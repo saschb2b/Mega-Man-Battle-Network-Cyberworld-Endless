@@ -130,14 +130,19 @@ bool dive_link_begin(void) {
 
 bool dive_link_diving(void) { return weekly_on(); }
 
-void dive_link_close(void) {
-	if (!L.on) return;
+/* the link's parts let go; the transport too where `ending` is false (a dive's end keeps it for the Board's answer) */
+static void let_go(bool ending) {
 	L.on = false;
 	dive_people_on(false);
 	dive_party_on(false);
 	dive_join_reset();
 	dive_crew_reset();
-	online_transport_end();
+	if (!ending) online_transport_end();
+}
+
+void dive_link_close(void) {
+	dive_mail_end_stop();
+	if (L.on) let_go(false);
 }
 
 static void send(const uint8_t *m, size_t n) {
@@ -152,9 +157,11 @@ static void ended(void) {
 		w->pulled ? ONLINE_WEEK_PULLED : 0u, 0 };
 	uint8_t m[ONLINE_DIVE_END_BYTES];
 	send(m, dive_wire_end(m, &e));
-	dive_mail_told();
-	fprintf(stderr, "dive: the dive's end told; the link closed\n");
-	dive_link_close();
+	OnlineSnapshot s;
+	online_transport_snapshot(&s);
+	bool waits = dive_mail_told(s.connected && !s.reconnecting);
+	fprintf(stderr, "dive: the dive's end told; %s\n", waits ? "the Board's answer waited for" : "the link closed");
+	let_go(waits);
 }
 
 void dive_link_scene_left(void) {

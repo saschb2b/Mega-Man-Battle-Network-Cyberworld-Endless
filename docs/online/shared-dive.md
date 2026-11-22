@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T11:13:02Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:45:00Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -1260,6 +1260,30 @@ layer 3's guardian of `--seed 3` a party of two and of four meet DiveMan's
 V1, at 800 and 1600 HP to the solo's 400 (`guardianfought version 0 party
 N`, `guardianhp`).
 
+## Viruses' aim in a crew's battle (22 November 2026)
+
+The second friction hunt found that in a crew's random battle the
+viruses struck the battle's owner and nobody else, three battles of three
+([issue #777](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/777)),
+though `party_field_aim` passes a guardian's aim round the party. Found
+(the ledger's `2026-11-22-viruses-aim-by-position`, `docs/rom/online.md`'s
+row): **a virus takes no player from side 0's first slot; it finds its
+target by position**, the MegaMan in its line. A Gunner's attack step asks
+for the first panel in its front direction holding `BN6_PANEL_SIDE_0`; a
+Mettaur stays in a row with a MegaMan in it and moves only once none
+stands there. On a crew's field the owner stands in front (column 2 row
+2) and the partners spawn behind him (column 1, rows 1 and 3), so a virus
+in his line strikes him until he falls. Trading the slot during the
+virus's routine, trading it for good, clearing the other MegaMen's panel
+bits or moving their objects off the field during its routine did not
+move a Mettaur's first target: what its row choice reads is still to
+find (perhaps the collision panels). The viruses' bench to measure it:
+`--dev party=3,partyaim=3` (the aim passed round on the spike's battles,
+the partners standing still; `partyaim=2` the partners still alone,
+`partylead=N` the lead's slot and partner 1's traded for good at
+iteration N), with `foes 01@52` or `53@52` on a layer and the log's
+`party: iteration ... HP` lines.
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own
@@ -1291,6 +1315,35 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
   AIs read their target elsewhere: the next thing to find, since a
   guardian that aims at the lead alone makes the lead's fight the party's
   hardest (the scaling above assumes the aim spreads).
+
+## A dive's end, and a reward taken once (22 November 2026)
+
+Issue #769, left over from #757:
+
+- **A dive's end screen of its own.** A dive that ends, deleted for
+  good on a crew's field or in any other way, opens the run's RESULT
+  as a dive's ([The engine's screens](../engine/ui.md)): DEEP NET on
+  its band, "The dive is over", the layer reached, the crew's battles
+  fought and won (counted in the dive's record as each ends,
+  `weekly_crew_battle`, `weekly.sav`'s last two bytes), and the dive's
+  place on the week's Board: the server posts the end (Back to the
+  dive, below) and answers with its Board, so the dive's link is kept
+  up to six seconds after the end for it (`dive_mail_told`, pumped by
+  the screen through `weekly_end_pump`), the row "Asking..." meanwhile,
+  then "3rd", or "No link" where the link was down at the end or the
+  Board never came. MegaMan says "That's our dive,Lan..." and "The
+  portal's open. Let's dive again!", never the normal run's "Dad's
+  backup worked!".
+- **An HP reward taken once.** BN6's results add an HP recovery to the
+  field's own MegaMan as they show (bn6f's sub_802C170, phase `0x10`),
+  and the battle's sub-mode runs a few frames on in phase `0x14` as
+  they close, then `0x00` and `0x04` ([BN6's battles](../rom/battle.md)).
+  The field read each MegaMan's HP in every phase but `0x10`, so those
+  frames gave the battle's owner the recovery and `director_crew_over`
+  gave it again. The field now reads HP only in the fight's own phases,
+  the Custom screen's and the fight's (`0x08`, `0x0C`):
+  every seat's HP as its fight ended, the reward given once in each
+  run (`online-week/crew-reward-once`: the owner on 20 HP of 100 ends on 70 with an HP+50 reward, 100 before).
 
 ## Back to the dive (22 November 2026)
 

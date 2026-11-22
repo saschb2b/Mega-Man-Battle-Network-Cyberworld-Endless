@@ -1,6 +1,10 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Create**: game/meta/forms.md (MegaMan's form for a run, issue #774: what a guardian pays by kind, the FORM row, the Soul forms opened, one power brought, SoulT+1 for BeastOut, the week's form; behind --dev forms). **Update**: game/meta/index.md (its line), game/meta/souls.md (a Soul brought at setup in a Soul form, the owner's reversal), game/fidelity.md (the guardian's pay across forms, adapted), code/director.md (forms.c, forms_words.c), GUIDE.md (the run event's form).
+* **Update**: online/shared-dive.md (a dive's end screen of its own and an HP reward taken once, issue #769), engine/ui.md (the dive's RESULT), rom/battle.md (a battle's HP reward and its results' close, phase 0x14), code/screens.md (the summary's dive).
+* **Update**: engine/saves.md (`RUN_MAGIC` "CWEE": MegaMan's form for a run and its fields, issue #774; "CWED" read as an older format, its state ten-bit, every older run the mix; `run.souls` widened to BN4's twelve).
+* **Update**: online/shared-dive.md (viruses' aim in a crew's battle, issue #777: a virus finds its target by position, the owner in front; the viruses' bench), rom/online.md (a virus's target by the panels in its line: the Gunner's scan and filter, the Mettaur's moves).
 * **Update**: online/shared-dive.md (whom the door waits for: the crew as it was in the last thirty seconds, still on the layer and free; one flare a door each; the queue's own line before the feed's; the window measured; issue #778), code/online.md (`dive_crew_recent.c`).
 * **Update**: online/shared-dive.md (a party's guardian, issue #754: the owner's call, his version a diver alone meets and his HP times the party, measured before and after; the decisions' Scaling row), devtools/party-guardian.md (a fight not over measured to its last hit).
 * **Update**: online/shared-dive.md (On screen only: the crew's reach a box in the picture's pixels, forms within 80 by 32, holds within 100 by 44, a battle offered only to those in sight, the joiner's band naming whose battle; issue #750, the owner's call of 22 November 2026).

@@ -10,6 +10,7 @@
 #include "audio.h"
 #include "extras.h"
 #include "extras_text.h"
+#include "forms.h"
 #include "meta.h"
 #include "pet_panel.h"
 #include "powers.h"
@@ -21,7 +22,9 @@
  * 2026): the run's shape and what it brings, the helpers, the extras;
  * NEXT at the foot of each but the last, whose foot is JACK IN! */
 enum { TAB_RUN, TAB_HELP, TAB_EXTRAS, TABS };
-enum { ROW_NET, ROW_FOLDER, ROW_CROSS, ROW_THREAT, RUN_ROWS };
+/* (FORM where the forms are offered, --dev forms until the Souls land;
+ * the row after it brings a Cross in CROSS, a Soul in a Soul form) */
+enum { ROW_NET, ROW_FOLDER, ROW_FORM, ROW_CROSS, ROW_THREAT, RUN_ROWS };
 #define ROWS_MAX 8   /* a page's rows at most */
 
 /* where it draws, from the picture's corner: the tabs under the band, the
@@ -52,6 +55,7 @@ enum { ROW_NET, ROW_FOLDER, ROW_CROSS, ROW_THREAT, RUN_ROWS };
 /* the choices on the pages */
 typedef struct {
 	int net, folder, cross, threat, helpers;   /* run_setup's */
+	int form, soul;                            /* run_setup_form's */
 	int extras_off;                            /* run_setup_extras' */
 } SetupChoice;
 
@@ -66,7 +70,7 @@ static struct {
 
 /* the rows the last summary's unlocks are on (profile.setup_new) */
 static int row_new(int row) {
-	static const int bits[RUN_ROWS] = { SETUP_NEW_NET, SETUP_NEW_FOLDER, SETUP_NEW_CROSS, SETUP_NEW_THREAT };
+	static const int bits[RUN_ROWS] = { SETUP_NEW_NET, SETUP_NEW_FOLDER, SETUP_NEW_FORM, SETUP_NEW_CROSS, SETUP_NEW_THREAT };
 	return row >= 0 && row < RUN_ROWS ? profile.setup_new & bits[row] : 0;
 }
 
@@ -75,7 +79,8 @@ static int row_new(int row) {
 static int rows_of(int tab, int row[ROWS_MAX]) {
 	int n = 0;
 	if (tab == TAB_RUN)
-		for (int r = 0; r < RUN_ROWS; ++r) row[n++] = r;
+		for (int r = 0; r < RUN_ROWS; ++r)
+			if (r != ROW_FORM || run_debug_forms) row[n++] = r;
 	if (tab == TAB_HELP)
 		for (int h = 0; h < meta_helpers_shown(); ++h) row[n++] = h;
 	if (tab == TAB_EXTRAS)
@@ -105,7 +110,15 @@ static void scroll(int tab) {
 	if (*top < 0) *top = 0;
 }
 
-void title_setup_reset(void) { S.c = (SetupChoice){ .net = RUN_SHORT, .folder = FOLDER_STANDARD }; }
+void title_setup_reset(void) { S.c = (SetupChoice){ .net = RUN_SHORT, .folder = FOLDER_STANDARD, .form = RUN_FORM_CROSS }; }
+
+/* whether the FORM row offers form `f`: opened, and its game's ROM read */
+static bool form_offered(int f) { return meta_form_open(f) && forms_offered(f); }
+
+static bool soul_form(void) { return S.c.form == RUN_FORM_SOUL_BN5 || S.c.form == RUN_FORM_SOUL_BN4; }
+
+/* a Soul a Soul form may bring: won in an earlier run, its ROM read */
+static bool soul_offered(int form, int p) { return meta_soul_open(form, p) && forms_offered(form); }
 
 bool title_setup_shown(void) { return S.shown; }
 
@@ -115,6 +128,8 @@ static void remember(void) {
 	profile.last_net = (uint8_t)S.c.net;
 	profile.last_folder = (uint8_t)S.c.folder;
 	profile.last_cross = (uint8_t)S.c.cross;
+	profile.last_form = (uint8_t)S.c.form;
+	profile.last_soul = (uint8_t)S.c.soul;
 	profile.last_threat = (uint8_t)S.c.threat;
 	profile.last_helpers = (uint8_t)S.c.helpers;
 	profile.last_extras_off = (uint16_t)S.c.extras_off;
@@ -124,7 +139,9 @@ static void remember(void) {
  * net was never written, so the setup a first win opened started on the
  * endless net, the profile's 0; meta_run_begun saves the profile next) */
 void title_setup_apply(void) {
-	run_setup(S.c.net, S.c.folder, S.c.threat, S.c.helpers, S.c.cross);
+	bool cross = !run_debug_forms || S.c.form == RUN_FORM_CROSS;
+	run_setup(S.c.net, S.c.folder, S.c.threat, S.c.helpers, cross ? S.c.cross : 0);
+	run_setup_form(S.c.form, soul_form() ? S.c.soul : 0);
 	run_setup_extras(S.c.extras_off);
 	remember();
 }
@@ -137,6 +154,8 @@ void title_setup_open(void) {
 	S.c.folder = meta_folder_open(profile.last_folder) ? profile.last_folder : FOLDER_STANDARD;
 	S.c.cross = meta_cross_open(profile.last_cross) ? profile.last_cross : 0;
 	S.c.threat = profile.last_threat <= meta_threat_open() ? profile.last_threat : meta_threat_open();
+	S.c.form = form_offered(profile.last_form) ? profile.last_form : RUN_FORM_CROSS;
+	S.c.soul = soul_form() && soul_offered(S.c.form, profile.last_soul) ? profile.last_soul : 0;
 	S.c.helpers = profile.last_helpers & ((1 << meta_helpers_shown()) - 1);
 	S.c.extras_off = profile.last_extras_off & ((1 << EXTRAS) - 1);
 	/* (each page's cursor on its foot, so that A goes page by page to
@@ -149,8 +168,9 @@ void title_setup_open(void) {
 		S.at[t] = rows_count(t);
 		S.top[t] = 0;
 	}
-	for (int r = RUN_ROWS - 1; r >= 0; --r) if (row_new(r)) S.at[TAB_RUN] = r;
-	if (S.at[TAB_RUN] == RUN_ROWS && (profile.setup_new & SETUP_NEW_HELP) && meta_beast_open()) {
+	int row[ROWS_MAX], n = rows_of(TAB_RUN, row);
+	for (int i = n - 1; i >= 0; --i) if (row_new(row[i])) S.at[TAB_RUN] = i;
+	if (S.at[TAB_RUN] == n && (profile.setup_new & SETUP_NEW_HELP) && meta_beast_open()) {
 		S.tab = TAB_HELP;
 		S.at[TAB_HELP] = HELPER_BEAST;
 	}
@@ -160,19 +180,37 @@ void title_setup_open(void) {
 /* ---- its keys ---- */
 
 static int value_of(int row) {
-	return row == ROW_NET ? S.c.net : row == ROW_FOLDER ? S.c.folder : row == ROW_CROSS ? S.c.cross : S.c.threat;
+	if (row == ROW_FORM) return S.c.form;
+	if (row == ROW_CROSS) return soul_form() ? S.c.soul : S.c.cross;
+	return row == ROW_NET ? S.c.net : row == ROW_FOLDER ? S.c.folder : S.c.threat;
+}
+
+/* Left or Right on the FORM row: the next offered form; on the Soul row,
+ * none or the next Soul offered */
+static void turn_form(int row, int d) {
+	if (row == ROW_FORM)
+		for (int k = 1; k < RUN_FORMS - 1; ++k) {
+			int f = RUN_FORM_CROSS + ((S.c.form - RUN_FORM_CROSS + d * k) % (RUN_FORMS - 1) + RUN_FORMS - 1) % (RUN_FORMS - 1);
+			if (form_offered(f)) { S.c.form = f; S.c.soul = 0; break; }
+		}
+	if (row == ROW_CROSS && soul_form())
+		for (int k = 1; k <= FORM_POWERS; ++k) {
+			int p = ((S.c.soul + d * k) % (FORM_POWERS + 1) + FORM_POWERS + 1) % (FORM_POWERS + 1);
+			if (!p || soul_offered(S.c.form, p)) { S.c.soul = p; break; }
+		}
 }
 
 /* Left or Right on a RUN row: the next open value that way */
 static void turn(int row, int d) {
 	int was = value_of(row);
-	if (row == ROW_NET && meta_endless_open()) S.c.net = S.c.net == RUN_SHORT ? RUN_ENDLESS : RUN_SHORT;
+	if (row == ROW_FORM || (row == ROW_CROSS && soul_form())) turn_form(row, d);
+	else if (row == ROW_NET && meta_endless_open()) S.c.net = S.c.net == RUN_SHORT ? RUN_ENDLESS : RUN_SHORT;
 	if (row == ROW_FOLDER)   /* (the open ones only) */
 		for (int k = 1; k < FOLDER_COUNT; ++k) {
 			int f = (S.c.folder + d * k + FOLDER_COUNT * k) % FOLDER_COUNT;
 			if (meta_folder_open(f)) { S.c.folder = f; break; }
 		}
-	if (row == ROW_CROSS)   /* (none, or an open one) */
+	if (row == ROW_CROSS && !soul_form())   /* (none, or an open one) */
 		for (int k = 1; k <= META_CROSSES; ++k) {
 			int c = (S.c.cross + d * k + (META_CROSSES + 1) * k) % (META_CROSSES + 1);
 			if (!c || meta_cross_open(c)) { S.c.cross = c; break; }
@@ -238,10 +276,27 @@ static int crosses_open(void) {
 static const char *cross_note(char *buf, size_t n, char shut[][SHUT_MAX], int *nshut) {
 	int c = S.c.cross, open = crosses_open();
 	const char *weak = c ? powers_cross_weakness(c) : NULL;
-	if (c) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", setup_word(SW_CROSS_ONE));
+	if (c && !run_debug_forms) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", setup_word(SW_CROSS_ONE));
 	else if (open && open < META_CROSSES) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", setup_word(SW_CROSS_MORE));
 	if (weak) return setup_cross_note(buf, n, powers_cross_strength(c), weak);
 	return setup_word(c ? SW_CROSS_CHOSEN_NOTE : open ? SW_CROSS_GUARDIANS_NOTE : SW_CROSS_NONE_NOTE);
+}
+
+/* the FORM row's note: what the form is, its record under it, and how
+ * more open while one is shut */
+static const char *form_note(char shut[][SHUT_MAX], int *nshut) {
+	static const SetupWord notes[RUN_FORMS] = { SW_FORM_CROSS_NOTE, SW_FORM_CROSS_NOTE, SW_FORM_BN5_NOTE, SW_FORM_BN4_NOTE };
+	setup_form_best(shut[(*nshut)++], SHUT_MAX, meta_form_best(S.c.form));
+	if (!form_offered(RUN_FORM_SOUL_BN5) || !form_offered(RUN_FORM_SOUL_BN4)) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", setup_word(SW_FORM_MORE));
+	return setup_word(notes[S.c.form < RUN_FORMS ? S.c.form : RUN_FORM_CROSS]);
+}
+
+/* the Soul row's note (a Soul form's): the Soul brought, from the first
+ * battle, or how one comes */
+static const char *soul_note(void) {
+	int any = 0;
+	for (int p = 1; p <= FORM_POWERS; ++p) any += soul_offered(S.c.form, p);
+	return setup_word(S.c.soul ? SW_START_REST_NOTE : any ? SW_SOUL_GUARDIANS_NOTE : SW_SOUL_NONE_NOTE);
 }
 
 /* a RUN row's note */
@@ -255,7 +310,8 @@ static const char *run_note(int row, char *buf, size_t n, char shut[][SHUT_MAX],
 			if (!meta_folder_open(f) && meta_folder(f)->opens)
 				setup_shut_folder(shut[(*nshut)++], SHUT_MAX, meta_folder(f)->name, meta_folder(f)->opens);
 		return meta_folder(S.c.folder)->about;
-	case ROW_CROSS: return cross_note(buf, n, shut, nshut);
+	case ROW_FORM: return form_note(shut, nshut);
+	case ROW_CROSS: return soul_form() ? soul_note() : cross_note(buf, n, shut, nshut);
 	default:
 		if (S.c.threat) return meta_threat_rule(S.c.threat);
 		return setup_word(meta_threat_open() ? SW_THREAT0_NOTE : SW_THREAT0_WIN_NOTE);
@@ -322,15 +378,20 @@ static void value_draw(int x0, int y, const char *v, bool turns) {
 
 /* a RUN row: its name and value */
 static void run_row_draw(int x0, int y, int row) {
-	static const SetupWord names[RUN_ROWS] = { SW_NET, SW_FOLDER, SW_CROSS, SW_THREAT };
+	static const SetupWord names[RUN_ROWS] = { SW_NET, SW_FOLDER, SW_FORM, SW_CROSS, SW_THREAT };
 	int open_folders = 0;
 	for (int f = 0; f < FOLDER_COUNT; ++f) open_folders += meta_folder_open(f);
 	char v[16];
 	snprintf(v, sizeof v, "%d", S.c.threat);
+	int forms = 0, souls = 0;
+	for (int f = RUN_FORM_CROSS; f < RUN_FORMS; ++f) forms += form_offered(f);
+	for (int p = 1; soul_form() && p <= FORM_POWERS; ++p) souls += soul_offered(S.c.form, p);
+	const char *start = soul_form() ? (S.c.soul ? forms_power_name(S.c.form, S.c.soul) : setup_word(SW_NONE))
+		: S.c.cross ? powers_cross_name(S.c.cross) : setup_word(SW_NONE);
 	const char *values[RUN_ROWS] = { setup_word(S.c.net == RUN_ENDLESS ? SW_ENDLESS : SW_SHORT), meta_folder(S.c.folder)->name,
-		S.c.cross ? powers_cross_name(S.c.cross) : setup_word(SW_NONE), v };
-	bool turns[RUN_ROWS] = { meta_endless_open(), open_folders > 1, crosses_open() > 0, meta_threat_open() > 0 };
-	label_draw(x0, y, setup_word(names[row]), row_new(row));
+		meta_form_name(S.c.form), start, v };
+	bool turns[RUN_ROWS] = { meta_endless_open(), open_folders > 1, forms > 1, soul_form() ? souls > 0 : crosses_open() > 0, meta_threat_open() > 0 };
+	label_draw(x0, y, setup_word(row == ROW_CROSS && soul_form() ? SW_SOUL : names[row]), row_new(row));
 	value_draw(x0, y, values[row], turns[row]);
 }
 
@@ -366,7 +427,7 @@ static void page_draw(int x0, int y0) {
 
 void title_setup_describe(FILE *f) {
 	if (!S.shown) return;
-	static const char *const tabs[TABS] = { "run", "help", "extras" }, *const rows[RUN_ROWS] = { "net", "folder", "cross", "threat" };
+	static const char *const tabs[TABS] = { "run", "help", "extras" }, *const rows[RUN_ROWS] = { "net", "folder", "form", "cross", "threat" };
 	int row = row_at(), folders = 0;
 	for (int k = 0; k < FOLDER_COUNT; ++k) folders += meta_folder_open(k);
 	fprintf(f, "tab %s\n", tabs[S.tab]);
@@ -374,6 +435,7 @@ void title_setup_describe(FILE *f) {
 	else if (S.tab == TAB_RUN) fprintf(f, "row %s\n", rows[row]);
 	else fprintf(f, "row %d\n", row);
 	meta_setup_describe(f, S.c.net, S.c.folder, S.c.cross, S.c.threat, S.c.helpers, S.c.extras_off);
+	if (run_debug_forms) fprintf(f, "form %s\nstartsoul %s\n", meta_form_name(S.c.form), S.c.soul ? forms_power_name(S.c.form, S.c.soul) : "none");
 	fprintf(f, "endless %s\nfolders %d\ncrosses %d\nthreatmax %d\nhelpersshown %d\n", meta_endless_open() ? "open" : "shut", folders,
 		crosses_open(), meta_threat_open(), meta_helpers_shown());
 }

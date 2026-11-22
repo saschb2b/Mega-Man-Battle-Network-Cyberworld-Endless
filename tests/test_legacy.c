@@ -212,30 +212,39 @@ static void check_rivals_fourth(void) {
 
 /* Ten-bit chip ids (save_format.h): a run of "CWEB" or "CWEC", its state's
  * folders nine-bit, read as today's Run (load_run converts them once); one
- * of RUN_MAGIC is no older format's */
-static void check_nine_bit_runs(void) {
-	const uint32_t nine[2] = { RUN_MAGIC_NINE, RUN_MAGIC_NINE_STOP };
+ * of "CWED" read too, its state ten-bit; each as the mix (issue #774), its
+ * form's fields whatever the bytes past the old Run held; one of RUN_MAGIC
+ * is no older format's */
+static void check_older_runs(void) {
+	const uint32_t magic[3] = { RUN_MAGIC_NINE, RUN_MAGIC_NINE_STOP, RUN_MAGIC_TEN };
 	fixture_magic = 0;
-	for (int k = 0; k < 2; ++k) {
+	for (int k = 0; k < 3; ++k) {
 		memset(&today_fixture, 0, sizeof today_fixture);
 		today_fixture.active = true;
 		today_fixture.seed = 9u + (uint32_t)k;
 		today_fixture.depth = 4;
 		today_fixture.extras_off = 2;
-		today_magic = nine[k];
+		today_fixture.form = RUN_FORM_SOUL_BN4;
+		today_fixture.soul_start = 3;
+		today_fixture.cross_active = 7;
+		today_fixture.cross_held = 9;
+		today_fixture.cross_layer = 9;
+		today_fixture.soul_turns = 1;
+		today_magic = magic[k];
 		memset(&run, 0, sizeof run);
 		CHECK(legacy_load_run() && run.seed == 9u + (uint32_t)k && run.depth == 4 && run.extras_off == 2,
-			"ten bits: a CWEB or CWEC run read as today's, its extras kept");
+			"older runs: a CWEB, CWEC or CWED run read as today's, its extras kept");
+		CHECK(run.form == RUN_FORM_MIX && !run.soul_start && !run.cross_active && !run.cross_held && !run.cross_layer && !run.soul_turns, "older runs: not read as the mix");
+		CHECK(legacy_run_nine() == (k < 2), "older runs: CWEB and CWEC nine-bit, CWED ten");
 	}
 	today_magic = RUN_MAGIC;
 	memset(&run, 0, sizeof run);
-	CHECK(RUN_MAGIC == RUN_MAGIC_TEN || !legacy_load_run(), "ten bits: RUN_MAGIC's run is no older format's");
-	CHECK(RUN_MAGIC != RUN_MAGIC_TEN || !legacy_load_run(), "ten bits: CWED is no older format's");
+	CHECK(RUN_MAGIC == RUN_MAGIC_FORMS && !legacy_load_run(), "older runs: RUN_MAGIC's run is no older format's");
 	today_magic = 0;
 }
 
 int main(void) {
-	check_nine_bit_runs();
+	check_older_runs();
 	check_format(8);
 	check_format(16);
 	check_rivals();

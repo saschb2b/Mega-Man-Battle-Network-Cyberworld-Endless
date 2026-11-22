@@ -28,11 +28,12 @@ static bool good_blob(const uint8_t *data, uint32_t size) {
 }
 
 static bool run_format(uint32_t magic, uint32_t size) {
-	/* ("CWE1" to "CWE9", then "CWEA", "CWEB", "CWEC" and "CWED": the same
-	 * Run, "CWED"'s state's folders ten-bit, save_format.h) */
-	static const uint32_t sizes[] = { 0, 248, 56, 64, 0, 84, 88, 96, 100, 112, 112, sizeof(Run), sizeof(Run), sizeof(Run) };
+	/* ("CWE1" to "CWE9", then "CWEA", "CWEB", "CWEC" and "CWED": one Run,
+	 * "CWED"'s state's folders ten-bit; "CWEE" today's, with MegaMan's
+	 * form, save_format.h) */
+	static const uint32_t sizes[] = { 0, 248, 56, 64, 0, 84, 88, 96, 100, 112, 112, 116, 116, 116, sizeof(Run) };
 	unsigned int c = magic & 255u;
-	unsigned int format = c >= '1' && c <= '9' ? c - '0' : c >= 'A' && c <= 'D' ? 10 + (c - 'A') : 0;
+	unsigned int format = c >= '1' && c <= '9' ? c - '0' : c >= 'A' && c <= 'E' ? 10 + (c - 'A') : 0;
 	if ((magic & 0xffffff00u) != (RUN_MAGIC & 0xffffff00u) || !format) return false;
 	return sizes[format] && size == sizes[format];
 }

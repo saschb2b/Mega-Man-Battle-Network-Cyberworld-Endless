@@ -17,9 +17,10 @@ _Static_assert(CHAR_BIT == 8 && sizeof(int) == 4 && sizeof(bool) == 1, "Save sca
 /* (the profile grew at its end for issue #82, for the Virus Battler's
  * card, for the designed folders' milestones, for the extras the last
  * run left out, for the battle data on virus families and for the Battle
- * Lab's own folder and for the first meetings heard, read up to its size: an
- * older profile reads whole, the new fields zero) */
-_Static_assert(sizeof(Profile) == 1112, "Profile save size changed");
+ * Lab's own folder and for the first meetings heard and for MegaMan's
+ * forms, read up to its size: an older profile reads whole, the new fields
+ * zero) */
+_Static_assert(sizeof(Profile) == 1124, "Profile save size changed");
 _Static_assert(offsetof(Profile, crosses_falzar) == 1109, "Profile.crosses_falzar save offset changed");
 _Static_assert(offsetof(Profile, runs) == 0, "Profile.runs save offset changed");
 _Static_assert(offsetof(Profile, best_depth) == 4, "Profile.best_depth save offset changed");
@@ -105,9 +106,11 @@ _Static_assert(offsetof(Profile, lab_sent) == 809 && offsetof(Profile, lab_slot)
 _Static_assert(offsetof(Profile, navi_beaten) == 980 && sizeof ((Profile *)0)->navi_beaten == RIVAL_NAVIS, "Profile.navi_beaten save layout changed");
 _Static_assert(offsetof(Profile, lab_folder_on) == 1047 && offsetof(Profile, lab_folder) == 1048, "Profile.lab_folder save layout changed");
 _Static_assert(offsetof(Profile, heard) == 1108, "Profile.heard save offset changed");
+_Static_assert(offsetof(Profile, forms_open) == 1110 && offsetof(Profile, last_form) == 1112 && offsetof(Profile, form_best) == 1114 &&
+	offsetof(Profile, souls_won) == 1118, "Profile.forms_open save layout changed");
 _Static_assert(offsetof(Profile, lab_sets) == 812 && sizeof(LabSaved) == 42 && offsetof(LabSaved, frames) == 38, "Profile.lab_sets save layout changed");
 
-_Static_assert(sizeof(Run) == 116, "Run save size changed");
+_Static_assert(sizeof(Run) == 124, "Run save size changed");
 _Static_assert(offsetof(Run, active) == 0, "Run.active save offset changed");
 _Static_assert(offsetof(Run, seed) == 4, "Run.seed save offset changed");
 _Static_assert(offsetof(Run, depth) == 8, "Run.depth save offset changed");
@@ -132,6 +135,8 @@ _Static_assert(offsetof(Run, back_spent) == 94, "Run.back_spent save offset chan
 _Static_assert(offsetof(Run, home_depth) == 96, "Run.home_depth save offset changed");
 _Static_assert(offsetof(Run, job) == 98, "Run.job save offset changed");
 _Static_assert(offsetof(Run, extras_off) == 112, "Run.extras_off save offset changed");
+_Static_assert(offsetof(Run, form) == 114 && offsetof(Run, soul_start) == 115, "Run.form save offset changed");
+_Static_assert(offsetof(Run, cross_active) == 116 && offsetof(Run, cross_held) == 118 && offsetof(Run, cross_layer) == 120 && offsetof(Run, soul_turns) == 122, "Run.cross_active save offset changed");
 
 _Static_assert(sizeof(Rival) == 20, "Rival save size changed");
 _Static_assert(offsetof(Rival, met) == 0, "Rival.met save offset changed");
@@ -179,5 +184,7 @@ _Static_assert(offsetof(WeeklyRecord, b_week) == 24, "WeeklyRecord.b_week save o
 _Static_assert(offsetof(WeeklyRecord, b_depth) == 26, "WeeklyRecord.b_depth save offset changed");
 _Static_assert(offsetof(WeeklyRecord, pulled) == 28, "WeeklyRecord.pulled save offset changed");
 _Static_assert(offsetof(WeeklyRecord, r_pulled) == 29, "WeeklyRecord.r_pulled save offset changed");
+_Static_assert(offsetof(WeeklyRecord, crew_fought) == 30, "WeeklyRecord.crew_fought save offset changed");
+_Static_assert(offsetof(WeeklyRecord, crew_won) == 31, "WeeklyRecord.crew_won save offset changed");
 
 #endif

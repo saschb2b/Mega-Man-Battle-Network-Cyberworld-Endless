@@ -37,6 +37,7 @@ typedef struct {
 	                                         seat's keys his battle keys or his screen's picks (arena_team_custom.h) */
 	int end;                              /* the enemies set to 1 HP at this iteration (the dev's partyend), 0 never */
 	int del;                              /* ... and the MegaMen of the seats of this mask deleted then (the dev's partydel), 0 none */
+	int reward;                           /* the results' reward this entry (the dev's partyreward), 0 BN6's own */
 } PartyBattle;
 
 /* FNV-1a over bytes: a field's inputs told apart in the log (party_play.c) */

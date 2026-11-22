@@ -13,6 +13,7 @@
 #include "chip_targets.h"
 #include "data.h"
 #include "director_state.h"
+#include "forms.h"
 #include "emu.h"
 #include "guardians.h"
 #include "net.h"
@@ -46,8 +47,12 @@ static void run_lines(FILE *f) {
 		older += area >= NET_AREAS;
 		guards += run_xguardian_at(a, biome) != 0;
 	}
-	/* (and BN5's Souls it holds, a bit each from Colonel's: souls.h) */
+	/* (and BN5's Souls it holds, a bit each from Colonel's: souls.h; every
+	 * Soul by its game's numbers, BN5's and BN4's, held and as the layer was
+	 * made; MegaMan's form, issue #774) */
 	fprintf(f, "\nolderacts %d\nolderguards %d\nsoulsheld %02x\n", older, guards, souls_held());
+	fprintf(f, "soulsbn5 %03x %03x\nsoulsbn4 %03x %03x\n", souls_held_bn5(), souls_layer_bn5(), souls_held_bn4(), souls_layer_bn4());
+	forms_describe(f);
 }
 
 /* The NPC object the map holds at world (x, y): its address, 0 none */
