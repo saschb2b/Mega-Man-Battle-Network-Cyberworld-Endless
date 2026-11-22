@@ -503,7 +503,9 @@ and `par`, `orderpoints`, the panels dark and `freed`, the DarkHoles and
 guardians standing, the Darkloid and his `darkloidhp`, each Navi of the
 team (`mate0 MegaMan 100/100 inplay`), what the Navi in play `faces`, the
 window's `command`, how the last battle ended (`lastfight won`, `oneturn`,
-`timeup`, `lost`), the `prize`'s tier and `boardexit`. A battle of its own
+`timeup`, `lost`) and the frames its fight ran on under its closing banners
+(`foughton 0`: paused under TIME UP! and LIBERATE FAILED!, issue #794),
+the `prize`'s tier and `boardexit`. A battle of its own
 adds `foehp`, `soul` and `cross`.
 
 A board is its seed's, so a scenario does not name its panels. The dev

@@ -15,9 +15,11 @@
 #define BN6_LOOP              0x0203CA70u /* u32: the battle loop's phase (+0, a word: a store sets its step to 0 with it), its step (+3), what it came
                                              to (+4: 1 won, 2 lost, 3 drawn, 6 on to the Custom screen), read by the fight's state (0x0800938A) */
 #define BN6_LOOP_STEP         0x0203CA73u /* u8, the loop state's fourth byte: its step, 0 as a phase begins (its first frame), 4 after */
+#define BN6_LOOP_CAME         0x0203CA74u /* u8, its fifth: what the loop came to, 0 while nothing is decided */
 #define BN6_LOOP_WON          0x0C        /* BN6_LOOP's phase: won, as the fight's frame finds side 1's count 0 (0x0800811C) */
 #define BN6_LOOP_LOST         0x10        /* ... lost, at side 0's (0x08008130) */
-#define BN6_LOOP_DRAW         0x14        /* BN6_LOOP's phase: a draw (0x080082DC): the battle stopped, its banner, then result 3 (no reward) */
+#define BN6_LOOP_DRAW         0x14        /* BN6_LOOP's phase: a draw (0x080082DC): the battle's displays hidden (0x0801DACC and 0x0801BED6 with 0xE4C53),
+                                             its banner, then result 3 (no reward); it pauses nothing: the objects run on under it (issue #794) */
 #define BN6_LOOP_TIME_DRAW    0x18        /* ... the fight's own draw, 0x0800A152's 7 (0x0800813A) */
 #define BN6_FIGHT_BANNER      0x080080A0u /* movs r0,#0 (BATTLE START!) as each turn's fight starts (0x08008064), where a NetBattle's TURN n
                                              START! is not (the options' bit 8), */
@@ -26,6 +28,9 @@
 #define BN6_FIGHT_RETURN      0x080081A2u /* ... the routine's pop {pc} */
 #define BN6_FIGHT_GOING       0x08008158u /* ... its bl 0x0800A8F8, reached by BN6_FIGHT_ASK's beq alone: no outcome and nothing asked this frame */
 #define BN6_FIGHT_CUSTOM      0x0800819Au /* ... its way to the Custom screen as L or R asks it (bl 0x0800A028, then the loop's phase 0x20) */
+#define BN6_PAUSE_BATTLE      0x0800A028u /* bn6f PauseBattle, BN6_FIGHT_CUSTOM's call: GameState +0xA (BN6_PAUSED, bn6_forms.h) set to 1, the byte the objects'
+                                             updates test (BN6_PAUSE_TEST); a liberation's time up sets it as BN5's does (BN5_LIB_TIME_PAUSE, issue #794) */
+#define BN6_CLOSE_UNPAUSE     0x08007E38u /* ... and the battle's closing clears it (movs r0,#0; strb r0,[r7,#0xa]) */
 #define BN6_STATE_FLAGS       0x32        /* BattleState +0x32, u16 the battle's flags (bn6f battle_getFlags 0x0800A2F0, battle_setFlags 0x0800A2D8): */
 #define BN6_FLAG_GAUGE_FULL   0x02        /* ... the Custom gauge full (BN5's liberation ask opens the screen on it alone, 0x08008BD2), */
 #define BN6_FLAG_HELD         0x04        /* ... the battle held (no screen asked: 0x0800A098), */

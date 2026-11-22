@@ -168,8 +168,9 @@ scene('liberate/won', """Liberation on a dark panel, its battle won in the secon
 scene('liberate/one-turn', """Liberation won in its first turn (1 TURN LIBERATE!): the dark panels round it are swept
       too.""", *liberate(1, ('expect', 'lastfight=oneturn'), ('expect', 'freed>1'), ('moved', 'boardphase', 1)))
 scene('liberate/time-up', """Liberation not won by its third turn's end (TIME UP!, LIBERATE FAILED!): the panel dark still,
-      no reward, the phase spent.""", *liberate(
-    0, ('expect', 'lastfight=timeup'), ('moved', 'freed', 0), ('moved', 'darkpanels', 0), ('moved', 'zenny', 0), ('moved', 'boardphase', 1),
+      no reward, the phase spent; and the fight stood still under both banners (issue #794: it ran on, its foes
+      moving and hitting, for the 120 frames they show).""", *liberate(
+    0, ('expect', 'lastfight=timeup'), ('expect', 'foughton=0'), ('moved', 'freed', 0), ('moved', 'darkpanels', 0), ('moved', 'zenny', 0), ('moved', 'boardphase', 1),
     start=DARK + ',god'))
 
 c = Course(('keep', 'guardians deleted freed'))
@@ -265,7 +266,7 @@ scene('cleared/over-par', """The board cleared over its par (--dev libpar=5): ze
       DARK + ',god,libpar=5', cleared(('expect', 'par=5'), ('expect', 'prize=over'), PRIZED, ('expect', 'boardexit=open'), ('moved', 'zenny', 653)))
 
 c = to_darkloid().time_up(each=[('do', 'mash B 240')])
-c.add(RESULT, ('until', 'side=darkloids', 600), ('expect', 'lastfight=timeup'), ('expect', 'darkloid~standing'),
+c.add(RESULT, ('until', 'side=darkloids', 600), ('expect', 'lastfight=timeup'), ('expect', 'foughton=0'), ('expect', 'darkloid~standing'),
       ('expect', 'darkloidhp<600'), ('expect', 'darkloidhp>0'), ('expect', 'prize=pending'), ('expect', 'boardexit=shut'))
 scene('darkloid/not-won', """The Darkloid fought from the board's 600 HP and not deleted by his battle's third turn: the HP the
       battle left him is his on the board, he stands, and the exit stays shut.""", DARK + ',god', c.steps)
