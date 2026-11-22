@@ -47,6 +47,8 @@ static const char *const words[] = {
 	"From the first battle. Guardians give the rest",   /* SW_START_REST_NOTE */
 	"Win a Soul to start with it",   /* SW_SOUL_NONE_NOTE */
 	"Souls from the guardians we delete",   /* SW_SOUL_GUARDIANS_NOTE */
+	"SoulT+1",   /* SW_SOULT */
+	"Each unison a turn longer, from the first battle",   /* SW_SOULT_NOTE */
 };
 const char *setup_word(SetupWord w) {
 	_Static_assert(sizeof words / sizeof *words == SW_COUNT, "a word for each SetupWord");

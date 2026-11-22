@@ -36,6 +36,10 @@ void loot_soul_souls(unsigned souls) {
 	}
 }
 
+void loot_soul_kinds(unsigned more) {
+	if (soulkinds_make()) kinds |= more & ((1u << SOULKIND_NONE) - 1);
+}
+
 int loot_soul_kind(void) {
 	if (!kinds) return -1;
 	/* (the folder's chips of each kind, as the layer was made; a DarkChip

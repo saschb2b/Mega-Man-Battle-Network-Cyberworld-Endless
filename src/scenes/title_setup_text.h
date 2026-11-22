@@ -26,6 +26,7 @@ typedef enum {
 	SW_NEXT_HELP_NOTE, SW_NEXT_EXTRAS_NOTE, SW_GO_NOTE,
 	SW_FORM_CROSS_NOTE, SW_FORM_BN5_NOTE, SW_FORM_BN4_NOTE, SW_FORM_MORE,
 	SW_START_REST_NOTE, SW_SOUL_NONE_NOTE, SW_SOUL_GUARDIANS_NOTE,
+	SW_SOULT, SW_SOULT_NOTE,   /* the BeastOut helper's name and note in a Soul form: SoulT+1's turn */
 	SW_COUNT
 } SetupWord;
 const char *setup_word(SetupWord w);

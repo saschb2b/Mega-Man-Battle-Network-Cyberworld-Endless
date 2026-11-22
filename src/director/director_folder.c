@@ -21,7 +21,6 @@
 #include "emu.h"
 #include "gamecall.h"
 #include "loot.h"
-#include "loot_souls.h"
 #include "meta.h"
 #include "save.h"
 #include "save_blob.h"
@@ -133,10 +132,10 @@ void note_folder_codes(void) {
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 	souls_note_layer();
 	run.cross_layer = run.cross_held;   /* (a CROSS run's Crosses, as its Souls: forms.h) */
-	loot_soul_souls(souls_layer());
+	souls_lean();
 }
 
-void folder_souls_load(void) { loot_soul_souls(souls_layer()); }
+void folder_souls_load(void) { souls_lean(); }
 
 /* The folder's chips owned, as BN6 marks a chip it gives (bn6f
  * encryption_applyPack, Gregar 0x08006E70): its byte in the table at

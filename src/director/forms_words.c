@@ -46,10 +46,10 @@ const char *forms_reward_words(int navi, bool beast) {
 	int k = 0, p, how = forms_pay_how(run.form, navi, forms_held_layer(), run.layer_seed, &p);
 	const char *name = guardian(navi)->name;
 	bool soul_form = run.form != RUN_FORM_CROSS;
-	/* (a Navi of an older game in a CROSS run: his Soul felt, never taken;
-	 * it opens his game's form for a later dive, the setup's to show) */
-	bool felt = !soul_form && (guardian_older(navi) || guardian_team(navi) || (guardian_bn4(navi) && navi - GUARDIAN_BN4_FIRST < SOULS_OF_BN4));
-	if (felt) ADD("@M Lan... There's a Soul in his data.");
+	/* (a Navi whose own Soul the run's form cannot take, a BN5 or BN4 Navi
+	 * in CROSS or in the other Soul form: his Soul felt, never taken; it
+	 * opens his game's form for a later dive, the setup's to show) */
+	if (forms_soul_felt(run.form, navi)) ADD("@M Lan... There's a Soul in his data.");
 	if (how == PAY_OWN && soul_form) k = soul_got(k, p);
 	/* (another game's Navi, or one whose own the run has: his data in the
 	 * shape of a power MegaMan knows, the Cross's name BN6's box's) */
