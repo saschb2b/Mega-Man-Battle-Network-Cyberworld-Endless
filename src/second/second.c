@@ -34,7 +34,7 @@ SecondState S2;
 
 /* What the second screen draws: a panel, which several screens may share */
 typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER, PANEL_BATTLE, PANEL_NAVICUST, PANEL_HOME, PANEL_STATUS, PANEL_LIBRARY, PANEL_MAIL, PANEL_SHOP, PANEL_TRADER,
-	PANEL_NETPASS } Panel;
+	PANEL_NETPASS, PANEL_FORMS } Panel;
 static Panel panel;
 static int panel_since;
 
@@ -70,7 +70,7 @@ static SecondContext context_now(void) {
 	default: return SECOND_OTHER;
 	}
 	int sub = emu_read8(BN6_GAMESTATE);
-	if (sub == BN6_SUB_PET) return second_library_up() ? SECOND_LIBRARY : SECOND_PET;
+	if (sub == BN6_SUB_PET) return second_library_up() ? SECOND_LIBRARY : second_forms_up() ? SECOND_FORMS : SECOND_PET;
 	if (sub == BN6_SUB_BATTLE || sub == BN6_SUB_BATTLE_INIT) return SECOND_BATTLE;
 	/* (a trader talks on the map, from BN6's trader archive: a BugFrag
 	 * Trader's whole trade, a Chip Trader's before its screen) */
@@ -86,6 +86,7 @@ static Panel panel_for(SecondContext c) {
 	case SECOND_NAVICUST: return PANEL_NAVICUST;
 	case SECOND_STATUS: return PANEL_STATUS;
 	case SECOND_LIBRARY: return PANEL_LIBRARY;
+	case SECOND_FORMS: return PANEL_FORMS;
 	case SECOND_MAIL: return PANEL_MAIL;
 	case SECOND_SHOP: return PANEL_SHOP;
 	case SECOND_TRADER: return PANEL_TRADER;
@@ -116,6 +117,7 @@ void second_update(void) {
 	if (p == PANEL_HOME) second_read_home();
 	if (p == PANEL_STATUS) second_read_status();
 	if (p == PANEL_LIBRARY) second_read_library();
+	if (p == PANEL_FORMS) second_read_forms();
 	if (p == PANEL_MAIL) second_read_mail();
 	if (p == PANEL_SHOP) second_read_shop();
 	if (p == PANEL_TRADER) second_read_trader();
@@ -136,7 +138,7 @@ const char *second_screen_word(void) {
 	static const char *const word[SECOND_CONTEXTS] = { [SECOND_DARK] = "game", [SECOND_TOWN] = "town", [SECOND_NET] = "map", [SECOND_BATTLE] = "battle",
 		[SECOND_PET] = "pet", [SECOND_FOLDERS] = "folders", [SECOND_EDIT] = "folder-edit", [SECOND_NAVICUST] = "navicust", [SECOND_STATUS] = "status",
 		[SECOND_LIBRARY] = "library", [SECOND_MAIL] = "mail", [SECOND_KEYITEM] = "keyitem", [SECOND_SUBCHIP] = "subchip", [SECOND_COMM] = "comm",
-		[SECOND_SAVE] = "save", [SECOND_SHOP] = "shop", [SECOND_TRADER] = "trader", [SECOND_OTHER] = "other", [SECOND_SQUARE] = "square" };
+		[SECOND_SAVE] = "save", [SECOND_SHOP] = "shop", [SECOND_TRADER] = "trader", [SECOND_OTHER] = "other", [SECOND_SQUARE] = "square", [SECOND_FORMS] = "forms" };
 	return word[context_now()];
 }
 
@@ -144,7 +146,7 @@ const char *second_screen_word(void) {
  * home stands in for it */
 static const char *panel_title(void) {
 	static const char *const title[] = { [PANEL_MAP] = "NET", [PANEL_FOLDER] = "FOLDER", [PANEL_BATTLE] = "BATTLE", [PANEL_NAVICUST] = "NAVICUST",
-		[PANEL_HOME] = "PET", [PANEL_STATUS] = "MEGAMAN", [PANEL_LIBRARY] = "LIBRARY", [PANEL_MAIL] = "E-MAIL", [PANEL_SHOP] = "SHOP", [PANEL_TRADER] = "TRADER" };
+		[PANEL_HOME] = "PET", [PANEL_STATUS] = "MEGAMAN", [PANEL_LIBRARY] = "LIBRARY", [PANEL_MAIL] = "E-MAIL", [PANEL_SHOP] = "SHOP", [PANEL_TRADER] = "TRADER", [PANEL_FORMS] = "FORMS" };
 	switch (S2.context) {
 	case SECOND_EDIT: return "FOLDER EDIT";
 	case SECOND_MAIL: return "E-MAIL";
@@ -217,6 +219,7 @@ bool second_draw(int w, int h) {
 	else if (panel == PANEL_HOME) second_home_draw(body);
 	else if (panel == PANEL_STATUS) second_status_draw(body);
 	else if (panel == PANEL_LIBRARY) second_library_draw(body);
+	else if (panel == PANEL_FORMS) second_forms_draw(body);
 	else if (panel == PANEL_MAIL) second_mail_draw(body);
 	else if (panel == PANEL_SHOP) second_shop_draw(body);
 	else if (panel == PANEL_TRADER) second_trader_draw(body);

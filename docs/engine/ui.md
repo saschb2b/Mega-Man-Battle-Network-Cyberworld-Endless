@@ -3,7 +3,7 @@ type: Style Guide
 title: "The PET's screens: Battle Network's rules"
 description: "BN6's PET screens' rules measured from Gregar (band, windows, information box, cursor, motion, keys, letters, colours) and what the engine's own screens (the Jukebox, Options and its pages and scene, Trade Central) take from them through `pet_look.c`."
 tags: [engine, ui]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T11:10:47Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:10:00Z }
 ---
 
 # The PET's screens: Battle Network's rules
@@ -179,10 +179,20 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   chosen as NaviCust's quit opens.
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
-- BN6's own PET menu in the Net Square carries the one hint of ours on a
-  screen of BN6's: `R:NETPASS` at its band's right end, which BN6 leaves
+- BN6's own PET menu carries the one hint of ours on a screen of BN6's:
+  in the Net Square `R:NETPASS` at its band's right end, which BN6 leaves
   empty, R a key BN6 does not use there (`square_pet.c`,
-  [The PET in the Square](../online/square/pet.md)).
+  [The PET in the Square](../online/square/pet.md)); in a run `R:FORMS`
+  in the same place, the forms screen's key (`pet_forms.c`).
+- The forms screen ([The forms screen](../game/meta/forms-screen.md)) is the
+  folder editor's two windows side by side, CROSSSELECT's five and the
+  spares, each row CROSSSELECT's own art from the ROM (in colour among the
+  five, grey among the spares, its "chosen" palette while taken up, as
+  CROSSSELECT colours its rows), A taking a Cross up and A on the other
+  side swapping, as the folder editor swaps; the count of CROSSSELECT's
+  rows in FOLDER EDIT's pill; the Souls a page of their own, its tags on
+  the band as the Library's entries; KeyItem's INFORMATION box under
+  them.
 - One key's hint on the band where the key does something unguessed:
   the Jukebox's `START:REPEAT` (the mode), Options' `START:DEFAULT` (a
   page's lines back, on pages that have such lines), the reconnect

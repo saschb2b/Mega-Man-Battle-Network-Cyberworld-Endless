@@ -20,12 +20,15 @@
 #define BN6_CROSS_LIST_NEXT   0x08029F38u /* ... adds r4,#1: on to the next Cross */
 #define BN6_CROSS_LIST_BOUND  0x08029F3Au /* ... cmp r4,#5: its loop's bound */
 #define BN6_CROSS_COUNT       0x08029EC8u /* push {r4,r6,lr}: how many have their flag set and their used bit clear (r0) */
+#define BN6_CROSS_COUNT_STEP  0x08029EEAu /* ... adds r6,#1: Cross r4 counted (its flag set, its used bit clear), */
+#define BN6_CROSS_COUNT_NEXT  0x08029EECu /* ... adds r4,#1: on to the next Cross, past the count's step */
 #define BN6_CROSS_COUNT_BOUND 0x08029EEEu /* ... cmp r4,#5 */
 #define BN6_CROSS_COUNT_END   0x08029EF2u /* ... adds r0,r6,#0: the count */
 #define BN6_CROSS_FLAGS_REF   0x08029F44u /* the one word naming the flags' table (both routines' literal), */
 #define BN6_CROSS_FLAGS       0x08029F48u /* ... the table: a word a Cross, BN6_FLAG_HEAT_CROSS on */
 #define BN6_CROSS_SCREEN_LIST 0x50        /* the Custom screen's +0x50: the Cross of each row listed, BN6_CROSS_ROWS of them */
 #define BN6_CROSS_SCREEN_STATE 0x55       /* ... +0x55: each row's state (1 once chosen) */
+#define BN6_CROSS_SCREEN_COUNT 0x18       /* ... +0x18: the rows listed, the list's r0 (strb at 0x0802690C) */
 #define BN6_CROSS_ART         0x086E5D50u /* the rows' art, 0x240 bytes (9 x 2 tiles) a Cross, its five, then the five grey */
 #define BN6_CROSS_ART_SIZE    0x240       /* ... bytes a row's art (9 x 2 tiles of 4 bits a pixel) */
 #define BN6_CROSS_ART_SEND    0x08029DB8u /* bl 0x08000AC8 in a row's art (0x08029D94: r6 the row, r7 the Cross, r0 its art, grey past the

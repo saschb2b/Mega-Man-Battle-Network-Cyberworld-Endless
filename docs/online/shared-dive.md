@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T13:45:00Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -1330,13 +1330,38 @@ the partners standing still; `partyaim=2` the partners still alone,
 iteration N), with `foes 01@52` or `53@52` on a layer and the log's
 `party: iteration ... HP` lines.
 
+Measured on the bench, three MegaMen standing still, a virus in one row:
+with the partners behind the lead, a Mettaur in row 1 or row 3 walked to
+the lead's row and struck him, ten times running, and a Gunner in any row
+struck the lead first. A virus goes for the front column, where the lead
+alone stood. So nothing was wrong with the aim, and positions deciding who
+is hit is BN6's own rule and stays; what was unfair is where the crew
+stood.
+
+**The crew side by side** (22 November 2026, taken under the owner's
+direction of 21 November and on his answer on the issue; his to turn
+over): on a party's field, a guardian's and a crew's alike, the partners
+stand beside the lead in his column, rows 1 and 3, a fourth behind him
+(column 1, row 2), then the rest (`party_field.c`'s `panels`), a hole of
+the battle's field passed over. **The lead keeps the middle row**, BN6's
+own place for him (column 2, row 2): chosen over the first partner in the
+middle (the order of seats on screen top to bottom) and over the lead on
+row 1. Every game of the field makes the same list, so the seats' hashes
+agree as before; a linked fighter fights his own battle, untouched. On the
+bench after it: a Mettaur in row 1 strikes the partner in row 1 and the
+lead in row 2 is untouched, in row 3 the partner in row 3; a Gunner in
+row 1 or 3 strikes the partner in its row first, then the others. The
+scenario `tests/scenarios/battle_crew_rows.py` holds it (`spike N hit H
+lead whole|hit|down`, the spike's battle in the state's words): seen to
+fail with the old layout, the lead struck first.
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own
 battles to N MegaMen on side 0 on one core, the way `--dev arena2v2`
 grows a NetBattle: the battle's list rewritten at its spawn
-(`BN6_SPAWN_ENTITIES`, the partners on side 0's free panels, the back
-column first) and each partner's keys written into his AI data at the
+(`BN6_SPAWN_ENTITIES`, the partners on side 0's free panels, beside the
+lead in his column since issue #777, then behind him) and each partner's keys written into his AI data at the
 battle loop's key copy (`BN6_KEY_COPY`), here a script. BN6 keeps four
 actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
 `BN6_BATTLE_PLAYERS`), so four fit its tables. Seen headless with
