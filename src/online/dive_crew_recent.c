@@ -37,7 +37,8 @@ void dive_crew_recent_note(const CrewState *before, const CrewState *after, uint
 		if (after->m[k].session != me) keep(after->m[k].session, now);
 }
 
-int dive_crew_recent_was(uint32_t session, uint32_t now) {
+/* whether `session` was in MegaMan's crew within CREW_RECENT_MS (in it now counts) */
+static int was(uint32_t session, uint32_t now) {
 	if (dive_crew_has(session)) return 1;
 	for (int k = 0; k < R.n; ++k)
 		if (R.session[k] == session) return now - R.at[k] <= CREW_RECENT_MS;
@@ -48,7 +49,7 @@ int dive_crew_recent_here(const OnlineSnapshot *s, uint32_t now, uint32_t *out, 
 	int n = 0;
 	for (size_t i = 0; s->connected && i < s->peer_count && n < most; ++i) {
 		const OnlinePeer *p = &s->peers[i];
-		if (p->id != s->player_id && p->busy == 0 && dive_crew_recent_was(p->id, now)) out[n++] = p->id;
+		if (p->id != s->player_id && p->busy == 0 && was(p->id, now)) out[n++] = p->id;
 	}
 	return n;
 }

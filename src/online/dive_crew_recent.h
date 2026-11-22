@@ -18,8 +18,6 @@
 void dive_crew_recent_reset(void);
 /* CREW_STATE: the crew before and after it, each of them in it until `now` */
 void dive_crew_recent_note(const CrewState *before, const CrewState *after, uint32_t me, uint32_t now);
-/* Whether `session` was in MegaMan's crew within CREW_RECENT_MS (in it now counts) */
-int dive_crew_recent_was(uint32_t session, uint32_t now);
 /* Those who were, still in the room `s` and free: their sessions into `out`
  * (at most `most`), their count */
 int dive_crew_recent_here(const OnlineSnapshot *s, uint32_t now, uint32_t *out, int most);
