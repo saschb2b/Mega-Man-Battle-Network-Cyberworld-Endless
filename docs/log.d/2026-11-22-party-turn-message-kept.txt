@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T21:12:01Z
-* **Update**: online/shared-dive.md (a partner's turn messages never lost on a frame early on the clock, partyearly; the state's partycustom line and why crew-battle-named waits on it), devtools/scenarios.md (partycustom among the dive's lines).
