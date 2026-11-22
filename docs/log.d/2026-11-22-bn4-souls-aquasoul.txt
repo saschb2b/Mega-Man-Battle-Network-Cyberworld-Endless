@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T18:51:34Z
+* **Update**: multirom/bn4-souls.md (AquaSoul in BN6's engine: his flag in Red Sun, his charged shot on Spreads' unit, his chip charge, his face, MegaMan's animations in a BN4 Soul, bn4_soul_aqua), rom/bn4.md (the chip charge's test and bonus by form, BN4_POWER_EMPTY), rom/souls.md (a BN4 Soul's animations, BN6_SPRITE_SET_ANIM), code/emu.md (soulbn4.c's AquaSoul, soullook.c's face and animations), devtools/differential.md (A's chip charge, a chip charge's power attack, a charged chip's sound).

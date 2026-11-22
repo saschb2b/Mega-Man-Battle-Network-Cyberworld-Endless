@@ -81,6 +81,11 @@ static HookAct charge_test(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_of(r->r[5]), chip = (int)r->r[0];
 	if (!soul) return HOOK_CONTINUE;
+	if (soulbn4_k(soul) >= 0) {   /* (a BN4 Soul's by BN4's test: soulbn4.h's soulbn4_charges) */
+		bool ok4 = chip > 0 && chip < CHIPS_IDS && soulbn4_charges(soulbn4_k(soul), chip) && !(breaks & SOULCHIPS_BREAK_CHARGE);
+		r->r[12] = (SOULS_THUMB + (ok4 ? ANSWER_YES : ANSWER_NO)) | 1;
+		return HOOK_JUMP;
+	}
 	int kind = soul == SOUL_SHADOW ? KIND_SWORD : soul == SOUL_KNIGHT ? KIND_BREAK : soul == SOUL_TOAD ? KIND_AQUA :
 		soul == SOUL_NAPALM ? KIND_FIRE : soul == SOUL_MAGNET ? KIND_ELEC : -1;
 	bool ok = kind >= 0 && chip > 0 && chip < CHIPS_IDS && !(soulchips_flags(chip) & BN6_CHIP_LEFT_ALONE) && !soulkinds_dark(chip) &&
@@ -95,6 +100,10 @@ static HookAct charge_bonus(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_of(r->r[5]);
 	if (!soul) return HOOK_CONTINUE;
+	if (soulbn4_k(soul) >= 0) {   /* (a BN4 Soul's: BN4's bonus, its power's modifier bit, BN6's caller adding it as BN4's does) */
+		r->r[0] = r->r[0] && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? soulbn4_charge_bonus(soulbn4_k(soul)) : 0;
+		return HOOK_RETURN;
+	}
 	bool doubled = soul == SOUL_KNIGHT || soul == SOUL_TOAD || soul == SOUL_NAPALM || soul == SOUL_MAGNET;
 	r->r[0] = r->r[0] && doubled && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? CHARGE_DOUBLE : 0;
 	return HOOK_RETURN;

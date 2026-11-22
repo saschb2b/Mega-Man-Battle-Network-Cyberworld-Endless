@@ -689,6 +689,7 @@ static const XcSong sidbmbo_songs[] = { { 0x8E, 0x1E1 } };
 	.sprites = sidbmbo_sprites, .nsprites = (int)(sizeof sidbmbo_sprites / sizeof *sidbmbo_sprites) }
 /* ---- Spreads: BN4's attack 0x1e (080EC761) as BN6's 0xd0; its chips 19 (588), 20 (589), 21 (590), 22 (591), 23 (592), 24 (593), 192 (594), 321 (606), 322 (607) ---- */
 /* MegaMan's state 0x1e (080EC760-080EC842), the family of its chips' records: moved */
+/* AquaSoul's power attack 0x23 (0800CF42), which returns the family: copied with it */
 /* its table 080CD524's kind 10: sprite 3:0x19 in BN4, 0x72 in BN6 (copied) */
 /* its table 080CD524's kind 6: sprite 3:0xd in BN4, 0x73 in BN6 (copied) */
 /* its table 080CD524's kind 14: sprite 3:0x1c in BN4, 0x74 in BN6 (copied) */
@@ -722,6 +723,7 @@ static const XvBlock spreads_blocks[] = {
 	{ 0x080CF420, 0x080CF5B8, XC4_CODE + 0x1490, 0x701B9ED2u },
 	{ 0x080CD524, 0x080CD5F8, XC4_CODE + 0x1630, 0x40F51A6Du },
 	{ 0x080CF3DC, 0x080CF420, XC4_CODE + 0x1710, 0x148921CFu },
+	{ 0x0800CF42, 0x0800CF62, XC4_CODE + 0x1762, 0x31E09036u },
 };
 static const XvData spreads_data[] = {
 	{ 0x080EC772, 0x080EC774, XV_RAW },
@@ -792,6 +794,7 @@ static const XvPair spreads_words[] = {
 	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
 };
 static const XvImm spreads_imms[] = {
+	{ 0x0800CF5E, THUMB_MOVS, 0, 0, 0x1E, 0xD0 },   /* AquaSoul's power attack 0x23: the family it returns, BN4's 0x1e, BN6's grown 0xd0 */
 	{ 0x080CF492, THUMB_LDR, 0, 7, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080CF546, THUMB_LDRB, 0, 7, 0x8, 0xA },   /* collision data +0x8 in BN4, +0xa in BN6 */
 	{ 0x080CF548, THUMB_LDRB, 1, 7, 0x9, 0xB },   /* collision data +0x9 in BN4, +0xb in BN6 */
@@ -853,6 +856,8 @@ static const XvByte spreads_bytes[] = {
 	{ 0x080CF407, 0xBC, 0x3F },   /* its table's kind 0xa's sound: BN4's 0xbc at BN6's slot 0x3f */
 	{ 0x080CF40A, 0x29, 0xC9 },   /* its table's kind 0xb's effect: 0x29 in BN4, 0xc9 in BN6 (moved) */
 	{ 0x080CF40B, 0xBC, 0x3F },   /* its table's kind 0xb's sound: BN4's 0xbc at BN6's slot 0x3f */
+	{ 0x080CF412, 0x25, 0xCA },   /* its table's kind 0xd's effect: 0x25 in BN4, 0xca in BN6 (moved) */
+	{ 0x080CF413, 0x9F, 0x3D },   /* its table's kind 0xd's sound: BN4's 0x9f at BN6's slot 0x3d */
 	{ 0x080CF416, 0x6A, 0xC8 },   /* its table's kind 0xe's effect: 0x6a in BN4, 0xc8 in BN6 (moved) */
 	{ 0x080CF41A, 0x64, 0xC7 },   /* its table's kind 0xf's effect: 0x64 in BN4, 0xc7 in BN6 (moved) */
 };
@@ -885,9 +890,9 @@ static const XcSong spreads_songs[] = { { 0x9F, 0x3D }, { 0xBC, 0x3F }, { 0x8D, 
 /* its chip 331 (id 610) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock flmline_blocks[] = {
-	{ 0x080ECAAE, 0x080ECB74, XC4_CODE + 0x1762, 0xACD55EB9u },
-	{ 0x080CFF80, 0x080D014E, XC4_CODE + 0x1830, 0x12544EF6u },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x1A00, 0x6FFE1431u },
+	{ 0x080ECAAE, 0x080ECB74, XC4_CODE + 0x1792, 0xACD55EB9u },
+	{ 0x080CFF80, 0x080D014E, XC4_CODE + 0x1860, 0x12544EF6u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x1A30, 0x6FFE1431u },
 };
 static const XvData flmline_data[] = {
 	{ 0x080ECAC0, 0x080ECAC4, XV_POOL },
@@ -961,8 +966,8 @@ static const XcSong flmline_songs[] = { { 0x9D, 0x36 } };
 /* its sound 0xad (080D20B0): BN4's song copied into the grown song table's slot 0x201, on BN4's player 26 */
 
 static const XvBlock thunder_blocks[] = {
-	{ 0x080ECE14, 0x080ECEAE, XC4_CODE + 0x1A30, 0x9EFCA62Au },
-	{ 0x080D2000, 0x080D2224, XC4_CODE + 0x1AD0, 0xC7652602u },
+	{ 0x080ECE14, 0x080ECEAE, XC4_CODE + 0x1A60, 0x9EFCA62Au },
+	{ 0x080D2000, 0x080D2224, XC4_CODE + 0x1B00, 0xC7652602u },
 };
 static const XvData thunder_data[] = {
 	{ 0x080ECE26, 0x080ECE28, XV_RAW },
@@ -1059,8 +1064,8 @@ static const XcSong thunder_songs[] = { { 0xAD, 0x201 } };
 /* its chip 337 (id 616) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock twnfng_blocks[] = {
-	{ 0x080ED4C6, 0x080ED572, XC4_CODE + 0x1D02, 0x5BDE5F2Cu },
-	{ 0x080D79B8, 0x080D7B64, XC4_CODE + 0x1DB0, 0x709BC9C5u },
+	{ 0x080ED4C6, 0x080ED572, XC4_CODE + 0x1D32, 0x5BDE5F2Cu },
+	{ 0x080D79B8, 0x080D7B64, XC4_CODE + 0x1DE0, 0x709BC9C5u },
 };
 static const XvData twnfng_data[] = {
 	{ 0x080ED4D8, 0x080ED4DC, XV_POOL },
@@ -1143,11 +1148,11 @@ static const XcSong twnfng_songs[] = { { 0xA6, 0x38 } };
 /* its chip 343 (id 622) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock magbolt_blocks[] = {
-	{ 0x080EE012, 0x080EE1A2, XC4_CODE + 0x1F62, 0x29ED9811u },
-	{ 0x080DBCA0, 0x080DBD94, XC4_CODE + 0x2100, 0x1B22F5D9u },
-	{ 0x0800AF90, 0x0800AFB0, XC4_CODE + 0x2200, 0x268EACF4u },
-	{ 0x08012D9A, 0x08012DB2, XC4_CODE + 0x2222, 0xCE602857u },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x2240, 0x6FFE1431u },
+	{ 0x080EE012, 0x080EE1A2, XC4_CODE + 0x1F92, 0x29ED9811u },
+	{ 0x080DBCA0, 0x080DBD94, XC4_CODE + 0x2130, 0x1B22F5D9u },
+	{ 0x0800AF90, 0x0800AFB0, XC4_CODE + 0x2230, 0x268EACF4u },
+	{ 0x08012D9A, 0x08012DB2, XC4_CODE + 0x2252, 0xCE602857u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x2270, 0x6FFE1431u },
 };
 static const XvData magbolt_data[] = {
 	{ 0x080EE024, 0x080EE028, XV_POOL },
@@ -1234,8 +1239,8 @@ static const XcSong magbolt_songs[] = { { 0xB9, 0x203 }, { 0xF8, 0x202 } };
 /* its sound 0x133 (080DEC08): BN4's song copied into the grown song table's slot 0x204, on BN4's player 28 */
 
 static const XvBlock propbom_blocks[] = {
-	{ 0x080EE532, 0x080EE5EA, XC4_CODE + 0x2272, 0x6CCC9E41u },
-	{ 0x080DEB70, 0x080DED60, XC4_CODE + 0x2330, 0x5D37AB7Eu },
+	{ 0x080EE532, 0x080EE5EA, XC4_CODE + 0x22A2, 0x6CCC9E41u },
+	{ 0x080DEB70, 0x080DED60, XC4_CODE + 0x2360, 0x5D37AB7Eu },
 };
 static const XvData propbom_data[] = {
 	{ 0x080EE544, 0x080EE548, XV_POOL },
@@ -1342,11 +1347,11 @@ static const XcSong propbom_songs[] = { { 0x8D, 0x200 }, { 0xC8, 0x205 }, { 0x13
 /* its chip 47 (id 583) sits out: SandRing, the generator line's (its records' kinds, the ring's rows 1-3 of table 080DAFB0 and its spec): the family is moved for ThunSoul's charged shot, whose ring is kind 0 (the attack's +0xC, which its power attack zeroes) */
 
 static const XvBlock thunsoul_blocks[] = {
-	{ 0x080EDC5A, 0x080EDD2E, XC4_CODE + 0x2522, 0xD47325F6u },
-	{ 0x080DAFBC, 0x080DB0EC, XC4_CODE + 0x2600, 0x351F2B25u },
-	{ 0x080DAFB0, 0x080DAFBC, XC4_CODE + 0x2730, 0xEF4D0545u },
-	{ 0x0800D298, 0x0800D2B4, XC4_CODE + 0x2740, 0x92FC0667u },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x2760, 0x6FFE1431u },
+	{ 0x080EDC5A, 0x080EDD2E, XC4_CODE + 0x2552, 0xD47325F6u },
+	{ 0x080DAFBC, 0x080DB0EC, XC4_CODE + 0x2630, 0x351F2B25u },
+	{ 0x080DAFB0, 0x080DAFBC, XC4_CODE + 0x2760, 0xEF4D0545u },
+	{ 0x0800D298, 0x0800D2B4, XC4_CODE + 0x2770, 0x92FC0667u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x2790, 0x6FFE1431u },
 };
 static const XvData thunsoul_data[] = {
 	{ 0x080EDC6C, 0x080EDC70, XV_POOL },
@@ -1436,11 +1441,11 @@ static const XcSong thunsoul_songs[] = { { 0x91, 0x300 } };
 /* its sound 0xa4 (080EBFB4): BN4's song copied into the grown song table's slot 0x207, on BN4's player 9 */
 
 static const XvBlock gutssoul_blocks[] = {
-	{ 0x080EBF6A, 0x080EC01E, XC4_CODE + 0x2792, 0x3AF9D65Eu },
-	{ 0x080D0A74, 0x080D0BBC, XC4_CODE + 0x2850, 0x97FC157Cu },
-	{ 0x080D0A60, 0x080D0A72, XC4_CODE + 0x29A0, 0xF9D9A51Au },
-	{ 0x0800CF62, 0x0800CF88, XC4_CODE + 0x29C2, 0x98BBFE0Bu },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x29F0, 0x6FFE1431u },
+	{ 0x080EBF6A, 0x080EC01E, XC4_CODE + 0x27C2, 0x3AF9D65Eu },
+	{ 0x080D0A74, 0x080D0BBC, XC4_CODE + 0x2880, 0x97FC157Cu },
+	{ 0x080D0A60, 0x080D0A72, XC4_CODE + 0x29D0, 0xF9D9A51Au },
+	{ 0x0800CF62, 0x0800CF88, XC4_CODE + 0x29F2, 0x98BBFE0Bu },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x2A20, 0x6FFE1431u },
 };
 static const XvData gutssoul_data[] = {
 	{ 0x080EBF7C, 0x080EBF80, XV_POOL },
@@ -1538,10 +1543,10 @@ static const XcSong gutssoul_songs[] = { { 0xA4, 0x207 } };
 /* its sound 0x90 (080EB454): BN4's song copied into the grown song table's slot 0x206, on BN4's player 8 */
 
 static const XvBlock seekbom_blocks[] = {
-	{ 0x080EB3FE, 0x080EB51E, XC4_CODE + 0x2A22, 0x5D011E1Au },
-	{ 0x080DED60, 0x080DEFEC, XC4_CODE + 0x2B50, 0xE55B2946u },
-	{ 0x080E3328, 0x080E33E8, XC4_CODE + 0x2DE0, 0xF6B3BF48u },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x2EA0, 0x6FFE1431u },
+	{ 0x080EB3FE, 0x080EB51E, XC4_CODE + 0x2A52, 0x5D011E1Au },
+	{ 0x080DED60, 0x080DEFEC, XC4_CODE + 0x2B80, 0xE55B2946u },
+	{ 0x080E3328, 0x080E33E8, XC4_CODE + 0x2E10, 0xF6B3BF48u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x2ED0, 0x6FFE1431u },
 };
 static const XvData seekbom_data[] = {
 	{ 0x080EB410, 0x080EB414, XV_POOL },
@@ -1651,8 +1656,8 @@ static const XcSong seekbom_songs[] = { { 0x70, 0x3A }, { 0x90, 0x206 } };
 /* its third-kind 0x56: ShotStar's copy, the dispatch's 0x56, shared (its spawner copied) */
 
 static const XvBlock meteors_blocks[] = {
-	{ 0x080EADF4, 0x080EAEA6, XC4_CODE + 0x2ED0, 0x8C47ED0Fu },
-	{ 0x080D877C, 0x080D879A, XC4_CODE + 0x2F90, 0x50812991u },
+	{ 0x080EADF4, 0x080EAEA6, XC4_CODE + 0x2F00, 0x8C47ED0Fu },
+	{ 0x080D877C, 0x080D879A, XC4_CODE + 0x2FC0, 0x50812991u },
 };
 static const XvData meteors_data[] = {
 	{ 0x080EAE02, 0x080EAE04, XV_RAW },
@@ -1713,12 +1718,12 @@ static const XvType meteors_types[] = {
 /* its chip 346 has no row of the registry (the run's by name, or none) */
 
 static const XvBlock timebomb_blocks[] = {
-	{ 0x080E4C3C, 0x080E4F5C, XC4_CODE + 0x2FB0, 0x12C9A5CFu },
-	{ 0x080D6BF8, 0x080D6ED4, XC4_CODE + 0x32D0, 0xF7AE8E1Du },
-	{ 0x080E4A0A, 0x080E4AD4, XC4_CODE + 0x35B2, 0xB899F21Fu },
-	{ 0x08012618, 0x08012630, XC4_CODE + 0x3680, 0x4286738Eu },
-	{ 0x080E4A00, 0x080E4A0A, XC4_CODE + 0x36A0, 0xF8D9D3A5u },
-	{ 0x08111888, 0x0811188E, XC4_CODE + 0x36B0, 0x7B317508u },
+	{ 0x080E4C3C, 0x080E4F5C, XC4_CODE + 0x2FE0, 0x12C9A5CFu },
+	{ 0x080D6BF8, 0x080D6ED4, XC4_CODE + 0x3300, 0xF7AE8E1Du },
+	{ 0x080E4A0A, 0x080E4AD4, XC4_CODE + 0x35E2, 0xB899F21Fu },
+	{ 0x08012618, 0x08012630, XC4_CODE + 0x36B0, 0x4286738Eu },
+	{ 0x080E4A00, 0x080E4A0A, XC4_CODE + 0x36D0, 0xF8D9D3A5u },
+	{ 0x08111888, 0x0811188E, XC4_CODE + 0x36E0, 0x7B317508u },
 };
 static const XvData timebomb_data[] = {
 	{ 0x080E4C4A, 0x080E4C4C, XV_RAW },
@@ -1882,11 +1887,11 @@ static const XcSong timebomb_songs[] = { { 0x70, 0x3A }, { 0xB0, 0x1E2 }, { 0xBC
 /* its sound 0x143 (080DF05E): BN4's song copied into the grown song table's slot 0x242, on BN4's player 23 */
 
 static const XvBlock ligtnin_blocks[] = {
-	{ 0x080DF7F8, 0x080DF9B0, XC4_CODE + 0x36C0, 0xCD3C14E6u },
-	{ 0x080DEFEC, 0x080DF128, XC4_CODE + 0x3880, 0xE3E47628u },
-	{ 0x080DF68C, 0x080DF7F8, XC4_CODE + 0x39C0, 0xD07CF041u },
-	{ 0x080DF674, 0x080DF68C, XC4_CODE + 0x3B30, 0x38CC9DEFu },
-	{ 0x08014446, 0x0801447A, XC4_CODE + 0x3B52, 0x6AADAE25u },
+	{ 0x080DF7F8, 0x080DF9B0, XC4_CODE + 0x36F0, 0xCD3C14E6u },
+	{ 0x080DEFEC, 0x080DF128, XC4_CODE + 0x38B0, 0xE3E47628u },
+	{ 0x080DF68C, 0x080DF7F8, XC4_CODE + 0x39F0, 0xD07CF041u },
+	{ 0x080DF674, 0x080DF68C, XC4_CODE + 0x3B60, 0x38CC9DEFu },
+	{ 0x08014446, 0x0801447A, XC4_CODE + 0x3B82, 0x6AADAE25u },
 };
 static const XvData ligtnin_data[] = {
 	{ 0x080DF806, 0x080DF808, XV_RAW },
@@ -2028,10 +2033,10 @@ static const XcSong ligtnin_songs[] = { { 0x120, 0x240 }, { 0x13E, 0x241 }, { 0x
 /* its chip 193 is a dark chip of BN4's (row 562): a battle it is used in costs 20 max HP */
 
 static const XvBlock hole_blocks[] = {
-	{ 0x080E4584, 0x080E4618, XC4_CODE + 0x3B90, 0x4B619B7Eu },
-	{ 0x080E9838, 0x080E98E0, XC4_CODE + 0x3C30, 0xD3ADC8B1u },
-	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x3CE0, 0xCF968AD5u },
-	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x3F10, 0x77CB1EA6u },
+	{ 0x080E4584, 0x080E4618, XC4_CODE + 0x3BC0, 0x4B619B7Eu },
+	{ 0x080E9838, 0x080E98E0, XC4_CODE + 0x3C60, 0xD3ADC8B1u },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x3D10, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x3F40, 0x77CB1EA6u },
 };
 static const XvData hole_data[] = {
 	{ 0x080E4592, 0x080E4594, XV_RAW },
@@ -2118,7 +2123,7 @@ static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 /* its chip 226 (id 537) waits: its row is XREG_PENDING */
 
 static const XvBlock gutsmanchip_blocks[] = {
-	{ 0x080B999C, 0x080B9B44, XC4_CODE + 0x4030, 0x15E72429u },
+	{ 0x080B999C, 0x080B9B44, XC4_CODE + 0x4060, 0x15E72429u },
 };
 static const XvData gutsmanchip_data[] = {
 	{ 0x080B99AE, 0x080B99B0, XV_RAW },
@@ -2192,9 +2197,9 @@ static const XcSong gutsmanchip_songs[] = { { 0xB0, 0x1E2 } };
 /* its chip 220 has no row of the registry (the run's by name, or none) */
 
 static const XvBlock drkvulcn_blocks[] = {
-	{ 0x080EC842, 0x080EC972, XC4_CODE + 0x41E2, 0x6C6AADB3u },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x4320, 0x6FFE1431u },
-	{ 0x080CF596, 0x080CF5B4, XC4_CODE + 0x4352, 0x70AA170Eu },
+	{ 0x080EC842, 0x080EC972, XC4_CODE + 0x4212, 0x6C6AADB3u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x4350, 0x6FFE1431u },
+	{ 0x080CF596, 0x080CF5B4, XC4_CODE + 0x4382, 0x70AA170Eu },
 };
 static const XvData drkvulcn_data[] = {
 	{ 0x080EC854, 0x080EC858, XV_POOL },
@@ -2257,12 +2262,12 @@ static const XcSong drkvulcn_songs[] = { { 0xBB, 0x283 } };
 /* its chip 213 is a dark chip of BN4's (row 697): a battle it is used in costs 20 max HP */
 
 static const XvBlock elem_blocks[] = {
-	{ 0x080EE2AE, 0x080EE426, XC4_CODE + 0x4372, 0xB0B60FB4u },
-	{ 0x080CE2D8, 0x080CE4D0, XC4_CODE + 0x44F0, 0x00B1870Eu },
-	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x46F0, 0xCF968AD5u },
-	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x4920, 0x77CB1EA6u },
-	{ 0x08014446, 0x0801447A, XC4_CODE + 0x4A42, 0x6AADAE25u },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x4A80, 0x6FFE1431u },
+	{ 0x080EE2AE, 0x080EE426, XC4_CODE + 0x43A2, 0xB0B60FB4u },
+	{ 0x080CE2D8, 0x080CE4D0, XC4_CODE + 0x4520, 0x00B1870Eu },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x4720, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x4950, 0x77CB1EA6u },
+	{ 0x08014446, 0x0801447A, XC4_CODE + 0x4A72, 0x6AADAE25u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x4AB0, 0x6FFE1431u },
 };
 static const XvData elem_data[] = {
 	{ 0x080EE2C0, 0x080EE2C4, XV_POOL },
@@ -2382,8 +2387,8 @@ static const XcSong elem_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 /* its chip 334 (id 613) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock pitrng_blocks[] = {
-	{ 0x080E999C, 0x080E9A50, XC4_CODE + 0x4AB0, 0xA5D50BFEu },
-	{ 0x080D3430, 0x080D344E, XC4_CODE + 0x4B70, 0x1CB27713u },
+	{ 0x080E999C, 0x080E9A50, XC4_CODE + 0x4AE0, 0xA5D50BFEu },
+	{ 0x080D3430, 0x080D344E, XC4_CODE + 0x4BA0, 0x1CB27713u },
 };
 static const XvData pitrng_data[] = {
 	{ 0x080E99AA, 0x080E99AC, XV_RAW },
@@ -2435,9 +2440,9 @@ static const XvType pitrng_types[] = {
 /* its chip 288 (id 566) sits out: WoodPowr, left out by the owner's call 12 */
 
 static const XvBlock fireplus_blocks[] = {
-	{ 0x080EAC98, 0x080EAD54, XC4_CODE + 0x4B90, 0x4F5D5678u },
-	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x4C50, 0xCF968AD5u },
-	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x4E80, 0x77CB1EA6u },
+	{ 0x080EAC98, 0x080EAD54, XC4_CODE + 0x4BC0, 0x4F5D5678u },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x4C80, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x4EB0, 0x77CB1EA6u },
 };
 static const XvData fireplus_data[] = {
 	{ 0x080EACA6, 0x080EACA8, XV_RAW },
@@ -2531,12 +2536,12 @@ static const XcSong fireplus_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0
 /* its chip 189 is a dark chip of BN4's (row 696): a battle it is used in costs 20 max HP */
 
 static const XvBlock darkbomb_blocks[] = {
-	{ 0x080EB3FE, 0x080EB51E, XC4_CODE + 0x4FA2, 0x5D011E1Au },
-	{ 0x080CE0A4, 0x080CE2D8, XC4_CODE + 0x50D0, 0x1ACC68FCu },
-	{ 0x080CE4D0, 0x080CE6E0, XC4_CODE + 0x5310, 0x842E9CE2u },
-	{ 0x080CF300, 0x080CF420, XC4_CODE + 0x5520, 0x067A9553u },
-	{ 0x080CE088, 0x080CE0A4, XC4_CODE + 0x5640, 0x0603CAF7u },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x5660, 0x6FFE1431u },
+	{ 0x080EB3FE, 0x080EB51E, XC4_CODE + 0x4FD2, 0x5D011E1Au },
+	{ 0x080CE0A4, 0x080CE2D8, XC4_CODE + 0x5100, 0x1ACC68FCu },
+	{ 0x080CE4D0, 0x080CE6E0, XC4_CODE + 0x5340, 0x842E9CE2u },
+	{ 0x080CF300, 0x080CF420, XC4_CODE + 0x5550, 0x067A9553u },
+	{ 0x080CE088, 0x080CE0A4, XC4_CODE + 0x5670, 0x0603CAF7u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x5690, 0x6FFE1431u },
 };
 static const XvData darkbomb_data[] = {
 	{ 0x080EB410, 0x080EB414, XV_POOL },
@@ -2680,7 +2685,7 @@ static const XcSong darkbomb_songs[] = { { 0x70, 0x3A }, { 0x90, 0x206 }, { 0xA9
 /* its sound 0xb0 (080C849A): BN4's song copied into the grown song table's slot 0x1e2, on BN4's player 23 */
 
 static const XvBlock gutpnch_blocks[] = {
-	{ 0x080C83F8, 0x080C85E8, XC4_CODE + 0x5690, 0x328E9BC4u },
+	{ 0x080C83F8, 0x080C85E8, XC4_CODE + 0x56C0, 0x328E9BC4u },
 };
 static const XvData gutpnch_data[] = {
 	{ 0x080C840A, 0x080C840C, XV_RAW },
@@ -2750,9 +2755,9 @@ static const XcSong gutpnch_songs[] = { { 0xA4, 0x207 }, { 0xB0, 0x1E2 } };
 /* its chip 303 is a dark chip of BN4's (row 730): a battle it is used in costs 20 max HP */
 
 static const XvBlock bugcurse_blocks[] = {
-	{ 0x080E81C4, 0x080E8284, XC4_CODE + 0x5880, 0x5CEAD780u },
-	{ 0x080DD39C, 0x080DD538, XC4_CODE + 0x5940, 0x94A97B07u },
-	{ 0x08014446, 0x0801447A, XC4_CODE + 0x5AE2, 0x6AADAE25u },
+	{ 0x080E81C4, 0x080E8284, XC4_CODE + 0x58B0, 0x5CEAD780u },
+	{ 0x080DD39C, 0x080DD538, XC4_CODE + 0x5970, 0x94A97B07u },
+	{ 0x08014446, 0x0801447A, XC4_CODE + 0x5B12, 0x6AADAE25u },
 };
 static const XvData bugcurse_data[] = {
 	{ 0x080E81D2, 0x080E81D4, XV_RAW },
@@ -2851,10 +2856,10 @@ static const XcSong bugcurse_songs[] = { { 0x141, 0x288 } };
 /* its chip 340 (id 619) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock airhoc_blocks[] = {
-	{ 0x080ECEAE, 0x080ECF44, XC4_CODE + 0x5B22, 0x2A21B6B1u },
-	{ 0x080D2788, 0x080D2B28, XC4_CODE + 0x5BC0, 0x54BA89C5u },
-	{ 0x080E4F5C, 0x080E503C, XC4_CODE + 0x5F60, 0x12DCA5A7u },
-	{ 0x080D2768, 0x080D2786, XC4_CODE + 0x6040, 0x2393F975u },
+	{ 0x080ECEAE, 0x080ECF44, XC4_CODE + 0x5B52, 0x2A21B6B1u },
+	{ 0x080D2788, 0x080D2B28, XC4_CODE + 0x5BF0, 0x54BA89C5u },
+	{ 0x080E4F5C, 0x080E503C, XC4_CODE + 0x5F90, 0x12DCA5A7u },
+	{ 0x080D2768, 0x080D2786, XC4_CODE + 0x6070, 0x2393F975u },
 };
 static const XvData airhoc_data[] = {
 	{ 0x080ECEC0, 0x080ECEC4, XV_POOL },
@@ -2987,7 +2992,7 @@ static const XcSong airhoc_songs[] = { { 0xC0, 0x289 }, { 0xCC, 0x28A } };
 /* its sound 0x132 (080C82DE): BN4's song copied into the grown song table's slot 0x208, on BN4's player 27 */
 
 static const XvBlock rollaro_blocks[] = {
-	{ 0x080C8120, 0x080C83F8, XC4_CODE + 0x6060, 0x0907F6F2u },
+	{ 0x080C8120, 0x080C83F8, XC4_CODE + 0x6090, 0x0907F6F2u },
 };
 static const XvData rollaro_data[] = {
 	{ 0x080C812E, 0x080C8130, XV_RAW },
@@ -3071,8 +3076,8 @@ static const XcSong rollaro_songs[] = { { 0xB0, 0x1E2 }, { 0x132, 0x208 } };
 /* its chip 215 (id 698) sits out: GodHammr, BigHamr's unit's Mega chip: its hit strikes its own hammer (an actor of 100 HP) and MegaMan too, and BN4's actor runner (0x08013F3E) finds the hammer's final damage (collision data +0x28) and plays its hurt sound 0xC8 where BN6's (0x0801B394) finds its +0x80 zero, both deleting it by the hit's flag 0x08000000 (bn4_chip_godhammr t57, BN6's hit flags with 0x80000000 more): BN6's hit pass on the struck actor to read */
 
 static const XvBlock bighamr_blocks[] = {
-	{ 0x080E4B88, 0x080E4C3C, XC4_CODE + 0x6340, 0x151512BCu },
-	{ 0x080D68CC, 0x080D6BF8, XC4_CODE + 0x6400, 0xF792293Bu },
+	{ 0x080E4B88, 0x080E4C3C, XC4_CODE + 0x6370, 0x151512BCu },
+	{ 0x080D68CC, 0x080D6BF8, XC4_CODE + 0x6430, 0xF792293Bu },
 };
 static const XvData bighamr_data[] = {
 	{ 0x080E4B96, 0x080E4B98, XV_RAW },
@@ -3205,9 +3210,9 @@ static const XcSong bighamr_songs[] = { { 0x70, 0x3A }, { 0xA2, 0x243 }, { 0xB0,
 /* BN4's computed powers 1023-1044 (08019518): a Navi chip DS's power (1023-1044): his row of BN4_DS_POWERS (power - 1023), its column 10 less the Hole panels on both sides (0x08009F40 with type 0xB, side 0 and 1), at most 10; BN6's 1227-1248 */
 
 static const XvBlock navipowers_blocks[] = {
-	{ 0x08018B48, 0x08018D00, XC4_CODE + 0x6730, 0x8441048Du },
-	{ 0x08000BBC, 0x08000C2C, XC4_CODE + 0x68F0, 0xDEC1F412u },
-	{ 0x0801949E, 0x080197D8, XC4_CODE + 0x6962, 0xEC180435u },
+	{ 0x08018B48, 0x08018D00, XC4_CODE + 0x6760, 0x8441048Du },
+	{ 0x08000BBC, 0x08000C2C, XC4_CODE + 0x6920, 0xDEC1F412u },
+	{ 0x0801949E, 0x080197D8, XC4_CODE + 0x6992, 0xEC180435u },
 };
 static const XvData navipowers_data[] = {
 	{ 0x08018B48, 0x08018D00, XV_RAW },
@@ -3257,7 +3262,7 @@ static const XvType navipowers_types[] = {
 /* its chip 387 has no row of the registry (the run's by name, or none) */
 
 static const XvBlock gutsrapid_blocks[] = {
-	{ 0x080EBDC0, 0x080EBE90, XC4_CODE + 0x6CA0, 0x8294D8D9u },
+	{ 0x080EBDC0, 0x080EBE90, XC4_CODE + 0x6CD0, 0x8294D8D9u },
 };
 static const XvData gutsrapid_data[] = {
 	{ 0x080EBDD2, 0x080EBDD4, XV_RAW },
@@ -3361,3 +3366,19 @@ const uint32_t xchips_bn4_powers[] = {
 	0, 0, 0,
 };
 const int xchips_bn4_powers_count = (int)(sizeof xchips_bn4_powers / sizeof *xchips_bn4_powers);
+
+/* (MegaMan's animations the attack units give BN6's art's numbers: the unit's family, BN6's number, BN4's) */
+const uint8_t xchips_bn4_anims[][3] = {
+	{ 0xD0, 0x0B, 0x0E },
+	{ 0xD1, 0x0A, 0x0D },
+	{ 0xD1, 0x0D, 0x11 },
+	{ 0xD3, 0x0E, 0x12 },
+	{ 0xD4, 0x0E, 0x12 },
+	{ 0xD5, 0x0A, 0x0D },
+	{ 0xD6, 0x0E, 0x12 },
+	{ 0xFB, 0x0C, 0x10 },
+	{ 0xFD, 0x0A, 0x0D },
+	{ 0xFD, 0x0D, 0x11 },
+	{ 0xFE, 0x0A, 0x0D },
+};
+const int xchips_bn4_anims_count = (int)(sizeof xchips_bn4_anims / sizeof *xchips_bn4_anims);

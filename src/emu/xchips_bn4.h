@@ -72,6 +72,10 @@
 /* The units (XChipUnit, xchips_bn5.h: `bn5` BN4's subfamily, `navis` 0) */
 extern const XChipUnit xchips_bn4[];
 extern const int xchips_bn4_count;
+/* MegaMan's animations the attack units give BN6's art's numbers (tools/xchiprecipe_bn4.py's IMMS): each row the unit's family,
+ * BN6's number, BN4's; a BN4 Soul, which wears BN4's art, takes BN4's back (soullook.c) */
+extern const uint8_t xchips_bn4_anims[][3];
+extern const int xchips_bn4_anims_count;
 /* BN4's computed powers by its table's entry (bn4_chips.h BN4_CHIP_POWERS, power less 1000): the routine its power unit
  * moved (a block of an XCHIP_HELPER's), 0 for one it did not (BN6's stub, power 0); src/emu/xchips_code.c powers4_stage */
 extern const uint32_t xchips_bn4_powers[];

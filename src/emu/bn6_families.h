@@ -28,6 +28,8 @@
                                              call (its 1 runs the after-state paused or not) */
 #define BN6_PAUSE_TEST        0x0800A03Cu /* the battle's pause byte tested ([eToolkit + BN6_TOOLKIT_PAUSE] + BN6_PAUSED): its flags ne while
                                              paused, BN6_VIRUS_PRESENT's pause test's second call */
+#define BN6_SPRITE_SET_ANIM   0x08002DA4u /* sprite_setAnimation: r0 stored as the animation of r5's sprite (its block, BN6_OBJ_SPRITE_BLOCK, +0),
+                                             called as +0x10 differs from +0x11 (0x0801BBE2 and its kin); ldrb r3,[r5,#2] first */
 #define BN6_SPRITE_UPDATE     0x080026C4u /* an object's sprite counted on a frame, its work in IWRAM (BN4_SPRITE_UPDATE's twin): BN6_VIRUS_PRESENT's
                                              last call (0x08016EBA) */
 #define BN6_APPEAR            0x08016396u /* the plain appear (the generic state 0's, BN6_NAVI_SPAWN_STATE, where its AI data's +2
