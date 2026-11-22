@@ -119,7 +119,7 @@ scene('command/knightman', """KnightMan has no command: his window holds Liberat
 
 c = Course(('expect', 'mate1=Colonel 1/200 ready'), ('keep', 'freed'), *in_play('Colonel'))
 c.command('dark').take().add(('repeat', 'press START; wait 10; press A; wait 50', 'custom>0', 10),
-                             ('repeat', 'mash A 60', 'screen=map', 20), ('until', 'lastfight=lost', 600),
+                             ('repeat', 'mash A 60', 'screen=map', 20), ('until', 'lastfight=lost', 600), ('expect', 'foughton=0'),
                              ('expect', 'mate1~out'), ('expect', 'scene=emu'), ('moved', 'freed', 0),
                              ('repeat', 'press A; wait 20', 'board=move', 40),
                              ('expect', 'inplay=MegaMan'), ('expect', 'mate0=MegaMan 100/100 inplay'), ('expect', 'boardphase=1'))

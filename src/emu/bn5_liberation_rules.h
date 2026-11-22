@@ -14,6 +14,8 @@
 #define BN5_LIB_TIME_ASK     0x08008BD2u /* the Custom screen asked for as the gauge is full (BattleState +0x32 bit 2, not the L or R request */
                                          /* ... 0x10 of the other battles' 0x08008BB0): below the third turn it opens by itself, from it (+7 >= 3) */
 #define BN5_LIB_TIME_UP      0x08007C24u /* ... the loop's phase 0x18: TIME UP! (0x54), 30 frames, LIBERATE FAILED! (0x5C), the battle over */
+#define BN5_LIB_TIME_PAUSE   0x08007A22u /* ... the fight's call of BN5_PAUSE_BATTLE before it sets that phase, as before the Custom screen's (0x08007A14) */
+#define BN5_PAUSE_BATTLE     0x08008A08u /* [eToolkit +0x3C] +9 set to 1: the battle paused (BN6's twin BN6_PAUSE_BATTLE) */
 #define BN5_LIB_WIN_BANNER   0x08007A50u /* the win's first step: 1 TURN LIBERATE! (0x90, number 1) where +7 is 1, else LIBERATE SUCCESS! (0x58) */
 #define BN5_BATTLE_MESSAGES  0x0801B80Cu /* the battle messages' table, a word each (a message's number is its offset), read by 0x0801B02A */
 #define BN5_LIB_LATE_DOUBLE  0x0800901Eu /* true in a battle of type 1 (no liberation battle's) from its eleventh turn: */

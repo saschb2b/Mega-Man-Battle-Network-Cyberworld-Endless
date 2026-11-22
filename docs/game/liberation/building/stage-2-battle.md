@@ -39,9 +39,14 @@ rules, its guardians' too (issue #669). Armed:
   tests L or R: played, the screen opened the frame the gauge filled, no
   key held), so here too: below the final turn BN6's own way to the
   Custom screen from L or R is taken (`BN6_FIGHT_CUSTOM`); in the final
-  turn the loop goes to BN6's own draw (a NetBattle's judge's end): the
-  battle stops, its banner TIME UP!, the draw run again for LIBERATE
-  FAILED!, then result 3, which ends the battle with no results screen
+  turn the battle is paused as BN5 pauses its own before its time up
+  (`BN5_LIB_TIME_PAUSE`; BN6's pause byte, the one its way to the Custom
+  screen sets) and the loop goes to BN6's own draw (a NetBattle's judge's
+  end, which hides the battle's displays and by itself stops nothing:
+  issue #794, the fight ran on under both banners; a MegaMan flashing
+  from a hit as the pause comes stays shown or hidden as that frame had
+  him, as under BN6's Custom screen), its banner TIME UP!,
+  the draw run again for LIBERATE FAILED!, then result 3, which ends the battle with no results screen
   and no reward, MegaMan's HP as it stands;
 - a win shows 1 TURN LIBERATE! or LIBERATE SUCCESS! in the win's place
   (ENEMY DELETED!), so the board no longer shows its own banner after the

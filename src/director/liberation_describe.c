@@ -41,6 +41,8 @@
  *   fights WHAT      the battle under way: panel, guardian, darkhole, darkloid
  *   lastfight HOW    how the board's last battle ended: none, won, oneturn,
  *                    timeup, lost (the Navi in it deleted, or struck down)
+ *   foughton N       the frames that battle's fight ran on under its closing
+ *                    banners (issue #794: 0, the battle paused under them)
  *   teampick NAMES, teamrow NAME|GO    the arrival's pick (liberation_pick.h)
  *   roulette SLOT, bonus SLOT    a BonusPanel's (liberation_bonus.h)
  *   darkshown N, facedshown N    the picture's (liberation_draw.c) */
@@ -53,6 +55,7 @@
 #include "bn6_fields.h"
 #include "director_state.h"
 #include "guardians.h"
+#include "liberation_battle.h"
 #include "liberation_bonus.h"
 #include "liberation_pick.h"
 #include "liberation_state.h"
@@ -156,6 +159,7 @@ void lib_describe(FILE *f) {
 		fprintf(f, "command %s\ntakes %s\n", lib_command_label(LB.menu, lib_mate_command(LB.in_play)), LB.can[LB.menu] ? "yes" : "no");
 	if (LB.step == LIB_STEP_BATTLE) fprintf(f, "fights %s\n", fights[LB.fight & 3]);
 	fprintf(f, "lastfight %s\n", fought[LB.fought >= 0 && LB.fought < 5 ? LB.fought : 0]);
+	fprintf(f, "foughton %d\n", lib_battle_ran_on());
 	lib_pick_describe(f);
 	lib_bonus_describe(f);
 	lib_draw_describe(f);

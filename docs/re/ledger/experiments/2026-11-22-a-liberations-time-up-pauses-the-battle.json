@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-11-22",
+  "name": "A liberation's time up pauses the battle",
+  "result": "Played on seed 5's act 2 board (--dev dark,hp=1000), a picture every 20 frames: the Armadill rolled on through TIME UP! and LIBERATE FAILED! (120 frames) and reached MegaMan's panel again before the board. Read in both ROMs: BN5's fight sets its time up's phase 0x18 at 0x08007A26 after calling 0x08008A08 at 0x08007A22, the routine that sets [eToolkit +0x3C] +9 to 1, the same call it makes before the Custom screen's phase; BN6's twin 0x0800A028 sets GameState +0xA and is called before its phase 0x20 alone. BN6's draw (0x080082DC) calls 0x0801DACC and 0x0801BED6 with 0xE4C53, which run display routines on eStruct2035280 and pause nothing. With the byte set by the time up's hook, the scenario liberate/time-up reads foughton 0; with that write taken out, it fails.",
+  "meaning": "The draw was read as stopping the battle; it only hides its displays, and a NetBattle's judge reaches it with nothing left to stop. BN5's pause before its time up is the missing step, now made by the hook (issue #794). Not played in BN5 itself: its pause is read from its code, not seen in romlab.",
+  "link": "../rom/battle.md"
+}

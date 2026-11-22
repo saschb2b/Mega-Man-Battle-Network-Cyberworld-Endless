@@ -9,9 +9,12 @@
  * the fight, BN5 asks for the Custom screen as the gauge fills, no key
  * pressed (0x08008BD2): below the third turn it opens, by BN6's own way
  * to it from L or R; in the third, BN5's time up: BN6's own draw (the
- * battle stopped, its banner, the battle over with result 3: no reward,
- * HP as it stands), its banner TIME UP! and then, the draw run again,
- * LIBERATE FAILED! (BN5's 0x08007C24). At a win, LIBERATE SUCCESS!, or 1
+ * banner, the battle over with result 3: no reward, HP as it stands), the
+ * battle paused first as BN5 pauses its own before its time up (its
+ * 0x08007A22 calls 0x08008A08, the call it makes before a Custom screen;
+ * BN6's draw hides the battle's displays and stops nothing: issue #794),
+ * its banner TIME UP! and then, the draw run again, LIBERATE FAILED!
+ * (BN5's 0x08007C24). At a win, LIBERATE SUCCESS!, or 1
  * TURN LIBERATE! where the first Custom screen was the only one
  * (0x08007A50). Every liberation battle runs so, the Darkloid's too: BN5's
  * battle reads nothing of its board but a unit's HP (bn5_liberation.h).
@@ -58,6 +61,7 @@ static int turn_seen;          /* (the director's) the turn the battle is in */
 static int foe_hp, foe_left;
 static bool foe_given;
 static int hp_seen;            /* ... and MegaMan's HP in it, as last seen (BN6's return to the map works his NaviStats afresh) */
+static int ran_on;             /* ... and the frames its fight ran on, unpaused, under the draw's banners (issue #794: none) */
 static bool soul_guarded;      /* the teammate's guard's hook in (soul_guard) */
 
 
@@ -75,6 +79,17 @@ static HookAct fight_banner(HookRegs *r, void *user) {
 	return HOOK_JUMP;
 }
 
+/* The battle over without a winner: paused as BN6's own PauseBattle does
+ * it (0x0800A028, the fight's way to the Custom screen: the byte the
+ * objects' updates test), so nothing moves or hits under the banners, and
+ * the loop set to its draw, from banner `pass` (0 TIME UP!, 1 LIBERATE
+ * FAILED!). The battle's closing clears the pause (bn6f loc_8007E38). */
+static void closing(int pass) {
+	hook_write8(BN6_GAMESTATE + BN6_PAUSED, 1);
+	hook_write32(BN6_LOOP, BN6_LOOP_DRAW);
+	draw_pass = pass;
+}
+
 /* The fight's frame, nothing decided yet: BN5's ask as the gauge fills
  * (both sides standing, the battle not held): the Custom screen below the
  * final turn; in it, the time is up, and the loop is set to its draw; a
@@ -82,8 +97,7 @@ static HookAct fight_banner(HookRegs *r, void *user) {
 static HookAct fight_ask(HookRegs *r, void *user) {
 	(void)user;
 	if (arm.on && down && r->r[0] == 0xFF && hook_read32(BN6_LOOP) != BN6_LOOP_DRAW) {
-		hook_write32(BN6_LOOP, BN6_LOOP_DRAW);
-		draw_pass = 1;
+		closing(1);
 		r->r[12] = BN6_FIGHT_RETURN | 1;
 		return HOOK_JUMP;
 	}
@@ -96,8 +110,7 @@ static HookAct fight_ask(HookRegs *r, void *user) {
 		r->r[12] = BN6_FIGHT_CUSTOM | 1;
 		return HOOK_JUMP;
 	}
-	hook_write32(BN6_LOOP, BN6_LOOP_DRAW);
-	draw_pass = 0;
+	closing(0);
 	r->r[12] = BN6_FIGHT_RETURN | 1;
 	return HOOK_JUMP;
 }
@@ -190,7 +203,7 @@ void lib_battle_install(void) {
 void lib_battle_arm(int turns) {
 	arm.turns = turns;
 	arm.on = true;
-	turn_seen = hp_seen = 0;
+	turn_seen = hp_seen = ran_on = 0;
 	lib_cue_battle(turns > 0);   /* (won in the first turn: BN5's jingle, liberation_cues.c) */
 	down = false;
 	/* (a teammate's: the hook on the HP taken while it runs; the duel's
@@ -222,6 +235,8 @@ bool lib_battle_soul_armed(void) { return arm.on && (arm.soul || arm.cross); }
 bool lib_battle_down(void) { return down; }
 
 int lib_battle_hp(void) { return hp_seen; }
+
+int lib_battle_ran_on(void) { return ran_on; }
 
 void lib_battle_disarm(void) {
 	arm.on = false;
@@ -282,6 +297,9 @@ void lib_battle_watch(void) {
 		uint32_t me = emu_read32(BN6_BATTLE_PLAYERS);
 		if (me) hp_seen = emu_read16(me + BN6_T1_HP);
 	}
+	if (emu_read8(BN6_BATTLE_MODE) == BN6_BATTLE_ON && emu_read8(BN6_LOOP) == BN6_LOOP_DRAW && !emu_read8(BN6_LOOP_CAME) &&
+		!emu_read8(BN6_GAMESTATE + BN6_PAUSED))
+		++ran_on;
 	foe_watch();
 }
 

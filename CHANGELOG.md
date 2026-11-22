@@ -30,6 +30,11 @@
   download page's notes are two PET windows now, **Your files** and
   **Stay in touch**.
 
+- **Fixed: a liberation's battle fought on after its time was up (issue
+  #794).** As the third turn ended, the foes kept moving and attacking
+  under TIME UP! and LIBERATE FAILED!, and a hit there still counted. The
+  battle now stands still from the moment the time is up, as BN5's does.
+  Thanks to Agergo100 for the report.
 - **Fixed: MegaMan and Lan kept a liberation teammate's body (issue
   #696).** A dark layer's board left with a teammate in play (Colonel,
   EraseMan, HeatMan) kept his body on the player: the next layer's

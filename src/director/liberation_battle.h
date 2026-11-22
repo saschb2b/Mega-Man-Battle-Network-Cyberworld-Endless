@@ -62,6 +62,9 @@ bool lib_battle_soul_armed(void);
 bool lib_battle_down(void);
 /* MegaMan's HP in the last battle armed as it was last seen (0 none seen) */
 int lib_battle_hp(void);
+/* ... and the frames its fight ran on, unpaused, under its closing banners
+ * (TIME UP!, LIBERATE FAILED!): none, the battle paused first (issue #794) */
+int lib_battle_ran_on(void);
 
 /* What liberating panel (x, y) with a command stakes, for the menu: the
  * turns, the panels freed won in any turn, those a win in the first turn
