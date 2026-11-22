@@ -718,7 +718,8 @@ void party_play_frame(uint32_t pad) {
 	if (PP.stage == PP_FIGHT && !PP.field_at && PP.core) {
 		bool custom = party_core_phase(PP.core) == BN6_PHASE_CUSTOM;
 		PP.custom_seen |= custom;
-		if (PP.custom_seen && !custom) PP.field_at = SDL_GetTicks() | 1u;
+		/* (this game's own picture the field: a partner's Custom screen of his own closed too) */
+		if (PP.custom_seen && !custom && !party_turn_video(viewer())) PP.field_at = SDL_GetTicks() | 1u;
 	}
 }
 
