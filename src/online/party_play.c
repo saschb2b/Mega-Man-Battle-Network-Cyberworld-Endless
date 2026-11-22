@@ -77,6 +77,8 @@ static struct {
 	/* this game's own link through a drop (issue #180): down since (SDL ticks, 0 up), the resumes seen, my session, the leave said */
 	uint32_t down_since, resumes, me;
 	bool leave_said;
+	bool custom_seen;             /* the field's first Custom screen has opened */
+	uint32_t field_at;            /* ... and when it first closed (SDL ticks, 0 not yet) */
 } PP;
 
 /* the seat the field is drawn for: mine, or the dev's partyview */
@@ -711,6 +713,20 @@ void party_play_frame(uint32_t pad) {
 	default: break;
 	}
 	if (PP.core) party_core_sound(PP.core, PP.stage >= PP_FIGHT);
+	/* (the field's first Custom screen closed: what is said over the field may stand from here, issue #781) */
+	if (PP.stage == PP_FIGHT && !PP.field_at && PP.core) {
+		bool custom = party_core_phase(PP.core) == BN6_PHASE_CUSTOM;
+		PP.custom_seen |= custom;
+		if (PP.custom_seen && !custom) PP.field_at = SDL_GetTicks() | 1u;
+	}
+}
+
+uint32_t party_play_field_since(void) { return PP.stage == PP_FIGHT ? PP.field_at : 0; }
+
+bool party_play_drawn_over(void) {
+	if (!PP.crew || PP.stage == PP_NONE) return false;
+	if (PP.stage < PP_FIGHT) return true;
+	return PP.stage == PP_FIGHT && PP.field_at && PP.core && !party_turn_video(viewer()) && party_core_phase(PP.core) != BN6_PHASE_CUSTOM;
 }
 
 void (*party_play_draw_more)(void);
@@ -723,7 +739,7 @@ void party_play_draw(void) {
 	arena_view_core(turn ? turn : PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
 	/* (who is who on the field as it fights, never over a partner's own screen) */
 	if (PP.core && PP.stage == PP_FIGHT && !turn) party_marks_draw(party_core_gba(PP.core), viewer(), PP.b.n);
-	if (PP.crew && PP.stage < PP_FIGHT && party_play_draw_more) party_play_draw_more();
+	if (party_play_drawn_over() && party_play_draw_more) party_play_draw_more();
 }
 
 void party_play_describe(FILE *f) {

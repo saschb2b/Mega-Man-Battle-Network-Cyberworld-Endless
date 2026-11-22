@@ -472,10 +472,11 @@ arrival's mark, the crew's plates and the band all go through it, so the
 next thing drawn there cannot land on a screen of BN6's either. The
 state's `cover` line names it.
 
-- **The joiner's band** stands on the map while the join is sent and over
-  the crew battle's staging (the still picture of the map), never over
-  the field: `band` in the state says what is drawn, and is none once the
-  field shows.
+- **The joiner's band** stands on the map while the join is sent, over
+  the crew battle's staging (the still picture of the map, made in a
+  burst, too short to read alone), and on the field for two and a half
+  seconds from its first Custom screen's close; never over a Custom screen
+  (`party_play_drawn_over`). `band` in the state says what is drawn.
 - **Title cards:** no names, rings or arrival mark under one; the
   arrival's two seconds are counted from the card's end.
 - **The plates:** six pixels between a crewmate's layer and his HP
@@ -493,7 +494,8 @@ Seen headless with two games on a local server (the scenario
 act's title card with no name or ring across it and the arrival's mark
 after it; Beta's link cut for four seconds, his crew put away under
 "Reconnecting..." and back with the link; Beta taken into Alpha's battle
-reading "Alpha's battle!" over the staging and nothing over the field.
+reading nothing over the field's Custom screen and "Alpha's battle!" on
+the field once it closed.
 
 ## As built
 

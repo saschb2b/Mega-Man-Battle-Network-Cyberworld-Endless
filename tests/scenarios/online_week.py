@@ -141,10 +141,12 @@ MANY['crew-on-screen-only'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
 MANY['crew-battle-named'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
     MANY['dive-together']['STEPS'],
     ('do', 'battle; wait 10'),
-    soon("band=Alpha's battle!", 'beta', 600),
+    soon('party~fight', 'beta', 900),
+    ('@beta', 'expect', 'band=none'),                  # never over the field's Custom screen (issue #781)
+    ('do', 'press START; wait 10; press A; wait 10'),  # the Custom screen closed on both
+    ('@beta', 'do', 'press START; wait 10; press A; wait 10'),
+    soon("band=Alpha's battle!", 'beta', 600),         # whose battle, on the field
     ('@beta', 'do', 'wait 30; shot'),
-    ('@beta', 'expect', "band=Alpha's battle!"),
-    soon('join=fighting', 'beta', 900),
 ))
 
 # A crew's battle through a dropped link (issue #180): Beta's own link cut for three seconds mid-fight; the server
@@ -346,14 +348,14 @@ MANY['drawn-over-nothing'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=
     soon('tags~Alpha', 'beta', 900),                   # back with the link
     soon('crew=2: Alpha Beta', 'beta', 900),
     ('do', 'battle; wait 10'),
-    soon("band=Alpha's battle!", 'beta', 600),
-    ('@beta', 'do', 'shot'),
     soon('party~fight', 'beta', 900),
     ('@beta', 'expect', 'band=none'),                   # never over the field's Custom screen
     ('@beta', 'do', 'wait 20; shot'),
-    # (the Custom screen closed on both: each mark under its MegaMan)
+    # (the Custom screen closed on both: whose battle on the field, each mark under its MegaMan)
     ('do', 'press START; wait 10; press A; wait 10'),
     ('@beta', 'do', 'press START; wait 10; press A; wait 10'),
+    soon("band=Alpha's battle!", 'beta', 600),
+    ('@beta', 'do', 'wait 20; shot'),
     soon('marks~apart', '', 600),
     ('do', 'wait 30; shot'),
     ('@beta', 'do', 'wait 30; shot'),

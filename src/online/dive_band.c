@@ -46,7 +46,7 @@ void dive_band_reset(void) {
  * chat box, a card, a fade or off the field (director_cover, issue #781) */
 static const char *band_line(uint32_t now) {
 	/* (a party's battle holding the game: whose battle, over its staging's still picture only; party_play_draw) */
-	if (party_play_held()) return party_play_staging() ? dive_join_band() : NULL;
+	if (party_play_held()) return party_play_drawn_over() ? dive_join_band() : NULL;
 	if (director_cover() != COVER_NONE) return NULL;
 	/* (a dive with no link: the feed alone, CONTINUE's word on the link it did not get, issue #759) */
 	if (!dive_link_on()) return dive_link_diving() && B.nfeed ? B.feed[0] : NULL;

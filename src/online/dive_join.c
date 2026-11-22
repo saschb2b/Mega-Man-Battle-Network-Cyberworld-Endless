@@ -211,7 +211,13 @@ const char *dive_join_band(void) {
 	/* (MegaMan's own battle held only while the server starts it: no line, issue #715) */
 	/* (whose battle, from the join until it has been read: over the battle's start too) */
 	case JOIN_JOINED: return dive_join_joined_words(J.name);
-	case JOIN_FIGHTING: return J.owner && SDL_GetTicks() - J.joined < NAMED_MS ? dive_join_joined_words(J.name) : NULL;
+	case JOIN_FIGHTING: {
+		/* (over the staging's still map, then for NAMED_MS on the field once its Custom screen has closed: never over the
+		 * Custom screen, issue #781, and long enough to read, the staging being made in a burst) */
+		if (!J.owner) return NULL;
+		uint32_t field = party_play_field_since();
+		return party_play_staging() || (field && SDL_GetTicks() - field < NAMED_MS) ? dive_join_joined_words(J.name) : NULL;
+	}
 	default: return NULL;
 	}
 }

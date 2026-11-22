@@ -68,6 +68,11 @@ bool party_play_mail(const uint8_t *m, size_t n);
 bool party_play_held(void);
 /* ... and still being made: its staging's still picture of the map shows, not yet the field */
 bool party_play_staging(void);
+/* When its field first showed with BN6's Custom screen closed (SDL ticks), 0 not yet or not fought */
+uint32_t party_play_field_since(void);
+/* Whether a crew battle's picture may have ours over it now (party_play_draw_more): its staging's still map, or the
+ * field with BN6's Custom screen closed, never a partner's own screen (issue #781) */
+bool party_play_drawn_over(void);
 /* This game's MegaMan's HP and max HP on the party's field while one is fought (false none): his box's, where the run's
  * own core stands still under it */
 bool party_play_hp(int *hp, int *max);
