@@ -10,6 +10,7 @@
 #include "director.h"
 #include "lcd_frame.h"
 #include "online_visit.h"
+#include "pet_menu.h"
 #include "platform.h"
 #include "stereo_scene.h"
 #include "voxel_scene.h"
@@ -73,6 +74,8 @@ void emu_picture_draw(int x, int y) {
 	PART("picture: board", director_tint_board(px));
 	/* (a Glitch layer's, docs/game/glitch-layer.md) */
 	PART("picture: glitch", director_glitch_frame(px));
+	/* (the PET's start menu of ours, BN6's own menu laid out again, docs/game/pet-menu.md; not in the Net Square, whose PET is BN6's) */
+	if (!online_visit_away()) PART("picture: pet menu", pet_menu_frame(px));
 	/* (each picture the core made blended once, as a frontend blends each
 	 * frame it is given; the game paused, the last one's frame again) */
 	static uint32_t seen;

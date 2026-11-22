@@ -14,6 +14,10 @@
 bool pet_options_install(void);
 /* Comm is Options: its A is the engine's (pet.c's hook on the menu's input) */
 bool pet_options_here(void);
+/* The ninth row's label, Forms, made beside Options in the same copy of the
+ * labels' tiles: its 9 x 2 tile entries (Save's, the word's columns ours),
+ * for pet_row.c; false while the labels are BN6's */
+bool pet_options_forms_map(uint16_t out[2 * 9]);
 /* Each game frame: Options taken from the menu opens. */
 void pet_options_update(void);
 /* The player's keys: those held as Options closes kept from the game

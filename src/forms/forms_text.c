@@ -9,7 +9,7 @@
 const char *forms_word(FormsWord w) {
 	/* (in FormsWord's order) */
 	static const char *const words[FT_COUNT] = { "FORMS", "CROSS", "SOUL", "CROSSSELECT", "SPARE", "INFORMATION",
-		"No Crosses or Souls yet.", "FORMS", "Weak to", "Kind" };
+		"No Crosses or Souls yet.", "Weak to", "Kind" };
 	return (unsigned)w < FT_COUNT ? words[w] : "";
 }
 

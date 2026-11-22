@@ -4,7 +4,8 @@ gives SpoutCross by his kind, Aqua, never his Soul. SOUL BN5: BN6's
 HeatMan, Fire, whose NapalmSoul is not moved yet, gives a Soul the run
 lacks, the layer's seed's. SOUL BN4: HeatMan gives BN4's one moved Soul,
 ThunSoul, the one the run lacks: the powers line before his data and
-after it is taken."""
+after it is taken; CROSS's and the Soul forms' power then taken in the next
+battle, after a quit and CONTINUE."""
 
 # (onehit: a short fight; quiet: no random battle on the way to his arena)
 BASE = 'CYBERWORLD_AUTOPILOT=1 --scene emu --seed 3 --run-depth 3 --dev onehit,quiet,'
@@ -62,6 +63,9 @@ def unite(soul, chip, turns):
 
 # (ToadSoul, BN5's 12, by an Aqua chip of BN6's, 181: xrom_souls.py's)
 SOUL_USED = [*ARRIVE[:6], ('do', 'chip 181 * 30; foes 205@52'), *unite(12, 181, 3)]
+# (ThunSoul, BN6's Soul 13 (BN4's 6), handed to UNITE with BN4's bits (soulunite_bn4_bits), by BN6's chip 30, Elec:
+# tests/xdiff/soul_thun.json's)
+SOUL4_USED = [*ARRIVE[:6], ('do', 'chip 30 B 30; foes 205@52'), *unite(13, 30, 3)]
 
 MANY = {
     'cross-bn5-guardian': dict(START=BASE + 'form=1 --guardian 29', NEEDS=('bn5',), STEPS=course('CROSS', 'SpoutCross') + CROSS_USED),
@@ -71,5 +75,5 @@ MANY = {
                                  NEEDS=('bn5',), STEPS=[('expect', 'runform=SOUL BN5'), ('expect', 'runsoulturn=1'),
                                                         ('do', 'foes 205@52'), *unite(12, 181, 4)]),
     # (BN4's Souls unite in the Souls' engine BN5's ROM builds: both ROMs)
-    'soul-bn4-bn6-guardian': dict(START=BASE + 'form=3 --guardian 1', NEEDS=('bn5', 'bn4'), STEPS=course('SOUL BN4', 'ThunSoul')),
+    'soul-bn4-bn6-guardian': dict(START=BASE + 'form=3 --guardian 1', NEEDS=('bn5', 'bn4'), STEPS=course('SOUL BN4', 'ThunSoul') + SOUL4_USED),
 }

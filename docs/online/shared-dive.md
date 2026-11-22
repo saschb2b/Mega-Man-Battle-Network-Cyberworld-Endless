@@ -502,7 +502,8 @@ the field once it closed.
 
 ## As built
 
-- **The portal** (15 November 2026, `src/online/online_square.c`'s
+- **The portal** (15 November 2026; its words since 22 November one box,
+  [The way in](#the-way-in-22-november-2026); `src/online/online_square.c`'s
   `portal`, `square_week.c`'s `square_week_portal`): where the greeter
   Mr.Prog stood by the Board, BN5's dark hole (Gregar's list 7 `0x87` once
   `xnavi_object` has copied it; every diver has BN5's ROM, the DeepNet
@@ -1133,6 +1134,44 @@ his dive kept on, "Gamma's signal is back!" and the crew of
 three again) and
 `online-week/crew-of-four-and-a-fifth` (five games: the fifth's rings none,
 "Alpha's crew is full" on his band; a crewmate walking off says nothing).
+
+## The way in (22 November 2026)
+
+The second friction hunt counted about fifteen presses of A from the
+portal to walking on layer 1, the same on every dive of the week and after
+a deletion, and the one fact a diver wants there, how many dive now, not
+said ([issue
+#779](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/779)).
+Under the owner's direction of 21 November (no prompts, no waiting; less
+is more), and his to turn over:
+
+- **One box, then go.** A new dive's portal is one BN6 Yes/No box: "3 NAVIS
+  DIVING! / DIVE IN?", the count the server's DIVERS (the Board's "Diving
+  now"), "DIVE INTO THIS / WEEK'S DEEP NET?" before the server has told it.
+  The week's first dive alone has one page before it, the week's dates and
+  "EVERY NAVI DIVES THE SAME NET!", and its cursor starts on No; once
+  MegaMan has dived this week it starts on Yes. Yes goes at once: "THE
+  PORTAL OPENS INTO THIS WEEK'S DEEP NET!" is gone, and so are "THE NET
+  SHIFTED!" and "DIVE IN NOW?". An unfinished dive's box is its options
+  alone (Keep diving, Start over, Not now), "YOUR DIVE INTO THE DEEP NET
+  ISN'T OVER!" gone. The Board's word of a dive it just took stays, a page
+  first.
+- **Once a week.** The first layer's words ("Whoa... It looks just like
+  ...!"), the older net's news ("Wait... This Net's a copy of an older
+  one!", which a dive's fresh profile heard every dive) and the act's title
+  card play on the week's first dive and not again that week (`weekly_intro_shown`, the week's record's `intro_week`
+  in `weekly.sav`, not `Run`).
+
+- **The vortex's flat frame is its own.** Sampled every three frames
+  with no box open, BN5's dark hole (list 7 `0x87`, moved plain) shows as a
+  flat purple shape once in each 30-frame loop of its five frames: it is
+  the moved sprite's, not the box's. Open: why that frame draws flat in
+  BN6's engine (its frame's tiles or OAM as `xnavi_sprite_len` copies
+  them, against BN5's own), a reverse-engineering task of its own.
+
+A second dive of the week is now three presses from A on the portal to
+walking on layer 1: the portal (A), Start over (DOWN, A), or a new dive's
+Yes (A, A). Seen headless: `online-week/second-dive-of-the-week`.
 
 ## A diver gone home (22 November 2026)
 

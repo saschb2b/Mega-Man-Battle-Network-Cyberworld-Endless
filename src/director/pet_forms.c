@@ -3,14 +3,10 @@
 #include "pet_forms.h"
 
 #include "bn6.h"
-#include "buttons.h"
 #include "crossselect.h"
 #include "emu.h"
 #include "forms_screen.h"
 #include "forms_text.h"
-#include "game.h"
-#include "pet_look.h"
-#include "platform.h"
 #include "powers.h"
 #include "run.h"
 #include "souls.h"
@@ -32,27 +28,11 @@ static void choose(uint16_t five) {
 
 void pet_forms_update(void) { crossselect_active(five_now()); }
 
-/* BN6's PET menu taking input */
-static bool on_menu(void) {
-	return emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME && emu_read8(BN6_GAMESTATE) == BN6_SUB_PET &&
-		(emu_read8(BN6_PET_MENU_OPEN) & 1) && !emu_read8(BN6_PET_HOLD);
-}
-
-uint32_t pet_forms_keys(uint32_t keys) {
-	if (forms_screen_shown() || !on_menu() || !btn_pressed(BTN_R)) return keys;
-	pet_forms_open();
-	return keys & ~(uint32_t)KEY_R;
-}
-
 bool pet_forms_holds(void) { return forms_screen_update(); }
 
 bool pet_forms_shown(void) { return forms_screen_shown(); }
 
-void pet_forms_draw(void) {
-	/* (R, which BN6's menu leaves unused, named at its band's end as the Square's R:NETPASS) */
-	if (!forms_screen_shown() && on_menu()) look_hint(P.core_x + CORE_W - 20 - look_hint_width("R", forms_word(FT_KEY)), P.core_y + 4, "R", forms_word(FT_KEY));
-	forms_screen_draw();
-}
+void pet_forms_draw(void) { forms_screen_draw(); }
 
 void pet_forms_leave(void) { forms_screen_shut(); }
 

@@ -3,7 +3,7 @@ type: Design
 title: "The forms screen"
 description: "The forms screen (issue #774): a PET screen of ours that lists the run's Crosses in BN6's folder editor's two windows, CROSSSELECT's five and the spares, swapped freely at no cost, and the run's Souls with their kind; CROSSSELECT then lists the five in BN6's order."
 tags: [game, meta, pet, ui]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:10:00Z }
 sources:
   - id: issue-774
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/774"
@@ -82,13 +82,10 @@ BN6's own pieces, no new art:
 
 ## Where it opens
 
-R on the PET's menu, named at its band's right end as `R:FORMS`, as the
-Net Square's PET names `R:NETPASS` (in the Square R stays the NetPass's,
-and the screen does not open there). BN6's menu has no room for a row of
-ours: its eight rows fill the column to the screen's foot, EXIT beside
-Save. A ninth row would re-lay BN6's own menu out (its rows closer, the
-cursor's wrap to EXIT, the icons, the slide-in), which the owner may still
-ask for.
+Forms, a row of the PET's start menu of ours, after MegaMan
+([The PET's start menu](../pet-menu.md), issue #793). BN6's menu has no room
+for a row of ours (its eight rows fill the column to the screen's foot), so
+the owner chose a menu of our own, BN6's laid out again in two columns.
 
 ## CROSSSELECT's five
 
