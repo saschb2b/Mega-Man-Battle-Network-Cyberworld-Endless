@@ -43,8 +43,9 @@
 #define SOULS_POWERS       (FREE_SOULS + 0x002100u)   /* BN6's power attacks grown (bn6_attacks.h): 148 entries, then the Souls', to: */
 #define SOULS_POWERS_END   (FREE_SOULS + 0x002500u)
 /* (FREE_SOULS + 0x2500-0x2C00: BN6's charge times grown to 179, kept free since they are SOULS_CHARGES, below) */
-#define SOULS_LOADOUTS     (FREE_SOULS + 0x002C00u)   /* the Souls' loadouts, 6 bytes each by BN5's number 7-12, in BN6's ids, to: */
-#define SOULS_LOADOUTS_END (FREE_SOULS + 0x002C40u)
+#define SOULS_LOADOUTS     (FREE_SOULS + 0x002C00u)   /* the Souls' loadouts, 6 bytes each: BN5's by number 7-12, then BN4's twelve, in BN6's
+                                                          ids, to: */
+#define SOULS_LOADOUTS_END (FREE_SOULS + 0x002C80u)
 #define SOULS_FACES        (FREE_SOULS + 0x002C80u)   /* the emotion window's faces grown: BN6's table of tiles' words, then the Souls', to: */
 #define SOULS_FACES_END    (FREE_SOULS + 0x002D00u)
 #define SOULS_FACE_PALS    (FREE_SOULS + 0x002D00u)   /* ... its palettes, BN6's 0x20 each by face, then the Souls', to: */

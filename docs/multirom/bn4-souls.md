@@ -166,7 +166,10 @@ These come before the first BN4 Soul, whichever it is:
   of 256 taken, `soulpower.c`), and so do the attack families (0xD0-0xFF
   spare in `xattack_grow.c`). Three places do not: the charge rows
   (`SOULS_CHARGES` holds 179, 14 to spare, where BN4's twelve name up to
-  18 power attacks), the loadouts (`SOULS_LOADOUTS`, BN5's six), and list
+  18 power attacks), the loadouts (`SOULS_LOADOUTS`, BN5's six; its 64
+  bytes held ten rows, and a fifth BN4 Soul's eleventh placed none of
+  the Souls' abilities, so no BN4 Soul united, until it grew to
+  eighteen, BN4's twelve, held by a static assert in `soulpower.c`), and list
   0's numbers (`SOULS_LIST0_ENTRIES` 0x60, 0x45-0x57 taken, where twelve
   sprites want twelve; its words have room for 256). Each grows in
   `soul_room.h` before the first BN4 Soul. The emotion window's faces
