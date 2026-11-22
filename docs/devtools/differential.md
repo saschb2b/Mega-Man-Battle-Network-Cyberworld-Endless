@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T18:09:56Z }
 ---
 
 # The differential: a moved family against its own game
@@ -111,8 +111,9 @@ in his AI data and NaviStats, BN6's in its Souls block, held to each
 other at every frame (a Soul's turns or form apart fails it); the
 pending form, which BN4 clears at each turn's start; BN4's timed form's
 frames and its count of a form's charged shots, which BN6 has none of;
-GutsSoul's count of B's presses toward his rapid buster while it stands
-at one to five (BN6 counts none yet, so a sixth press parts the battles);
+GutsSoul's count of B's presses toward his rapid buster and its window,
+BN4's in his AI data, BN6's in his side's Souls block (`soulrapid.c`),
+held to each other at every frame;
 and the buster's charge, BN4's two counters, levels (0, 1, 3) and button
 against BN6's one counter held at the charge time, its level (0, 1, 2),
 button and request bits, and each engine's glow. Each writer BN4 alone
@@ -1699,7 +1700,18 @@ format, its game 4: the trace's header names it):
       from the battle timer's bit 1 (BN4 `0x08007BE4`, BN6 `0x0800A704`,
       the timer's): each game's compared with what that code gives, the
       gate BN6's flags of t + 1 and each game's own timer
-      (`paralysis_flash`).
+      (`paralysis_flash`); and his lock-out's glow, the same shader set
+      by twins (BN4 `0x080103BC`, BN6's at `0x0801687C`) while his flags
+      hold 8 (GutsSoul's rapid buster's lock-out) from the timer's low
+      five bits through one table of 32 (BN4 `0x080103E8`, BN6
+      `0x080168A8`), before his state steps: each game's by its own
+      frame before and its own timer (`lockout_glow`).
+    - a buster shot (the third kind's 0, each engine's own) keeps its
+      kind's row of its game's table at +0x4C (BN4's rows of 9 bytes at
+      `0x080CD2A8`, BN6's of 12 at `0x080C64E8`): the same where both are
+      their game's row of one kind and the rows' 9 bytes match
+      (`shot_row`); MegaMan's plain shot is BN4's state 8 and BN6's
+      family 0x11 (`PLAYER_FAMILY`).
     - the hit's spark (the fourth kind's 0x04), each engine's own effect:
       its place was a draw of the engine's under the family's thunder
       (twins BN4 `0x08014620`, BN6 `0x0801BDDE`, GetRNG once, the

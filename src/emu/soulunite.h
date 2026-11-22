@@ -50,12 +50,14 @@ bool soulunite_ready(void);
  * (soullook.h) in its low nibble, the abilities' (soulpower.h) in the
  * next, the passives' (soulpassive.h; ColonelSoul's from bit 11,
  * soulcolonel.h) from bit 8, the chips' (soulchips.h) from bit 16, the
- * mood's (soulmood.h) from bit 24 */
+ * mood's (soulmood.h) from bit 24, BN4's Souls' own (soulrapid.h) from
+ * bit 30 */
 #define SOULBREAK_LOOK(b)    ((b) & 0xF)
 #define SOULBREAK_POWER(b)   ((b) >> 4 & 0xF)
 #define SOULBREAK_PASSIVE(b) ((b) >> 8 & 0xFF)
 #define SOULBREAK_CHIPS(b)   ((b) >> 16 & 0xFF)
-#define SOULBREAK_MOOD(b)    ((b) >> 24 & 0xFF)
+#define SOULBREAK_MOOD(b)    ((b) >> 24 & 0x3F)
+#define SOULBREAK_BN4(b)     ((b) >> 30 & 1)
 /* The run's Souls, bit k BN5's Soul 7 + k (souls.h), then BN4's from bit
  * SOULS_HELD_BN4 (soulbn4.h: bit 6 ThunSoul, which no run gives yet), for
  * the battles from the next Custom screen on: the director's as each

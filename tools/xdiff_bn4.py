@@ -297,7 +297,10 @@ OBJ_SAVED_ACTION = 0x5D
 # numbered otherwise: BN4's family read as BN6's of the chips both games name alike, measured over their records (+0xB)
 # for every chip of one name in both (86 chips, each BN4 family one BN6 family but BN4's 0x0C, its support chips' 0x15
 # and its Navi chips' 0x1B: the support chips', 32 of its 37). Cannon's: BN4 0x0B at t32, BN6 0x14 at t33 (bn4_chip_cannon)
-PLAYER_FAMILY = {0x09: 0x12, 0x0A: 0x13, 0x0B: 0x14, 0x0C: 0x15, 0x1D: 0x20, 0x1F: 0x17, 0x20: 0x1C, 0x23: 0x21, 0x28: 0x2F,
+# His plain buster's too, no chip's: BN4's plain shot's power attack (0, 0x0800CC2E) returns his state 8, BN6's (0x08011A26)
+# its family 0x11, each its game's buster shot, ten frames in both (bn4_soul_guts_rapid's five plain shots, BN4 t34-t43
+# against BN6 t35-t44 at the spec's lag); before it BN4's 8 read as one of his own states, BN6's 0xA
+PLAYER_FAMILY = {0x08: 0x11, 0x09: 0x12, 0x0A: 0x13, 0x0B: 0x14, 0x0C: 0x15, 0x1D: 0x20, 0x1F: 0x17, 0x20: 0x1C, 0x23: 0x21, 0x28: 0x2F,
                  0x2B: 0x23, 0x32: 0x3F, 0x36: 0x53, 0x5A: 0x54}
 MEGAMAN_ID = 0x1A0
 # ... and a family of BN4's whose state is moved into BN6's engine as a unit of BN4's chips' code (tools/xchiprecipe_bn4.py's
@@ -1317,6 +1320,66 @@ def paralysis_flash(d, fa, fb):
     return oa.o16(SHADER) == want(fa.fr['t']) and ob.o16(SHADER) == want(fb.fr['t'])
 
 
+LOCKED, GLOW_PERIOD, GLOW_SHIFT = 0x08, 0x20, 5   # (legit.json's bn4 lockout_glow)
+
+
+def lockout_glow(d, fa, fb):
+    """legit.json's bn4 lockout_glow: a first-kind object's colour shader (its sprite +6, u16; MegaMan's +0x96) while its
+    collision flags hold 8 (his lock-out's, set by BN4's 0x0800B018 and BN6's twin 0x0800EAFA: GutsSoul's rapid buster's state
+    0) and its CurAction is not 0: twin routines (BN4 0x080103BC, BN6's at 0x0801687C) set it from the battle timer's low five
+    bits through the same table of 32 bytes (BN4's 0x080103E8, BN6's 0x080168A8: 0, 2, ... 0x1E, 0x1E, ... 0, twice the
+    nearer end) shifted by 5, else 0, before the object's state steps: BN4's at t and BN6's at t + 1 each that, by its own
+    game's flags and CurAction of the frame before and its own timer"""
+    # (its word +0x94 read whole where the trace reads it as a pointer's look: its low half the same in both)
+    if not (d.part == 'obj' and d.off in (SHADER - 2, SHADER, SHADER + 1) and isinstance(d.role, tuple) and d.role[0] == 'T1'):
+        return False
+    oa = next((o for o in fa.fr['objs'] if o.role == d.role), None)
+    ob = next((o for o in fb.fr['objs'] if o.role == d.role), None)
+    if oa is None or ob is None or ob.coll is None or (d.off == SHADER - 2 and oa.o16(SHADER - 2) != ob.o16(SHADER - 2)):
+        return False
+    def want(f):
+        # (each game's glow runs before its state's step: its object's flags and CurAction as the frame before left them)
+        before = next((x for x in f.trace['frames'] if x['t'] == f.fr['t'] - 1), None)
+        o = next((x for x in before['objs'] if x.role == d.role), None) if before else None
+        if o is None or o.coll is None or not int.from_bytes(bytes(o.coll[COLL_FLAGS6:COLL_FLAGS6 + 4]), 'little') & LOCKED or \
+                not o.rec[NODE + OBJ_ACTION]:
+            return 0
+        t = f.fr['t'] % GLOW_PERIOD
+        return 2 * min(t, GLOW_PERIOD - 1 - t) << GLOW_SHIFT
+    return oa.o16(SHADER) == want(fa) and ob.o16(SHADER) == want(fb)
+
+
+SHOT, SHOT_KIND, SHOT_ROW = 0x00, 0x04, 0x4C   # (legit.json's bn4 shot_row: the third kind's buster shot, its kind, its row)
+SHOT_ROWS = {4: (0x080CD2A8, 9), 6: (0x080C64E8, 12)}   # (each game's table of the shots' kinds: its place, a row's bytes)
+SHOT_ROW_BYTES = 9
+ROM4 = {}
+
+
+def shot_row(d, fa, fb):
+    """legit.json's bn4 shot_row: a buster shot's (the third kind's 0, each engine's own: BN4's spawner 0x080CD45A, BN6's twin
+    0x080C686E) +0x4C, its kind's row (its +4) in its own game's table of the shots' kinds, BN4's rows of 9 bytes at 0x080CD2A8
+    (0x080CD354-0x080CD360), BN6's of 12 at 0x080C64E8: True where each is its game's row of the same kind and the two rows
+    hold the same 9 bytes"""
+    if not (d.part == 'obj' and isinstance(d.role, tuple) and d.role[:2] == ('T3', SHOT) and SHOT_ROW <= d.off < SHOT_ROW + 4):
+        return False
+    oa, ob = fa.by_role.get(d.role), fb.by_role.get(d.role)
+    if oa is None or ob is None or oa.o8(SHOT_KIND) != ob.o8(SHOT_KIND):
+        return False
+    k, rows = oa.o8(SHOT_KIND), []
+    if not ROM4:
+        with open(os.path.join(ROOT, '.build', 'xdiff', 'rom', 'bn4.gba'), 'rb') as f:
+            ROM4[4] = f.read()
+        with open(os.path.join(ROOT, '.build', 'xdiff', 'rom', 'bn6.gba'), 'rb') as f:
+            ROM4[6] = f.read()
+    for g, o in ((4, oa), (6, ob)):
+        base, size = SHOT_ROWS[g]
+        if o.o32(SHOT_ROW) != base + size * k:
+            return False
+        at = base + size * k - 0x08000000
+        rows.append(ROM4[g][at:at + SHOT_ROW_BYTES])
+    return rows[0] == rows[1]
+
+
 SPARK, SPARK_SPRITE = 0x04, (0x80, 0xBB)   # (the fourth kind's hit spark and its sprite state: legit.json's bn4 allowed)
 SPARKS_SEEN = set()   # (the sparks in play in both games at a frame compared before: compare keeps it)
 
@@ -1943,6 +2006,8 @@ def compare(spec, ta, tb, canon, show=6):
                       "the hit's spark, each engine's own" if spark_own(d) else
                       "Full Synchro's aura, each engine's own" if synchro_aura(d, fa, fb) else
                       "the paralysis's flash, its gate a state's and its phase the timer's" if paralysis_flash(d, fa, fb) else
+                      "the lock-out's glow, its gate a state's and its phase the timer's" if lockout_glow(d, fa, fb) else
+                      "a buster shot's row of its kind, each game's table" if shot_row(d, fa, fb) else
                       "MegaMan's own art's animation" if own_animation(d, fa, fb) else
                       MEGAMAN_ANIMATION if megaman_animation(d, fa, fb) else
                       INTERRUPTED_ATTACK if interrupted_attack(d, fa, fb) else None)
@@ -1975,6 +2040,7 @@ def compare(spec, ta, tb, canon, show=6):
             # sprite state and its life its own art's, legit.json's bn4 allowed, the hit's spark)
             d.mask = allowed_bit(d, fam) or navi_ai(d) or kept_action(d) or spawn_leftover(d) or spawner_kept(d) or (foe_slide(d, fam, fa, fb) if spec.get('subject') == 'megaman' else None) or ("the hit's spark, each engine's own" if spark_own(d) and against else None) or \
                 ("the paralysis's flash, its gate a state's and its phase the timer's" if against and paralysis_flash(d, fa, fb) else None) or \
+                ("the lock-out's glow, its gate a state's and its phase the timer's" if against and lockout_glow(d, fa, fb) else None) or \
                 ("the opening's animation count, by the fight's frames" if navi_role(d.role) and opening_count(d, fa, ft) else None) or \
                 ("a Navi's companion's opening count, by the fight's frames" if companion_count(d, fa, ft) else None) or \
                 ("a Navi's opening animation, by the fight's frames" if navi_opening_art(d, fa, ft) else None) or \

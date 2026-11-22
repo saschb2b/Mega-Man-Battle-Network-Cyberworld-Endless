@@ -1,0 +1,249 @@
+{
+ "about": "BN4 Red Sun's GutsSoul (Soul 2, form 2) and his rapid buster in BN4's own battle on the guest core against BN6's with it moved (docs/multirom/bn4-souls.md, GutsSoul in BN6's engine): his key handler counts B pressed in his form, each within ten frames of the last (BN4_GUTS_RAPID_FORM; BN6's count in his side's Souls block, src/emu/soulrapid.c), and six ask his state 0x10, the chips' unit GutsRapid at BN6's grown 0xD9, eight shots of his buster (0x0800B590, BN6's 0x0800FAAC) with BN4's sound 0xA7 from slot 0x301; its end clears the count (XC4_SOULS_SIDE). United as bn4_soul_guts unites (two PanlSht1, UNITE on the first Custom screen); B held from fight frame 30 for 102 frames, its release his charged shot, the punch (thirty frames of his state 0x12, BN4's t134-t163); during it B pressed six times, from 137 four frames apart and held two, each counted, none a plain shot: as B is let go both games' key handlers ask nothing while a request stands (the punch's charged B's, BN4 0x0800BE2C, BN6 0x0801317C), so no plain buster's shot meets the other engine's, which spawn otherwise. The sixth asks the rapid buster, which the punch's end clears with its own requests; the count standing at six asks it again, and it fires after the punch. A MettaurSP at (4,2), MegaMan at (3,2) before it, so the punch and the shots strike it; MegaMan with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "against": "bn6",
+ "subject": "megaman",
+ "foes": "04@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "safe": true,
+ "souls4": "02",
+ "souls6": "80",
+ "folder4": [
+  "00B2",
+  "00B2"
+ ],
+ "deck4": [
+  "00B2",
+  "00B2"
+ ],
+ "folder6": [
+  "22F:00",
+  "22F:00"
+ ],
+ "deck6": [
+  "22F:00",
+  "22F:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   102
+  ],
+  [
+   137,
+   "B",
+   2
+  ],
+  [
+   141,
+   "B",
+   2
+  ],
+  [
+   145,
+   "B",
+   2
+  ],
+  [
+   149,
+   "B",
+   2
+  ],
+  [
+   153,
+   "B",
+   2
+  ],
+  [
+   157,
+   "B",
+   2
+  ]
+ ]
+}

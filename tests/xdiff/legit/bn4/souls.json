@@ -85,10 +85,11 @@
  },
  {
   "key": "presses",
-  "name": "BN4's count of B's presses toward GutsSoul's rapid buster, under six",
-  "why": "BN4's key handler, in form 2 (GutsSoul) and no rapid buster asked (its requests' 0x20 clear), counts each new press of B into his AI data's +0x12 and sets +0x11 to 10 (0x0800BE5A-0x0800BE6A); +0x11 counts down a frame at a time and, run out, zeroes the count (0x0800BE6C-0x0800BE7A); at six presses it asks the rapid buster (request 0x20, 0x0800BE7E-0x0800BE8A), which his state 0x10 fires, clearing both (0x080EBE84-0x080EBE88). BN6's engine counts no presses yet: its +0x11 is its chip's chaos power (0xFF none, BN6_AI_POWER_CHIP's note) and its +0x12 0. Read as the same state while BN4's count stands at one to five with its window open: no rapid buster asked in either; a sixth press, which BN4 answers with its state 0x10, parts the battles",
+  "name": "BN4's count of B's presses toward GutsSoul's rapid buster, BN6's kept in his Souls block",
+  "why": "BN4's key handler, in form 2 (GutsSoul) and no rapid buster asked (its requests' 0x20 clear), counts each new press of B into his AI data's +0x12 and sets +0x11 to 10 (0x0800BE5A-0x0800BE6A); +0x11 counts down a frame at a time and, run out, zeroes the count (0x0800BE6C-0x0800BE7A); at six presses it sets the window to the count and asks the rapid buster (request 0x20, 0x0800BE7E-0x0800BE8A), which his state 0x10 fires, clearing both at its end (0x080EBE84-0x080EBE88). BN6's engine counts them in his side's Souls block (src/emu/soulrapid.c: BN6_SOUL_PRESSES +0x18, BN6_SOUL_WINDOW +0x19; the unit's end clears them there through XC4_SOULS_SIDE), since its AI data's +0x11 is his chaos power (0xFF none) and +0x12 0. Read as the same state where BN4's +0x12 and +0x11 are BN6's Souls block's +0x18 and +0x19, BN6's AI data's own as BN6 keeps them: a count or window apart, a press counted in one game alone, parts the battles",
   "evidence": [
-   "bn4_soul_guts: B pressed once, held for the punch: BN4's +0x11 9 and +0x12 1 at the press's frame, the window run down a frame at a time, both 0 ten frames on (18 frames read so); BN6's +0x11 0xFF and +0x12 0 throughout (traces of 22 November 2026)"
+   "bn4_soul_guts: B pressed once, held for the punch: BN4's +0x11 9 and +0x12 1 at the press's frame, the window run down a frame at a time, both 0 ten frames on (18 frames read so); BN6's +0x11 0xFF and +0x12 0 throughout (traces of 22 November 2026)",
+   "bn4_soul_guts_rapid: six presses during the punch, four frames apart: BN4's +0x12 1 to 5 with +0x11 9 down to 6 between, at the sixth 6 and 6, standing so while its request stands (BN4's +0x44 0x22, BN6's 2) and through the rapid buster, both 0 at its end (BN4 t222); BN6's Souls block's +0x18 and +0x19 the same a frame on, its AI data's +0x11 0xFF and +0x12 0 throughout (traces of 22 November 2026)"
   ]
  },
  {

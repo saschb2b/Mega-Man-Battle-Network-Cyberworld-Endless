@@ -37,6 +37,8 @@ unsigned soulbn4_held(unsigned bn4) {
 	return out;
 }
 
+int soulbn4_form(int k) { return k >= 0 && k < SOULS_BN4 ? forms[k] : 0; }
+
 int soulbn4_k(int soul) { return soul >= SOUL_BN4_FIRST && soul < SOUL_BN4_FIRST + SOULS_BN4 ? soul - SOUL_BN4_FIRST : -1; }
 
 bool soulbn4_read(int k, SoulBn4 *out) {

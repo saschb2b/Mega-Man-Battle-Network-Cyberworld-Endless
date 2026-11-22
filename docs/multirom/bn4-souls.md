@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Souls on BN6's proxy form"
 description: "What moving BN4 Red Sun's twelve Souls (Red Sun's six and Blue Moon's six, which run in Red Sun's ROM) onto BN6's proxy form takes: how BN4 takes a form, each Soul's abilities and the code it brings against BN6's twins, what BN5's path supplies and what BN4 must, a cost ranking and which Souls first; ThunSoul moved, the first, and what is left."
 tags: [multirom, bn4, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T18:09:56Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, read in tools/romlab and by tools/bn4_souls.py"
@@ -311,21 +311,27 @@ battle's, so a charge begun after a chip reads a frame early. Its four
 mutations: the charge 10 frames longer, the punch's damage another, the pass
 left out (the passives' `SOULPASSIVE_BREAK_PLUS`), another Soul's sprite.
 
-**Not yet moved: his rapid buster.** BN4's key handler in form 2 counts B's
-presses (AI data +0x12, a window of 10 frames at +0x11, 0x0800BE5A to
-0x0800BE7A) and at six asks request 0x20, which his ready state answers
-with his state 0x10: eight shots, sound 0xA7, each BN4's buster shot
-(0x0800B590, BN6's twin 0x0800FAAC, each reading its own game's buster
-attack from the NaviStats), then the count cleared (0x080EBE84 to
-0x080EBE88). The comparator reads the count of one to five presses as the
-same state (`presses`); a sixth parts the battles. To move it: the state
-as an attack unit (`('attack', 0x10, ...)` at 0xD9; its sound to slot 0x301;
-the twin above), a place for the two bytes (BN6's AI data's spare past
-+0xF0 is BN5's chip AI's where BN5's ROM is read, so the Souls block's
-side bytes from 0x18, which the unit's clear then needs aimed there), a hook
-after BN6's charge requests (0x08013130, r4 his AI data) that counts, and
-one on the charged B's request (0x080F17F2, its power attack's call) that
-gives family 0xD9 in place of the charged shot's.
+**His rapid buster.** BN4's key handler in form 2 counts B's presses (AI
+data +0x12, a window of 10 frames at +0x11, 0x0800BE5A to 0x0800BE7A) and at
+six asks request 0x20, which his ready state answers first with his state
+0x10: eight shots, sound 0xA7, each BN4's buster shot (0x0800B590, BN6's
+twin 0x0800FAAC, each reading its own game's buster attack from the
+NaviStats), then the count cleared (0x080EBE84 to 0x080EBE88). In BN6's
+engine (`src/emu/soulrapid.c`):
+
+| Part | Its place |
+| --- | --- |
+| The state | the chips' unit `GutsRapid` (BN4's state 0x10 whole, moved as BN6's grown family 0xD9), its sound 0xA7 at slot 0x301, its shots BN6's twin of the buster shot (audited), the arm's flash BN4's effect 5 moved as BN6's 0xC1 |
+| The count | in his side's Souls block (`BN6_SOUL_PRESSES` +0x18, `BN6_SOUL_WINDOW` +0x19), since BN6's AI data holds his chaos power at BN4's +0x11; the unit's end clears it there through a stub (`XC4_SOULS_SIDE`, the generator's `UNIT_CALLS_IN`, its two stores' offsets moved) |
+| The counting | a hook where BN6's key handler's paths join before a B press's charge (`BN6_RAPID_COUNT`, BN4's twin place), BN4's rule line for line, its ten and six read from BN4's code |
+| The request | BN6's charged B's (2), whose answer in BN6's requests makes the calls BN4's answer to 0x20 makes; a hook on its power attack's call (`BN6_RAPID_POWER`) gives the unit's family while the count stands at six, as BN4 answers 0x20 before a charged B |
+
+The proof is `bn4_soul_guts_rapid` (with its control): united as
+`bn4_soul_guts` unites, B pressed six times six frames apart, the first five
+each a plain shot as it is let go, the sixth the rapid buster, B once more
+after it, counted from 0. Its three mutations: asked at seven presses
+(`SOULRAPID_BREAK_SEVEN`, `soulbreak` bit 30), seven shots, the count left
+standing at its end.
 
 ## Two Souls of one kind
 
@@ -414,9 +420,11 @@ palettes' bytes as tiles and colours. Derived from the layout
 (`BN4_SOUL_FACE_COUNT`); the look of 4 November that saw all twelve unite
 watched the sprite and the name, not the window. Their sprites and
 pictures are whole (the table above counts them). A run that gives Blue
-Moon's six needs their faces from somewhere: Blue Moon's ROM, BN5's of
-the same Navis where BN5 has one (ProtoSoul's and NumberSoul's), or the
-Soul Navi's own mugshot.
+Moon's six needs their faces from somewhere. **The owner's call (22
+November 2026): MegaMan's plain face for all six of Blue Moon's Souls**,
+his normal mood face, the first of Red Sun's own faces, with the turns'
+digits under it as for Red Sun's six. No Blue Moon ROM is read, now or
+later.
 
 ## The shared room
 
@@ -507,4 +515,6 @@ What the room does not do yet:
   NetBattle with BN4 Souls on both sides, needs a room a seat; no
   NetBattle takes a BN4 Soul yet (the differential's `souls6` alone).
 - **Blue Moon's six.** `room4_fits` refuses a form past
-  `BN4_SOUL_FACE_COUNT`: they have no face in Red Sun's ROM (above).
+  `BN4_SOUL_FACE_COUNT`: they have no face in Red Sun's ROM (above). By
+  the owner's call the room takes MegaMan's plain face for them, as each
+  of them is moved (AquaSoul first).

@@ -1,0 +1,24 @@
+[
+ {
+  "name": "GutsSoul's rapid buster asked at seven presses",
+  "spec": "bn4_soul_guts_rapid",
+  "soulbreak": 1073741824,
+  "what": "the counter's break SOULRAPID_BREAK_SEVEN (src/emu/soulrapid.c, soulunite.h's SOULBREAK_BN4): seven presses ask it where BN4's cmp r0,#6 (0x0800BE7E) asks at six: the sixth press a plain shot, no state 0x10"
+ },
+ {
+  "name": "GutsSoul's rapid buster seven shots",
+  "spec": "bn4_soul_guts_rapid",
+  "poke": [
+   "080EBDEC:2007"
+  ],
+  "what": "the unit's copy of his state 0x10 (BN4 0x080EBDC0, moved as BN6's 0xD9) with its movs r0,#8 (the shots left, its variables' +0x12) made #7: one shot fewer, the state ended a shot early"
+ },
+ {
+  "name": "GutsSoul's rapid buster's count left at its end",
+  "spec": "bn4_soul_guts_rapid",
+  "poke": [
+   "080EBE86:46C0"
+  ],
+  "what": "the unit's end with its strb r0,[r3,#0x18] (the count in his side's Souls block, XC4_SOULS_SIDE's r3) made a nop: the count stands at six after the state, so the next frame's counter asks the rapid buster again"
+ }
+]
