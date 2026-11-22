@@ -1,0 +1,14 @@
+[
+ {
+  "name": "NapalmSoul's charged chip not doubled",
+  "spec": "soul_napalm_charge",
+  "soulbreak": 131072,
+  "what": "the charged chip's bonus none for NapalmSoul where BN5's 0x080103C8 doubles it (form 4): its damage the record's"
+ },
+ {
+  "name": "NapalmSoul's charged chip no Napalm Bomb",
+  "spec": "soul_napalm_charge",
+  "soulbreak": 8388608,
+  "what": "his charged FireHit1 runs its own family where BN5's 0x0801043A gives NapalmSoul's charged chip family 0x4B, the Napalm Bomb"
+ }
+]

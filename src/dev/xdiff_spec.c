@@ -9,6 +9,7 @@
 #include "chip_entry.h"
 #include "emu.h"
 #include "soulbn4.h"
+#include "soulteam.h"
 
 /* ---- the spec ---- */
 
@@ -160,6 +161,7 @@ static int souls_parse(Spec *s, const char *name, const char *v) {
 	if (!strcmp(name, "confuse6")) return (s->confuse6 = atoi(v) != 0), 1;
 	if (!strcmp(name, "mood4")) return (s->mood4 = atoi(v) != 0), 1;
 	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
+	if (!strcmp(name, "souls5")) return (s->souls5 = (unsigned)strtoul(v, NULL, 16)) != 0 && s->souls5 < 1u << SOULS_TEAM;
 	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
 	if (!strcmp(name, "soulbreak")) return (s->soulbreak = atoi(v)) > 0;
 	return -1;
@@ -277,7 +279,7 @@ static bool game_parse(Spec *s, const char *v) {
 	return s->bn5 || s->bn6 || s->bn4;
 }
 
-bool xd_spec_bn4_code(const Spec *s) { return s->bn4 || (s->souls6 >> SOULS_HELD_BN4) != 0; }
+bool xd_spec_bn4_code(const Spec *s) { return s->bn4 || (s->souls6 & SOULS_HELD_BN4_MASK) != 0; }
 
 /* MegaMan's setup, then his NaviCust's */
 static int subject_parse(Spec *s, const char *name, char *v) {

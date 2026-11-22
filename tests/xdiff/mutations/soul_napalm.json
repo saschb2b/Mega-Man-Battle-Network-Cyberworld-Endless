@@ -1,0 +1,14 @@
+[
+ {
+  "name": "NapalmSoul lit by the kind after its own",
+  "spec": "soul_napalm",
+  "unitebreak": 4,
+  "what": "UNITE's check reads the chip's kind one up (Fire as Aqua): FireHit1 lights ToadSoul, which BN6's MegaMan does not hold, so UNITE stays grey and NapalmSoul never unites where BN5's does at t1"
+ },
+ {
+  "name": "NapalmSoul committed with four turns",
+  "spec": "soul_napalm",
+  "unitebreak": 1,
+  "what": "OK's commit gives NapalmSoul 4 turns where BN5's gives 3 (0x08024FFA): its turns 4 at t1, its end a turn late"
+ }
+]

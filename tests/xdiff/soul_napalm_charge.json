@@ -1,0 +1,216 @@
+{
+ "about": "BN5's NapalmSoul's chip charge in both engines (docs/game/team-protoman.md, unit 8): NapalmSoul united (souls5 8, souls6 bit 21) with a deck of FireHit1 (BN5's 151 O, BN6's 107 D: Fire, NapalmSoul's kind), two picked, the last given up for UNITE; A held from t100 for 130 frames: the chip charged by BN5's rule (BN5 0x08010902: a Fire chip for NapalmSoul), its charge time BN5's (0x27's row), released as the chip used charged and doubled (0x080103C8), its family BN5's Napalm Bomb (0x0801043A: 0x4B, BN6's 0xC9), thrown at CanGard V1 at (6,2); MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 420,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "1C97"
+ ],
+ "deck5": [
+  "1C97"
+ ],
+ "folder6": [
+  "066B"
+ ],
+ "deck6": [
+  "066B"
+ ],
+ "souls6": "200000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   130
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: NapalmSoul united from t1, the chip charged from t100, used charged as a Napalm Bomb.",
+ "souls5": "8"
+}

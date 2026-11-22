@@ -1,0 +1,233 @@
+{
+ "about": "BN5's NapalmSoul and its charged shot in both engines (docs/game/team-protoman.md, unit 8): its flag entry written in BN5's ROM copy and set (souls5), the Souls installed in BN6's engine holding it (souls6 bit 21), a deck of FireHit1 (BN5's 151 O, BN6's 107 D: Fire, NapalmSoul's kind), the first Custom screen's chip picked and given up, UNITE and OK; it unites as the first turn starts: his look, his loadout in BN6's numbers, his element Fire. B held from t100 for 140 frames: its charged shot, a vulcan of fire along his row (BN5's power attack 0x19, its family 0x44, BN6's 0xC8; its shots the third kind's 0x12, the chips' copy), which strikes CanGard V1 at (6,2); MegaMan at (2,2) with 2000 HP, kept from harm. Every frame compared, MegaMan's own state a difference.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 500,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "1C97"
+ ],
+ "deck5": [
+  "1C97"
+ ],
+ "folder6": [
+  "066B"
+ ],
+ "deck6": [
+  "066B"
+ ],
+ "souls6": "200000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "B",
+   140
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x04"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x03"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x10"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ]
+   ],
+   "hp": [
+    [
+     500,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own course (its trace, the reference): NapalmSoul united from t1 (NapalmMan's AI index 4, its turns 3, its used bit 0x10 for the battle, UNITE chosen on the first screen); MegaMan never hit (safe).",
+ "souls5": "8"
+}
