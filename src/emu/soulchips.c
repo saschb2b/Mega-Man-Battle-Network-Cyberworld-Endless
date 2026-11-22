@@ -6,8 +6,10 @@
 
 #include "bn5.h"
 #include "bn6.h"
+#include "bn6_attacks.h"
 #include "bn6_chips.h"
 #include "bn6_forms.h"
+#include "bn6_navis.h"
 #include "bn6_panels.h"
 #include "bytes.h"
 #include "chips.h"
@@ -23,6 +25,7 @@
 #include "soulteam.h"
 #include "thumb_reloc.h"
 #include "xpanels.h"
+#include "xsong.h"
 
 #define BUS 0x08000000u
 #define THUMB_MOVS_R0 0x2000u
@@ -45,10 +48,19 @@
 #define ANSWER_NO (GRASS_CODE_SIZE)        /* ... movs r0,#0; bx lr and */
 #define ANSWER_YES (GRASS_CODE_SIZE + 4)   /* ... movs r0,#1; bx lr: an answer with its flags set, as BN6's callers test them */
 #define THUMB_SIZE (GRASS_CODE_SIZE + 8)
-#define LAVA_CODE_SIZE 28    /* the Thumb NapalmSoul's lava jumps to (lava_code) */
+#define LAVA_CODE_SIZE 28    /* the Thumb NapalmSoul's lava jumps to (lava_code), */
+#define PROP_CODE_SIZE 16    /* ... GyroSoul's propeller spent (prop_spend_code), */
+#define PROP_SET_SIZE 36     /* ... and set (prop_set_code) */
+#define AI_PROPELLER 0x0D    /* his AI data's propeller (BN5's +0x0D, 0x080102EE; no code of Gregar's reads or writes BN6's +0x0D) */
+#define KIND_WIND 10         /* BN5_CHIP_KIND's Wind */
+#define SONG_PROPELLER 0x167 /* BN5's propeller sound (0x080102F0: 0x68 + 0xFF), copied to its slot (xsong.c's XSOUNDS) */
+#define SLOT_PROPELLER 0x340
 #define LAVA_BONUS 10        /* NapalmSoul on lava: his next attack chip's power more (BN5's 0x08012644) */
 #define HAND_SIDE 0x50       /* a side's hand after OK, BN6_BATTLE_HAND's step (BN6_HAND_ADDR) */
-_Static_assert(SOULS_TEAM_THUMB + LAVA_CODE_SIZE <= SOULS_TEAM_THUMB_END, "NapalmSoul's lava's Thumb past its room (soul_room.h)");
+_Static_assert(SOULS_TEAM_THUMB + LAVA_CODE_SIZE + PROP_CODE_SIZE + PROP_SET_SIZE <= SOULS_TEAM_THUMB_END,
+	"Team ProtoMan's Thumb past its room (soul_room.h)");
+#define PROP_SPEND (SOULS_TEAM_THUMB + LAVA_CODE_SIZE)
+#define PROP_SET (PROP_SPEND + PROP_CODE_SIZE)
 
 static int breaks;
 static bool done;
@@ -113,11 +125,31 @@ static HookAct release(HookRegs *r, void *user) {
 
 /* ---- what the chip used gets ---- */
 
+/* GyroSoul's propeller as the chip's modifier reads it (BN5's 0x08010264): set, an attack chip's modifier is the
+ * propeller's alone, 3 and the damage doubled for a Wind chip or one of no kind, not left alone (0x080102FA), none for any
+ * other, the emotion's not looked at; on to the Thumb that spends it (case 3, 0x0800FFC2: +0x0D 0) and plays the sound */
+static HookAct propeller(HookRegs *r, int chip) {
+	uint32_t ai = hook_read32(r->r[5] + BN6_T1_AI_DATA);
+	uint8_t f = flags_of(chip);
+	if (!ai || !hook_read8(ai + AI_PROPELLER) || !(f & BN6_CHIP_SHOWS_POWER) || (breaks & SOULCHIPS_BREAK_NAPALM)) return HOOK_CONTINUE;
+	int kind = soulkinds_of(chip);
+	uint16_t before = hook_read16(r->r[7] + BN6_ATTACK_DAMAGE);   /* (the damage the modifier was given, kept until the strh) */
+	if ((f & BN6_CHIP_LEFT_ALONE) || (kind != KIND_WIND && kind != SOULKIND_NONE)) {
+		r->r[0] = before;
+		r->r[1] = 0;
+		return HOOK_CONTINUE;
+	}
+	r->r[0] = before | MODIFIED_DOUBLE;
+	r->r[12] = PROP_SPEND | 1;
+	return HOOK_JUMP;
+}
+
 /* (the chip's damage modified, r0 it, r1 what its modifier did, r7 its attack's variables, at the strh that keeps it)
  * TomahawkSoul's Wood attack chip on grass: doubled, and on to the Thumb that makes the panel plain (BN5's case 4,
- * 0x0800FFCA) and plays the modifier's sound */
+ * 0x0800FFCA) and plays the modifier's sound; GyroSoul's propeller */
 static HookAct grass(HookRegs *r, void *user) {
 	int chip = hook_read16(r->r[7] + BN6_ATTACK_CHIP);
+	if (soul_of(r->r[5]) == SOUL_GYRO) return propeller(r, chip);
 	if (soul_of(r->r[5]) != SOUL_TOMAHAWK || r->r[1] || (breaks & SOULCHIPS_BREAK_GRASS)) return HOOK_CONTINUE;
 	uint32_t x = hook_read8(r->r[5] + BN6_T1_PANEL_X), y = hook_read8(r->r[5] + BN6_T1_PANEL_Y);
 	if (soulkinds_of(chip) != KIND_WOOD || !attack_chip(chip) || hook_read8(panel_at(x, y) + BN6_PANEL_TYPE) != BN6_PANEL_GRASS)
@@ -196,7 +228,59 @@ static HookAct lava(HookRegs *r, void *user) {
 	return HOOK_JUMP;
 }
 
+/* (BN6_CHIP_USE_MODIFIED, past the modifier's switch: r7 its attack's variables, r5 MegaMan) GyroSoul's propeller set by a Wind
+ * chip not left alone (BN5's 0x080102CA): on to the Thumb that sets it and plays BN5's sound; and his overlay spun as it stands
+ * after the chip (0x11 while set, 0 once spent: BN5's 0x080C3876 from his steps, the chip's first frame in its trace) */
+static HookAct propeller_set(HookRegs *r, void *user) {
+	(void)user;
+	uint32_t me = r->r[5], ai = hook_read32(me + BN6_T1_AI_DATA), ov = hook_read32(me + BN6_T1_OVERLAY);
+	int chip = hook_read16(r->r[7] + BN6_ATTACK_CHIP);
+	if (soul_of(me) != SOUL_GYRO || !ai || (breaks & SOULCHIPS_BREAK_NAPALM)) return HOOK_CONTINUE;
+	bool sets = soulkinds_of(chip) == KIND_WIND && !(flags_of(chip) & BN6_CHIP_LEFT_ALONE);
+	/* (BN6's twin of BN5's overlay takes its animation's offset from its +7, BN5's from its +0x60: legit.json's masks, 049) */
+	if (ov) hook_write8(ov + BN6_OVERLAY_OFFSET, (sets || hook_read8(ai + AI_PROPELLER)) ? BN6_OVERLAY_SPUN : 0);
+	if (!sets) return HOOK_CONTINUE;
+	r->r[12] = PROP_SET | 1;
+	return HOOK_JUMP;
+}
+
 /* ---- the install ---- */
+
+/* the Thumb GyroSoul's propeller jumps to when spent: the hooked strh, his +0x0D 0, on to the modifier's sound */
+static void prop_spend_code(uint8_t out[PROP_CODE_SIZE]) {
+	static const uint16_t code[] = {
+		0x8138,           /* strh r0,[r7,#8] */
+		0x6DA9,           /* ldr r1,[r5,#0x58]: his AI data */
+		0x2000,           /* movs r0,#0 */
+		0x7348,           /* strb r0,[r1,#0xd]: the propeller spent */
+		0x4B00,           /* ldr r3,[pc,#0]: the way on */
+		0x4718,           /* bx r3 */
+	};
+	for (size_t i = 0; i < sizeof code / sizeof *code; ++i) put16(out + 2 * i, code[i]);
+	put32(out + 12, BN6_CHIP_MODIFIED_SOUND | 1);
+}
+
+/* ... and when set: his +0x0D 1, the sound's slot played (BN6_PLAY_SOUND), the hooked ldrh, on to the use's next */
+static bool prop_set_code(uint32_t at, uint8_t out[PROP_SET_SIZE]) {
+	static const uint16_t code[] = {
+		0x6DA9,           /* 00 ldr r1,[r5,#0x58] */
+		0x2001,           /* 02 movs r0,#1 */
+		0x7348,           /* 04 strb r0,[r1,#0xd]: the propeller set */
+		0x4804,           /* 06 ldr r0,[pc,#16]: the sound */
+		0x4B04,           /* 08 ldr r3,[pc,#16]: PlaySoundEffect */
+		0, 0,             /* 0A bl the bx r3 at 0x14 */
+		0x8938,           /* 0E ldrh r0,[r7,#8]: the hooked instruction (BN6_CHIP_USE_MODIFIED's) */
+		0x4B03,           /* 10 ldr r3,[pc,#12]: the way on */
+		0x4718,           /* 12 bx r3 */
+		0x4718,           /* 14 bx r3 */
+		0x46C0,           /* 16 nop */
+	};
+	for (size_t i = 0; i < sizeof code / sizeof *code; ++i) put16(out + 2 * i, code[i]);
+	put32(out + 24, SLOT_PROPELLER);
+	put32(out + 28, BN6_PLAY_SOUND | 1);
+	put32(out + 32, BN6_CHIP_USE_MODIFIED_NEXT | 1);
+	return thumb_bl_write(out, 10, at, at + 20);
+}
 
 /* the Thumb NapalmSoul's lava jumps to: the panel under him plain (BN6_SET_PANEL_TYPE, r0 column, r1 row, r2 the type), the
  * hooked ldrb, on to the routine's next */
@@ -243,7 +327,7 @@ static bool expected(void) {
 		{ BN6_CHARGE_TEST, 0xB5D0 }, { BN6_CHARGE_BONUS, 0xB510 }, { BN6_CHIP_MODIFIED, 0x8138 }, { BN6_CHIP_MODIFIED_SOUND, 0x2087 },
 		{ BN6_CHIP_USED_END, 0x8AB8 }, { BN6_CHIP_FAMILY_READ, 0x7AE0 }, { BN6_SHADOW_TYPE_SIDE, 0x2129 }, { BN6_SHADOW_TYPE_DONE, 0xBD10 },
 		{ BN6_SET_PANEL_TYPE, 0xB570 }, { BN6_CHARGED_RELEASE, 0x290D }, { BN6_CHARGED_CHIP_USE, 0x2001 },
-		{ BN6_PLAYER_TIMERS, 0x7E60 },
+		{ BN6_PLAYER_TIMERS, 0x7E60 }, { BN6_CHIP_USE_MODIFIED, 0x8938 },
 	};
 	for (size_t i = 0; i < sizeof code / sizeof *code; ++i)
 		if (rom_u16(code[i].at - BUS) != code[i].op) {
@@ -260,8 +344,12 @@ bool soulchips_install(int brk) {
 	breaks = brk;
 	sword_family = (uint32_t)soulcode_family(BN6_FAMILY_SWORD);
 	napalm_family = soulcode_family(BN5_FAMILY_NAPALM_BOMB);
-	uint8_t stub[THUMB_SIZE], lava_stub[LAVA_CODE_SIZE];
-	if ((int)sword_family < 0 || !grass_code(SOULS_THUMB, stub) || !lava_code(SOULS_TEAM_THUMB, lava_stub)) return false;
+	uint8_t stub[THUMB_SIZE], lava_stub[LAVA_CODE_SIZE], spend[PROP_CODE_SIZE], set[PROP_SET_SIZE];
+	if ((int)sword_family < 0 || !grass_code(SOULS_THUMB, stub) || !lava_code(SOULS_TEAM_THUMB, lava_stub) || !prop_set_code(PROP_SET, set))
+		return false;
+	prop_spend_code(spend);
+	/* (BN5's propeller sound at its slot, where the other tracks' sounds are copied: xsong.c) */
+	if (xsong_install_at(XROM_BN5_COLONEL_US, SONG_PROPELLER, SLOT_PROPELLER) != SLOT_PROPELLER) return false;
 	put16(stub + ANSWER_NO, THUMB_MOVS_R0 | 0);
 	put16(stub + ANSWER_NO + 2, THUMB_BX_LR);
 	put16(stub + ANSWER_YES, THUMB_MOVS_R0 | 1);
@@ -269,12 +357,15 @@ bool soulchips_install(int brk) {
 	claims_begin(SOULCHIPS_CLAIMS);
 	emu_write(SOULS_THUMB, stub, sizeof stub);
 	emu_write(SOULS_TEAM_THUMB, lava_stub, sizeof lava_stub);
+	emu_write(PROP_SPEND, spend, sizeof spend);
+	emu_write(PROP_SET, set, sizeof set);
 	bool ok = emu_hook(BN6_CHARGE_TEST, charge_test, NULL) && emu_hook(BN6_CHARGE_BONUS, charge_bonus, NULL) &&
 		emu_hook(BN6_CHARGED_RELEASE, release, (void *)(uintptr_t)BN6_CHARGED_CHIP_USE) &&
 		emu_hook(BN6_CHIP_MODIFIED, grass, (void *)(uintptr_t)SOULS_THUMB) && emu_hook(BN6_CHIP_USED_END, front, NULL) &&
 		emu_hook(BN6_CHIP_FAMILY_READ, sword, (void *)(uintptr_t)BN6_CHIP_FAMILY_NEXT) &&
 		emu_hook(BN6_SHADOW_TYPE_SIDE, shadow, (void *)(uintptr_t)BN6_SHADOW_TYPE_DONE) &&
-		emu_hook(BN6_PLAYER_TIMERS, lava, (void *)(uintptr_t)SOULS_TEAM_THUMB);
+		emu_hook(BN6_PLAYER_TIMERS, lava, (void *)(uintptr_t)SOULS_TEAM_THUMB) &&
+		emu_hook(BN6_CHIP_USE_MODIFIED, propeller_set, NULL);
 	claims_end();
 	done = ok;
 	printf("soulchips: the Souls' chips%s%s\n", ok ? ": the chip charge, its double, TomahawkSoul's grass, KnightSoul's front column, "

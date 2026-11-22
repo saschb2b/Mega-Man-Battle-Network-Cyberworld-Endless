@@ -28,7 +28,8 @@ enum {
 	SOULCHIPS_BREAK_SWORD = 16,   /* ShadowSoul's charged sword run by BN6's sword family */
 	SOULCHIPS_BREAK_SHADOW = 32,  /* ShadowSoul keeps his shadow */
 	SOULCHIPS_BREAK_LAVA = 64,    /* NapalmSoul on lava adds nothing to his next chip */
-	SOULCHIPS_BREAK_NAPALM = 128, /* NapalmSoul's charged chip run by its own family, no Napalm Bomb */
+	SOULCHIPS_BREAK_NAPALM = 128, /* NapalmSoul's charged chip run by its own family, no Napalm Bomb, and GyroSoul's propeller
+	                                 doubling nothing */
 };
 
 /* The hooks and the stubs of Thumb they jump to (soul_room.h's

@@ -462,7 +462,8 @@ _Static_assert(SOULS4_END <= FREE_BN4_SOUL_LOOK_END && SOUL_LIST0_BN4 < SOULS_LI
  * is its empty routine */
 static void routes(void) {
 	uint32_t enter[SOULS_BN5_FORMS] = { 0 }, leave[SOULS_BN5_FORMS] = { 0 };
-	for (int n = SOUL_FIRST; n < SOUL_FIRST + SOULS; ++n) {
+	/* (Team Colonel's and Team ProtoMan's: BN5's 1-12, a routine of theirs not moved none, as their empty one's) */
+	for (int n = SOUL_TEAM_FIRST; n < SOUL_FIRST + SOULS; ++n) {
 		uint32_t e = rom5(BN5_SOUL_ENTER + 4u * (uint32_t)n), l = rom5(BN5_SOUL_LEAVE + 4u * (uint32_t)n);
 		enter[n] = e == BN5_FORM_NULLSUB ? 0 : soulcode_moved(e);
 		leave[n] = l == BN5_FORM_NULLSUB ? 0 : soulcode_moved(l);

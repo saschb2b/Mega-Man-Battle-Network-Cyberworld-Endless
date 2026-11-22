@@ -105,11 +105,15 @@
 #define SOULS_TEAM_LOADOUTS_END (FREE_TEAM_SOULS + 0x51440u)
 #define SOULS_CHARGES      (FREE_TEAM_SOULS + 0x51480u)   /* BN6's charge times grown with every Soul's, 10 bytes a power attack (256), to: */
 #define SOULS_CHARGES_END  (FREE_TEAM_SOULS + 0x51E80u)
-#define SOULS_TEAM_THUMB   (FREE_TEAM_SOULS + 0x51440u)   /* the project's own Thumb their hooks jump to: NapalmSoul's lava (soulchips.c), to: */
-#define SOULS_TEAM_THUMB_END (FREE_TEAM_SOULS + 0x51480u)
+/* (FREE_TEAM_SOULS + 0x51440-0x51480 free: their hooks' Thumb outgrew it, SOULS_TEAM_THUMB below) */
 #define SOULS_TEAM_CHAOS   (FREE_TEAM_SOULS + 0x51E80u)   /* their Chaos Unison's power attacks: a stub each, the chip writer of its DarkChip (soulpower.c), to: */
 #define SOULS_TEAM_CHAOS_END (FREE_TEAM_SOULS + 0x51F20u)
-#define SOULS_TEAM_END     (FREE_TEAM_SOULS + 0x51F20u)
+#define SOULS_TEAM_OVERLAYS (FREE_TEAM_SOULS + 0x51F20u)  /* their companion overlays' masks (BN5's bytes, a kind's at most 0x40), to: */
+#define SOULS_TEAM_OVERLAYS_END (FREE_TEAM_SOULS + 0x51FA0u)
+#define SOULS_TEAM_THUMB   (FREE_TEAM_SOULS + 0x51FA0u)   /* the project's own Thumb their hooks jump to: NapalmSoul's lava, GyroSoul's
+                                                           propeller spent and set (soulchips.c), to: */
+#define SOULS_TEAM_THUMB_END (FREE_TEAM_SOULS + 0x52000u)
+#define SOULS_TEAM_END     (FREE_TEAM_SOULS + 0x52000u)
 
 /* ---- BN4's Souls' look: one room, the united Soul's (free_space.h's FREE_BN4_SOUL_LOOK; soullook.c, docs/multirom/bn4-souls.md,
  * The shared room): the twelve sprites take 438 KB and the copy has no such room, so the room holds one Soul's at a time, filled

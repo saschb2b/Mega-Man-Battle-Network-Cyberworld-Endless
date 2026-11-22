@@ -476,6 +476,8 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN5_COLONEL_US, 0xE0, 0x46 }, { XROM_BN5_COLONEL_US, 0x100, 0x47 },
 	/* (Nebula's LarkMan's after them: docs/multirom/navis.md, LarkMan) */
 	{ XROM_BN5_COLONEL_US, 0x13C, 0x48 },
+	/* (Team ProtoMan's Souls', the grown table's 0x340 up, docs/project/claims: GyroSoul's propeller set, BN5's 0x080102F4) */
+	{ XROM_BN5_COLONEL_US, 0x167, 0x340 },
 	/* (BN5's battles' win songs, its Victory and Fanfare, on its areas' layers: src/director/win_song.c; the Darkloids' next from 0x43) */
 	{ XROM_BN5_COLONEL_US, BN5_SONG_VICTORY, 0x41 }, { XROM_BN5_COLONEL_US, BN5_SONG_FANFARE, 0x42 },
 	/* BN4's families' (tools/xrecipe_bn4.py's SOUND_SLOTS, by install order from the themes' top down: Spikey's, Shrimpy's,
