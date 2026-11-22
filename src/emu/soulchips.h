@@ -23,7 +23,7 @@
 /* (soulbreak's chips, soulunite.h's SOULBREAK_CHIPS: the differential's own test, tests/xdiff/mutations.json) */
 enum {
 	SOULCHIPS_BREAK_CHARGE = 1,   /* no chip charged in a Soul (BN6's rule for form 8) */
-	SOULCHIPS_BREAK_DOUBLE = 2,   /* a charged chip not doubled */
+	SOULCHIPS_BREAK_DOUBLE = 2,   /* a charged chip not doubled (and a BN4 Soul's bonus to an uncharged one, ThunSoul's, left out) */
 	SOULCHIPS_BREAK_GRASS = 4,    /* TomahawkSoul's Wood chip not doubled on grass */
 	SOULCHIPS_BREAK_FRONT = 8,    /* KnightSoul's front column gives no unharmed frames */
 	SOULCHIPS_BREAK_SWORD = 16,   /* ShadowSoul's and ProtoSoul's charged sword run by BN6's sword family */

@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Souls on BN6's proxy form"
 description: "What moving BN4 Red Sun's twelve Souls (Red Sun's six and Blue Moon's six, which run in Red Sun's ROM) onto BN6's proxy form takes: how BN4 takes a form, each Soul's abilities and the code it brings against BN6's twins, what BN5's path supplies and what BN4 must, a cost ranking and which Souls first; ThunSoul moved, the first, and what is left."
 tags: [multirom, bn4, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T18:51:34Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T20:51:07Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, read in tools/romlab and by tools/bn4_souls.py"
@@ -310,6 +310,11 @@ from it (the differential's megaman_clock), while a press of B keeps the
 battle's, so a charge begun after a chip reads a frame early. Its four
 mutations: the charge 10 frames longer, the punch's damage another, the pass
 left out (the passives' `SOULPASSIVE_BREAK_PLUS`), another Soul's sprite.
+`bn4_soul_guts_atk` (with its control) takes him with an Attck+10 merged into
+PanlSht1 on the same Custom screen: 40 in both games, the pass on top of the
+merge. BN4's form state zeroes the hand's six bonuses before a form's routine
+(`0x0800E068`, its +0x26), but the merge lands after it; BN6 merges at OK and
+the pass adds as he enters the form. Its mutation leaves the pass out (10).
 
 **His rapid buster.** BN4's key handler in form 2 counts B's presses (AI
 data +0x12, a window of 10 frames at +0x11, 0x0800BE5A to 0x0800BE7A) and at
@@ -332,6 +337,19 @@ each a plain shot as it is let go, the sixth the rapid buster, B once more
 after it, counted from 0. Its three mutations: asked at seven presses
 (`SOULRAPID_BREAK_SEVEN`, `soulbreak` bit 30), seven shots, the count left
 standing at its end.
+
+**ThunSoul's Elec chips paralyse** (found 22 November 2026, after ThunSoul's
+port): BN4's chip use asks a bonus by form for a chip used uncharged too
+(`BN4_CHIP_BONUS`, `0x0800C4C4`), which gives form 6 0x4000 on an Elec chip
+whose power shows (kinds 0xC and 2, not left alone): the power word's
+paralysis bit, the one BN6's own bonus gives ElecCross's charged chips.
+BN6 plays its charged chip's sound for any bonus its own routine returns,
+which BN4 plays for a charged chip alone, so soulchips adds it past that
+sound (`BN6_CHARGED_BONUS_DONE`), its numbers read from BN4's code
+(`soulbn4.c`'s `soulbn4_chip_bonus`). `bn4_soul_thun_elec` holds it: united
+by two Ligtnin1, the first used at t30, its power 0x4064 in both games; its
+mutation leaves the bonus out (0x64). Ligtnin1 alone strikes nothing there,
+so the paralysis's own frames are not yet compared.
 
 ## AquaSoul in BN6's engine
 

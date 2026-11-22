@@ -1,0 +1,8 @@
+[
+ {
+  "name": "GutsSoul's pass left out over a merged Atk+",
+  "spec": "bn4_soul_guts_atk",
+  "soulbreak": 512,
+  "what": "the passives' break SOULPASSIVE_BREAK_PLUS leaves his entering's pass out (src/emu/soulbn4.c soulbn4_enter): PanlSht1's bonus 10 from Attck+10 alone where BN4's gives 40"
+ }
+]
