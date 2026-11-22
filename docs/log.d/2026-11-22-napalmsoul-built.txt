@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T14:14:50Z
+* **Update**: multirom/souls.md (Team ProtoMan's Souls on the proxy form: their numbers, held bits, room and fixed power ids; NapalmSoul built and held to BN5's battle), rom/souls.md (Team ProtoMan's Souls' row: BN5's tables and routines by form, BN6's player-timers hook and chip writer), game/team-protoman.md (unit 8: NapalmSoul built; their abilities as BN5's code gives them), devtools/differential.md (souls5, Team ProtoMan's bits in souls6), code/emu.md (soulteam.h), engine/emulation/memory.md (FREE_TEAM_SOULS), engine/emulation/free-space.md (FREE_TEAM_SOULS).

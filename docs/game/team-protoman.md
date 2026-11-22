@@ -214,6 +214,12 @@ versions are trusted.
 From MMKB's Double Soul page, to be verified by `tools/xsoul.py`'s walk of
 forms 1-6 and held to BN5's battle frame by frame as the six were:
 
+What BN5's own code gives each, read from it (2026-11-22; the table above is MMKB's): a Soul's chip charge by its kind
+(0x08010902: ProtoSoul Sword, NapalmSoul Fire, MagnetSoul Elec), doubled for ProtoSoul, NapalmSoul and MagnetSoul
+(0x080103C8); NapalmSoul +40 to a Fire attack chip used uncharged (0x0800D0CE) and, on lava, 10 more to the hand's next
+attack chip with the panel made plain (0x080125FA), his charged chip the Napalm Bomb (0x0801043A); GyroSoul's Wind chip
+sets his propeller for the next (0x080102CA). Team Colonel's ROM holds no emotion-window face of theirs.
+
 | Soul | Charged shot | Its abilities | What BN6's engine has for it |
 | --- | --- | --- | --- |
 | ProtoSoul | a WideSword before him | Reflect on B and back; a charged Sword chip hits twice as hard and steps two panels in | the chip charge of the Souls' S5 (ShadowSoul's swords) |
@@ -285,7 +291,7 @@ and own states); each Navi is M, as each of Team Colonel's was:
 | 5. Meddy (built) | Her recipe and `meddy_v1`, `_v1_keys`, `_sp`: PASS; five mutations FAIL ([Transplanted Navis](../multirom/navis.md), Meddy). Her seven types recorded as moved; the raw pointers were her effect's id beside a parameter (`movs r4,#0; orrs r4,rX`), read by the generator now; her sound 0xE0 at BN6's slot 0x46 | M |
 | 6. MagnetMan (built) | His recipe and `magnetman_v1`, `_v1_keys`, `_sp`: PASS; five mutations FAIL ([Transplanted Navis](../multirom/navis.md), MagnetMan). His magnet panels are BN5's panel type 5 in BN6's engine as its 15 ([One net](../multirom/one-net.md), The magnet panel in BN6's engine): its flags, its push, BN5's pull in BN6's movement step on a magnet panel, its look; his child at his place moved; his sound 0x100 at BN6's slot 0x47; MagnetSoul's exemption waits for unit 8 | M |
 | 7. Guardians | The partner coin in `xguardian.c` (from act 2), the deep pool of eleven, their bodies and faces copied as the six's, Guardian Data (his Soul and a chip of his Soul's kind, below), their intro lines in a words file through [the voice rules](../voice/rules.md) | S-M |
-| 8. Their Souls | `tools/xsoul.py` over forms 2-6, a Soul at a time with its specs as S2-S5 held the six: NapalmSoul, GyroSoul, MagnetSoul (M each), then SearchSoul and MeddySoul (L each, their Custom-screen code traced first) | L |
+| 8. Their Souls (NapalmSoul built) | `tools/xsoul.py` over forms 2-6, a Soul at a time with its specs as S2-S5 held the six: NapalmSoul (built: UNITE, look, element, charged shot, chip charge and Napalm Bomb, lava, +40 to Fire chips, Chaos Unison's power attack; `soul_napalm`, `_shot`, `_charge`, `_lava` PASS, their mutations FAIL; [Transplanted Souls](../multirom/souls.md), Team ProtoMan's Souls), GyroSoul, MagnetSoul (M each), then SearchSoul and MeddySoul (L each, their Custom-screen code traced first) | L |
 | 9. ProtoSoul | Form 1 by the same walk (M), given at the rival's netbattle won with BN5's ROM read, Chaud's box | M |
 | 10. The board | A held Soul's Navi with his own command | S |
 
