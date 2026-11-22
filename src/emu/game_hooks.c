@@ -17,6 +17,7 @@
 #include "pet.h"
 #include "pet_text.h"
 #include "protoman_cross.h"
+#include "save_mask.h"
 #include "scripts.h"
 #include "soulproxy.h"
 #include "sound_quiet.h"
@@ -30,6 +31,8 @@ void game_hooks_install(void) {
 	 * them where its ROM is read (xchips_code.h) */
 	xchips_install();
 	gamecall_install();
+	/* (BN6's save's mask: the run's logic waits through it, save_mask.h) */
+	save_mask_install();
 #ifndef CW_GPSP
 	/* (gpSP skips BN6's wait for VBlank as its own idle loop) */
 	idle_install();

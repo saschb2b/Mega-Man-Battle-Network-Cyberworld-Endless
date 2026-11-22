@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-21T23:07:00Z
+* **Update**: rom/game-state.md (the save's mask: the hooked ends, the sum after the unmask that masks again, seen with and without the run's logic held), devtools/scenarios.md (`savemasks`, `savemasked`), code/emu.md (`save_mask.c`).

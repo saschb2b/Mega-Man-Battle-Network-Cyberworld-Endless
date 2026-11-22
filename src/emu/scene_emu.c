@@ -113,6 +113,9 @@ static void leave(void) {
 }
 
 static uint32_t frame_keys(void) {
+	/* (BN6's save holding the RAM masked: the player's keys as they are,
+	 * none of ours read from it, save_mask.h) */
+	if (save_masked()) return autopilot_on() ? 0 : keys_from_buttons();
 	uint32_t keys = autopilot_on() ? autopilot_keys() : keys_from_buttons();
 	/* (in the Net Square the run's own keys rest: docs/online/) */
 	if (online_visit_away()) return online_visit_keys(keys);
@@ -124,8 +127,13 @@ static uint32_t frame_keys(void) {
 	return keys;
 }
 
-/* What follows a frame of the game: the run's logic on it. */
+/* What follows a frame of the game: the run's logic on it. Not while
+ * BN6's save holds the RAM masked (save_mask.h, issue #734): read then, its
+ * bytes are the save's key's bits, and written, they come out inverted by
+ * them as it unmasks; the logic takes the frames up once it is whole, the
+ * hooks' events still queued. */
 static void after_frame(void) {
+	if (save_masked()) return;
 	online_visit_update();
 	if (online_visit_away()) { second_update(); emu_debug_frame(); return; }
 	director_see();
@@ -181,7 +189,26 @@ static bool soft_reset(void) {
  * (director_settle.c). On the core's own thread, the
  * frame begun last is ended and its logic run first, and the next update
  * begins afresh. */
+#define SAVE_RUN_MOST 120   /* frames run on at most for BN6's save to unmask: some eight a trade's took (issue #734) */
+
+/* BN6's save under way at a quit: the game run on through it, unseen and
+ * unheard, so that what is kept is read from the RAM whole, and no state is
+ * saved with it masked */
+static void save_runs_out(void) {
+	if (!save_masked()) return;
+	if (emu_threaded() && started) after_frame();
+	started = false;
+	int n = 0;
+	for (; n < SAVE_RUN_MOST && save_masked(); ++n) {
+		emu_frame_as(0, EMU_FRAME_UNSHOWN | EMU_FRAME_UNHEARD);
+		emu_sync();
+		after_frame();
+	}
+	printf("quit: BN6's save run on %d frames, its RAM %s\n", n, save_masked() ? "still masked" : "whole");
+}
+
 void emu_keep_run(void) {
+	save_runs_out();
 	if (!director_can_suspend() && director_settles()) {
 		emu_sync();
 		if (emu_threaded() && started) after_frame();

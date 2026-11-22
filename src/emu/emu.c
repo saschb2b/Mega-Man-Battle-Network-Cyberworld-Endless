@@ -12,6 +12,7 @@
 #include "ram_survey.h"
 #include "xchips_pack.h"
 #include "save_queue.h"
+#include "save_mask.h"
 #include "sound_quiet.h"
 #include "xinstall_log.h"
 
@@ -121,7 +122,7 @@ bool emu_init(const uint8_t *rom, size_t len) {
 static void wait_frame(void);
 
 bool emu_ready(void) { return core != NULL; }
-void emu_reset(void) { wait_frame(); if (core) { core->reset(core); hook_reapply(); } }
+void emu_reset(void) { wait_frame(); if (core) { core->reset(core); hook_reapply(); save_mask_loaded(); } }
 
 bool emu_hook(uint32_t addr, EmuHook fn, void *user) {
 	wait_frame();
@@ -576,6 +577,7 @@ bool emu_load_state(const char *path) {
 		hook_reapply();
 		keep_put(false);
 		sound_quiet_loaded();
+		save_mask_loaded();
 		xchips_pack_ready(core);   /* (a state from before the pack's entries in the save RAM: xchips_pack.h) */
 	}
 	return ok;
@@ -599,6 +601,7 @@ bool emu_state_load(const void *state) {
 	hook_reapply();
 	keep_put(false);
 	sound_quiet_loaded();
+	save_mask_loaded();
 	return true;
 }
 
@@ -629,6 +632,7 @@ bool emu_snapshot_load(void *bytes, size_t size) {
 		hook_reapply();
 		keep_put(false);
 		sound_quiet_loaded();
+		save_mask_loaded();
 	}
 	return ok;
 }

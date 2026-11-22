@@ -34,6 +34,7 @@
 #include "hook_gpsp.h"
 #include "platform.h"
 #include "save_queue.h"
+#include "save_mask.h"
 #include "sound_quiet.h"
 #include "xchips_pack.h"
 #include "xinstall_log.h"
@@ -311,6 +312,7 @@ bool emu_ready(void) { return ready; }
 bool emu_rom_clean(uint8_t *out, size_t size) { (void)out; (void)size; return false; }
 void emu_reset(void) {
 	if (ready) retro_reset();
+	save_mask_loaded();
 }
 bool emu_threaded(void) { return false; }
 void emu_sync(void) {}
@@ -481,6 +483,7 @@ static bool state_from(const uint8_t *b, size_t size) {
 	if (s && save) memcpy(save, b + sizeof head + head.state, s);
 	keep_put(false);
 	sound_quiet_loaded();
+	save_mask_loaded();
 	xchips_pack_ready(NULL);
 	return true;
 }
@@ -534,6 +537,7 @@ bool emu_state_load(const void *state) {
 	if (!ready || !retro_unserialize(state, retro_serialize_size())) return false;
 	keep_put(false);
 	sound_quiet_loaded();
+	save_mask_loaded();
 	return true;
 }
 
