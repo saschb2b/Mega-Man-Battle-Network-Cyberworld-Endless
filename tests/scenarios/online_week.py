@@ -495,6 +495,7 @@ MANY['crew-pulls-back'] = dict(crew_fight(BETA), STEPS=online.course(
     ('@beta', 'expect', 'dive=on'),
     soon('where=layer', 'beta', 600),
     ('@beta', 'expect', 'hp>0'),
+    ('@beta', 'repeat', 'press A; wait 10', 'chat=closed', 20),   # (the band shows over no chat box: issue #781)
     soon('band~pulled us back', 'beta', 600),
 ))
 # ... and a second deletion: spent, the dive over as alone; Alpha gives nothing.

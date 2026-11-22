@@ -83,6 +83,9 @@ void dive_band_frame(uint32_t now, bool linked, uint32_t me) {
 }
 
 void dive_band_tick(uint32_t now) {
+	/* (a line's time runs only while the band can show it: one said under a card, a fade or a battle waits for the
+	 * field, never spent unseen; issue #781) */
+	if (party_play_held() || director_cover() != COVER_NONE) { B.shown_at = 0; return; }
 	if (B.nfeed && B.shown_at && now - B.shown_at > FEED_MS) {
 		memmove(B.feed, B.feed + 1, sizeof B.feed[0] * (size_t)(B.nfeed - 1));
 		B.shown_at = --B.nfeed ? now : 0;

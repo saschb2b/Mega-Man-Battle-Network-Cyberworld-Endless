@@ -477,6 +477,9 @@ state's `cover` line names it.
   burst, too short to read alone), and on the field for two and a half
   seconds from its first Custom screen's close; never over a Custom screen
   (`party_play_drawn_over`). `band` in the state says what is drawn.
+- **The feed waits:** a line said while the band cannot show it (a card,
+  a chat box, a fade, a battle) keeps its three and a half seconds for
+  when it can, rather than spending them unseen.
 - **Title cards:** no names, rings or arrival mark under one; the
   arrival's two seconds are counted from the card's end.
 - **The plates:** six pixels between a crewmate's layer and his HP
