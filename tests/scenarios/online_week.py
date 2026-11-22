@@ -635,3 +635,31 @@ MANY['door-waits-crew'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.c
     soon('partyfield~seat', 'beta', 3000),
     ('expect', 'partyfield~2 seat'),                      # two MegaMen on one field
 ))
+
+
+# An HP reward on a crew's field reaches the run once (issue #769): Alpha, the battle's owner, on 20 HP of 100, so BN6's
+# results pick from the rows of a MegaMan low on HP; whatever they give, the run's HP after it is the field's as its
+# fight ended and the reward once (the field's read stops before the results' recovery, BN6_PHASE_LEAVING).
+# (partyreward=32818: the results' reward 0x8032, HP+50, on every game of the field; partydel=8, a seat nobody holds, so
+# that the enemies fall 60 iterations after partyend whatever they are)
+LOW = LOUD.replace('onlinename={name}', 'onlinename={name},hp=100/20,partyend=20,partybot=1,partyreward=32818,partydel=8')
+MANY['crew-reward-once'] = dict(crew_fight(LOW), STEPS=online.course(
+    crew_fight(LOW)['STEPS'],
+    ('expect', 'crewend~won'),
+    ('expect', 'crewend~reward 8032'),
+    ('expect', 'hp=70/100'),                      # (the field's own MegaMan: 20 and the reward once; 100 before, its cap)
+    ('@beta', 'expect', 'hp=70/100'),             # (a partner: BN6's results gave him nothing on the field)
+))
+
+# A dive's end screen of its own (issue #769): Beta's second deletion on a crew's field ends his dive; his title opens
+# the dive's RESULT, the crew's battles fought and won, and his place on the week's Board as the server answers it.
+MANY['dive-end-screen'] = dict(crew_fight(BETA), STEPS=online.course(
+    MANY['crew-pulls-back']['STEPS'],
+    soon('join=none', '', 600),
+    soon('join=none', 'beta', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    ('@beta', 'repeat', 'press A; wait 20', 'page=result', 120),   # (BN6's results paged; the dive's RESULT on the title)
+    ('@beta', 'expect', 'diveend~crew 2/2'),
+    soon('diveend~place 1', 'beta', 600),
+))

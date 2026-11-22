@@ -179,5 +179,7 @@ _Static_assert(offsetof(WeeklyRecord, b_week) == 24, "WeeklyRecord.b_week save o
 _Static_assert(offsetof(WeeklyRecord, b_depth) == 26, "WeeklyRecord.b_depth save offset changed");
 _Static_assert(offsetof(WeeklyRecord, pulled) == 28, "WeeklyRecord.pulled save offset changed");
 _Static_assert(offsetof(WeeklyRecord, r_pulled) == 29, "WeeklyRecord.r_pulled save offset changed");
+_Static_assert(offsetof(WeeklyRecord, crew_fought) == 30, "WeeklyRecord.crew_fought save offset changed");
+_Static_assert(offsetof(WeeklyRecord, crew_won) == 31, "WeeklyRecord.crew_won save offset changed");
 
 #endif

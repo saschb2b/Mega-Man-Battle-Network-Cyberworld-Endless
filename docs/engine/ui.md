@@ -230,7 +230,13 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   opened under them, each marked NEW as the setup marks it, and the
   closest goal in the information box). A helped run's helpers stand on
   RESULT's band as its note. Like RESULT it waits for A, but without
-  RESULT's PRESS (A) BUTTON: no screen of ours names A.
+  RESULT's PRESS (A) BUTTON: no screen of ours names A. A dive's end
+  (issue #769) is the same screen with the dive's band, DEEP NET: "The
+  dive is over" in the panel, and in the window the layer reached, the
+  crew's battles ("2 of 3 won") and the dive's place on the week's
+  Board as the server answers it ("Asking..." for up to six seconds,
+  then "3rd", or "No link"), MegaMan's word that the portal is open
+  again; RECORDS as for any dive.
 - A list's line keeps its colour under the cursor (Options).
 - Yes and No as BN6 asks them: the statistics question.
 - The second screen's HP, ZENNY and BUGFRAGS named as the PET menu
