@@ -190,6 +190,7 @@ bool meta_form_open(int form) {
 int meta_form_best(int form) { return form >= 0 && form < (int)sizeof profile.form_best ? profile.form_best[form] - 1 : -1; }
 
 void meta_soul_won(int form, int soul) {
+	if (save_slot_weekly()) return;   /* (the week's net opens nothing: docs/game/meta/weekly-net.md) */
 	int g = form == RUN_FORM_SOUL_BN5 ? 0 : form == RUN_FORM_SOUL_BN4 ? 1 : -1;
 	if (g < 0 || soul < 1 || soul > 12 || (profile.souls_won[g] >> (soul - 1) & 1)) return;
 	profile.souls_won[g] |= (uint16_t)(1u << (soul - 1));

@@ -219,6 +219,8 @@ void forms_rival_pay(char *words, size_t n) {
  * run, as a deleted Navi opens his Cross start: noted as he falls, and
  * from the rivals' records for the falls before forms) */
 void forms_note_fall(int navi) {
+	/* (the week's net opens nothing: docs/game/meta/weekly-net.md) */
+	if (save_slot_weekly()) return;
 	int f = guardian_older(navi) || guardian_team(navi) ? RUN_FORM_SOUL_BN5 : guardian_bn4(navi) ? RUN_FORM_SOUL_BN4 : RUN_FORM_MIX;
 	if (f == RUN_FORM_MIX || (profile.forms_open >> f & 1)) return;
 	profile.forms_open |= (uint8_t)(1u << f);
