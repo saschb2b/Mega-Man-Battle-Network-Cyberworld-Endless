@@ -15,6 +15,7 @@ typedef struct {
 	int cursor;        /* the row the arrow is on */
 	int frame;         /* frames since the menu came: the arrow's turn */
 	bool asking;       /* NEW GAME's question over it: no arrow */
+	bool dive;         /* CONTINUE's run an unfinished dive (issue #759) */
 } TitleMenu;
 
 /* Its rows: NEW GAME, CONTINUE where a run is saved, OPTIONS the last. */

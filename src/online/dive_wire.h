@@ -154,7 +154,15 @@ typedef struct {
 /* -- built: each its size, 0 where a value is out of its bounds -- */
 size_t dive_wire_enter(uint8_t out[ONLINE_DIVE_ENTER_BYTES], uint16_t week, uint32_t seed, DiveWay way);
 size_t dive_wire_leave(uint8_t out[ONLINE_DIVE_LEAVE_BYTES]);
-size_t dive_wire_end(uint8_t out[ONLINE_DIVE_END_BYTES], unsigned how, int x, int y, int z, unsigned cause);
+/* A dive's end: how (deleted or won), where, what deleted MegaMan, and
+ * (v30) what the Board takes from it: the dive's minutes, its flags
+ * (ONLINE_WEEK_PULLED) and the acts whose guardian was fought in a party */
+typedef struct {
+	unsigned how;
+	int x, y, z;
+	unsigned cause, minutes, flags, party;
+} DiveEnd;
+size_t dive_wire_end(uint8_t out[ONLINE_DIVE_END_BYTES], const DiveEnd *e);
 size_t dive_wire_found(uint8_t out[ONLINE_DIVE_FOUND_BYTES], unsigned index);
 /* v24: MegaMan's HP and max HP (1..9999, hp at most it) */
 size_t dive_wire_vitals(uint8_t out[ONLINE_DIVE_VITALS_BYTES], unsigned hp, unsigned max_hp);

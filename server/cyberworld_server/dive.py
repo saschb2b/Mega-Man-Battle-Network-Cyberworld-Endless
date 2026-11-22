@@ -243,7 +243,7 @@ class Dive:
 
     # -- traces --
 
-    async def end(self, player, room, how, x, y, z, cause):
+    async def end(self, player, room, how, x, y, z, cause, minutes=0, flags=0, party=0):
         if how == SPEC["dive_won"] and room.depth != SPEC["week_layers"]:
             await self.server.notice(player, 25, "That dive does not add up")
             return
@@ -257,6 +257,9 @@ class Dive:
         # (the dive ended: its crew and its queue left; he stays on the layer until his game moves on)
         self.server.crews.split(player.id, gone=False)
         self.server.parties.left(player.id)
+        # (v30: its end on the Board at once, the layer the server's own, no visit to the Square waited for; the
+        # game's WEEK_POST after it confirms the same entry, week.py)
+        await self.server.weeks.from_dive(player, room.week, room.key[1], depth, how == SPEC["dive_won"], minutes, flags, party)
 
     async def found(self, player, room, index):
         layer = self.traces.layers.get(room.key)

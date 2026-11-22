@@ -30,6 +30,12 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader) {
 
 
 const char *dive_join_joined_words(void) { return "Jumping in!"; }
+
+const char *dive_back_words(void) { return "Back in,Lan! Linked up again."; }
+
+const char *dive_back_alone_words(void) { return "No link... We'll dive alone,Lan."; }
+
+const char *dive_back_week_words(void) { return "A new week's net! We'll dive alone."; }
 const char *dive_find_words(const char *name, bool mine) {
 	static char s[64];
 	if (mine) snprintf(s, sizeof s, "First to open this one this week!");

@@ -38,6 +38,14 @@ void dive_band_describe(FILE *f) { fprintf(f, "band %s\n", B.nfeed ? B.feed[0] :
 void dive_band_frame(uint32_t now, bool linked, uint32_t me) {
 	/* (MegaMan's HP to his crew as it changes, and the crew's plates: dive_crew_view.h) */
 	dive_crew_view_frame(linked, me, now);
+	dive_band_tick(now);
+}
+
+void dive_band_back(int how) {
+	dive_link_line(how == DIVE_BACK_LINKED ? dive_back_words() : how == DIVE_BACK_OTHER_WEEK ? dive_back_week_words() : dive_back_alone_words());
+}
+
+void dive_band_tick(uint32_t now) {
 	if (B.nfeed && B.shown_at && now - B.shown_at > FEED_MS) {
 		memmove(B.feed, B.feed + 1, sizeof B.feed[0] * (size_t)(B.nfeed - 1));
 		B.shown_at = --B.nfeed ? now : 0;
@@ -56,8 +64,13 @@ void dive_link_draw(void) {
 	/* (none of it over SELECT's map: a name and a ring had stood on it, issue #728) */
 	if (director_map_over()) return;
 	dive_traces_draw();
-	if (!dive_link_on() || !director_on_map()) return;
+	if (!director_on_map()) return;
 	bool chat = emu_read8(BN6_CHATBOX) != 0;
+	/* (a dive with no link: the feed alone, CONTINUE's word on the link it did not get, issue #759) */
+	if (!dive_link_on()) {
+		if (dive_link_diving() && B.nfeed && !chat) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, B.feed[0]);
+		return;
+	}
 	/* (the divers' names over their heads: dive_people.h) */
 	dive_people_draw(chat);
 	/* (the crew's plates under BN6's HP box: dive_crew_view.h) */

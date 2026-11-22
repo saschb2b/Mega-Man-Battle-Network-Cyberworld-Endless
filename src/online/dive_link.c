@@ -26,6 +26,8 @@
 #include "weekly.h"
 
 #define LOST_MS 20000        /* a link down so long leaves the dive solo */
+#define CALL_MS 15000        /* CONTINUE's call to the Square: answered within, or the dive goes on alone */
+#define URL_BYTES 256        /* a server address, network_prefs.h's NETWORK_URL */
 
 static struct {
 	bool on;
@@ -37,6 +39,14 @@ static struct {
 	uint32_t lost_at;
 	uint32_t resumes;        /* the transport's resumes seen (issue #180: a resume puts him in no room) */
 } L;
+
+/* CONTINUE into a dive (issue #759): the dive taken up with no link, the
+ * Square called as the gate calls it and the link taken up once it answers */
+static struct {
+	unsigned seen;           /* the dive's resumes handled (weekly_resumes) */
+	bool calling;
+	uint32_t since;
+} C;
 
 void dive_link_adopt(void) {
 	OnlineSnapshot s;
@@ -109,9 +119,12 @@ static void send(const uint8_t *m, size_t n) {
 
 /* the dive over (deleted or won): told where, then the link closed */
 static void ended(void) {
-	const WeeklyRecord *r = weekly_record();
+	/* (this dive's own end, which the server posts to the Board: the week's best the record keeps may be another's) */
+	const WeeklyEnd *w = weekly_last_end();
+	DiveEnd e = { w->won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, dive_splits_cause(), w->minutes,
+		w->pulled ? ONLINE_WEEK_PULLED : 0u, 0 };
 	uint8_t m[ONLINE_DIVE_END_BYTES];
-	send(m, dive_wire_end(m, r->pending && r->r_won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, dive_splits_cause()));
+	send(m, dive_wire_end(m, &e));
 	dive_mail_told();
 	fprintf(stderr, "dive: the dive's end told; the link closed\n");
 	dive_link_close();
@@ -136,8 +149,49 @@ static void room(void) {
 }
 
 
+/* the call ended: the link taken up where the server is on the dive's week, else the dive on alone, said */
+static void answered(const OnlineSnapshot *s) {
+	const WeeklyRecord *r = weekly_record();
+	C.calling = false;
+	if (s->connected && s->week == r->week && s->week_seed == r->seed) {
+		dive_link_adopt();
+		if (L.on) { dive_band_back(DIVE_BACK_LINKED); return; }
+	}
+	fprintf(stderr, "dive: CONTINUE's call %s; the dive goes on alone\n", s->connected ? "met another week's Square" : "not answered");
+	online_transport_end();
+	dive_band_reset();
+	dive_band_back(s->connected ? DIVE_BACK_OTHER_WEEK : DIVE_BACK_ALONE);
+}
+
+/* a dive taken up again with no link (the title's CONTINUE; the portal's comes with its link): the Square called */
+static void call_again(void) {
+	if (L.on || !weekly_on()) { C.seen = weekly_resumes(); C.calling = false; return; }
+	if (C.calling) {
+		OnlineSnapshot s;
+		online_transport_snapshot(&s);
+		if ((s.connected && s.week) || s.error[0] || SDL_GetTicks() - C.since > CALL_MS) answered(&s);
+		return;
+	}
+	if (C.seen == weekly_resumes()) return;
+	C.seen = weekly_resumes();
+	char url[URL_BYTES], name[ONLINE_NAME_BYTES + 1];
+	uint8_t id[ONLINE_IDENTITY_BYTES];
+	if (!director_gate_address(url, sizeof url, name, sizeof name, id) || !online_transport_start(url, name, id)) {
+		OnlineSnapshot none = { 0 };
+		answered(&none);
+		return;
+	}
+	C.calling = true;
+	C.since = SDL_GetTicks();
+	fprintf(stderr, "dive: CONTINUE into the dive; calling %s as %s\n", url, name);
+}
+
 void dive_link_frame(void) {
-	if (!L.on) return;
+	call_again();
+	if (!L.on) {
+		if (weekly_on()) dive_band_tick(SDL_GetTicks());
+		return;
+	}
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	uint32_t now = SDL_GetTicks();

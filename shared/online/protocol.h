@@ -3,7 +3,7 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 24
+#define ONLINE_PROTOCOL_VERSION 30
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
@@ -159,7 +159,7 @@
 #define ONLINE_DIVE_VITALS 8          /* v24: MegaMan's HP and max HP, as they change (issue #717) */
 #define ONLINE_DIVE_ENTER_BYTES 11    /* ... and each one's size, its type byte counted */
 #define ONLINE_DIVE_LEAVE_BYTES 2
-#define ONLINE_DIVE_END_BYTES 11
+#define ONLINE_DIVE_END_BYTES 15        /* (v30: the dive's minutes, its flags and its party's acts, for the Board) */
 #define ONLINE_DIVE_FOUND_BYTES 3
 #define ONLINE_DIVE_PHRASE_BYTES 9
 #define ONLINE_DIVE_WAVE_BYTES 6

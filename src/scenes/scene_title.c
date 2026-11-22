@@ -67,6 +67,7 @@ static struct {
 	bool has_save;
 	int saved_depth;      /* the saved run's layer, 0 when unknown */
 	bool saved_home;      /* ... saved at home, between acts */
+	int dive;             /* an unfinished dive's layer, CONTINUE's before the normal run's (issue #759); 0 none */
 	bool summary;         /* the finished run's summary (title_summary.c), its area's picture after it */
 	int next;             /* the cycle's next backdrop */
 	int shown_at;         /* frame the backdrop came in */
@@ -288,7 +289,8 @@ static void enter(void) {
 	Run saved = { 0 };
 	if (S.has_save && peek_run(&saved)) S.saved_depth = saved.depth;
 	S.saved_home = S.saved_depth && emu_saved_home(saved.seed, saved.depth);
-	S.cursor = S.has_save ? 1 : 0; /* CONTINUE when there is one */
+	S.dive = weekly_unfinished();
+	S.cursor = S.has_save || S.dive ? 1 : 0; /* CONTINUE when there is one */
 	S.summary = title_summary;
 	title_summary = false;
 	S.first = true;
@@ -349,7 +351,7 @@ static bool select_pressed(void) {
  * left to `ok`. */
 static bool menu_input(bool ok) {
 	if (select_pressed()) return true;
-	int rows = title_menu_rows(S.has_save);
+	int rows = title_menu_rows(S.has_save || S.dive);
 	if (btn_repeat(BTN_UP) || btn_repeat(BTN_DOWN)) {
 		S.cursor = (S.cursor + (btn_repeat(BTN_UP) ? rows - 1 : 1)) % rows;
 		audio_sfx(SFX_CURSOR);
@@ -412,6 +414,9 @@ static void leave_step(void) {
 	if (S.jack_v < 96) S.jack_v += 4;
 	S.jack_y += S.jack_v;
 	if (S.leaving <= LEAVE_FRAMES) return;
+	/* (an unfinished dive first, straight back in at its checkpoint, its link taken up as it starts: the owner's call
+	 * of 22 November 2026, issue #759; the normal run's CONTINUE again once it ends) */
+	if (S.choice == 1 && S.dive && weekly_continue()) return;
 	if (S.choice == 1 && load_run()) emu_resume_requested = true;
 	else {
 		run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
@@ -487,8 +492,8 @@ static void update(void) {
 void title_describe(FILE *f) {
 	const char *step = S.leaving ? "leaving" : title_setup_shown() ? "setup" : S.summary ? "summary" : !S.pressed ? "start"
 		: !S.menu ? "opening" : S.confirm ? "confirm" : "menu";
-	const char *cursor = S.cursor == 0 ? "new" : S.cursor == 1 && S.has_save ? "continue" : "options";
-	fprintf(f, "title %s\ncursor %s\nsaved %d\n", step, cursor, S.has_save ? (S.saved_depth ? S.saved_depth : -1) : 0);
+	const char *cursor = S.cursor == 0 ? "new" : S.cursor == 1 && (S.has_save || S.dive) ? "continue" : "options";
+	fprintf(f, "title %s\ncursor %s\nsaved %d\ndivesaved %d\n", step, cursor, S.has_save ? (S.saved_depth ? S.saved_depth : -1) : 0, S.dive);
 	if (S.confirm) fprintf(f, "asks %s\n", S.t - S.asked < (int)(strlen(ASK_FIRST) + strlen(S.ask)) ? "typing" : S.yes ? "yes" : "no");
 	fprintf(f, "runs %d\nbest %d\nmarks %03x\n", profile.runs, profile.best_depth, profile.marks);
 	title_setup_describe(f);
@@ -607,6 +612,13 @@ static void top_draw(int x0, int y0) {
 	if (saves_cloud_note(s, sizeof s, &t, &len)) cinema_note_box(x0, y0, s, t, len);
 }
 
+/* the menu as it stands: CONTINUE an unfinished dive's before the normal run's (issue #759) */
+static TitleMenu menu_now(void) {
+	TitleMenu m = { S.has_save || S.dive, S.saved_depth, S.saved_home, S.cursor, S.t - S.menu, S.confirm, S.dive != 0 };
+	if (S.dive) { m.saved_depth = S.dive; m.saved_home = false; }
+	return m;
+}
+
 static void draw(void) {
 	fill_rect(0, 0, P.w, P.h, BLACK);
 	int x0 = P.core_x, y0 = P.core_y;
@@ -644,7 +656,7 @@ static void draw(void) {
 	}
 	title_hint_draw(x0, y0, S.menu, S.pressed, S.confirm || options_shown());
 	if (S.menu) {
-		TitleMenu m = { S.has_save, S.saved_depth, S.saved_home, S.cursor, S.t - S.menu, S.confirm };
+		TitleMenu m = menu_now();
 		title_menu_draw(x0, y0, &m);
 	}
 	if (S.confirm) {

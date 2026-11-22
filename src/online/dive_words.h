@@ -16,6 +16,11 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader);
 /* The band's join-in line (dive_join.h): his join into a crewmate's battle
  * sent, while it starts. */
 const char *dive_join_joined_words(void);
+/* The band's as CONTINUE takes a dive up (issue #759): linked up again;
+ * no answer from the Square; the Square on another week's net. */
+const char *dive_back_words(void);
+const char *dive_back_alone_words(void);
+const char *dive_back_week_words(void);
 /* The band's line as MegaMan opens a Mystery Data another opened first
  * this week (`mine` he is the first: `name` his own). */
 const char *dive_find_words(const char *name, bool mine);
