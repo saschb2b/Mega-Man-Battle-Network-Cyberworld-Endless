@@ -374,6 +374,25 @@ frames longer, his element none, another Soul's sprite. Not moved: the
 unison picture's arm (`BN4_SOUL_PICTURE_DECOS`' 0x13 for him), which BN6's
 picture does not draw.
 
+## SrchSoul in BN6's engine
+
+SrchSoul (Red Sun's Soul 4, form 4, kind Invisible) is BN6's Soul 16 (k 3 in
+`soulbn4.c`'s `forms`, held bit 9), the first BN4 Soul with an object of its
+own. What it took past AquaSoul's parts:
+
+| Part | SrchSoul's |
+| --- | --- |
+| His charged shot | power attack 0x0A into family 0x3E, an attack unit at BN6's grown 0xDA: five shots of 10 at the nearest foe ahead of him, a scope (effect 0x52, BN6's 0xBE) on it. Its target finder (`0x0800FB3C`) is copied with its panel flags' table: BN6's nearest (`0x08016054`) reads a side flip and keeps a column past his where BN4's keeps his own |
+| His object | his taking of the form (`BN4_FORM_ENTERS`' 4, `0x0800E13E`) spawns the fourth kind's 0x44, which scans the other side for hidden foes (collision flags 0x206), puts a scope on each, and ten frames on lays a hit area and ends. The generator copies the routine with his charged shot's unit (`SOUL_ENTERS`) and moves the object at a fixed dispatch number of the Souls' own, 0xA4 (`TYPES4_SOULS`, the claim's 0xA4-0xA7 past bn4-air-units' 0xA0-0xA3); `soullife.c` runs the copy as he enters the proxy form (`soulbn4_enter_copy`) |
+| Its moment | BN4 runs a form's routine as the form is written, inside its unison (`BN4_FORM_STATE`), so its object is gone before the fight's first frame; BN6's crossing ends nearer the fight, so its object is still in play at t1-t3 and its hit area meets MegaMan there (`BN6_COLL_MET`). The comparator reads that as one state (`soul object`) |
+| His shots' sound | BN4's 0xBB, copied at slot 0x283 (DrkVulcn's), played on BN6's player 22 (`src/audio/xsong.c` XSOUNDS' `player`): on BN4's player 14 BN6's own release of a charged shot (0x72, player 14 in BN6, 26 in BN4) cut his first two shots' sound |
+
+The proof is `bn4_soul_srch` (with its control): united by two Invis, B held
+102 frames, his five shots at a MettaurSP at (5,2). Its three mutations: the
+charge 10 frames longer, the shots' damage another, another Soul's sprite.
+The object's scan finds no hidden foe there, so no frame of the fight tests
+it yet.
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first

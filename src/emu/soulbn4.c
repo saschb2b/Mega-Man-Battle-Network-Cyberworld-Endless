@@ -23,8 +23,8 @@
 enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
-/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11 };
+/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4 };
 #define FORM_GUTS 2
 #define FORM_AQUA 11
 #define FORM_THUN 6
@@ -85,6 +85,12 @@ unsigned soulbn4_chip_bonus(int k, int chip) {
 unsigned soulbn4_charge_bonus(int k) {
 	int kind;
 	return k >= 0 && k < SOULS_BN4 && forms[k] == FORM_AQUA && aqua_rule(&kind) ? BN4_CHARGED_DOUBLE : 0;
+}
+
+uint32_t soulbn4_enter_copy(int k) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (!b4 || k < 0 || k >= SOULS_BN4) return 0;
+	return xchips_bn4_moved_at(get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * forms[k]) | 1u);
 }
 
 int soulbn4_k(int soul) { return soul >= SOUL_BN4_FIRST && soul < SOUL_BN4_FIRST + SOULS_BN4 ? soul - SOUL_BN4_FIRST : -1; }

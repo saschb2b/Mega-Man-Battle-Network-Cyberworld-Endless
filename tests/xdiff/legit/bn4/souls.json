@@ -8,6 +8,14 @@
   ]
  },
  {
+  "key": "soul object",
+  "name": "a Soul's object spawned as he takes the form, each engine's own moment of it",
+  "why": "BN4 runs a form's routine as the form is written (BN4_FORM_STATE 0x0800E05C, by BN4_FORM_ENTERS), inside its unison, before the fight's first frame: SrchSoul's (0x0800E13E) spawns the fourth kind's 0x44 (0x080E6E4C), which scans the other side for hidden foes, a scope on each (effect 0x52), and ten frames on lays a hit area and ends, all before t1. BN6 runs its copy as he enters the proxy form (src/emu/soullife.c, soulbn4_enter_copy), which BN6's crossing ends nearer the fight, so its object (the dispatch's 0xA4) is still in play at the fight's first frames. Read as the same state where BN6's is in play and BN4's is not: its being in play and its place in the run order; and MegaMan's word of the regions he met (BN6_COLL_MET, BN4's +0x4C) where BN6's holds the bit of the hit area the object lays as it ends, which BN4's met before the fight, and no bit BN4's has is missing",
+  "evidence": [
+   "bn4_soul_srch: BN6's object in play t1-t3, BN4's in no fight frame ; MegaMan's +0x6B 0x20 in BN6 at t3, its hit area met (traces of 22 November 2026)"
+  ]
+ },
+ {
   "key": "held",
   "name": "the battle's actors held through BN4's unison",
   "why": "BN4's unison stops the battle's time (the battle's flags' bit 4, BN4_TIME_STOP 0x08007948, BN6's twin 0x0800A098), and its actors' runner gives every actor its held routine instead of its state while it is stopped (0x08013D94-0x08013DA8: bl 0x080104DC): on its first held frame, +0x18 0, the routine copies +0x36 to +0x30 and +0x3E to +0x32 and sets +0x18 4 (0x080104DE-0x080104F2); +0x18 goes back to 0 as time runs again, +0x30 and +0x32 keep the copies. BN6's runner and held routine are the same code (BN6 0x0801B4AA, 0x08016BFC, the same bytes), but BN6 crosses before the fight, its time never stopped in the fight's frames, so its actors keep their +0x30 and +0x32 as they began. Read so after BN4's unison: an actor's +0x18 4 at the unison's frame where BN6's is as it began, and its +0x30 to +0x33 BN4's copies of its own +0x36 to +0x39 where BN6's are as they began The copy is kept after time runs again, so +0x30-+0x33 are held to +0x36-+0x39 as they are or as they were on BN4's last frame of the unison: a push changes its +0x36 later (GutsSoul's punch pushes the Mettaur back, BN4's +0x30 staying the 0x14 its held routine copied, 0x080104E6 again by romlab's write watch on bn4_soul_guts)",

@@ -1,0 +1,22 @@
+[
+ {
+  "name": "SrchSoul's charge 10 frames longer",
+  "spec": "bn4_soul_srch",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 110 frames for his grown power attack where BN4_CHARGE_TIMES' row of 0x0A holds 100: B held 102 frames fires the plain buster, not his shots"
+ },
+ {
+  "name": "SrchSoul's shots' damage another",
+  "spec": "bn4_soul_srch",
+  "poke": [
+   "0800CDC6:2014"
+  ],
+  "what": "the power attack's copy (BN4 0x0800CDC4, moved with family 0x3E's unit) with its movs r0,#0xa (each shot's damage at the attack's +8, 10) made #0x14: the Mettaur loses 20 a shot, not 10"
+ },
+ {
+  "name": "SrchSoul drawn as another Soul",
+  "spec": "bn4_soul_srch",
+  "soulbreak": 1,
+  "what": "the sprite's hook gives BN5's first Soul's sprite where the room's is his: his sprite's address another"
+ }
+]

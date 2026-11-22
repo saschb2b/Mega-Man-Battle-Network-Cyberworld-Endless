@@ -1,0 +1,10 @@
+{
+ "bn4": "0xBB",
+ "bn6": "0x283",
+ "clock": "state",
+ "souls": [
+  "4"
+ ],
+ "what": "SrchSoul's shots' sound 0xBB, its copy",
+ "why": "Played by SrchSoul's charged shot as each of its five shots strikes (BN4's family 0x3E, moved as BN6's grown 0xDA: movs r0,#0xbb at 0x080EDC0E, its bl to PlaySoundEffect at 0x080EDC10; BN6: the copy's bl aimed at the unit's shim that makes r0 0x283, the slot DrkVulcn's unit gave BN4's song 0xBB first, on BN6's player 22 (src/audio/xsong.c XSOUNDS: BN4's player 14 is BN6's release of a charged shot's, 0x72, which cut his first two shots' sound). bn4_soul_srch at t142, then every six frames"
+}
