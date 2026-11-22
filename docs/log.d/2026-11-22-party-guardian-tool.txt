@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T01:10:00Z
-* **New**: devtools/party-guardian.md (a party's guardian against going alone: `tools/party_guardian.py`, issue #754). **Update**: devtools/index.md (its line), code/tools.md (its row).
