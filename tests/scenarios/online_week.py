@@ -246,6 +246,22 @@ MANY['join-cut-owner'] = dict(CAST, START=LOUD, GAMES={'beta': SLOW}, STEPS=onli
     ('@beta', 'expect', 'doing=map'),
 ))
 
+# A link cut as the portal is taken (issue #751): the dive begins with its link down, kept, and takes it up again
+# once back, not solo for the rest of the dive
+MANY['portal-cut'] = dict(CAST, STEPS=online.course(
+    online.into_square(),
+    ('do', PORTAL),
+    ('repeat', 'press A; wait 10', 'choice~/2', 20),
+    online.yes(),
+    ('do', 'reconnect cut 3'),
+    ('repeat', 'press A; wait 10', 'dive=on', 60),
+    ('until', 'where=layer', 1200),
+    ('expect', 'divelink=on'),
+    ('sleep', 4.5),                                     # the cut and a try again: the clock's
+    soon('divestate=up', '', 1800),
+    ('expect', 'link=up'),
+))
+
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
 # back; between the near reach and the far (along x, 64 and 88 world units: protocol.json's crew_near_* and crew_far_*,
 # issue #750) a crew stays as it was, looked at again and again. MegaMan is put
