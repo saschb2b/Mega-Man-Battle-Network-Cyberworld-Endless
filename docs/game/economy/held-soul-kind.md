@@ -3,7 +3,7 @@ type: Feature
 title: "A held Soul's kind"
 description: "A held Soul leans the finds and stock to its kind (`src/core/loot_souls.c`): a quarter of Mystery Data's chips and a Net Dealer's fourth chip, the folder's scarcest kind, measured with `build.py economy`."
 tags: [game, economy]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T13:09:14Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:32:55Z }
 ---
 
 # A held Soul's kind (25 October 2026)

@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T12:32:55Z
-* **Update**: game/economy/held-soul-kind.md (every Soul a run holds leans its finds and stock to its kind, Team ProtoMan's and BN4's beside Team Colonel's, `souls_lean`).

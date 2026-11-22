@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: game/economy/held-soul-kind.md (every Soul a run holds leans its finds and stock to its kind, Team ProtoMan's and BN4's beside Team Colonel's, `souls_lean`).
+* **Update**: game/meta/forms.md (the helper named SoulT+1 in a Soul form and Dad's call for it, every held Soul's lean, the Soul felt in either Soul form, BN4's Souls to UNITE through #792, SOUL BN4 offered with BN5's ROM beside BN4's and a BN4 Soul standing once its power attack is placed).
 * **Update**: online/shared-dive.md (Nothing over BN6's screens: one answer for what stands over the layer's field, asked by everything the dive draws there; the joiner's band, the title cards, the plates' gap, the field's bottom-row marks, a dropped link's crew put away; issue #781), code/director.md (`director_cover.c`).
 * **Update**: online/arena/dropped-link.md (a link cut during a join: the joiner, the owner, a door's queue and the portal's way in, each settled at once).
 * **Update**: devtools/differential.md (a BN4 Soul's BN6 power attack read as soulpower.c lays the table out, never written as a number).
