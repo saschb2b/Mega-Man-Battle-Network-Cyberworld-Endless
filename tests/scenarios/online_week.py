@@ -399,8 +399,7 @@ MANY['crew-pull-back-kept'] = dict(crew_fight(BETA), STEPS=online.course(
 ))
 
 # Comings and goings (issue #758): three crewed; Beta's PET open, his plate busy on the others'; Gamma's game quit, his
-# signal gone on Alpha's band; Gamma's game started again and back on the layer (its held place taken back), his signal
-# back.
+# signal gone on Alpha's band; Gamma's game started again and his dive kept on, on the layer again, his signal back.
 MANY['comings-and-goings'] = dict(CAST, GAMES={'beta': online.HOME, 'gamma': online.HOME}, STEPS=online.course(
     MANY['dive-together']['STEPS'],
     online.into_square('gamma'), dive('gamma'),
@@ -415,8 +414,13 @@ MANY['comings-and-goings'] = dict(CAST, GAMES={'beta': online.HOME, 'gamma': onl
     ('sleep', 1.5),
     soon("comings=Gamma's signal is gone...", '', 600),
     soon("comings=Gamma's signal is gone...", 'beta', 600),
-    # (his game started again takes back the place held for him, on the layer: #739's resume)
-    ('@gamma', 'do', 'wait 60'),
+    # (his game started again, through the gate and the portal's "Keep diving", on the layer again)
+    online.into_square('gamma'),
+    soon('weekoffer=again', 'gamma', 600),
+    online.at('gamma', ('do', PORTAL), ('repeat', 'press A; wait 10', 'choice~/', 20)),
+    ('@gamma', 'repeat', 'wait 4', 'choice=1/3', 90),
+    ('@gamma', 'do', 'press A; wait 6'),
+    online.at('gamma', ('repeat', 'press A; wait 10', 'dive=on', 30), ('until', 'where=layer', 1200)),
     ('sleep', 1.5),
     soon("comings=Gamma's signal is back!", '', 600),
     soon('crew=3: Alpha Beta Gamma', '', 600),

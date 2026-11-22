@@ -893,8 +893,9 @@ As built (`dive_comings.c`, its lines in `dive_words.c`; protocol v29):
 
 Seen headless: `online-week/comings-and-goings` (three games: Beta's PET
 open, his plate BUSY on Alpha's and Gamma's; Gamma's game quit, "Gamma's
-signal is gone..." on Alpha's and Beta's band; Gamma dived again, "Gamma's
-signal is back!" and the crew of three again) and
+signal is gone..." on Alpha's and Beta's band; Gamma's game started again and
+his dive kept on, "Gamma's signal is back!" and the crew of
+three again) and
 `online-week/crew-of-four-and-a-fifth` (five games: the fifth's rings none,
 "Alpha's crew is full" on his band; a crewmate walking off says nothing).
 
