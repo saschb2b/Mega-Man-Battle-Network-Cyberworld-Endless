@@ -310,3 +310,8 @@ void xd4_start_confusion(const Spec *s, int game) {
 		}
 	}
 }
+
+void xd4_state_take(const Spec *s, int game, int screen, int custom) {
+	if (s->state4[0] && game == 4 && screen == 1 && custom == 1 && !guest_state_save(s->state4))
+		fprintf(stderr, "xdiff: BN4's state not saved at %s\n", s->state4);
+}

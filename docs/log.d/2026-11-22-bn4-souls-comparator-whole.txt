@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T14:40:00Z
+* **Update**: multirom/bn4-souls.md (the comparator's BN4 Souls done: the actors held through BN4's unison and the attack's variable it leaves, each writer found by romlab's write watch; bn4_soul_thun passes whole; a BN4 Soul lit by BN4's kind of the chip), devtools/differential.md (the hold and unison rules, state4 for romlab, a BN4 spec's shots). code/emu.md (soulkinds.c's BN4 kinds).

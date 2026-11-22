@@ -137,7 +137,7 @@ static int lights(int side, int *chaos) {
 	int shift = (breaks & SOULUNITE_BREAK_KIND) ? 1 : 0;
 	unsigned moved4 = 0;
 	for (int k = 0; k < SOULS_BN4; ++k) moved4 |= (unsigned)soulpower_bn4(k) << k;
-	const SoulTables t = { kinds5, bits5, kinds4, SOULS_BN4, SOUL_BN4_FIRST, SOULS_HELD_BN4, moved4 };
+	const SoulTables t = { kinds5, bits5, kinds4, SOULS_BN4, SOUL_BN4_FIRST, SOULS_HELD_BN4, moved4, true, soulkinds_bn4_of(chip) - shift };
 	return soulkinds_lights(&t, kind - shift, dark, held_now(), hook_read32(soul_field(side, BN6_SOUL_USED)), chaos);
 }
 

@@ -327,26 +327,34 @@ a rule of the run's, not of either game's:
   lights then, or the player picks, is the owner's call (issue #499), to
   be made before a run gives two of a kind.
 
+A BN4 Soul lights by the chip's kind as BN4 has it (`soulkinds_bn4_of`,
+since 22 November 2026): a BN4 chip of the registry by its own BN4
+record, a chip with a BN4 namesake by that, else BN5's kind with Cursor
+none. The two numberings agree but at 8, which is BN5's Cursor and BN4's
+panel-cracking (GutsSoul's kind), so a Cursor chip never lights GutsSoul
+and BN4's crack chips do. BN4's kinds are made once BN4's ROM is read,
+which may come after BN5's kinds are made.
+
 Held ROM-free by `tests/test_core.c`'s `test_soul_lights`, each case
-above over BN5's kinds as its ROM has them and two of BN4's.
+above over BN5's kinds as its ROM has them and two of BN4's, and
+GutsSoul's kind by BN4's 8.
 
 What is left, in order:
 
 1. ~~**The rest of the look**~~ (22 November 2026, The shared room,
    below): the unison's picture and his buster's flash moved, the room
    filled as a Soul is committed.
-2. **The comparator's BN4 Souls.** Its rules are in (22 November 2026:
-   `tools/xdiff_bn4_souls.py`, legit.json's bn4 `souls`, [the
-   differential](../devtools/differential.md), BN4): BN4's unison's last
-   frame on the fight's clock, his ready state's clock after it, the power
-   attack and his NameID by each game's number, the Soul's form and turns
-   held to BN6's Souls block, the pending form, BN4's own counters and the
-   buster's charge. `bn4_soul_thun` still parts at t1 on three bytes no
-   rule reads, each one's writer in BN4 not located: the Mettaur's +0x30
-   (0x3C in BN4's battle with a Soul, 0 in BN6's and in every BN4 spec
-   without one) and its +0x18 at the unison's frame, and MegaMan's attack
-   variables' +5 (2 from the unison to his charged shot). Its FAIL is
-   recorded with them; its mutations wait for it to pass.
+2. ~~**The comparator's BN4 Souls.**~~ (22 November 2026: `tools/xdiff_bn4_souls.py`,
+   legit.json's bn4 `souls`, [the differential](../devtools/differential.md), BN4):
+   BN4's unison's last frame on the fight's clock and the battle's actors
+   held through it (BN4's actors' runner gives each its held routine while
+   time is stopped, 0x080104DC, which copies its +0x36 to +0x30: a write
+   romlab's watch caught at 0x080104E6), the attack's variables' +5 its
+   unison leaves (written at 0x08013B22, caught the same way), his ready
+   state's clock after it, the power attack and his NameID by each game's
+   number, the Soul's form and turns held to BN6's Souls block, the
+   pending form, BN4's own counters and the buster's charge.
+   `bn4_soul_thun` PASSes whole, its four mutations caught.
 3. **AquaSoul and GutsSoul**, adding a chip charge, a hand pass and the
    first engine hook (Cost and order, above). Past ThunSoul's 13, the used
    word has 14 and 15 left below BN5's chaos bits (from 16), so the twelve
