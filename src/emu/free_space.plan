@@ -96,7 +96,7 @@ FREE_XNAVIS            +0x240000  +0x26E000  end  xnavi.c                   mult
 FREE_BACKDROPS         +0x26E000  +0x286000  end  xbackdrop.c               multirom/overview.md        other games' battle backgrounds
 FREE_MAP_BACKDROPS     +0x286000  +0x2A6000  end  xbackdrop.c               multirom/overview.md        other games' net maps' backdrops
 FREE_FLAME             +0x2A6000  +0x2A7000  end  xnavi.c                   game/meta/bn6-darkchips.md  BN6's own flame of darkness
-FREE_BN4_SOUL_LOOK     +0x2E1000  +0x2EC400  end  soullook.c                multirom/bn4-souls.md       BN4's united Soul's look, one room for whichever Soul is united (the owner's call): his sprite (the largest RollSoul's 42,324 bytes), his unison's picture, his face, and BN4's count's digits
+FREE_BN4_SOUL_LOOK     +0x2E1000  +0x2FB000  end  soullook.c                multirom/bn4-souls.md       BN4's united Soul's look, one room for whichever Soul is united (the owner's call), filled as he unites: his sprite (the largest RollSoul's 42,324 bytes), his unison's picture (his Soul Navi's battle sprite, the largest GutsMan's 60,988), his face, BN4's count's digits, and whose they are
 FREE_BN4_CHIP_SPRITE   +0x320000  +0x32F000  end  xnavi_bn4_chip.c          multirom/bn4-chips.md       a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes); in the world zone, the one with room left
 
 zone code  rom  +0x330000  +0x7A0000  -  other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs

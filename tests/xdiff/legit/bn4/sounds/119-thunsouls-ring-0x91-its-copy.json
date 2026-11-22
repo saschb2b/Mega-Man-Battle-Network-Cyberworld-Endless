@@ -1,0 +1,10 @@
+{
+ "bn4": "0x91",
+ "bn6": "0x300",
+ "clock": "state",
+ "souls": [
+  "6"
+ ],
+ "what": "ThunSoul's charged shot's ring 0x91, its copy",
+ "why": "Played by the ring of SandRing's family as ThunSoul's charged shot throws it (BN4's family 0x47, moved as BN6's grown 0xD7: its ring's kind 0 row of table 0x080DAFB0, whose sound byte is 0x91, the unit's copy playing it from BN6's grown song table's slot 0x300 through its shim; tools/xchiprecipe_bn4.py SOUND_SLOTS, docs/rom/bn4.md, SandRing's family and ThunSoul's charged shot): BN4's song 0x91 copied into slot 0x300, BN6 having another song at 0x91. bn4_soul_thun at t162; soul_thun's expect holds BN6's 0x300"
+}

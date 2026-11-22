@@ -37,5 +37,13 @@ bool soullook_install(int breaks);
  * proxy form where a Soul is united on `side`: BN6's kind for BN5's
  * (*kind) and the Soul as its frame (*frame); false where none is */
 bool soullook_flash(uint32_t obj, int *kind, int *frame);
+/* Before each frame of BN6's core (xinstall.c's step): BN4's Souls' room
+ * (soul_room.h's SOULS4_*) filled with the look of the BN4 Soul a side is
+ * committed to or stands in, MegaMan's side's first, where it holds
+ * another's. What the room holds is kept in the core's copy beside it, so
+ * a state loaded (a rollback's, a CONTINUE's) is followed: its Souls'
+ * block names the Soul, and the next frame's check fills the room again
+ * where the copy holds another. */
+void soullook_frame(void);
 
 #endif

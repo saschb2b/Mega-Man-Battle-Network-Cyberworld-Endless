@@ -733,6 +733,11 @@ bool party_play_drawn_over(void) {
 
 void (*party_play_draw_more)(void);
 
+/* this game's MegaMan down in a crew's battle while the others fight on (the fight's own phase) */
+static bool down_now(void) {
+	return PP.crew && PP.core && PP.stage == PP_FIGHT && party_core_phase(PP.core) == BN6_PHASE_FIGHT && !party_core_hp(PP.core, PP.seat);
+}
+
 /* the party's field, or while it is made and the others come, the staging's
  * last picture of the run's own core */
 void party_play_draw(void) {
@@ -741,6 +746,8 @@ void party_play_draw(void) {
 	arena_view_core(turn ? turn : PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
 	/* (who is who on the field as it fights, never over a partner's own screen) */
 	if (PP.core && PP.stage == PP_FIGHT && !turn) party_marks_draw(party_core_gba(PP.core), viewer(), PP.b.n);
+	/* (down in a crew's battle, the field fighting on: one line, never over a Custom screen or the results, issue #780) */
+	if (down_now()) party_marks_down(PP.b.seat[PP.seat].pulled);
 	if (party_play_drawn_over() && party_play_draw_more) party_play_draw_more();
 }
 
@@ -759,6 +766,7 @@ void party_play_describe(FILE *f) {
 	}
 	if (!PP.core || PP.stage != PP_FIGHT) return;
 	fprintf(f, "partyfield %u seat %u\n", PP.b.n, viewer());
+	if (down_now()) fprintf(f, "partydown %s\n", PP.b.seat[PP.seat].pulled ? "spent" : "unspent");
 	/* (a partner's own Custom screen: the HP its box shows, and his own on the field, issue #757) */
 	unsigned turn = party_turn_hp(viewer());
 	if (turn) fprintf(f, "partyturn hp %u own %u %s\n", turn, party_core_hp(PP.core, viewer()), turn == party_core_hp(PP.core, viewer()) ? "agree" : "APART");

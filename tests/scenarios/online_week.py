@@ -767,3 +767,27 @@ MANY['dive-end-screen'] = dict(crew_fight(BETA), STEPS=online.course(
     ('@beta', 'expect', 'diveend~crew 2/2'),
     soon('diveend~place 1', 'beta', 600),
 ))
+
+
+# Down in a crew's battle, told (issue #780): Beta deleted on the field while Alpha fights on, the one line in his band,
+# the pull-back unspent; and in his next crew's battle, deleted again with it spent. partyend at 40, early enough that the bots have not won yet, and the
+# field fights on a while after he falls; the enemies 60 iterations after (partydel).
+DOWN = LOUD.replace('onlinename={name}', 'onlinename={name},partyend=40,partybot=1,partydel=2')
+MANY['crew-down-told'] = dict(crew_fight(DOWN), STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    ('@beta', 'repeat', 'press A; wait 20', 'partydown=unspent|crewend!=none', 120),
+    ('@beta', 'expect', 'partydown=unspent'),
+    ('@beta', 'expect', 'hpbox_hp=0'),                # (his own box, 0: never the lead's HP over the band)
+    ('@beta', 'repeat', 'press A; wait 20', 'crewend!=none|dive=none', 120),
+    ('repeat', 'press A; wait 20', 'crewend!=none|dive=none', 120),
+    ('@beta', 'expect', 'pullback=spent'),
+    soon('join=none', '', 600),
+    soon('join=none', 'beta', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    ('@beta', 'repeat', 'press A; wait 20', 'partydown=spent|page=result', 120),
+    ('@beta', 'expect', 'partydown=spent'),
+    ('@beta', 'expect', 'hpbox_hp=0'),
+))
