@@ -1091,6 +1091,17 @@ on the field ending with no results (`partyover skipped hp 0`). Left open
 on the issue: a dive's end screen of its own, and an HP reward that came
 into the run twice.
 
+**Keys held as the field hands the game back** (22 November 2026): the
+run's own core stands still under a crew's battle, its last keys those
+from before it, so a button still held on the field's last frame came to
+BN6 as a new press on the layer. A fallen MegaMan's game goes back at
+once (above), and the A that a player, or `crew-down-told`, kept pressing
+there talked to the Mr.Prog before him; in the chat his game answered the
+crewmate's next battle busy, and he was never in it. Every button held as
+a held battle hands the game back (a crew's, the Square's NetBattle) is
+now kept from it until let go (`online_visit_keys`, as the Battle Lab's
+screen does), the d-pad walking on.
+
 ## Comings and goings (22 November 2026)
 
 What the friction hunt of 21 November found silent ([issue

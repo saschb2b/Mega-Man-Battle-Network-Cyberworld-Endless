@@ -66,6 +66,13 @@ void director_dev_place(int x, int y, int face) {
 	if (face >= 0 && face < 8) { emu_write8(BN6_PLAYER_FACING, (uint8_t)face); emu_write8(BN6_PLAYER_ANIM, (uint8_t)face); }
 }
 
+void director_dev_place_panel(int x, int y, int face) {
+	int gx, gy, wx, wy;
+	netmap_panel(x, y, &gx, &gy);
+	netmap_world(gx, gy, &wx, &wy);
+	director_dev_place(wx, wy, face);
+}
+
 bool director_dev_signature(void) {
 	if (!director_on_map() || layer.sig_room < 0) return false;
 	const Room *m = &layer.rooms[layer.sig_room];

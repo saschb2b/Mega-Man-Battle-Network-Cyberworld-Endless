@@ -216,7 +216,15 @@ void online_visit_wait_frame(void) {
 	if (why != VISIT_END_NONE) come_home(why);
 }
 
+/* the buttons held as a held battle handed the game back, each kept from it
+ * until let go: an A that paged the field's results last is no A on the
+ * layer or the Square, where it had talked to whoever stood before MegaMan
+ * (a crewmate's next battle then declined as busy). The d-pad walks on. */
+static uint32_t held_after;
+
 uint32_t online_visit_keys(uint32_t keys) {
+	held_after &= keys;
+	keys &= ~(held_after & ~(uint32_t)(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT));
 	if (V.stage == VISIT_AWAY) return online_scene_keys(keys);
 	/* (a dive's: a phrase left on its layer, dive_traces.h) */
 	if (V.stage == VISIT_HOME) return dive_link_keys(keys);
@@ -233,6 +241,7 @@ bool online_visit_held(void) { return (V.stage == VISIT_AWAY && (square_arena_on
 
 /* (a battle of this game's, or one watched from the stands) */
 void online_visit_held_frame(uint32_t keys) {
+	held_after = ~0u;
 	/* (another part's screen over the held game: the shared dive's party core, party_play.h) */
 	if (hold_on()) { online_visit_hold->frame(keys); return; }
 	if (square_arena_on()) square_arena_frame(keys);

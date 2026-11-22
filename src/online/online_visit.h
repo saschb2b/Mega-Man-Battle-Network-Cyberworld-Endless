@@ -75,6 +75,8 @@ void online_visit_wait_frame(void);
 /* What a server's refusal (its ERROR's code) means: `away`, it came in the
  * Square (a link lost there, else no answer) */
 VisitEnd online_visit_refusal(const OnlineSnapshot *s, bool away);
+/* The run's keys as a visit takes them: a button held as a held battle
+ * ended (online_visit_held) kept from the game until let go. */
 uint32_t online_visit_keys(uint32_t keys);
 /* The Square over the game, or the gate's field where one is open. */
 void online_visit_draw(void);

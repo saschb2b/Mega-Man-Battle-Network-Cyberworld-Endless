@@ -193,6 +193,10 @@ bool director_arrived(void);
 void director_describe(FILE *f);
 /* Dev: MegaMan put at world (x, y) facing `face` (0-7, else unchanged). */
 void director_dev_place(int x, int y, int face);
+/* ... at the centre of the panel of the map that holds world (x, y): where
+ * BN6 pushes him off a wall a little, he stays on that panel (a scenario's
+ * panels apart on a layer it does not know, the shared dive's) */
+void director_dev_place_panel(int x, int y, int face);
 /* ... in the layer's signature, on the free panel nearest its anchor (the
  * "sig" step: docs/world/level-design/identity.md); false on a layer without. */
 bool director_dev_signature(void);
