@@ -64,12 +64,37 @@ def bn4_forms():
     return {first + k: f for k, f in enumerate(forms)}
 
 
-def power_map():
-    """BN4's power attack -> BN6's for the moved Souls (legit.json's bn4 souls, its power rule's map)"""
-    for r in shards.load('legit').get('bn4', {}).get('souls', []):
-        if r['key'] == 'power':
-            return {int(a, 0): int(b, 0) for a, b in r['bn4_to_bn6'].items()}
-    return {}
+def c_entries(path, name):
+    """how many entries the C array `name` of `path` (from src/) holds: its initializer's top-level items"""
+    body = open(os.path.join(ROOT, 'src', *path.split('/'))).read()
+    m = re.search(r'\b' + re.escape(name) + r'\[\] = \{(.*?)\n?\};', body, re.S)
+    inner = re.sub(r'/\*.*?\*/', '', m.group(1), flags=re.S)
+    if '{' in inner:
+        return inner.count('{')
+    return len([x for x in inner.split(',') if x.strip()])
+
+
+def bn6_power(form):
+    """BN6's number of the charged shot of BN4's Soul of `form`, as src/emu/soulpower.c's tables() lays the grown table out:
+    BN6's own (BN6_POWER_ATTACK_COUNT), then BN5's Souls' moved ones (soulcode_bn5.c's powers), their empty ones
+    (soulpower.c's empty_powers) and their Chaos Unison's (chaos_powers), then BN4's moved Souls' in soulbn4.c's order. Read
+    from the sources, so a Soul another track adds before them moves the number here as it does in the engine; None where
+    the form is none of the moved ones"""
+    head = open(os.path.join(ROOT, 'src', 'emu', 'bn6_attacks.h')).read()
+    count = int(re.search(r'#define BN6_POWER_ATTACK_COUNT\s+(\d+)', head).group(1))
+    k = {f: n for n, f in enumerate(bn4_forms().values())}.get(form)
+    if k is None:
+        return None
+    return count + c_entries('emu/soulcode_bn5.c', 'powers') + c_entries('emu/soulpower.c', 'empty_powers') + \
+        c_entries('emu/soulpower.c', 'chaos_powers') + k
+
+
+def power_map(rom4):
+    """BN4's power attack -> BN6's for the moved Souls: each one's charged shot (BN4_FORM_LOADOUTS' +3 by its form, 0x080184F0)
+    at bn6_power's number"""
+    if not rom4:
+        return {}
+    return {rom4[0x184F0 + 4 * f + 3]: bn6_power(f) for f in bn4_forms().values()}
 
 
 def form_frames(rom4):
@@ -81,7 +106,7 @@ class Souls4:
     """the rules over one spec's two traces"""
 
     def __init__(self, ta, tb, rom4, lag):
-        self.names, self.forms, self.powers, self.frames = rules(), bn4_forms(), power_map(), form_frames(rom4)
+        self.names, self.forms, self.powers, self.frames = rules(), bn4_forms(), power_map(rom4), form_frames(rom4)
         self.a, self.b, self.lag = {f['t']: f for f in ta['frames']}, {f['t']: f for f in tb['frames']}, lag
         self.unison_last = None   # (BN4's last frame of its unison)
 

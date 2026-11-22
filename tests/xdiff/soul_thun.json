@@ -125,7 +125,7 @@
    "loadout": [
     [
      1,
-     "ffff00a5ffff"
+     "ffff00{bn4_power:6}ffff"
     ]
    ],
    "element": [
@@ -211,5 +211,5 @@
    "0x300"
   ]
  },
- "expect_why": "BN4's own course (tests/xdiff/bn4_soul_thun.json's BN4 trace, the reference, the same keys; its BN4 numbers in BN6's): ThunSoul united from t1 (BN6's Soul 13, its used bit 0x2000 for the battle), its loadout BN4's form 6 row (ff 00 ff 58) as BN6's six bytes, its charged shot BN6's grown power attack 0xA5 (BN4's 0x58), his element Elec (3, BN4_FORM_ELEMENTS' form 6); the charged shot's state from t154 (BN4's 0x47 at t154, BN6's grown 0xD7) to his ready state again at t177 (BN4's 6 at t177), the Mettaur's HP 40 before its hit and 20 at t167 (BN4's 40 to 20 at t167: the power attack's 20); the ring's sound, BN4's 0x91 at t162, BN6's grown slot 0x300 (BN6 has another song at 0x91). B held 88 frames gives the plain buster in both games (its 1 at t155 in BN4's battle, t156 in BN6's with the reference's lag of 1): the charge is 90 in both. His look: his sprite the shared room's, BN4's list 0 number 6 copied to FREE_BN4_SOUL_LOOK (0x08AE1000, BN6's list 0 number 0x5F) before the frame after the Custom screen commits him (the install leaves the room empty: src/emu/soullook.c soullook_frame), his frame's record read from it at its offsets in BN4's art (0x4C standing, 0x4FC in his shot's animation 0xD at t160), in palette 0 as BN4's unison sets it (0x080EBB9E); his face and count in the emotion window are seen by film alone (docs/multirom/bn4-souls.md, The shared room)."
+ "expect_why": "BN4's own course (tests/xdiff/bn4_soul_thun.json's BN4 trace, the reference, the same keys; its BN4 numbers in BN6's): ThunSoul united from t1 (BN6's Soul 13, its used bit 0x2000 for the battle), its loadout BN4's form 6 row (ff 00 ff 58) as BN6's six bytes, its charged shot BN6's grown power attack after BN5's Souls' (BN4's 0x58; {bn4_power:6}, src/emu/soulpower.c's layout read from the sources by tools/xdiff_bn4_souls.py's bn6_power: 0xA5 today), his element Elec (3, BN4_FORM_ELEMENTS' form 6); the charged shot's state from t154 (BN4's 0x47 at t154, BN6's grown 0xD7) to his ready state again at t177 (BN4's 6 at t177), the Mettaur's HP 40 before its hit and 20 at t167 (BN4's 40 to 20 at t167: the power attack's 20); the ring's sound, BN4's 0x91 at t162, BN6's grown slot 0x300 (BN6 has another song at 0x91). B held 88 frames gives the plain buster in both games (its 1 at t155 in BN4's battle, t156 in BN6's with the reference's lag of 1): the charge is 90 in both. His look: his sprite the shared room's, BN4's list 0 number 6 copied to FREE_BN4_SOUL_LOOK (0x08AE1000, BN6's list 0 number 0x5F) before the frame after the Custom screen commits him (the install leaves the room empty: src/emu/soullook.c soullook_frame), his frame's record read from it at its offsets in BN4's art (0x4C standing, 0x4FC in his shot's animation 0xD at t160), in palette 0 as BN4's unison sets it (0x080EBB9E); his face and count in the emotion window are seen by film alone (docs/multirom/bn4-souls.md, The shared room)."
 }

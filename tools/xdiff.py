@@ -100,6 +100,7 @@ import io
 import json
 import multiprocessing
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -111,6 +112,7 @@ from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, S
 from xdiff_masks import attribute, mask_of, renderer_ranks, who  # noqa: E402
 from xdiff_events import Translations, call_diffs, draw_diffs, matched_draws  # noqa: E402
 import xdiff_bn4  # noqa: E402
+import xdiff_bn4_souls  # noqa: E402
 import shards  # noqa: E402
 
 SPECS = os.path.join(ROOT, 'tests', 'xdiff')
@@ -402,6 +404,8 @@ def check_player(trace, canon, expect):
     for what, pairs in expect.get('megaman', {}).items():
         for t, want in pairs:
             got = by_t.get(t, {}).get(what)
+            if isinstance(want, str):   # ({bn4_power:FORM}: a BN4 Soul's charged shot's number in BN6's grown table, read as the engine lays it out)
+                want = re.sub(r'\{bn4_power:(\d+)\}', lambda m: f'{xdiff_bn4_souls.bn6_power(int(m.group(1))):02x}', want)
             want = int(want, 0) if isinstance(want, str) and what != 'loadout' else want
             if got != want:
                 bad.append(f'BN{trace["game"]}: MegaMan\'s {what} at t{t} {got if not isinstance(got, int) else hex(got)}, not '

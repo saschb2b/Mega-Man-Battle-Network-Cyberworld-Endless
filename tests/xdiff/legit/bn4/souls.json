@@ -18,12 +18,9 @@
  {
   "key": "power",
   "name": "a moved Soul's power attack by each game's number",
-  "bn4_to_bn6": {
-   "0x58": "0xA5"
-  },
-  "why": "A BN4 Soul's loadout names BN4's power attacks (BN4_FORM_LOADOUTS, 0x080184F0, +3 the charged shot's: ThunSoul's 0x58); the move copies each with its family's unit into BN6's grown power attacks after BN5's Souls' and their Chaos Unison's (src/emu/soulpower.c's tables(): ThunSoul's at 0xA5) and writes BN6's number into its loadout (SOULS_LOADOUTS' seventh row, ff ff 00 a5 ff ff). His AI data's power attacks (+5 to +8, BN6_AI_POWER_CHIP to BN6_AI_POWER_C) read BN4's number as BN6's by this map, where BN6's MegaMan holds the move of BN4's form",
+  "why": "A BN4 Soul's loadout names BN4's power attacks (BN4_FORM_LOADOUTS, 0x080184F0, +3 the charged shot's: ThunSoul's 0x58); the move copies each with its family's unit into BN6's grown power attacks and writes BN6's number into its loadout (SOULS_LOADOUTS, past BN5's six rows). src/emu/soulpower.c's tables() lays the grown table out as BN6's own (BN6_POWER_ATTACK_COUNT), BN5's Souls' moved ones (soulcode_bn5.c's powers), their empty ones (empty_powers), their Chaos Unison's (chaos_powers), then BN4's in soulbn4.c's order; tools/xdiff_bn4_souls.py's bn6_power reads the same counts from the sources, so a Soul another track adds before BN4's moves the number in both. His AI data's power attacks (+5 to +8, BN6_AI_POWER_CHIP to BN6_AI_POWER_C) read BN4's number as BN6's so, where BN6's MegaMan holds the move of BN4's form",
   "evidence": [
-   "soul_thun's expect: loadout ffff00a5ffff",
+   "soul_thun's expect: loadout ffff00{bn4_power:6}ffff (0xA5 while BN5's Souls' are 8 moved, 3 empty and 6 chaos)",
    "bn4_soul_thun: ai+0x07 BN4 0x58, BN6 0xA5 from t2"
   ]
  },
