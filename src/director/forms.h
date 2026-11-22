@@ -64,7 +64,7 @@ void forms_note_fall(int navi);
 void forms_note_falls(void);
 /* The run's form in its state, a line each: `runform` its name (`form`
  * is MegaMan's in a battle, battle_state.c), `powers`
- * those it holds ("HeatCross SpoutCross", none), `soulturns` SoulT+1's */
+ * those it holds ("HeatCross SpoutCross", none), `runsoulturn` SoulT+1's */
 void forms_describe(FILE *f);
 
 /* ProtoMan's netbattle won (director_duel.c): in a form run his kind's

@@ -227,5 +227,5 @@ void forms_describe(FILE *f) {
 	unsigned held = forms_held();
 	for (int p = 1; p <= FORM_POWERS; ++p)
 		if (held >> (p - 1) & 1) fprintf(f, " %s", forms_power_name(run.form, p));
-	fprintf(f, "%s\nsoulturns %d\n", held ? "" : " none", run.soul_turns);
+	fprintf(f, "%s\nrunsoulturn %d\n", held ? "" : " none", run.soul_turns);
 }

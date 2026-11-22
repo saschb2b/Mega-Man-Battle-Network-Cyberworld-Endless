@@ -34,9 +34,10 @@ unsigned souls_held(void);
 void souls_note_layer(void);
 unsigned souls_layer(void);
 /* As a battle begins (encounter.c): a Soul form's SoulT+1 turn, the
- * Cybeast's or the BeastOut helper's (run.soul_turns), in the battle's
- * NaviStats (BN6_NAVI_TURN_EXTRA): one turn more at most beside the
- * NaviCust program's, which sets the same byte (issue #774) */
+ * Cybeast's or the BeastOut helper's (run.soul_turns), in MegaMan's
+ * NaviStats (BN6_NAVI_TURN_EXTRA), which the battle copies: one turn more
+ * at most beside the NaviCust program's, which sets the same byte (issue
+ * #774) */
 void souls_battle_begins(void);
 /* Whether the run holds guardian `navi`'s Soul (guardians.h, guardian_older,
  * or guardian_team: Team ProtoMan's, BN5's Souls 1-6, kept apart from Team

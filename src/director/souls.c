@@ -77,7 +77,7 @@ void soul_give(int navi) {
 
 void souls_battle_begins(void) {
 	if (run_form_crosses() || !run.soul_turns) return;
-	uint32_t at = BN6_BATTLE_NAVI + BN6_NAVI_TURN_EXTRA;
+	uint32_t at = BN6_NAVI_STATS + BN6_NAVI_TURN_EXTRA;   /* (MegaMan's own: the battle's copy is made from it after StartBattle) */
 	if ((int8_t)emu_read8(at) < 1) emu_write8(at, 1);
 }
 
