@@ -9,7 +9,7 @@ however long it was away (#751), the Board's posts of the week,
 a dive left by a quit (CONTINUE is the normal run's, as it was, and the
 portal offers the dive again), a game without the DeepNet stamp, which
 the portal offers nothing, and the server gone on a dive, which goes on
-alone.
+alone and links again once it is back (#751).
 
 The week's net is the server's own (its seed from its key and the calendar
 week), so the dive's layer is another each run: these courses read nothing
@@ -90,7 +90,18 @@ MANY = {
         ('do', 'hold UP 20; wait 20'),             # MegaMan walks on meanwhile
         ('expect', 'dive=on'),
         ('expect', 'where=layer'),
-        ('repeat', 'wait 60', 'divelink=off', 700),
+        # (past the transport's 30 seconds the dive goes on alone and starts its link again now and then, for as long
+        # as it lasts (issue #751): never let go for the rest of the dive; the clock's seconds, a layer outruns it)
+        ('sleep', 33.0),
+        soon('divestate=away', '', 900),
+        ('expect', 'divelink=on'),
+        ('expect', 'dive=on'),
+        ('same', 'layer area hp'),
+        # (the server back: the dive's link with it within its next start, 15 seconds at most)
+        ('server', 'start'),
+        ('sleep', 16.0),
+        soon('divestate=up', '', 1800),
+        ('expect', 'link=up'),
         ('expect', 'dive=on'),
         ('same', 'layer area hp'),
     )),
