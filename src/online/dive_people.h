@@ -16,6 +16,10 @@
 /* The puppets made as each layer is built (layer_objs_more), or not. */
 void dive_people_on(bool on);
 
+/* Whether diver `session` stands in MegaMan's picture now, his feet inside
+ * it by BN6's camera (issue #750: a battle is joined only with one in sight). */
+bool dive_people_in_sight(uint32_t session);
+
 /* Dev (diveroom=N): N MegaMen at most for the others on each layer, as
  * a layer whose own NPCs leave little room gives (issue #755). */
 void dive_people_dev_room(int most);

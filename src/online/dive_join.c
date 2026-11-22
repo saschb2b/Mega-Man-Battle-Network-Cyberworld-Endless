@@ -11,6 +11,7 @@
 #include "director.h"
 #include "director_crew.h"
 #include "dive_crew.h"
+#include "dive_people.h"
 #include "dive_splits.h"
 #include "dive_words.h"
 #include "emu.h"
@@ -21,6 +22,7 @@
 #include "talk.h"
 
 #define LATE_MS 3000          /* past the window, an answer given up on */
+#define NAMED_MS 2500         /* whose battle it is, said this long from the join (issue #750) */
 
 /* (the one field runs a core beside the game's: not on the New 3DS, nor on the PSP's gpSP, which fight linked) */
 #if defined(__3DS__) || defined(__PSP__)
@@ -37,6 +39,7 @@ static struct {
 	int index;                /* its index on the layer */
 	char name[ONLINE_NAME_BYTES + 1];
 	uint32_t since;           /* the stage's start (ms) */
+	uint32_t joined;          /* when MegaMan was taken into a crewmate's battle (ms) */
 	uint32_t battle;          /* its ARENA_STATE battle once taken */
 	Encounter e;              /* ... and its battle */
 } J;
@@ -139,7 +142,10 @@ void dive_join_crew_state(const CrewState *c) {
 	/* (MegaMan not free to go in: his own battle held or fought, a chat, a shop, a door, Mystery Data opening; or the owner
 	 * no crewmate of his any more. Said at once (CREW busy, v23), so that nobody waits a window for him) */
 	const char *why = J.stage == JOIN_CALLING ? "his own battle held" : J.stage == JOIN_FIGHTING ? "fighting" :
-		!free_here() ? "busy" : !dive_crew_has(c->other) ? "not in the crew" : NULL;
+		!free_here() ? "busy" : !dive_crew_has(c->other) ? "not in the crew" :
+		/* (never into the battle of one out of MegaMan's picture, issue #750: the server's reach is on screen, and a
+		 * camera held at a layer's edge is not where MegaMan stands) */
+		!dive_people_in_sight(c->other) ? "out of sight" : NULL;
 	if (why) {
 		send(ONLINE_CREW_BUSY, c->other, 0);
 		fprintf(stderr, "dive: an offer of battle %u declined at once (%s)\n", c->value, why);
@@ -156,6 +162,7 @@ void dive_join_crew_state(const CrewState *c) {
 	send(ONLINE_CREW_JOIN, J.owner, 0);
 	fprintf(stderr, "dive: jumping into %s's battle %d, unasked\n", J.name, J.index);
 	to(JOIN_JOINED);
+	J.joined = J.since;
 }
 
 /* the crew's battle into the party's core, every game of it making the same */
@@ -202,7 +209,9 @@ void dive_join_describe(FILE *f) {
 const char *dive_join_band(void) {
 	switch (J.stage) {
 	/* (MegaMan's own battle held only while the server starts it: no line, issue #715) */
-	case JOIN_JOINED: return dive_join_joined_words();
+	/* (whose battle, from the join until it has been read: over the battle's start too) */
+	case JOIN_JOINED: return dive_join_joined_words(J.name);
+	case JOIN_FIGHTING: return J.owner && SDL_GetTicks() - J.joined < NAMED_MS ? dive_join_joined_words(J.name) : NULL;
 	default: return NULL;
 	}
 }

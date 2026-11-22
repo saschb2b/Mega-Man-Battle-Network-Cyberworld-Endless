@@ -71,6 +71,10 @@ bool party_play_held(void);
 bool party_play_hp(int *hp, int *max);
 void party_play_frame(uint32_t pad);
 void party_play_draw(void);
+/* Drawn over a crew's battle as it is made and fought, set by the dive's
+ * band (dive_band.c: whose battle MegaMan was taken into, issue #750);
+ * NULL none. */
+extern void (*party_play_draw_more)(void);
 /* ... in the state's words: the field's size and the seat it is drawn
  * for, its marks (party_marks.h); over the server "party" its stage and
  * frame, the hashes agreed, and this game's own link through a drop (up,

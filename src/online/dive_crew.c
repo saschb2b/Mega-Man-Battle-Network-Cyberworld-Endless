@@ -1,6 +1,7 @@
 /* dive_crew.h */
 #include "dive_crew.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include <SDL.h>
@@ -70,4 +71,9 @@ void dive_crew_mail(const uint8_t *m, size_t n) {
 		C = none;
 		log_crew("none", &C);
 	}
+}
+
+bool dive_crew_within(long dx, long dy, CrewReach reach) {
+	long across = dx + dy, down = dy - dx;
+	return labs(across) <= reach.wide && labs(down) <= 2L * reach.high;
 }

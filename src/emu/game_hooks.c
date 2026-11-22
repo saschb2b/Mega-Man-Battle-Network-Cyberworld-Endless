@@ -5,7 +5,6 @@
 #include "cross_rows.h"
 #include "darkinvs.h"
 #include "devtools.h"
-#include "dive_people.h"
 #include "encounter.h"
 #include "events.h"
 #include "gamecall.h"
@@ -17,6 +16,7 @@
 #include "pet.h"
 #include "pet_text.h"
 #include "protoman_cross.h"
+#include "save_mask.h"
 #include "scripts.h"
 #include "soulproxy.h"
 #include "sound_quiet.h"
@@ -30,6 +30,8 @@ void game_hooks_install(void) {
 	 * them where its ROM is read (xchips_code.h) */
 	xchips_install();
 	gamecall_install();
+	/* (BN6's save's mask: the run's logic waits through it, save_mask.h) */
+	save_mask_install();
 #ifndef CW_GPSP
 	/* (gpSP skips BN6's wait for VBlank as its own idle loop) */
 	idle_install();
@@ -62,6 +64,4 @@ void game_hooks_after_boot(void) {
 	if (dev.party_core > 1 || dev.party_end > 0 || dev.party_bot || dev.party_roll || dev.party_delay || dev.party_lead)
 		party_play_dev(&(PartyDev){ dev.party_core, dev.party_twin, dev.party_roll, dev.party_end, dev.party_bot, dev.party_delay, dev.party_lead,
 			dev.party_view, dev.party_del, dev.party_hp, dev.party_scale, dev.party_hp_per, dev.party_steps });
-	/* (a dive's layers with little room for the divers: dive_people.h) */
-	if (dev.dive_room > 0) dive_people_dev_room(dev.dive_room);
 }
