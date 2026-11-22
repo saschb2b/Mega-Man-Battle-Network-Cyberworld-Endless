@@ -15,6 +15,7 @@
 #define CW_SOULCHIPS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /* Who the Souls' chips' bytes are (claims.h) */
 #define SOULCHIPS_CLAIMS "the Souls' chips (soulchips.c)"
@@ -28,7 +29,8 @@ enum {
 	SOULCHIPS_BREAK_SWORD = 16,   /* ShadowSoul's charged sword run by BN6's sword family */
 	SOULCHIPS_BREAK_SHADOW = 32,  /* ShadowSoul keeps his shadow */
 	SOULCHIPS_BREAK_LAVA = 64,    /* NapalmSoul on lava adds nothing to his next chip */
-	SOULCHIPS_BREAK_NAPALM = 128, /* NapalmSoul's charged chip run by its own family, no Napalm Bomb */
+	SOULCHIPS_BREAK_NAPALM = 128, /* NapalmSoul's charged chip run by its own family, no Napalm Bomb, and GyroSoul's propeller
+	                                 doubling nothing */
 };
 
 /* The hooks and the stubs of Thumb they jump to (soul_room.h's
@@ -36,5 +38,11 @@ enum {
  * family). Once a core; false (nothing written) where a byte it stands on
  * is not Gregar's as expected. */
 bool soulchips_install(int breaks);
+
+/* (what Team ProtoMan's rules read as the others do, soulteam_chips.c) the side of the Navi `obj` (0 or 1), the effect flags of
+ * BN6's chip `chip` (0 for none), the panel's record at column x, row y */
+int soulchips_side(uint32_t obj);
+uint8_t soulchips_flags(int chip);
+uint32_t soulchips_panel(uint32_t x, uint32_t y);
 
 #endif

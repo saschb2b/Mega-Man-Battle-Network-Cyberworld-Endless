@@ -242,6 +242,9 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
 #define BN6_PLAYER_TIMERS     0x080107DEu /* ... ldrb r0,[r4,#0x19], its first timer read, r4 his AI data: where BN5's twin (0x0800E532) has run
                                              NapalmSoul's lava step (0x080125FA) before its timers, */
 #define BN6_PLAYER_TIMERS_NEXT 0x080107E0u /* ... and its next instruction */
+#define BN6_CHIP_USE_MODIFIED 0x08012880u /* ldrh r0,[r7,#8] in the chip's use (0x080127C0) past its modifier's switch (BN6_CHIP_MODIFIED's), where
+                                             BN5's twin sets GyroSoul's propeller for a Wind chip (0x0800FFDE: 0x080102CA), */
+#define BN6_CHIP_USE_MODIFIED_NEXT 0x08012882u /* ... and its next instruction */
 #define BN6_FLASH_COUNT_OP    0x6DAC      /* ... its ldr r4,[r5,#0x58] there, checked before the hook */
 #define BN6_FLASH_TINT        0x0801B15Au /* an object's colours' chain (0x0801AF44): bl 0x080168C8, BN5's 0x08013738 (BN5 tints before it) */
 #define BN6_FLASH_TINT_BL     0xFBB5F7FBu /* ... its two halves */

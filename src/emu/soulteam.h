@@ -27,6 +27,10 @@ _Static_assert(SOULS_HELD_BN4 + SOULS_HELD_BN4_ALL <= SOULS_HELD_TEAM, "Team Pro
 /* (the differential's BN5 side, souls5: BN5's flag a Team ProtoMan Soul n is given in its own battle, BN5_SOUL_FLAGS' entry
  * written in the guest's ROM copy: Team Colonel's Soul at the same place's, BN5_FLAG_SOUL + n - 1, which only UNITE's check reads) */
 #define SOUL_TEAM_FLAG(n) (0x0008 + (n) - SOUL_TEAM_FIRST)
+/* (their sounds Gregar has another song of, at the slots xsong.c's XSOUNDS gives them, the claim's 0x340 on: GyroSoul's propeller
+ * set, BN5's 0x167, copied by soulpower.c) */
+#define SOUL_TEAM_PROPELLER_SONG 0x167
+#define SOUL_TEAM_PROPELLER_SLOT 0x340
 
 /* Whether BN5's Soul n (1-6) is one of Team ProtoMan's */
 static inline int soulteam_is(int soul) { return soul >= SOUL_TEAM_FIRST && soul < SOUL_TEAM_FIRST + SOULS_TEAM; }

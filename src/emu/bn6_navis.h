@@ -76,6 +76,9 @@
                                              its animations' masks (a word a kind, at 0x080C5B44), */
 #define BN6_OVERLAY_SPRITES_REF 0x080C5C2Cu /* ... and its sprites' (two bytes a kind, list offset and number, at 0x080C5B90): */
 #define BN6_OVERLAY_KINDS     19          /* ... its kinds */
+#define BN6_T1_OVERLAY        0x50        /* an object's companion overlay, 0 none (BN5's GyroSoul's enter keeps his propeller there, 0x0800F070) */
+#define BN6_OVERLAY_OFFSET    0x07        /* u8 the overlay's animation's offset past its owner's (0x080C5C3A; BN5's at its +0x60, 0x080C374A) */
+#define BN6_OVERLAY_SPUN      0x11        /* ... BN5's GyroSoul's propeller set (0x080C3876) */
 #define BN6_NAVI_NAMES_REF    0x0800ECF0u /* BN6_NAME_OF's word naming the Navis' names (RomLayout.enemy_names[1]): an id past 0xFF its entry id & 0xFF, */
 #define BN6_NAVI_NAMES_COUNT  184         /* ... its entries (to 0x1B7); its other reader 0x08139B70 (a list of the story's) */
 #define BN6_NAME_OF_NAVIS     0x0800EC5Eu /* BN6_NAME_OF once its archive is chosen (movs r1,#0xFF): r0 the id, r2 the archive (the Navis' past 0xFF) */

@@ -131,4 +131,7 @@ IMAGE_COPIED = {
     # BN6's the same) at list 0's 0x4E, the Souls' own list: the kind's bytes fixed in the one copy, its sprite copied and
     # listed by the Souls' install (src/emu/soulcode.c), list 0 grown by theirs alone (tools/xnavirecipe.py copies none for it)
     0x31: (0, 0x4E, 'souls'),
+    # GyroSoul's tornado's flash (his charged shot's family 0x3C, BN5 0x080EEA78: kind 0x22, BN5's sprite 3:0x10, 1228 bytes, none
+    # of BN6's the same) at list 0's 0x66, Team ProtoMan's Souls' numbers (soul_room.h's SOUL_LIST0_TEAM_ART on)
+    0x22: (0, 0x66, 'souls'),
 }

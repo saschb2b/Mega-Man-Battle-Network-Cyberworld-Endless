@@ -1,0 +1,8 @@
+[
+ {
+  "name": "GyroSoul's propeller doubling nothing",
+  "spec": "soul_gyro_double",
+  "soulbreak": 8388608,
+  "what": "no propeller where BN5's 0x08010264 doubles the next Wind chip with it: the second AirShot's damage its own 20, CanGard left at 20 at t155, no modifier's sound"
+ }
+]

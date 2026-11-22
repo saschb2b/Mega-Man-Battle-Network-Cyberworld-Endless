@@ -1,0 +1,124 @@
+{
+ "about": "BN4 Red Sun's GutsSoul (Soul 2, form 2: kind panel-cracking, its charged shot power attack 0x24 and family 0x12, 100 frames; his entering adds 30 to the hand's chips of no kind or panel-cracking whose power shows, BN4_GUTS_PASS) in BN4's own battle on the guest core, fought twice, each in a process of its own, the same frame for frame: the GutsSoul's control. MegaMan holds the Soul (souls4: its flag 0x18 from BN4_SOUL_FLAGS, Double Soul's, and its pseudo-chip written past BN4's chip gate), a deck of two PanlSht1 A (BN4's chip 178, kind 8, panel-cracking, its power 100 shown: a unit of tools/xchiprecipe_bn4.py, BN6's 559); the first Custom screen picks both, the second taken by UNITE, moves to UNITE (four right, down), takes it and the Soul (up, A): the unison makes form 2 (said by the form watch). B held from fight frame 30 for 102 frames, its release the charged shot; A at fight frame 200 fires the first PanlSht1, its power 100 + 30. A MettaurSP at (4,2), MegaMan at (3,2) before it, so his charged shot, a punch at the panel ahead (power attack 0x24: 60 at its +8), strikes it, with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "04@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "safe": true,
+ "souls4": "02",
+ "folder4": [
+  "00B2",
+  "00B2"
+ ],
+ "deck4": [
+  "00B2",
+  "00B2"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   102
+  ],
+  [
+   200,
+   "A",
+   4
+  ]
+ ]
+}

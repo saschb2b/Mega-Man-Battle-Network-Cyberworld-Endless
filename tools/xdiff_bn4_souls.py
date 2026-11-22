@@ -23,6 +23,8 @@ wrong turns, form, power attack, charge or level still parts:
   pending       BN4 clears the pending form at each turn's start, BN6's record keeps the form taken
   form frames   BN4's timed form's frames, written for every form and counted for DarkSoul's alone; BN6 none
   shots         BN4's count of a form's charged shots, to 5; BN6 none
+  presses       BN4's count of B's presses toward GutsSoul's rapid buster (+0x11 its window, +0x12 the presses, under six);
+                BN6 counts none
   charge        the buster's charge: BN4's counters (+0x30, +0x32), levels (+0x0A, +0x0B: 0, 1, 3), button (+9) and the
                 levels kept at the release (+0x14, +0x15); BN6's counter (+0x1B, held at the charge time), level (+0x1D: 0,
                 1, 2), button (+0x1E) and request bits (+0x44's 0x20000 and 0x40000); each engine's own glow object"""
@@ -56,6 +58,9 @@ KEPT_CHIP4, KEPT4 = 0x14, 0x15            # (... kept as B is let go, 0x0800BE48
 TIME4 = 0xFE                              # (BN4's charged shot's charge time, its cache +0x36 at BN6_AI_SPARE_LAST + 2)
 COUNT6, LEVEL6, BUTTON6, REQUEST6 = 0x1B, 0x1D, 0x1E, 0x46
 LEVEL_AS6 = {0: 0, 1: 1, 3: 2}
+WINDOW4, PRESSES4 = 0x11, 0x12            # (BN4's rapid buster's count, 0x0800BE5A-0x0800BE7A: a press sets the window to 10)
+WINDOW_TOP, RAPID_AT = 10, 6              # (... and at six presses it asks the rapid buster, 0x0800BE7E)
+CHAOS6_NONE = 0xFF                        # (BN6's +0x11, its chip's chaos power, 0xFF none: BN6_AI_POWER_CHIP's note)
 GLOW4, GLOW6, GLOW_SLOT = ('T4', 0x05), ('T4', 0x08), 0x58
 
 
@@ -85,9 +90,10 @@ def c_entries(path, name):
 
 def colonel_powers():
     """how many of soulcode_bn5.c's powers are Team Colonel's, those before BN4's in the grown table (Team ProtoMan's come
-    after BN4's room, src/emu/soulpower.c): the recipe's npowers_colonel, its initializer's last number"""
+    after BN4's room, src/emu/soulpower.c): the recipe's npowers_colonel, its initializer's last number but for its overlays'
+    pair (Team ProtoMan's, NULL, 0 where none)"""
     body = open(os.path.join(ROOT, 'src', 'emu', 'soulcode_bn5.c')).read()
-    m = re.search(r'const SoulCode soulcode_bn5 = \{[^}]*?, (\d+),\s*\};', body, re.S)
+    m = re.search(r'const SoulCode soulcode_bn5 = \{[^}]*?, (\d+),(?: (?:NULL, 0|overlays, N\(overlays\)),)?\s*\};', body, re.S)
     return int(m.group(1)) if m else c_entries('emu/soulcode_bn5.c', 'powers')
 
 
@@ -127,6 +133,7 @@ class Souls4:
         self.a, self.b, self.lag = {f['t']: f for f in ta['frames']}, {f['t']: f for f in tb['frames']}, lag
         self.unison_last = None   # (BN4's last frame of its unison)
         self.since_unison = False  # (BN4's MegaMan in no state but his ready one since it: unison var)
+        self.held_from = {}        # (each actor's +0x36-+0x39 at BN4's last frame of its unison, which the held routine copied)
 
     @staticmethod
     def mm(fr):
@@ -151,6 +158,9 @@ class Souls4:
         if self.in_unison(fa):
             self.unison_last = fa.fr['t']
             self.since_unison = True
+            for x in fa.fr['objs']:
+                if isinstance(x.role, tuple) and x.role[:2] != MEGAMAN:
+                    self.held_from[x.role] = {k: x.rec[NODE + k + HELD_FROM] for k in HELD_COPY}
         elif o is not None and o.rec[NODE + OBJ_ACTION] != READY4:
             self.since_unison = False
 
@@ -158,7 +168,7 @@ class Souls4:
         """the rule's name that reads d as the same state, None where none"""
         for key, rule in (('unison', self.unison), ('held', self.held), ('unison var', self.unison_var), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
                           ('soul', self.soul), ('pending', self.pending), ('form frames', self.form_frames),
-                          ('shots', self.shots), ('charge', self.charge)):
+                          ('shots', self.shots), ('presses', self.presses), ('charge', self.charge)):
             if key in self.names and rule(d, fa, fb):
                 return self.names[key]
         return None
@@ -207,8 +217,10 @@ class Souls4:
             return False
         if d.off == HELD_FLAG:   # (at the unison's frame: held, BN4's 4 where BN6's runs it as ever)
             return self.in_unison(fa) and d.a == HELD and d.b == first.rec[NODE + d.off]
-        # (its +0x30-+0x33 BN4's copies of its own +0x36-+0x39, BN6's as it began)
-        return d.off in HELD_COPY and oa.rec[NODE + d.off] == oa.rec[NODE + d.off + HELD_FROM] and d.b == first.rec[NODE + d.off]
+        # (its +0x30-+0x33 BN4's copies of its own +0x36-+0x39, as they are or as they were when its time stopped last (a push
+        # since changes them), BN6's as it began)
+        copied = (oa.rec[NODE + d.off + HELD_FROM], self.held_from.get(d.role, {}).get(d.off))
+        return d.off in HELD_COPY and oa.rec[NODE + d.off] in copied and d.b == first.rec[NODE + d.off]
 
     def first_b(self):
         return self.b[min(self.b)]['objs'] if self.b else []
@@ -268,6 +280,14 @@ class Souls4:
     def shots(self, d, fa, fb):
         ai = self.ai_bytes(d, fa, fb)
         return ai is not None and d.off == SHOTS4 and 0 < ai[0][SHOTS4] <= 5 and ai[1][SHOTS4] == 0 and self.united(fa, fb)
+
+    def presses(self, d, fa, fb):
+        ai = self.ai_bytes(d, fa, fb)
+        if ai is None or d.off not in (WINDOW4, PRESSES4) or not self.united(fa, fb):
+            return False
+        a, b = ai
+        counting = 0 < a[PRESSES4] < RAPID_AT and 0 < a[WINDOW4] <= WINDOW_TOP
+        return counting and (b[WINDOW4] == CHAOS6_NONE if d.off == WINDOW4 else b[PRESSES4] == 0)
 
     def charge_byte(self, k, a, b):
         """a byte of MegaMan's AI data where the engines keep the charge apart, each reading as the other"""

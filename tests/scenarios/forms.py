@@ -1,9 +1,8 @@
 """MegaMan's forms (issue #774; docs/game/meta/forms.md): a run of each form
 pays a guardian of another game in its own form. CROSS: BN5's ToadMan
 gives SpoutCross by his kind, Aqua, never his Soul. SOUL BN5: BN6's
-HeatMan gives NapalmSoul by his kind, Fire (Team ProtoMan's, moved since
-#804). SOUL BN4: HeatMan gives BN4's one moved Soul,
-ThunSoul, the one the run lacks: the powers line before his data and
+HeatMan gives NapalmSoul by his kind, Fire, now that it stands. SOUL BN4:
+HeatMan gives BN4's one moved Soul, ThunSoul, the one the run lacks: the powers line before his data and
 after it is taken; CROSS's and the Soul forms' power then taken in the next
 battle, after a quit and CONTINUE."""
 
@@ -61,7 +60,8 @@ def unite(soul, chip, turns):
     ]
 
 
-# (NapalmSoul, BN5's and BN6's Soul 4, Team ProtoMan's, by BN6's chip 107 D, FireHit1, Fire: tests/xdiff/soul_napalm.json's)
+# (NapalmSoul, BN5's 4, by a Fire chip of BN6's, 107 (FireHit1: tests/xdiff/soul_napalm.json's): BN6's guardian 1, HeatMan,
+# pays the Soul of his kind, Fire, where one stands (src/director/forms.c, forms_pay_how's PAY_KIND))
 SOUL_USED = [*ARRIVE[:6], ('do', 'chip 107 D 30; foes 205@52'), *unite(4, 107, 3)]
 # (ThunSoul, BN6's Soul 13 (BN4's 6), handed to UNITE with BN4's bits (soulunite_bn4_bits), by BN6's chip 30, Elec:
 # tests/xdiff/soul_thun.json's)

@@ -75,19 +75,27 @@ UNITS = (
     # (NapalmSoul: its charged shot's power attack and family, and the family a charged Fire chip of his runs, BN5's 0x4B,
     # the Napalm Bomb: BN5's 0x0801043A gives it for his chip charged, src/emu/soulchips.c the same in BN6's)
     ('napalm', 4, (0x0800F840, 0x080EEE82, 0x080EF38A)),
+    # (GyroSoul: his charged shot's power attack and family, his way into the proxy and out (his propeller, the companion
+    # overlay of BN5's kind 2), his passives as he unites and as his form's state is set again (Air and Float shoes))
+    ('gyro', 2, (0x0800F6A6, 0x080EEA40, 0x0800F064, 0x0800F0C8, 0x08011BDC, 0x08011D04)),
 )
 # Team ProtoMan's units: their blocks in a room of their own (soul_room.h's SOULS_TEAM_CODE), their sprites too
 # (SOULS_TEAM_ART, list 0 from TEAM_ART_FIRST), so that Team Colonel's code and numbers stay where they were
-TEAM_UNITS = ('napalm',)
+TEAM_UNITS = ('napalm', 'gyro')
 TEAM_CODE_ROOM = 0x8000     # SOULS_TEAM_CODE's bytes
 TEAM_ART_ROOM = 0x18000     # SOULS_TEAM_ART's
 TEAM_ART_FIRST, TEAM_ART_LAST = 0x66, 0x7F   # (list 0's numbers past Team ProtoMan's Souls' own 0x60-0x65: soul_room.h)
+# The companion overlay (BN5's first kind's 0x56, tools/bn5_navi_twins.py's OVERLAY5) a Team ProtoMan Soul's enter spawns of a
+# kind BN6 lacks (GyroSoul's propeller, BN5's kind 2): BN6's kind for it past the Navis' (xnavi_recipe.h's XN_KIND_OF: 19 + a
+# seat, to 61; the grown tables hold 64, xnavi_room.h's XN_KINDS), docs/project/claims/team-protoman-souls.json
+OVERLAY5 = dict(spawner=0x080C3808, masks=0x080C36AC, sprites=0x080C36C4, kinds=6)
+TEAM_OVERLAY_KINDS = {2: 63}
 
 # The families moved: BN5's CurAction, BN6's in the grown table (xattack_grow.h's XATTACK_SOULS on), its entry in BN5
 FAMILIES = ((0x43, 0xC0, 0x080EED92), (0x3A, 0xC1, 0x080EE864), (0x40, 0xC2, 0x080EEBDE), (0x50, 0xC3, 0x080EF68A),
             (0x3D, 0xC4, 0x080EEADC), (0x45, 0xC5, 0x080EEF6C), (0x13, 0xC6, 0x080EBDC6),
             # (Team ProtoMan's, past Chaos Unison's failure 0xC7: NapalmSoul's charged shot, its vulcan of fire)
-            (0x44, 0xC8, 0x080EEE82), (0x4B, 0xC9, 0x080EF38A))
+            (0x44, 0xC8, 0x080EEE82), (0x4B, 0xC9, 0x080EF38A), (0x3C, 0xCA, 0x080EEA40))
 
 # The power attacks moved: BN5's id, its entry, and the Soul's role for it (its loadout row's byte); BN6's id is
 # soul_room.h's SOUL_POWER_FIRST on in this order
@@ -95,7 +103,7 @@ POWERS = ((0x14, 0x0800F7DC, 'ColonelSoul\'s charged shot'), (0x13, 0x0800F7D0, 
           (0x17, 0x0800F818, 'ShadowSoul\'s charged shot'), (0x45, 0x0800FBE6, 'ShadowSoul\'s B+Left'),
           (0x07, 0x0800F66A, 'NumberSoul\'s charged shot'), (0x1A, 0x0800F864, 'TomahawkSoul\'s charged shot'),
           (0x11, 0x0800F79E, 'KnightSoul\'s charged shot'), (0x2D, 0x0800F9E6, 'ToadSoul\'s charged shot'),
-          (0x19, 0x0800F840, 'NapalmSoul\'s charged shot'))
+          (0x19, 0x0800F840, 'NapalmSoul\'s charged shot'), (0x09, 0x0800F6A6, 'GyroSoul\'s charged shot'))
 POWERS_COLONEL = 8   # (Team Colonel's, the first; Team ProtoMan's after: src/emu/soulpower.c numbers them past BN4's)
 
 # BN5's routines a moved routine calls that BN6 answers otherwise, aimed at the Souls' stubs (soul_room.h: SOUL_STUB_*),
@@ -124,6 +132,9 @@ PAIRS = {0x0800FE70: (0x080126EA, 'the chip writer\'s second entry: push {r4,r6,
          0x080258E8: (0x08029CD4, 'a pick\'s slot drawn on the Custom screen: the same steps, each game\'s own tiles and map place')}
 # The Souls' audits of their calls' differing twins (as tools/bn5_twins.py's AUDITS for the families')
 AUDITS = {
+    (0x080C3808, 0x080C5D18): "the companion overlay spawned (GyroSoul's propeller as he enters): the same steps but BN6 copies "
+                              "its owner's +0x16 as a halfword where BN5 copies the byte, and BN5 writes 0 to +0x60, which BN6's "
+                              "spawn leaves as its allocator zeroed it: the Navis' audit (tools/bn5_navi_twins.py), the same twin",
     (0x0800FE56, 0x08012642): "a charged shot's damage, base + its step x (his buster's Attack + 1): BN6's adds his Navi's and his form's "
                               "Attack too (0x0801265A), capped at 5, and 1 while he is dark; for MegaMan in a Soul, the form's 0 "
                               "(src/emu/soulpower.c's hook on BN6_FORM_BUSTER_BONUS's read), the same to Attack 4",
@@ -222,7 +233,9 @@ SOUND_TABLES = {0x080C6DE2: ((0x080C6C54, 'the obstacle strike\'s shot (its para
 # code of the Souls' spawns them), the one copy every track shares fixing up each kind
 FLASH_KINDS5 = bn5_objects.IMAGE['kinds']
 FLASH_KIND_COUNT = bn5_objects.IMAGE['count']
-FLASH_KINDS = (0x23, 0x33, 0x03, 0x0A, 0x32, 0x31)   # (each fixed in tools/bn5_objects.py's per-kind table, the Souls' entries)
+FLASH_KINDS = (0x23, 0x33, 0x03, 0x0A, 0x32, 0x31, 0x22)   # (each fixed in tools/bn5_objects.py's per-kind table, the Souls' entries;
+                                                           # GyroSoul's tornado's 0x22 Team ProtoMan's, past TEAM_ART_FIRST)
+TEAM_FLASH_KINDS = (0x22,)
 # Raw tables of the sprites a moved routine loads by a parameter: BN5's table (its entry's size; list x 4 and number first),
 # the parameters the moved code gives (NumberSoul's enter 0x0800F074 its companion 1; no moved code spawns it with 0), whose
 SPRITE_TABLES = {0x080C33A8: (2, (1,), 'NumberSoul\'s companion'),
@@ -343,6 +356,9 @@ class Deriv:
         self.routes = {}        # BN5's routine or data -> its place in another track's copy, as C: what the Souls' code runs there
         self.shared_effects = set()   # BN6's ids of the effects another track's install made, the Souls' too
         self.reserved = {}      # BN5's sprite -> its list 0 number (ART_ORDER: the numbers given once stay)
+        self.team_now = 'colonel'   # (whose walk the numbering pass reads: Team ProtoMan's new sprites go to their own room)
+        self.next_team_art, self.team_art = TEAM_ART_FIRST, 0
+        self.overlays = []
 
     def shared_at(self, a):
         """the block of another track's copy (shared_blocks) that holds BN5's address `a`, or None"""
@@ -732,6 +748,7 @@ class Deriv:
         for e in EFFECT_ORDER:
             self.bn6_effect(e)
         for a, w in self.walks.items():
+            self.team_now = self.team_of(a)
             for site, t in w.bls.items():
                 if t == SOUND:
                     self.number_sound(w, site)
@@ -743,6 +760,7 @@ class Deriv:
                     self.number_setup(w, site)
             self.scan_collision(w)
             self.scan_fields(w)
+        self.team_now = 'colonel'
         for tab in SPRITE_TABLES:
             if any(tab in w.lits.values() for w in self.walks.values()) and not self.shared_at(tab):
                 self.number_sprite_table(tab)
@@ -755,6 +773,7 @@ class Deriv:
         # tools/bn5_objects.py; a kind of the Souls' own their sprite, copied here at the number that table gives it)
         for kind in FLASH_KINDS:
             e = self.b5.bytes(FLASH_KINDS5 + 5 * kind, 2)
+            self.team_now = 'team' if kind in TEAM_FLASH_KINDS else 'colonel'
             fixed = bn5_objects.IMAGE_TWIN.get(kind) or bn5_objects.IMAGE_COPIED.get(kind, (None, None))[:2]
             if fixed[0] is None:
                 self.decide(f'the image object\'s kind {kind:#x}: unfixed in tools/bn5_objects.py')
@@ -762,6 +781,7 @@ class Deriv:
                 got = self.place_sprite(e[0] // 4, e[1])
                 if got != tuple(fixed):
                     self.decide(f'the image object\'s kind {kind:#x}: {got} here, {fixed} in tools/bn5_objects.py')
+        self.team_now = 'colonel'
         # (the rows of other tracks' copies the Souls' code spawns them with, fixed there to the Souls' numbers: they agree)
         for r in bn5_twins.SHARED_ROWS:
             if r['track'] != 'souls':
@@ -773,6 +793,34 @@ class Deriv:
         for site, (fam5, fam6) in families.items():
             self.imms.append(dict(at=site, form='THUMB_MOVS', rd=0, rn=0, was=fam5, now=fam6,
                                   why=f'its family: CurAction {fam5:#x} in BN5, the Souls\' {fam6:#x} in BN6 (xattack_grow.h)'))
+
+    def team_overlays(self):
+        """the companion overlay a Team ProtoMan Soul's walk spawns (movs r4,#kind before OVERLAY5's spawner) of a kind BN6
+        lacks: its kind made BN6's (TEAM_OVERLAY_KINDS), its masks and sprite (BN5's of that kind) copied, as the Navis'
+        recipe makes a Navi's (tools/xnavirecipe.py, overlay_of)"""
+        self.team_now = 'team'
+        for a, w in sorted(self.walks.items()):
+            if self.team_of(a) != 'team':
+                continue
+            for site in [x for x, t in w.bls.items() if t == OVERLAY5['spawner']]:
+                movs = [x for x in sorted(w.insns) if x < site and w.insns[x].form == 'movs' and w.insns[x].f[0] == 4]
+                k = w.insns[movs[-1]].f[1] if movs else None
+                if k not in TEAM_OVERLAY_KINDS:
+                    self.decide(f'{site:08X}: an overlay of a kind made otherwise, or with no BN6 kind given ({k})')
+                    continue
+                kind6 = TEAM_OVERLAY_KINDS[k]
+                masks = sorted(self.b5.u32(OVERLAY5['masks'] + 4 * j) for j in range(OVERLAY5['kinds']))
+                at = self.b5.u32(OVERLAY5['masks'] + 4 * k)
+                end = next((m for m in masks if m > at), OVERLAY5['masks'])
+                lst, idx = self.b5.u8(OVERLAY5['sprites'] + 2 * k) // 4, self.b5.u8(OVERLAY5['sprites'] + 2 * k + 1)
+                to = self.place_sprite(lst, idx)
+                if to is None:
+                    continue
+                self.overlays.append(dict(kind5=k, kind6=kind6, masks=at, masks_len=end - at, crc=zlib.crc32(self.b5.bytes(at, end - at)) & 0xFFFFFFFF,
+                                          list=to[0], index=to[1], unit=self.unit_of[a]))
+                self.imms.append(dict(at=movs[-1], form='THUMB_MOVS', rd=4, rn=0, was=k, now=kind6,
+                                      why=f'its overlay\'s kind: {k} in BN5, {kind6} in BN6 (Team ProtoMan\'s, past the Navis\')'))
+        self.team_now = 'colonel'
 
     def imm_for(self, chain, reg, was, now, why):
         for x, form, v in chain:
@@ -850,6 +898,23 @@ class Deriv:
             return tuple(to)
         if (lst, idx) in self.reserved:
             to_list, num = ART_LIST, self.reserved[(lst, idx)]
+        elif self.team_now == 'team':
+            # (a sprite Team ProtoMan's code draws first: list 0 from TEAM_ART_FIRST, in SOULS_TEAM_ART)
+            p, b = xrecipe.sprite(self.b5, LISTS5, lst, idx)
+            if not b:
+                self.decide(f'BN5\'s sprite {lst}:{idx:#x} cannot be read')
+                return None
+            num = self.next_team_art
+            if num > TEAM_ART_LAST:
+                self.decide(f'BN5\'s sprite {lst}:{idx:#x}: list 0 past Team ProtoMan\'s numbers ({TEAM_ART_LAST:#x})')
+            self.next_team_art += 1
+            at, room = rounded(self.team_art, ART_STEP), rounded(len(b), ART_STEP)
+            self.team_art = at + len(b)
+            if self.team_art > TEAM_ART_ROOM:
+                self.decide(f'Team ProtoMan\'s sprites take {self.team_art:#x} bytes, past SOULS_TEAM_ART\'s {TEAM_ART_ROOM:#x}')
+            self.sprites.append(dict(list=lst, index=idx, to_list=ART_LIST, to_index=num, at=at, room=room, base='SOULS_TEAM_ART'))
+            self.number_of[(lst, idx)] = (ART_LIST, num)
+            return (ART_LIST, num)
         else:
             to_list, num = ART_LIST, self.next_art
             if num > ART_LAST:
@@ -1095,6 +1160,7 @@ def derive(b5, b6, pairs):
     d.place_blocks()
     d.data_ranges()
     d.scan_numbers(families)
+    d.team_overlays()
     if d.art > ART_ROOM or d.art2 > ART_ROOM2:
         d.decide(f'the sprites take {d.art:#x} and {d.art2:#x} bytes, past SOULS_ART\'s {ART_ROOM:#x} before the faces or '
                  f'FREE_SOULS_ART\'s {ART_ROOM2:#x}')
@@ -1199,6 +1265,12 @@ def write_c(d):
     for v, now in sorted(d.songs.items(), key=lambda x: -x[1]):
         L.append(f'\t{{ 0x{v:X}, 0x{now:02X} }},')
     L.append('};')
+    L.append('/* the companion overlays its code spawns of a kind BN6 lacks: BN5\'s masks (their CRC32) copied to the Souls\' room, BN6\'s')
+    L.append(' * kind for them, their sprite as listed above */')
+    L.append('static const SoulOverlay overlays[] = {')
+    for o in d.overlays:
+        L.append(f'\t{{ 0x{o["masks"]:08X}, 0x{o["crc"]:08X}u, 0x{o["masks_len"]:X}, {o["kind6"]}, {o["list"]}, 0x{o["index"]:02X} }},   /* {o["unit"]}: BN5\'s kind {o["kind5"]} */')
+    L.append('};')
     L.append('/* the families moved: BN5\'s CurAction, BN6\'s, BN5\'s entry */')
     L.append('static const SoulFamily families[] = {')
     for f5, f6, entry in FAMILIES:
@@ -1220,7 +1292,8 @@ def write_c(d):
              'families', 'routes', 'shared_effects')
     L.append('#define N(a) (int)(sizeof (a) / sizeof *(a))')
     L.append('const SoulCode soulcode_bn5 = {')
-    L.append('\t' + ', '.join('NULL, 0' if n in empty else f'{n}, N({n})' for n in names) + f', {POWERS_COLONEL},')
+    L.append('\t' + ', '.join('NULL, 0' if n in empty else f'{n}, N({n})' for n in names) + f', {POWERS_COLONEL}, ' +
+             ('NULL, 0' if 'overlays' in empty else 'overlays, N(overlays)') + ',')
     L.append('};')
     return '\n'.join(L) + '\n'
 

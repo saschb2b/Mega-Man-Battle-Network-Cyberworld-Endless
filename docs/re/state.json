@@ -202,6 +202,15 @@
       "updated": "2026-11-15",
       "link": "../online/shared-dive.md",
       "state_text": "Being built"
+    },
+    {
+      "name": "Team ProtoMan's Souls in BN6's engine",
+      "state": "building",
+      "now": "BN5's Souls 1-6, which Team Colonel's ROM holds whole but never gives (BN5_SOUL_FLAGS 0xFF), on BN6's proxy form as Team Colonel's six (src/emu/soulteam.h; docs/multirom/souls.md, Team ProtoMan's Souls; docs/rom/souls.md, their row): the differential opens one in BN5's own battle by its flag entry written in the guest's ROM copy (souls5); tools/xsoul.py walks their units after Team Colonel's into a room of their own (FREE_TEAM_SOULS), their power attacks at SOUL_POWER_TEAM (0xB1), past room for BN4's twelve. NapalmSoul and GyroSoul built and proved against BN5's battle: UNITE, look, element, charged shot (0x19, family 0x44 as 0xC8), chip charge doubled as the Napalm Bomb (0x0801043A, family 0x4B as 0xC9), lava step (0x080125FA), +40 to Fire chips (0x0800D0CE), Chaos Unison's power attack: soul_napalm, soul_napalm_shot, soul_napalm_charge, soul_napalm_lava PASS, their mutations FAIL. Every compare of the form with 1-6 in BN5's code is listed (docs/rom/souls.md). GyroSoul: his propeller (the companion overlay of BN5's kind 2 as BN6's 63), Air and Float shoes, tornado (0x09, family 0x3C as 0xCA), the propeller's rule (0x080102CA, 0x08010264) and spin: soul_gyro, soul_gyro_shot, soul_gyro_propeller PASS against BN5, soul_gyro_double held to BN5's course.",
+      "left": "MagnetSoul, SearchSoul, MeddySoul, ProtoSoul (form 1); NapalmSoul's Chaos Unison's spec; soul_napalm_charge's last frames (CanGard's fourth-kind object let go a frame apart at t321, not traced). Their emotion-window faces: none in Team Colonel's ROM (MegaMan's own shown).",
+      "updated": "2026-11-22",
+      "link": "../multirom/souls.md",
+      "state_text": "Being built"
     }
   ],
   "decisions": [],

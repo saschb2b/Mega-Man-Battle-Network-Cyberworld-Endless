@@ -1,0 +1,14 @@
+[
+ {
+  "name": "GyroSoul lit by the kind after its own",
+  "spec": "soul_gyro",
+  "unitebreak": 4,
+  "what": "UNITE's check reads the chip's kind one up (Wind as Break): AirShot lights KnightSoul, which BN6's MegaMan does not hold, so GyroSoul never unites where BN5's does at t1"
+ },
+ {
+  "name": "GyroSoul's passives left out",
+  "spec": "soul_gyro",
+  "soulbreak": 1024,
+  "what": "the proxy's passive entry runs none for GyroSoul where BN5's ready routine 0x08011BDC sets his flags 0x20 and 0x10 (Air and Float shoes) and updates his collision data: his object's flags"
+ }
+]

@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted Souls"
 description: "Issue #82's Souls track: BN5's six Team Colonel Souls in BN6's engine on the proxy form 8, milestones S0-S7 from UNITE on BN6's Custom screen to Chaos Unison and BN5's mood (`src/emu/soul*.c`, `tools/xsoul.py`)."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T22:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T16:13:16Z }
 ---
 
 # Transplanted Souls
@@ -312,6 +312,23 @@ the next.
   where BN6's twin of the player's timers runs, `BN6_PLAYER_TIMERS`):
   `soul_napalm`, `soul_napalm_shot`, `soul_napalm_charge` and
   `soul_napalm_lava` PASS against BN5's own battle, their mutations FAIL.
+  **GyroSoul** (2): UNITE by a Wind chip, his look, his propeller (BN5's
+  companion overlay of kind 2, spawned as he enters and let go as he
+  leaves, its kind BN6's 63 past the Navis', its sprite in list 0 at
+  0x67), Air and Float shoes as he unites (BN5's 0x08011BDC), his charged
+  shot (0x09, family 0x3C as 0xCA: a tornado three panels ahead, its
+  flash the image object's kind 0x22, BN5's sprite at list 0's 0x66), and
+  his propeller's rule: a Wind chip not left alone sets it (BN5's
+  0x080102CA: his AI data +0x0D, BN5's sound 0x167 at slot 0x340), the
+  next Wind or plain attack chip is doubled by it and spends it (the
+  modifier 3, 0x08010264, the emotion's not looked at), and his overlay
+  spins while it is set (its animation's offset 0x11: BN5's +0x60, BN6's
+  +7, legit's mask 049): `soul_gyro`, `soul_gyro_shot` and
+  `soul_gyro_propeller` PASS against BN5's battle, the last to t62, where
+  the AirShot that sets it is each game's own chip; its doubling is
+  `soul_gyro_double`, BN6's battle alone held to BN5's course (the same to
+  the frame: the second AirShot's 0x8014 from t142, the sound 0x87 at
+  t143); their mutations FAIL.
   Open: `soul_napalm_charge` ends at t320, before CanGard's last frames,
   where the games part on a fourth-kind object of his (BN5's let go at
   t321, BN6's 0x11 still in play): not traced yet. His Chaos Unison
