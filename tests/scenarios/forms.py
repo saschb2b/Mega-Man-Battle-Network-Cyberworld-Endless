@@ -74,6 +74,8 @@ MANY = {
     'soul-bn5-helper-turn': dict(START='layer --seed 15 --net-biome 0 --setup short,0,0,16,0 --dev god,quiet,hp=2000,form=2,souls=0x20,folder=181',
                                  NEEDS=('bn5',), STEPS=[('expect', 'runform=SOUL BN5'), ('expect', 'runsoulturn=1'),
                                                         ('do', 'foes 205@52'), *unite(12, 181, 4)]),
-    # (BN4's Souls unite in the Souls' engine BN5's ROM builds: both ROMs)
-    'soul-bn4-bn6-guardian': dict(START=BASE + 'form=3 --guardian 1', NEEDS=('bn5', 'bn4'), STEPS=course('SOUL BN4', 'ThunSoul') + SOUL4_USED),
+    # (BN4's Souls unite in the Souls' engine BN5's ROM builds: both ROMs. ElecMan pays ThunSoul by his kind, Elec
+    # (src/director/forms.c forms_pay_how); HeatMan's Fire Soul is not moved, so he paid a seeded one of those that are, which
+    # turned from ThunSoul to AquaSoul as AquaSoul was moved)
+    'soul-bn4-bn6-guardian': dict(START=BASE + 'form=3 --guardian 2', NEEDS=('bn5', 'bn4'), STEPS=course('SOUL BN4', 'ThunSoul') + SOUL4_USED),
 }
