@@ -29,7 +29,7 @@ LAYERS_AN_ACT = 3
 TAKEN = re.compile(r"the guardian's fight taken over, (\d) MegaMen, my seat \d, his HP (\d+) \(his own (\d+)\)")
 GUARDIAN = re.compile(r'guardian \d+: enemy id \S+, version (\d+), HP (\d+) fought at (\d+)')
 IN = re.compile(r"party: iteration \d+: side 0's actor (\d) in \(name \S+, HP (\d+)\)")
-HP = re.compile(r"party: iteration \d+: side 0's actor (\d) HP (\d+) to (\d+)")
+HP = re.compile(r"party: iteration (\d+): side 0's actor (\d) HP (\d+) to (\d+)")
 OVER = re.compile(r'party: frame (\d+): the battle over, (won|lost)')
 
 
@@ -65,10 +65,13 @@ def fight(act, n, seed, a):
     for k, hp in IN.findall(out):
         start.setdefault(int(k), int(hp))
         last.setdefault(int(k), int(hp))
-    for k, _, to in HP.findall(out):
+    upto = 0
+    for it, k, _, to in HP.findall(out):
         last[int(k)] = int(to)
+        upto = int(it)
     o = OVER.search(out)
-    r['frames'] = int(o[1]) if o else None
+    # (a fight not over in the window: measured to its last hit, where it ran long enough to say)
+    r['frames'] = int(o[1]) if o else upto if upto >= 1800 else None
     r['lost'] = sum(start[k] - last[k] for k in start)
     r['fighters'] = len(start)
     return r

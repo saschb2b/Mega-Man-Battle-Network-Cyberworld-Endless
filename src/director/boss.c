@@ -309,12 +309,13 @@ static void reward_taught(void) {
 	if (soul || form || board) profile_save();
 }
 
-/* A party's guardian (the shared dive, docs/online/shared-dive.md): two
- * meet his next version, three or four the one after, as far as his
- * versions go (`most`); past them his HP alone grows (party_hp) */
+/* A party's guardian (the shared dive, docs/online/shared-dive.md): the
+ * version a diver alone meets, his HP alone grown for the party (party_hp;
+ * the owner's call of 22 November 2026, issue #754: the version raised made
+ * a party's fight slower and bloodier a head than going alone). The dev's
+ * measure may raise it (boss_party_dev), as far as his versions go (`most`) */
 static int party_version(int version, int most) {
-	int steps = B.party >= 3 ? 2 : B.party == 2 ? 1 : 0;
-	if (dev_party.steps >= 0 && B.party > 1) steps = dev_party.steps;
+	int steps = dev_party.steps >= 0 && B.party > 1 ? dev_party.steps : 0;
 	if (B.g.bracket || super_boss(B.foe)) return version;
 	return version + steps < most ? version + steps : most - 1;
 }
@@ -655,6 +656,8 @@ void boss_describe(FILE *f) {
 	fprintf(f, "version %d\nknown %s\ndata %s\n", B.g.version, guardian_known(B.g.navi) ? "yes" : "no",
 		taken ? "taken" : B.state != B_REWARD ? "hidden" : boss_reward_fresh() ? "fresh" : "waiting");
 	if (B.state == B_FIGHT) fprintf(f, "guardianhp %d\n", B.fought_hp);
+	/* (the version he is fought at and the party he is scaled for: a party's the solo's version, issue #754) */
+	if (B.state == B_FIGHT && B.fought.nfoes) fprintf(f, "guardianfought version %d party %d\n", B.fought.foes[0].version, B.party);
 	/* (where the staging's steps left MegaMan, from his card to the
 	 * battle: at his place beside the guardian, or astray: issue #697's
 	 * slide left him on the guardian's own spot) */

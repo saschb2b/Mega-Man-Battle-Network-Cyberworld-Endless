@@ -128,7 +128,7 @@ Verified on `dev`, 15 November 2026:
 | The leader | The first at the door starts any time; anyone leaves any time; a leader idle a minute passes the lead on | A countdown on a join; a ready check |
 | The clock | Runs while the queue waits | Paused, capped; paused |
 | The fight | One field: the party's MegaMen together against the guardian | Linked fights, each in their own battle with the guardian's HP shared |
-| Scaling | A party of two meets the guardian's next version (V1 to EX), three or four the one after, its HP times the party; past SP or its last version only the HP grows | HP alone; none; harder hits past SP; a cap at SP |
+| Scaling | (22 November 2026, issue #754) The guardian's version a diver alone meets, his HP times the party: per head the same fight as going alone, measured ([A party's guardian](#a-partys-guardian-22-november-2026)) | (15 November's call, as built till then) two meet his next version, three or four the one after, HP times the party: a fighter paid up to 3.3 times the solo's time and 9.4 times his HP lost; one version up from act 3 on; one version up and HP 1.5 times a fighter; HP alone; none; harder hits past SP; a cap at SP |
 | A drop | The missing MegaMen leave the field in each game, and each game finishes its own battle | Broken off, back to the door; the dropped run ended |
 | Deleted in a party | At a guardian: the run is over, as alone. In a crew's random battle the crew wins: pulled back once a dive, paid in the crew's HP, the dive marked (21 November 2026, issue #718; A deletion in a crew, below) | Pulled out at 1 HP and carried by a win; pulled out to fight again; (21 November) as at a guardian; back once a dive, free; at a guardian's party too; a fixed 100 HP a helper; the helper with the most HP paying alone; revived dives ranked below the rest |
 | Systems without the Arena | The New 3DS and the PSP join as linked fighters: their own battle, their damage into the field's guardian | Alone only; the whole party linked |
@@ -508,8 +508,9 @@ the session building it, and is his to turn over.
   A band over the map's foot says who waits: the leader's "PARTY OF 2!
   A:GO IN B:ALONE", the others' "ALPHA LEADS 2 B:GO ALONE"; alone on the
   layer he goes in as ever. The leader's A starts the party: each game's
-  guardian is scaled for it (two meet his next version, three or four the
-  one after, his HP times the party, at most 9999) and each fights him in
+  guardian is scaled for it (his HP times the party, at most 9999, at the
+  version a diver alone meets since 22 November 2026: A party's guardian,
+  below) and each fights him in
   its own battle, his HP the party's: seat 0's game counts every seat's
   damage (its own, PARTY_DAMAGE from the others) and tells the HP it keeps
   (PARTY_HP); no game ever raises its guardian's HP over what its own
@@ -1175,6 +1176,60 @@ is up, and the map's draw gives the rows the panel's top. Seen headless
 captured on both screens: Alpha's at an Android display's 640 x 480,
 "Beta 90/100" and three green bars, then "Beta L2 90/100" once Beta had
 gone on; Beta's at the 3DS's 320 x 240, "Alpha L1 100/100".
+
+## A party's guardian (22 November 2026)
+
+The friction hunt of 21 November found a party's door harder per head
+than going alone
+([issue #754](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/754)).
+Measured with `tools/party_guardian.py` ([A party's guardian against
+going alone](../devtools/party-guardian.md)): bot fighters on the party's
+field, the guardian's HP and his damage a second on the party measured, a
+fighter's time to the win and the HP he loses worked out against the
+solo's (1.0), each fighter taken to deal the same damage a second. As
+built till then (two met his next version, three or four the one after,
+his HP times the party), four seeds:
+
+| Act | Fighters | Guardian | Time to the win | HP a fighter loses |
+| --- | --- | --- | --- | --- |
+| 1 | 2 | v1 1800 | 2.0 | 3.3 |
+| 1 | 4 | v2 6000 | 3.3 | 9.4 |
+| 2 | 2 | v1/2 2500 | 1.8 | 2.0 |
+| 2 | 4 | v2 6400 | 2.3 | 5.5 |
+| 3 | 2 | v1 2600 | 1.4 | 1.05 |
+| 3 | 4 | v2 7200 | 2.0 | 1.5 |
+
+The version raised was what cost: his damage a second rose two to four
+times with it, while the HP he was fought at grew with the party anyway.
+
+**The owner's call** (22 November 2026, on the proposal on the issue,
+through the game-design skill's dialectic, together against ahead: a
+party is to be the better fight to be in, not the cheaper win): **the
+guardian's version a diver alone meets, his HP times the party.** Per head
+it is the fight a diver alone has; what a party has more of is the aim
+passed round it, the pull-back, a bar that falls under four. Chosen over
+the ladder as built; one version up only from act 3 on; and one version up
+with his HP 1.5 times a fighter (measured: still 1.5 to 4.9 times the HP a
+fighter loses). As built (`boss.c`, `party_version`: no step but the dev's
+measure, `partysteps`), four seeds:
+
+| Act | Fighters | Guardian | Time to the win | HP a fighter loses |
+| --- | --- | --- | --- | --- |
+| 1 | 2 | v0 900 | 1.0 | 0.55 |
+| 1 | 3 | v0 1350 | 1.0 | 0.43 |
+| 2 | 2 | v0/1 1400 | 1.0 | 0.81 |
+| 2 | 3 | v0/1 2100 | 1.0 | 0.77 |
+| 3 | 2 | v0 1800 | 1.0 | 0.70 |
+| 3 | 3 | v0 2700 | 1.0 | 0.53 |
+
+Four were not measured this way: four bot MegaMen on one game's field stand
+still after its first iteration (`--dev partycore=4,partybot=1`, an older
+fault of the dev's stood-in party, listed missing in the 0.22.0 trailer's
+cut), so the rule's per head for four rests on it being the same rule.
+The scenario `tests/scenarios/battle_guardian_party.py` holds it: at
+layer 3's guardian of `--seed 3` a party of two and of four meet DiveMan's
+V1, at 800 and 1600 HP to the solo's 400 (`guardianfought version 0 party
+N`, `guardianhp`).
 
 ## The spike: four on one field (15 November 2026)
 
