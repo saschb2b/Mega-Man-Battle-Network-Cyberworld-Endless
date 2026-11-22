@@ -1,4 +1,4 @@
-/* The forms screen in a run (src/forms/; docs/game/meta/forms.md, issue
+/* The forms screen in a run (src/forms/; docs/game/meta/forms-screen.md, issue
  * #774): what the run holds of MegaMan's forms handed to it as it opens
  * from the PET, and the five Crosses marked for CROSSSELECT, which the
  * engine's CROSSSELECT lists (crossselect_active) in BN6's order. */
@@ -18,7 +18,7 @@ void pet_forms_update(void);
  * kept from the game (the caller's outside the Net Square, where R is the
  * NetPass's: square_pet.h) */
 uint32_t pet_forms_keys(uint32_t keys);
-/* The screen's course while it is up (forms.h's): true while it holds the game */
+/* The screen's course while it is up (forms_screen.h's): true while it holds the game */
 bool pet_forms_holds(void);
 bool pet_forms_shown(void);
 /* Over the game's picture: the screen while it is up, and R's hint at the

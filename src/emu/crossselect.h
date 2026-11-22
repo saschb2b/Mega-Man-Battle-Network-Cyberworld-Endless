@@ -30,7 +30,7 @@ bool crossselect_install(const uint8_t *art, const uint8_t *pals);
 bool crossselect_falzar(void);
 /* The Crosses it lists, bit i Cross i (0-9, its order: Gregar's five,
  * then Falzar's), of those MegaMan holds: the five the forms screen marks
- * (src/forms/; docs/game/meta/forms.md), the rest held left off its list
+ * (src/forms/; docs/game/meta/forms-screen.md), the rest held left off its list
  * and its count. All of them until it is set; kept by the engine, not the
  * core, so the director sets it again after a state is loaded. */
 void crossselect_active(uint16_t crosses);

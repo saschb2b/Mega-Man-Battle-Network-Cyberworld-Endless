@@ -8,7 +8,7 @@
 #include "bn6.h"
 #include "dive_crew_view.h"
 #include "emote_palette.h"
-#include "forms.h"
+#include "forms_screen.h"
 #include "navicust.h"
 
 /* The screen the player is on, as BN6's state tells it (docs/rom/pet-and-second-screen.md,

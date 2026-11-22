@@ -64,7 +64,7 @@ The one screen of BN6's the run redraws: its P.A. Memo tab went with it.
 ## Forms
 
 R on the menu, named `R:FORMS` at its band's right end, opens the forms
-screen over it ([The forms screen](meta/forms.md)): the run's Crosses in
+screen over it ([The forms screen](meta/forms-screen.md)): the run's Crosses in
 the folder editor's two windows, CROSSSELECT's five and the spares,
 swapped with A as the folder editor swaps, and the run's Souls with the
 kind of chip each takes. BN6's menu has no room for a ninth row (its eight

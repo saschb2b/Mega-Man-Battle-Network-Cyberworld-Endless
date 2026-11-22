@@ -4,7 +4,7 @@ goes among the spares (BN6's first five held stay CROSSSELECT's); one
 swapped in from them is CROSSSELECT's in BN6's order, kept by the run
 through a quit and CONTINUE (run.cross_active), a seventh won after it
 waits among the spares too, and CROSSSELECT in the next battle lists the
-five chosen and no other (docs/game/meta/forms.md)."""
+five chosen and no other (docs/game/meta/forms-screen.md)."""
 
 # (the setup's HeatCross, Gregar's other four by their flags: five held)
 SWAP_START = '--scene emu --seed 1 --run-depth 2 --setup short,0,0,0,1 --dev onehit,god'

@@ -6,7 +6,7 @@
 #include "buttons.h"
 #include "crossselect.h"
 #include "emu.h"
-#include "forms.h"
+#include "forms_screen.h"
 #include "forms_text.h"
 #include "game.h"
 #include "pet_look.h"

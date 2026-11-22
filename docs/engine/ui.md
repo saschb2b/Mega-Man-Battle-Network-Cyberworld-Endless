@@ -184,7 +184,7 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   empty, R a key BN6 does not use there (`square_pet.c`,
   [The PET in the Square](../online/square/pet.md)); in a run `R:FORMS`
   in the same place, the forms screen's key (`pet_forms.c`).
-- The forms screen ([The forms screen](../game/meta/forms.md)) is the
+- The forms screen ([The forms screen](../game/meta/forms-screen.md)) is the
   folder editor's two windows side by side, CROSSSELECT's five and the
   spares, each row CROSSSELECT's own art from the ROM (in colour among the
   five, grey among the spares, its "chosen" palette while taken up, as

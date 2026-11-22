@@ -1,4 +1,4 @@
-/* The forms screen's picture (forms.h), in BN6's PET screens' look
+/* The forms screen's picture (forms_screen.h), in BN6's PET screens' look
  * (pet_look.h; docs/engine/ui.md): the band with the screen's name, its
  * pages as tags where the run holds Crosses and Souls, and on the Crosses'
  * page the count of CROSSSELECT's rows filled in a pill, as FOLDER EDIT's
@@ -14,7 +14,7 @@
 #include <SDL.h>
 #include <stdbool.h>
 
-#include "forms.h"
+#include "forms_screen.h"
 
 enum { FORMS_PAGE_CROSSES, FORMS_PAGE_SOULS, FORMS_PAGES };
 enum { FORMS_FIVE, FORMS_SPARE, FORMS_SIDES };   /* the Crosses' two windows */

@@ -7,7 +7,7 @@
 #include "director.h"
 #include "game.h"
 #include "jukebox.h"
-#include "forms.h"
+#include "forms_screen.h"
 #include "library.h"
 #include "netpass_screen.h"
 #include "online_describe.h"

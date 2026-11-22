@@ -1,4 +1,4 @@
-/* The forms screen's words (forms.h; docs/game/meta/forms.md): its name,
+/* The forms screen's words (forms_screen.h; docs/game/meta/forms-screen.md): its name,
  * its pages' and windows' labels, the count of CROSSSELECT's rows, and
  * what its INFORMATION box says of the cursor's row, in the PET's own
  * plain voice as KeyItem's (docs/voice/rules.md); and the Souls' names

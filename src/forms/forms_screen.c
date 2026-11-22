@@ -1,8 +1,8 @@
-/* forms.h. The Crosses' page is a deck of five over what the run holds:
+/* forms_screen.h. The Crosses' page is a deck of five over what the run holds:
  * the five are always CROSSSELECT's rows filled (every Cross held where
  * five or fewer are), so a change is a swap, one in for one out, and the
  * deck is never left short. */
-#include "forms.h"
+#include "forms_screen.h"
 
 #include <string.h>
 

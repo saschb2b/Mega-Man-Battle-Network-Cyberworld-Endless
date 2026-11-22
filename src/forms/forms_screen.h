@@ -1,4 +1,4 @@
-/* The forms screen (issue #774; docs/game/meta/forms.md): MegaMan's forms
+/* The forms screen (issue #774; docs/game/meta/forms-screen.md): MegaMan's forms
  * in this run, opened over the PET outside battle. Its Crosses in BN6's
  * folder editor's way: CROSSSELECT's five on the left, the others held on
  * the right as spares, each row CROSSSELECT's own; A takes one up (its row
@@ -8,8 +8,8 @@
  * both, B or START leaves (B first puts back a Cross taken up); a tap
  * takes a row, a second tap on it is A. What the run holds comes from the
  * director (pet_forms.h), and the five chosen go back to it. */
-#ifndef CW_FORMS_H
-#define CW_FORMS_H
+#ifndef CW_FORMS_SCREEN_H
+#define CW_FORMS_SCREEN_H
 
 #include <stdbool.h>
 #include <stdint.h>
