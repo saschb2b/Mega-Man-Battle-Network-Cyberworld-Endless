@@ -10,6 +10,13 @@
   beside Gregar's. Once their Navi has fallen, a run can start in one
   (issue #706).
 
+- **Fixed: a crew's battle could stall on its Custom screen for half a
+  minute.** In the week's DeepNet, a crewmate's chips picked on his own
+  Custom screen were now and then lost on their way, where his game ran
+  a frame ahead of the clock as he pressed OK: the field waited for them
+  to the turn's 30-second limit and then gave him no chips. They always
+  arrive now.
+
 ## 0.23.0 (2026-11-19)
 
 - **New: your friends on Discord see you play, and how far the run

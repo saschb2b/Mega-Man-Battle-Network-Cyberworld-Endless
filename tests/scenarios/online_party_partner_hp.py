@@ -14,8 +14,10 @@ PORTAL = 'place -44 150 3; wait 10'    # before the week's portal, facing it (se
 MENU = 'hold SELECT 4; hold SELECT+R 4; wait 6; '
 WIN = MENU + 'press DOWN; ' * 4 + 'press A; wait 60'          # the dev menu's Win this battle
 # (not quiet: the battle step goes through BN6's roll; the field's turns a bot's)
-# (partyend=300 on both games: the field's enemies at 1 HP at its 300th iteration, the crew's win quick)
-CREW = online.HOME.replace('quiet,', '') + ',partybot=1,partyend=300'
+# (partyend=300 on both games: the field's enemies at 1 HP at its 300th iteration, the crew's win quick; partydel=8, a
+# seat nobody holds, so that they fall 60 iterations later whatever they are: the bots never walk, and a foe on a row
+# neither MegaMan stands on, as the week's seed puts one now and then, was never hit)
+CREW = online.HOME.replace('quiet,', '') + ',partybot=1,partyend=300,partydel=8'
 
 
 def dive(game=''):

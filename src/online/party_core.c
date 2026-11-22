@@ -348,6 +348,8 @@ void party_core_leave(PartyCore *pc, unsigned seat) {
 
 unsigned party_core_phase(PartyCore *pc) { return (unsigned)(uint8_t)pc->core->rawRead8(pc->core, BN6_BATTLE_PHASE, -1); }
 
+unsigned party_core_custom_mode(PartyCore *pc) { return (unsigned)(uint8_t)pc->core->rawRead8(pc->core, BN6_CUSTOM_MODE, -1); }
+
 unsigned party_core_hp(const PartyCore *pc, unsigned seat) { return seat < PARTY_MOST ? pc->hp[seat] : 0; }
 
 void party_core_seat_hp(PartyCore *pc, unsigned seat, unsigned *hp, unsigned *max) {
