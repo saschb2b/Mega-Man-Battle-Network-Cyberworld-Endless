@@ -648,7 +648,7 @@ MANY['second-dive-of-the-week'] = dict(CAST, STEPS=online.course(
     ('do', PORTAL),
     ('do', 'press A; wait 10'),                       # 1: the portal's box, its options
     ('repeat', 'wait 4', 'choice=1/3', 90),
-    ('do', 'press DOWN; wait 6'),                     # 2: Start over
+    ('do', 'wait 20; press DOWN; wait 6'),            # 2: Start over (a moment after the options are up)
     ('expect', 'choice=2/3'),
     ('do', 'press A; wait 6'),                        # 3
     ('repeat', 'wait 10', 'dive=on', 60),

@@ -113,6 +113,8 @@ static void first_dive(const char *area) {
  * the rest. */
 void arrival_words(void) {
 	const char *area = guardian_area_in_text(run.biome, LAYER_NORMAL);
+	/* (the week's dive's first layer once its words were said this week: none of them again, issue #779) */
+	bool heard_this_week = run.depth == 1 && run.side_kind == LAYER_NORMAL && weekly_intro_shown();
 	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
 	int super = super_here();
 	D.beat[0] = 0;
@@ -132,7 +134,7 @@ void arrival_words(void) {
 		snprintf(D.beat, sizeof D.beat, "@M We're back in %s,Lan!|@M It feels easier now...|@L 'Cause we got stronger! Let's stock up!", area);
 	else if (run.depth == 1) {
 		/* (the week's dive: its first layer's words and the act's card once a week, not every dive; issue #779) */
-		if (weekly_intro_shown()) D.area_card = false;
+		if (heard_this_week) D.area_card = false;
 		else first_dive(area);
 		weekly_intro_mark();
 	}
@@ -148,7 +150,7 @@ void arrival_words(void) {
 	/* (a new act's other areas: none, where they are and whose copy waits
 	 * at its end the act card's, just before; the main path's words cut,
 	 * one channel a fact: docs/game/core-loop.md) */
-	nets_arrival_words();
+	if (!heard_this_week) nets_arrival_words();
 	/* (the area's battlefields, on its first layer: a playtester froze on
 	 * the Aquarium's ice, 140 to 80 HP, and nothing had said so; a
 	 * homepage's conveyor carried another off the row he stepped into,

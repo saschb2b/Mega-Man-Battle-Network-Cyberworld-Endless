@@ -1079,9 +1079,17 @@ is more), and his to turn over:
   ISN'T OVER!" gone. The Board's word of a dive it just took stays, a page
   first.
 - **Once a week.** The first layer's words ("Whoa... It looks just like
-  ...!") and the act's title card play on the week's first dive and not
-  again that week (`weekly_intro_shown`, the week's record's `intro_week`
+  ...!"), the older net's news ("Wait... This Net's a copy of an older
+  one!", which a dive's fresh profile heard every dive) and the act's title
+  card play on the week's first dive and not again that week (`weekly_intro_shown`, the week's record's `intro_week`
   in `weekly.sav`, not `Run`).
+
+- **The vortex's flat frame is its own.** Sampled every three frames
+  with no box open, BN5's dark hole (list 7 `0x87`, moved plain) shows as a
+  flat purple shape once in each 30-frame loop of its five frames: it is
+  the moved sprite's, not the box's. Open: why that frame draws flat in
+  BN6's engine (its frame's tiles or OAM as `xnavi_sprite_len` copies
+  them, against BN5's own), a reverse-engineering task of its own.
 
 A second dive of the week is now three presses from A on the portal to
 walking on layer 1: the portal (A), Start over (DOWN, A), or a new dive's
