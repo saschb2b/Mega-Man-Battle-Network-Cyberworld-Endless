@@ -44,13 +44,13 @@ static const Power *powers_of(int form, int *n) {
 const char *forms_power_name(int form, int p) {
 	int n;
 	const Power *pw = powers_of(form, &n);
-	return p >= 1 && p <= n ? pw[p - 1].name : NULL;
+	return pw && p >= 1 && p <= n ? pw[p - 1].name : NULL;
 }
 
 int forms_power_kind(int form, int p) {
 	int n;
 	const Power *pw = powers_of(form, &n);
-	return p >= 1 && p <= n ? pw[p - 1].kind : KIND_NONE;
+	return pw && p >= 1 && p <= n ? pw[p - 1].kind : KIND_NONE;
 }
 
 /* (BN6's Navis: his Cross's kind, a Cross's element read against its
