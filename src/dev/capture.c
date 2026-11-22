@@ -39,7 +39,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16], by[16], board[16], drop[160]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab, ahead, home; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16], by[16], board[16], drop[160]; int place[4], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab, ahead, home; } InputStep;
 /* (the steps taken from the heap by the first script, as only headless
  * tests and remote play have one: a megabyte no game holds otherwise) */
 #define SCRIPT_MAX 1024
@@ -87,6 +87,16 @@ static bool bare_step(const char *tok, InputStep *s) {
 	else if (!strcmp(tok, "home")) s->home = true;
 	else return false;
 	return true;
+}
+
+/* "place X Y FACING", or "place X Y FACING panel": at the centre of the
+ * panel that holds (X, Y), a wall beside it never nudging MegaMan across a
+ * panel's edge (director_dev_place_panel); false where it is not whole */
+static bool place_parse(const char *words, InputStep *s) {
+	char panel[8] = "";
+	int n = sscanf(words, "%d %d %d %7s", &s->place[0], &s->place[1], &s->place[2], panel);
+	s->place[3] = n == 4 && !strcmp(panel, "panel");
+	return n >= 3;
 }
 
 /* a dev step that takes its words whole ("foes SPEC", "status SPEC",
@@ -161,7 +171,7 @@ static void parse_script(const char *spec) {
 		 * puts him in it, of the Glitch warp or its copy by it; "300:battle" waits its 300 frames first; "0:dump
 		 * PREFIX" the video memory, as remote play's) */
 		if (colon && !strncmp(colon + 1, "dump ", 5)) snprintf(s->dump, sizeof s->dump, "%s", colon + 6);
-		else if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
+		else if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = place_parse(colon + 7, s);
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (colon && bare_step(colon + 1, s)) {}
 		else if (colon && text_step(colon + 1, s)) {}
@@ -302,7 +312,7 @@ static void script_actions(void) {
 		if (s->second[0]) platform_save_second_screen(s->second);
 		if (s->state[0]) write_state(s->state);
 		if (s->dump[0]) emu_debug_dump(s->dump);
-		if (s->placed) director_dev_place(s->place[0], s->place[1], s->place[2]);
+		if (s->placed) (s->place[3] ? director_dev_place_panel : director_dev_place)(s->place[0], s->place[1], s->place[2]);
 		if (s->drop[0]) drop_file(s->drop);
 		if (scene_current() == &scene_emu) emu_steps(s);
 		/* (event flags FROM..TO set, then as they were: finding what a flag does) */
@@ -337,7 +347,7 @@ static bool remote_open(const char *dir) {
 
 /* One line: "N BUTTONS" holds them N frames, "shot PATH", "second PATH"
  * (the second screen's picture), "state PATH",
- * "dump PREFIX" (the video memory, emu_debug_dump), "place X Y FACING", "flags FROM TO 1" (set; 0: back as they were),
+ * "dump PREFIX" (the video memory, emu_debug_dump), "place X Y FACING [panel]", "flags FROM TO 1" (set; 0: back as they were),
  * "battle" (the layer's next random battle, director_dev_battle), "home"
  * (the run home between acts, director_dev_go_home), "foes
  * SPEC" (a battle of these foes, director_dev_foes), "xrecord ADDR" (a
@@ -362,7 +372,7 @@ static void remote_parse(char *line) {
 		else if (!strncmp(tok, "second ", 7)) snprintf(s->second, sizeof s->second, "%s", tok + 7);
 		else if (!strncmp(tok, "state ", 6)) snprintf(s->state, sizeof s->state, "%s", tok + 6);
 		else if (!strncmp(tok, "dump ", 5)) snprintf(s->dump, sizeof s->dump, "%s", tok + 5);
-		else if (!strncmp(tok, "place ", 6)) s->placed = sscanf(tok + 6, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
+		else if (!strncmp(tok, "place ", 6)) s->placed = place_parse(tok + 6, s);
 		else if (!strncmp(tok, "flags ", 6)) s->flagged = sscanf(tok + 6, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (bare_step(tok, s)) {}
 		else if (text_step(tok, s)) {}

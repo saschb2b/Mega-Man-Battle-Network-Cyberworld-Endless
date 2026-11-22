@@ -303,24 +303,25 @@ MANY['crew-by-nearness'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.
 # Every diver on the layer a dot on the map (issue #728): each game sees the other's, ringed in the crew's colour
 # while the two are a crew, moving as he walks, and dimmer once he has walked out of the crew. The dots are told by
 # their panel from MegaMan's, so the layer's layout plays no part; SELECT held shows the map for its picture (`shot`),
-# the second screen's too (`second`).
+# the second screen's too (`second`). Each MegaMan is put down at the centre of his panel (`place ... panel`): the
+# week's layer is another each run, and one put down by a wall's edge was pushed a panel's width off it (64 0 to 64 8).
 MAP = 'hold SELECT 20; shot; second; hold SELECT 4'
 MANY['divers-on-the-map'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
     MANY['dive-together']['STEPS'],
-    ('do', 'place 0 0 3; wait 5'),
-    ('@beta', 'do', 'place 64 0 3; wait 5'),          # two panels off, in the crew
+    ('do', 'place 0 0 3 panel; wait 5'),
+    ('@beta', 'do', 'place 64 0 3 panel; wait 5'),    # two panels off, in the crew
     soon('mapdots=1: Beta(0,-2)*', '', 600),
     soon('mapdots=1: Alpha(0,2)*', 'beta', 600),
     ('do', MAP),
     ('@beta', 'do', MAP),
-    ('@beta', 'do', 'place 576 0 3; wait 5'),         # eighteen panels off: his dot goes with him
+    ('@beta', 'do', 'place 576 0 3 panel; wait 5'),   # eighteen panels off: his dot goes with him
     soon('mapdots~Beta(0,-18)', '', 600),
     ('sleep', 2.5),                                    # out of the crew past crew_split_ms: dimmer, no ring
     soon('mapdots=1: Beta(0,-18)', '', 600),
     soon('mapdots=1: Alpha(0,18)', 'beta', 600),
     ('do', MAP),
-    ('@beta', 'do', 'place 16 160 3; wait 5'),        # and across: five panels the other way, still apart
-    soon('mapdots~Beta(5,', '', 600),
+    ('@beta', 'do', 'place 0 160 3 panel; wait 5'),   # and across: five panels the other way, still apart
+    soon('mapdots~Beta(5,0)', '', 600),
     ('expect', 'crew=0'),
     ('do', MAP),
 ))
@@ -874,4 +875,32 @@ MANY['crew-down-told'] = dict(crew_fight(DOWN), STEPS=online.course(
     ('@beta', 'repeat', 'press A; wait 20', 'partydown=spent|page=result', 120),
     ('@beta', 'expect', 'partydown=spent'),
     ('@beta', 'expect', 'hpbox_hp=0'),
+))
+
+# A held as the field hands the game back: no press on the layer. The run's own core stands still under the field, its
+# last keys those from before it, so a button still held as a fallen MegaMan's game went back came to BN6 as a new
+# press: the A that kept paging talked to the NPC before him, and in the chat his game answered his crewmate's next
+# battle busy (crew-down-told's failures, Mr.Prog's "HELLO, MEGAMAN!"). Both stand by the layer's first NPC, facing it
+# (his A there opens its chat: something to talk to); Beta deleted on the field, A held through his fall and the
+# field's end into the layer; no chat opens there, and the next battle has him again.
+MANY['crew-a-held-over'] = dict(crew_fight(DOWN), STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'by npc; wait 10'),
+    ('@beta', 'do', 'by npc; wait 10'),
+    ('@beta', 'do', 'press A; wait 40'),
+    ('@beta', 'expect', 'chat=open'),
+    ('@beta', 'repeat', 'press A; wait 20', 'chat=closed', 20),
+    ('sleep', 1.5),
+    soon('crew=2: Alpha Beta', 'beta', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    ('@beta', 'repeat', 'hold A 120', 'crewend!=none|dive=none', 30),   # (one A, its batches back to back)
+    ('@beta', 'do', 'wait 30; shot'),                 # (let go: time for a chat it had opened to show)
+    ('@beta', 'expect', 'where=layer'),
+    ('@beta', 'expect', 'chat=closed'),
+    ('repeat', 'press A; wait 20', 'crewend!=none|dive=none', 120),
+    soon('join=none', '', 600),
+    soon('join=none', 'beta', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
 ))

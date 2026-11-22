@@ -127,7 +127,8 @@ def steps(commands):
             elif op == 'second':
                 out.append(('second',))
             elif op == 'place':
-                out.append(('place', int(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else -1))
+                # (a fourth word, `panel`: at the centre of the panel that holds X, Y)
+                out.append(('place', int(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else -1, *args[3:4]))
             elif op == 'flags':
                 out.append(('flags', int(args[0], 0), int(args[1], 0), int(args[2]) if len(args) > 2 else 1))
             elif op in ('battle', 'home'):
@@ -355,7 +356,7 @@ def send(h, seq, record=None):
             shots.append((at, path))
             items.append(f'shot {short(path)}')
         elif s[0] == 'place':
-            items.append(f'place {s[1]} {s[2]} {s[3]}')
+            items.append(' '.join(['place', *map(str, s[1:])]))
         elif s[0] == 'flags':
             items.append(f'flags {s[1]} {s[2]} {s[3]}')
         elif s[0] in ('battle', 'sig', 'home', 'guardian'):

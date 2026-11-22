@@ -15,7 +15,7 @@ reading each picture; a session replays from the seed, `data0/` and the
 history. Each start copies the current build into the session's `bin/`;
 with `NAME/bin.pin` present its restarts keep that copy, so a rebuild
 during a playtest leaves its CONTINUE alone. Dev steps beside the
-player's: `place X Y FACING` puts MegaMan somewhere, `flags FROM TO 1`
+player's: `place X Y FACING` puts MegaMan somewhere (`place X Y FACING panel` at the centre of the map's panel that holds X, Y, where a wall beside it cannot push him off it: a scenario's panels on a layer it does not know, the shared dive's), `flags FROM TO 1`
 sets a block of event flags and `flags FROM TO 0` puts them back,
 `stuck NAME` saves the run with BN6 holding MegaMan so (a CONTINUE's
 recovery tested, issue #23), `foes 200@52 01@43` a battle of the foes named, `xrecord 811DE10` one of BN5's records in BN6's engine and `status freeze 90` a status on its enemies ([Dev tools](overview.md)), `battle` starts the layer's next random battle once he is free on its
