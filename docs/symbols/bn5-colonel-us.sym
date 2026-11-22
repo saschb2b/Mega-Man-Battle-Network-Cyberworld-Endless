@@ -545,6 +545,7 @@
 08026CFA mode_4_last_draw
 08026CFE past_it
 08027058 mode_0x24_end
+08027252 mode_step
 08027310 custom_screen_script
 08027410 mode_0x38_phases_table_read
 08027412 colonelsoul_button_chip.on
@@ -554,6 +555,8 @@
 08027F10 elements_set_up
 08028020 bn5_program_advances.323_337_registry_350_364_list_2
 0802806C bn5_mood_bn6_5
+080280FC one_turn
+080280FE where_hook_goes_on
 080281D4 colonelsoul_button_chip.slot_drawn
 08028342 colonelsoul_button_chip.button_tiles_by_state_element_8
 08028344 colonelsoul_button_chip.button_tiles_by_state_element_8_2
@@ -581,6 +584,7 @@
 08029C5A colonel_pattern_test
 08029CD4 colonelsoul_button_chip.slot_drawn_2
 08029D34 mode_4_last_draw_call
+0802A5D6 button_stands_where_element_8_is
 0802B3E0 BN5_BATTLE_TYPE
 0802B3F2 battle_win_song.options
 0802B4B0 player_chip_ai

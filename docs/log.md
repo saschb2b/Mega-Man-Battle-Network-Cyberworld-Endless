@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: multirom/souls.md (SearchSoul's SHUFFLE as BN6's own button, which BN6 kept from BN5's: his Soul passes its test with three a turn), rom/souls.md (BN6's SHUFFLE: its test, its count, its step), game/team-protoman.md (SearchSoul's SHUFFLE built), code/emu.md (soulshuffle.c).
 * **Update**: online/shared-dive.md (a partner's turn messages never lost on a frame early on the clock, partyearly; the state's partycustom line and why crew-battle-named waits on it), devtools/scenarios.md (partycustom among the dive's lines).
 * **Update**: multirom/bn4-souls.md (the Souls' loadouts' room grown to BN4's twelve: a fifth BN4 Soul's row overflowed it and no BN4 Soul united).
 * **Update**: multirom/souls.md (SearchSoul's battle in BN6's engine, his SHUFFLE traced: BN5's Custom screen's Soul button), rom/souls.md (SearchSoul's addresses, the Soul button and SHUFFLE in BN5's Custom screen), game/team-protoman.md (unit 8: SearchSoul's battle built, the button to come), devtools/differential.md (state5, BN5's guest saved for romlab).
