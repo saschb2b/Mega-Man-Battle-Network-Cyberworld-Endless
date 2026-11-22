@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T12:04:04Z
-* **Create**: game/meta/forms.md (MegaMan's form for a run, issue #774: what a guardian pays by kind, the FORM row, the Soul forms opened, one power brought, SoulT+1 for BeastOut, the week's form; behind --dev forms). **Update**: game/meta/index.md (its line), game/meta/souls.md (a Soul brought at setup in a Soul form, the owner's reversal), game/fidelity.md (the guardian's pay across forms, adapted), code/director.md (forms.c, forms_words.c), GUIDE.md (the run event's form).

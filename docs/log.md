@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Create**: game/meta/forms.md (MegaMan's form for a run, issue #774: what a guardian pays by kind, the FORM row, the Soul forms opened, one power brought, SoulT+1 for BeastOut, the week's form; behind --dev forms). **Update**: game/meta/index.md (its line), game/meta/souls.md (a Soul brought at setup in a Soul form, the owner's reversal), game/fidelity.md (the guardian's pay across forms, adapted), code/director.md (forms.c, forms_words.c), GUIDE.md (the run event's form).
 * **Update**: online/shared-dive.md (a dive's end screen of its own and an HP reward taken once, issue #769), engine/ui.md (the dive's RESULT), rom/battle.md (a battle's HP reward and its results' close, phase 0x14), code/screens.md (the summary's dive).
 * **Update**: engine/saves.md (`RUN_MAGIC` "CWEE": MegaMan's form for a run and its fields, issue #774; "CWED" read as an older format, its state ten-bit, every older run the mix; `run.souls` widened to BN4's twelve).
 * **Update**: online/shared-dive.md (viruses' aim in a crew's battle, issue #777: a virus finds its target by position, the owner in front; the viruses' bench), rom/online.md (a virus's target by the panels in its line: the Gunner's scan and filter, the Mettaur's moves).
