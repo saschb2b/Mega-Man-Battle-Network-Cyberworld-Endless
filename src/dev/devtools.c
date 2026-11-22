@@ -54,7 +54,7 @@ static bool dev_switch(const char *t) {
 	static const struct { const char *name; bool *on; } flags[] = {
 		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "sliprun", &dev.sliprun }, { "fragile", &dev.fragile }, { "powers", &dev.powers }, { "lab", &dev.lab },
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "folders", &dev.folders }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
-		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "groups", &dev.groups }, { "noarc", &dev.noarc }, { "dark", &dev.dark }, { "bootplayed", &dev.bootplayed }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "glitchhold", &dev.glitch_hold }, { "tourney", &dev.tourney },
+		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "groups", &dev.groups }, { "noarc", &dev.noarc }, { "dark", &dev.dark }, { "bootplayed", &dev.bootplayed }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "glitchhold", &dev.glitch_hold }, { "tourney", &dev.tourney }, { "forms", &dev.forms },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy }, { "nocarry", &dev.no_carry },
 		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end }, { "discord", &dev.discord },
 		{ "feel", &dev.feel }, { "settings", &dev.settings }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 },
@@ -63,7 +63,7 @@ static bool dev_switch(const char *t) {
 		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "library=", &dev.library }, { "alias=", &dev.alias }, { "reward=", &dev.reward }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },
 		{ "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny }, { "libpar=", &dev.lib_par }, { "libhp=", &dev.lib_hp },
 		{ "side=", &dev.side }, { "glitchstage=", &dev.glitch_stage }, { "battler=", &layer_battler_forced }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
-		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak },
+		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak }, { "form=", &dev.form },
 		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenacarry=", &dev.arena_carry }, { "arenadesync=", &dev.arena_desync },
 		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "party=", &dev.party }, { "partyhp=", &dev.party_hp }, { "partyend=", &dev.party_end }, { "partydel=", &dev.party_del }, { "partycore=", &dev.party_core }, { "partytwin=", &dev.party_twin }, { "partyroll=", &dev.party_roll }, { "partybot=", &dev.party_bot }, { "partyview=", &dev.party_view }, { "partyscale=", &dev.party_scale }, { "partyhpper=", &dev.party_hp_per }, { "partysteps=", &dev.party_steps }, { "partydelay=", &dev.party_delay }, { "partylead=", &dev.party_lead }, { "diveroom=", &dev.dive_room }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
 		{ "matehp=", &dev.mate_hp }, { "group=", &dev.group },
@@ -110,6 +110,8 @@ void devtools_parse(const char *spec) {
 	if (dev.speed > 8) dev.speed = 8;
 	run_debug_glitch = dev.glitch;
 	run_debug_bracket = dev.tourney;
+	run_debug_forms = dev.forms || dev.form > 0;
+	run_debug_form = dev.form;
 }
 
 void devtools_veteran(void) {

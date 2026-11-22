@@ -130,7 +130,7 @@ its folders' entries, in ten bits since ten-bit chip ids (`chip_entry.h`),
 and the cart's save RAM, where the pack counts the chips of ids from 635
 ([Memory the engine writes](emulation/memory.md), the save RAM's table: a
 state from before them is read as holding none):
-`RUN_MAGIC` is "CWED" (`save_format.h`; "CWEC" is Oran Isle's run.stop,
+`RUN_MAGIC` was "CWED" (`save_format.h`; "CWEC" is Oran Isle's run.stop,
 nine-bit too); a run saved before ("CWEC", "CWEB", or an older format)
 is read as ever, and its folders go through the converter
 (`chip_entries_from9`, unit-tested; `tests/test_legacy.c` reads a "CWEB"
@@ -141,6 +141,15 @@ the nine-bit build saved at a guardian's door: the ten-bit build's
 CONTINUE the same picture for picture as the nine-bit build's, and
 without the converter not, from the battle on. A ten-bit run's `.cwsave`
 reads as made by a newer version in a build before it.
+
+`RUN_MAGIC` is "CWEE" since MegaMan's form for a run (issue #774):
+`run.form`, the Soul a Soul form brought (`run.soul_start`), the Crosses
+marked for CROSSSELECT (`run.cross_active`), the Crosses a CROSS run holds
+(`run.cross_held`, and as the layer was made, `run.cross_layer`) and the turn more a unison lasts (`run.soul_turns`) after `run.extras_off`. A "CWED" run is read as
+today's, its state ten-bit (`legacy_run_nine`), and every run read from
+an older format plays to its end as the mix, every system at once
+(`tests/test_legacy.c`). `run.souls` holds BN4's twelve Souls past the
+eight bytes it held, which an older file reads as none.
 
 ROMs, boot states and any other file are never packed. Controls, keys,
 the touch layout, screen settings, the volumes and the statistics answer

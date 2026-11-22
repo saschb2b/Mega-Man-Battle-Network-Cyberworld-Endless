@@ -107,7 +107,7 @@ _Static_assert(offsetof(Profile, lab_folder_on) == 1047 && offsetof(Profile, lab
 _Static_assert(offsetof(Profile, heard) == 1108, "Profile.heard save offset changed");
 _Static_assert(offsetof(Profile, lab_sets) == 812 && sizeof(LabSaved) == 42 && offsetof(LabSaved, frames) == 38, "Profile.lab_sets save layout changed");
 
-_Static_assert(sizeof(Run) == 116, "Run save size changed");
+_Static_assert(sizeof(Run) == 124, "Run save size changed");
 _Static_assert(offsetof(Run, active) == 0, "Run.active save offset changed");
 _Static_assert(offsetof(Run, seed) == 4, "Run.seed save offset changed");
 _Static_assert(offsetof(Run, depth) == 8, "Run.depth save offset changed");
@@ -132,6 +132,8 @@ _Static_assert(offsetof(Run, back_spent) == 94, "Run.back_spent save offset chan
 _Static_assert(offsetof(Run, home_depth) == 96, "Run.home_depth save offset changed");
 _Static_assert(offsetof(Run, job) == 98, "Run.job save offset changed");
 _Static_assert(offsetof(Run, extras_off) == 112, "Run.extras_off save offset changed");
+_Static_assert(offsetof(Run, form) == 114 && offsetof(Run, soul_start) == 115, "Run.form save offset changed");
+_Static_assert(offsetof(Run, cross_active) == 116 && offsetof(Run, cross_held) == 118 && offsetof(Run, cross_layer) == 120 && offsetof(Run, soul_turns) == 122, "Run.cross_active save offset changed");
 
 _Static_assert(sizeof(Rival) == 20, "Rival save size changed");
 _Static_assert(offsetof(Rival, met) == 0, "Rival.met save offset changed");

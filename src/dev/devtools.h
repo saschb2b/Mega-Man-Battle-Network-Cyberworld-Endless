@@ -24,6 +24,8 @@ typedef struct {
 	bool bootplayed; /* bootplayed: the boot's kept state read from the run's checkpoint, a played game's (issue #688's scenario) */
 	int lib_hp;     /* libhp=N: a board's Darkloid begins at N HP (his heal and his battle from the board's HP seen); 0 his max */
 
+	bool forms;     /* new runs take MegaMan's form, CROSS unless the setup or form=N chooses (issue #774; run_debug_forms) */
+	int form;       /* form=N: ... form N (run.h's RUN_FORM_*: 1 CROSS, 2 SOUL BN5, 3 SOUL BN4), forms on */
 	bool tourney;   /* every act from the third that can hold one ends in the tournament's bracket, whatever the profile and the coin (docs/game/tournament.md; run_debug_bracket) */
 	bool glitch;    /* every act's first layer from the second holds the Glitch warp (docs/game/glitch-layer.md; run_debug_glitch) */
 	int glitch_stage; /* glitchstage=N: a Glitch layer held at stage N - 1 (1-5), its glitches and battles; 0 the floor's */
