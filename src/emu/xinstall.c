@@ -4,6 +4,7 @@
 #include "chip_targets.h"
 #include "emu.h"
 #include "rom.h"
+#include "soullook.h"
 #include "soulproxy.h"
 #include "soulunite.h"
 #include "xbracket.h"
@@ -18,10 +19,12 @@
 #include "xsea.h"
 #include "xstrike.h"
 
-/* before each frame where BN4's ROM is read: a Navi chip's Navi's rooms (xnavi_bn4_chip.h), then the pool's pointing */
+/* before each frame where BN4's ROM is read: a Navi chip's Navi's rooms (xnavi_bn4_chip.h), then the pool's pointing; BN4's
+ * united Soul's room (soullook.h) */
 static void bn4_frame(void) {
 	xnavi_bn4_chip_frame();
 	xnavi_bn4_sounds_frame();
+	soullook_frame();
 }
 
 void xinstall_core(int families, int navis) {

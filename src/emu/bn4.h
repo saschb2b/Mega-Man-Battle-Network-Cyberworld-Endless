@@ -311,7 +311,8 @@
 #define BN4_FORM_ELEMENTS 0x0800C964u /* by form, a byte: his element (FireSoul 1, ThunSoul 3, AquaSoul 2, WoodSoul 4) */
 #define BN4_FORM_COMPANIONS 0x08018068u /* by form, a u16: an object spawned beside him (FireSoul's 0x0010, NumSoul's 0x0110), 0 none */
 #define BN4_STATS_SPRITES 0x08017F98u /* by BN4_NAVI_NAVI, his sprite's list and number (2 bytes): MegaMan's list 0, number the form (the
-                                       * Souls' sprites list 0's 1-12, BN5's 7-12); 1-13 list 8, the Soul Navis the unison draws */
+                                       * Souls' sprites list 0's 1-12, BN5's 7-12); 1-13 list offset 8 (sprite_load's r1, a byte offset
+                                       * into the lists: list 2), the Soul Navis' battle sprites, which the unison draws */
 #define BN4_POWER_ATTACKS 0x0800CA7Cu /* the power attacks by id, 108 (BN5_POWER_ATTACKS' and BN6_POWER_ATTACKS' twin): each sets the attack's
                                        * variables (AI data +0x70) and returns its family, a state of MegaMan's (BN4_PLAYER_STATES) */
 #define BN4_POWER_ATTACK_COUNT 108    /* ... how many */
