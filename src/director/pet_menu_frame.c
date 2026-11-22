@@ -76,12 +76,15 @@ static uint32_t rgb(uint16_t c) {
 
 static uint16_t pal16(const uint8_t *pal, int i) { return (uint16_t)(pal[2 * i] | pal[2 * i + 1] << 8); }
 
-/* a 4bpp tile at (dx, dy), colour 0 clear, `ink` (its index; -1 none) in colour `ink_to` */
-static void tile(uint32_t *px, const uint8_t *t, const uint8_t *pal, int bank, bool flip, int dx, int dy, int ink, uint16_t ink_to) {
+/* how a tile is drawn: its palette (bank of `pal`), flipped across or not, colour `ink` (-1 none) in `ink_to` */
+typedef struct { const uint8_t *pal; int bank; bool flip; int ink; uint16_t ink_to; } TileLook;
+
+/* a 4bpp tile at (dx, dy), colour 0 clear */
+static void tile(uint32_t *px, const uint8_t *t, const TileLook *l, int dx, int dy) {
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
-			int sx = flip ? 7 - x : x, k = t[y * 4 + sx / 2] >> (sx & 1 ? 4 : 0) & 15;
-			if (k) put(px, dx + x, dy + y, rgb(k == ink ? ink_to : pal16(pal, bank * 16 + k)));
+			int sx = l->flip ? 7 - x : x, k = t[y * 4 + sx / 2] >> (sx & 1 ? 4 : 0) & 15;
+			if (k) put(px, dx + x, dy + y, rgb(k == l->ink ? l->ink_to : pal16(l->pal, l->bank * 16 + k)));
 		}
 }
 
@@ -103,7 +106,8 @@ static void button(uint32_t *px, const uint16_t *map, int ink, uint16_t ink_to, 
 	if (!vram || !pal) return;
 	for (int i = 0; i < 2 * 9; ++i) {
 		uint16_t e = map[i];
-		tile(px, vram + (e & 0x3FF) * 32u, pal, e >> 12, e & 0x400, dx + i % 9 * 8, dy + i / 9 * 8, ink, ink_to);
+		TileLook l = { pal, e >> 12, (e & 0x400) != 0, ink, ink_to };
+		tile(px, vram + (e & 0x3FF) * 32u, &l, dx + i % 9 * 8, dy + i / 9 * 8);
 	}
 }
 
@@ -127,7 +131,8 @@ static void icon(uint32_t *px, int k, bool lit, int dx, int dy) {
 	const uint8_t *vram = emu_memory(OBJ_TILES, 0x8000u), *pal = emu_memory(BG_PALETTES + 0x200u, 0x200u);
 	if (!vram || !pal || !icons[k].found) return;
 	int x = dx + (lit ? ICON_POP : 0), y = dy + icons[k].dy;
-	for (int q = 0; q < 4; ++q) tile(px, vram + (uint32_t)(icons[k].tile + q) * 32u, pal, lit ? ICON_LIT : ICON_UNLIT, false, x + q % 2 * 8, y + q / 2 * 8, -1, 0);
+	TileLook l = { pal, lit ? ICON_LIT : ICON_UNLIT, false, -1, 0 };
+	for (int q = 0; q < 4; ++q) tile(px, vram + (uint32_t)(icons[k].tile + q) * 32u, &l, x + q % 2 * 8, y + q / 2 * 8);
 }
 
 static void rows(uint32_t *px) {
@@ -146,7 +151,7 @@ static void rows(uint32_t *px) {
 		pet_menu_place(e, &col, &row);
 		int dx = COL_X + col * COL_STEP, dy = ROWS_Y + row * ROW_PITCH;
 		if (k >= 0) button(px, maps[k], BN6_PET_LABEL_INK + k, lit ? lit_ink : dim_ink, dx + BUTTON_X, dy + 1);
-		else if (pet_options_forms_map(forms)) button(px, forms, BN6_PET_LABEL_INK + 8, lit ? lit_ink : dim_ink, dx + BUTTON_X, dy + 1);
+		else if (pet_options_forms_map(forms)) button(px, forms, BN6_PET_LABEL_INK_NEXT, lit ? lit_ink : dim_ink, dx + BUTTON_X, dy + 1);
 		icon(px, k >= 0 ? k : pet_menu_bn6_row(PM_MEGAMAN), lit, dx + 1, dy);
 	}
 }

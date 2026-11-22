@@ -22,8 +22,9 @@
 #define LH 16                      /* ... and down */
 #define COLS 5                     /* the label's tile columns the word takes, from its second (its first the edge) */
 #define ADDED 12                   /* the tiles past BN6's: Options' fifth column, then Forms' five */
-#define FORMS_FIRST (BN6_PET_LABEL_COUNT + 2)       /* Forms' first tile in the copy: its top row, then its bottom */
-#define FORMS_INK (BN6_PET_LABEL_INK + 8)   /* its letters' colour: the one after the eight rows' (the menu sets it, pet_menu.c) */
+#define OPTIONS_ADDED 2            /* the tiles past BN6's Options' fifth column takes */
+#define FORMS_FIRST (BN6_PET_LABEL_COUNT + OPTIONS_ADDED)   /* Forms' first tile in the copy: its top row, then its bottom */
+#define FORMS_INK BN6_PET_LABEL_INK_NEXT   /* its letters' colour: the one after the eight rows' (the menu sets it, pet_menu_frame.c) */
 #define SAVE 7                     /* the label Forms' is made on: Save's, its last row's */
 #define VRAM_LABELS 0x0600D340u    /* where the load list puts them: BN6_PET_LABEL_FIRST in BG character block 2 */
 #define VRAM_FREE_END 0x0600E000u  /* BG0's map from here; 0x0600DE80 on, zero in the PET and on the map (docs/rom/) */

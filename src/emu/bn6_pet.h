@@ -40,6 +40,7 @@
 #define BN6_PET_LABEL_INK     5           /* a label's letters' colour, + its entry (palette 15, 0x03001B40) */
 #define BN6_PET_LABEL_SHADE   3           /* ... their shade's */
 #define BN6_PET_LABEL_BACK    2           /* ... the box's under them */
+#define BN6_PET_LABEL_INK_NEXT (BN6_PET_LABEL_INK + 8) /* the colour after the eight rows' inks (palette 15's 13, black in BN6's PET): Forms' letters' (pet_options.c, pet_menu_frame.c) */
 #define BN6_PET_ENTRY_LIBRARY 2           /* the menu's entries as BN6_PET_CURSOR counts them: Library, the run's own (src/library/) */
 #define BN6_PET_ENTRY_COMM    6           /* the menu's entries as BN6_PET_CURSOR counts them: Comm, the run's Options */
 #define BN6_PET_ENTRY_SAVE    7           /* ... Save */
