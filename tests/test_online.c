@@ -385,10 +385,10 @@ static void netpass(void) {
 	/* (characters: stamps, never a game) */
 	const char *said[] = { trade_no_stamp(), trade_none_stamped(), square_greeter_stamp_words(true), square_greeter_grew_words(false),
 		square_greeter_stamp_words(false), square_greeter_grew_words(true), trade_none_shared("Alpha"),
-		square_peer_words("Alpha", NULL, false, false), square_week_post(WEEK_OFFER_STAMP, 2965, 0) };
+		square_peer_words("Alpha", NULL, false, false), square_week_post(WEEK_OFFER_STAMP, 2965, 0, true) };
 	for (size_t i = 0; i < sizeof said / sizeof *said; ++i) assert(!strstr(said[i], "BN5") && !strstr(said[i], "BN6") && !strstr(said[i], "BN4") &&
 		!strstr(said[i], "ROM") && !strstr(said[i], "Red Sun"));
-	assert(strstr(trade_no_stamp(), "NO TRADE\nSTAMP") && strstr(square_week_post(WEEK_OFFER_STAMP, 2965, 0), "NO DEEPNET\nSTAMP"));
+	assert(strstr(trade_no_stamp(), "NO TRADE\nSTAMP") && strstr(square_week_post(WEEK_OFFER_STAMP, 2965, 0, true), "NO DEEPNET\nSTAMP"));
 	OnlineProfile card = { .hp = 80, .max_hp = 100, .act = 1, .depth = 2 };
 	assert(!strstr(square_peer_words("Alpha", &card, true, true), "NetPass") && strstr(square_peer_words("Alpha", &card, false, false), "just the Square"));
 	/* (a full pass without the Arena stamp, a PET of one extra ROM: why Battle is not offered with him) */
@@ -461,7 +461,10 @@ static void week(void) {
 	online_put16(m + 6 + ONLINE_WEEK_ENTRY_BYTES + 16, 11); assert(!online_week_mail(m, sizeof m));
 	assert(online_week_board()->serial == 1);
 	/* (a week across a month's end, and a post's bytes) */
-	assert(strstr(square_week_post(WEEK_OFFER_NEW, 2965, 0), "NOV 2-NOV 8"));
+	assert(strstr(square_week_post(WEEK_OFFER_NEW, 2965, 0, true), "NOV 2-NOV 8") && !*square_week_post(WEEK_OFFER_NEW, 2965, 0, false));
+	/* (issue #779: one box, the count the server's, none said where it has not told it) */
+	assert(!strcmp(square_week_question(true, 3), "3 NAVIS DIVING!\nDIVE IN?\n") && strstr(square_week_question(true, 1), "1 NAVI DIVING!") &&
+		strstr(square_week_question(true, 0), "NO NAVI") && !strstr(square_week_question(false, 0), "NAVI"));
 	assert(online_week_post(2963, 0xF521FE36u, 5, 2, 0, 12, 0x1234) && sent_size == ONLINE_WEEK_POST_BYTES);
 	assert(sent[0] == ONLINE_WEEK_POST && sent[1] == 0x0B && sent[2] == 0x93 && sent[8] == 5 && sent[9] == 2 && sent[10] == 0 && sent[12] == 12);
 	/* (v19: a post's last byte the acts fought in a party, none yet; an entry's bit 1 a party's mark, no bit past it) */

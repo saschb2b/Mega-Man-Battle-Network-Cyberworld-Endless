@@ -3,6 +3,8 @@
 
 #include <string.h>
 
+#include <SDL.h>
+
 #include "bn6_fields.h"
 #include "dive_crew.h"
 #include "dive_link.h"
@@ -11,6 +13,7 @@
 #include "run.h"
 
 #define GONE_LOOK_MS 600         /* a crewmate who went, looked for in the snapshot so long before he counts as gone */
+#define FULL_GRACE_MS 2000      /* a full crew told kept so long at least: the snapshot that shows it near may come after the word */
 #define AWAY_MOST 8              /* those whose signal went, kept for their return */
 
 typedef struct {
@@ -27,6 +30,7 @@ static struct {
 	int nsaid;
 	CrewState full;              /* the last crew told full, while MegaMan stands near it (count 0 none) */
 	bool full_said;
+	uint32_t full_at;            /* when it was told (SDL_GetTicks) */
 	char last[64];
 } K;
 
@@ -81,6 +85,7 @@ void dive_comings_full(const CrewState *full) {
 	bool same = K.full.count == full->count;
 	for (int k = 0; same && k < full->count; ++k) same = K.full.m[k].session == full->m[k].session;
 	K.full = *full;
+	K.full_at = SDL_GetTicks();
 	if (same && K.full_said) return;
 	K.full_said = true;
 	if (full->count) {
@@ -129,7 +134,7 @@ void dive_comings_frame(uint32_t now) {
 			if (p->id == K.full.m[k].session && dive_crew_within(dx, dy, DIVE_CREW_FAR)) near = true;
 		}
 	}
-	if (K.full.count && !near) { memset(&K.full, 0, sizeof K.full); K.full_said = false; }
+	if (K.full.count && !near && now - K.full_at > FULL_GRACE_MS) { memset(&K.full, 0, sizeof K.full); K.full_said = false; }
 }
 
 void dive_comings_describe(FILE *f) { fprintf(f, "comings %s\n", K.last[0] ? K.last : "none"); }

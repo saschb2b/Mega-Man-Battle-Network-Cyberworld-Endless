@@ -40,6 +40,18 @@ static void record_write(void) {
 
 bool weekly_on(void) { return save_slot_weekly(); }
 
+bool weekly_intro_shown(void) {
+	const WeeklyRecord *r = weekly_record();
+	return weekly_on() && r->week && r->intro_week == r->week;
+}
+
+void weekly_intro_mark(void) {
+	const WeeklyRecord *r = weekly_record();
+	if (!weekly_on() || !r->week || r->intro_week == r->week) return;
+	W.intro_week = r->week;
+	record_write();
+}
+
 /* a dive's act at layer `depth`: three layers an act, the Nest the fourth */
 static int weekly_act(int depth) {
 	int act = depth >= 1 ? (depth - 1) / 3 + 1 : 0;
