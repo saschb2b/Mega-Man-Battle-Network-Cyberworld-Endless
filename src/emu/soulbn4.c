@@ -23,11 +23,12 @@
 enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
-/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, NumSoul 8) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 8 };
+/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8 };
 #define FORM_GUTS 2
 #define FORM_NUM 8
 #define FORM_AQUA 11
+#define FORM_THUN 6
 #define OP_CMP_R0 0x2800u    /* cmp r0,#imm8 */
 #define OP_CMP_R2 0x2A00u    /* cmp r2,#imm8 */
 #define OP_CMP_R4 0x2C00u    /* cmp r4,#imm8 */
@@ -63,9 +64,34 @@ bool soulbn4_charges(int k, int chip) {
 	return chip > 0 && !(hook_read8(rec + BN6_CHIP_EFFECT_FLAGS) & BN6_CHIP_LEFT_ALONE) && soulkinds_bn4_of(chip) == kind;
 }
 
+/* ThunSoul's uncharged bonus in BN4's code (BN4_CHIP_BONUS): its form and two kinds; false where the code is not that */
+static bool thun_rule(int *kind1, int *kind2) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (!b4) return false;
+	uint16_t f = get16(b4 + (BN4_THUN_BONUS_FORM - BUS)), k1 = get16(b4 + (BN4_THUN_BONUS_KIND - BUS)), k2 = get16(b4 + (BN4_THUN_BONUS_KIND2 - BUS));
+	if (f != (OP_CMP_R2 | FORM_THUN) || (k1 & 0xFF00u) != OP_CMP_R1 || (k2 & 0xFF00u) != OP_CMP_R1) return false;
+	*kind1 = k1 & 0xFF;
+	*kind2 = k2 & 0xFF;
+	return true;
+}
+
+unsigned soulbn4_chip_bonus(int k, int chip) {
+	int kind1, kind2;
+	if (k < 0 || k >= SOULS_BN4 || forms[k] != FORM_THUN || chip <= 0 || !thun_rule(&kind1, &kind2)) return 0;
+	uint8_t flags = hook_read8(chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE + BN6_CHIP_EFFECT_FLAGS);
+	int kind = soulkinds_bn4_of(chip);
+	return (flags & BN6_CHIP_SHOWS_POWER) && !(flags & BN6_CHIP_LEFT_ALONE) && (kind == kind1 || kind == kind2) ? BN4_PARALYSING : 0;
+}
+
 unsigned soulbn4_charge_bonus(int k) {
 	int kind;
 	return k >= 0 && k < SOULS_BN4 && forms[k] == FORM_AQUA && aqua_rule(&kind) ? BN4_CHARGED_DOUBLE : 0;
+}
+
+uint32_t soulbn4_enter_copy(int k) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (!b4 || k < 0 || k >= SOULS_BN4) return 0;
+	return xchips_bn4_moved_at(get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * forms[k]) | 1u);
 }
 
 int soulbn4_k(int soul) { return soul >= SOUL_BN4_FIRST && soul < SOUL_BN4_FIRST + SOULS_BN4 ? soul - SOUL_BN4_FIRST : -1; }

@@ -100,13 +100,27 @@ static HookAct charge_bonus(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_of(r->r[5]);
 	if (!soul) return HOOK_CONTINUE;
-	if (soulbn4_k(soul) >= 0) {   /* (a BN4 Soul's: BN4's bonus, its power's modifier bit, BN6's caller adding it as BN4's does) */
-		r->r[0] = r->r[0] && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? soulbn4_charge_bonus(soulbn4_k(soul)) : 0;
+	if (soulbn4_k(soul) >= 0) {   /* (a BN4 Soul's: BN4's bonus to a charged chip (BN4_CHIP_CHARGE_BONUS), its power's modifier bit,
+	                                 * BN6's caller adding it as BN4's does) */
+		int k = soulbn4_k(soul);
+		r->r[0] = r->r[0] && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? soulbn4_charge_bonus(k) : 0;
 		return HOOK_RETURN;
 	}
 	bool doubled = soul == SOUL_KNIGHT || soul == SOUL_TOAD || soul == SOUL_PROTO || soul == SOUL_NAPALM || soul == SOUL_MAGNET;
 	r->r[0] = r->r[0] && doubled && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? CHARGE_DOUBLE : 0;
 	return HOOK_RETURN;
+}
+
+/* (BN6_CHARGED_BONUS_DONE, r5 MegaMan, r7 his attack's variables) a BN4 Soul's bonus to a chip used uncharged (BN4_CHIP_BONUS:
+ * ThunSoul's paralysis on an Elec chip), added past BN6's charged chip's bonus and its sound, which BN4 plays for a charged one alone */
+static HookAct uncharged_bonus(HookRegs *r, void *user) {
+	(void)user;
+	int k = soulbn4_k(soul_of(r->r[5]));
+	uint32_t vars = r->r[7];
+	if (k < 0 || hook_read8(vars + BN6_ATTACK_CHARGED) || (breaks & SOULCHIPS_BREAK_DOUBLE)) return HOOK_CONTINUE;
+	unsigned add = soulbn4_chip_bonus(k, hook_read16(vars + BN6_ATTACK_CHIP));
+	if (add) hook_write16(vars + BN6_ATTACK_DAMAGE, (uint16_t)(hook_read16(vars + BN6_ATTACK_DAMAGE) + add));
+	return HOOK_CONTINUE;
 }
 
 /* (the release of a charged A, r1 the A power attack, r5 MegaMan) a Soul's chip charge: the chip used charged, BN5's way
@@ -213,7 +227,7 @@ static bool grass_code(uint32_t at, uint8_t out[GRASS_CODE_SIZE]) {
 
 static bool expected(void) {
 	static const struct { uint32_t at; uint16_t op; } code[] = {
-		{ BN6_CHARGE_TEST, 0xB5D0 }, { BN6_CHARGE_BONUS, 0xB510 }, { BN6_CHIP_MODIFIED, 0x8138 }, { BN6_CHIP_MODIFIED_SOUND, 0x2087 },
+		{ BN6_CHARGE_TEST, 0xB5D0 }, { BN6_CHARGE_BONUS, 0xB510 }, { BN6_CHARGED_BONUS_DONE, 0x9803 }, { BN6_CHIP_MODIFIED, 0x8138 }, { BN6_CHIP_MODIFIED_SOUND, 0x2087 },
 		{ BN6_CHIP_USED_END, 0x8AB8 }, { BN6_CHIP_FAMILY_READ, 0x7AE0 }, { BN6_SHADOW_TYPE_SIDE, 0x2129 }, { BN6_SHADOW_TYPE_DONE, 0xBD10 },
 		{ BN6_SET_PANEL_TYPE, 0xB570 }, { BN6_CHARGED_RELEASE, 0x290D }, { BN6_CHARGED_CHIP_USE, 0x2001 },
 	};
@@ -241,6 +255,7 @@ bool soulchips_install(int brk) {
 	claims_begin(SOULCHIPS_CLAIMS);
 	emu_write(SOULS_THUMB, stub, sizeof stub);
 	bool ok = emu_hook(BN6_CHARGE_TEST, charge_test, NULL) && emu_hook(BN6_CHARGE_BONUS, charge_bonus, NULL) &&
+		emu_hook(BN6_CHARGED_BONUS_DONE, uncharged_bonus, NULL) &&
 		emu_hook(BN6_CHARGED_RELEASE, release, (void *)(uintptr_t)BN6_CHARGED_CHIP_USE) &&
 		emu_hook(BN6_CHIP_MODIFIED, grass, (void *)(uintptr_t)SOULS_THUMB) && emu_hook(BN6_CHIP_USED_END, front, NULL) &&
 		emu_hook(BN6_CHIP_FAMILY_READ, sword, (void *)(uintptr_t)BN6_CHIP_FAMILY_NEXT) &&

@@ -67,7 +67,8 @@ ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
                   0x12: 0xD8,   # (BN4's Souls' own families from 0xD8, docs/project/claims/bn4-souls.json)
                   0x10: 0xD9,   # (GutsSoul's rapid buster, his state 0x10: no chip's, asked by B pressed six times, soulrapid.c)
-                  0x15: 0xDA,   # (NumSoul's charged shot)
+                  0x3E: 0xDA,   # (SrchSoul's charged shot)
+                  0x15: 0xDB,   # (NumSoul's charged shot)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -123,7 +124,16 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 # block of its own, its return given the unit's number (POWER_RETURN); the Souls' engine runs it from BN6's grown power
 # attacks (src/emu/soulbn4.c, xchips_bn4_moved_at). By BN4's family: (the power attack's id, its Soul)
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
-SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),), 0x15: ((0x11, 'NumSoul'),)}
+SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),), 0x3E: ((0x0A, 'SrchSoul'),),
+               0x15: ((0x11, 'NumSoul'),)}
+# ... and a Soul's taking of the form that spawns an object of its own (BN4_FORM_ENTERS by its form), copied with the unit of
+# its charged shot's family, which the Souls' engine runs as he enters the proxy form (src/emu/soullife.c, xchips_bn4_moved_at).
+# By BN4's family: (the form, its Soul)
+ENTERS4 = 0x0800E0A0   # BN4_FORM_ENTERS
+SOUL_ENTERS = {0x3E: ((4, 'SrchSoul'),)}
+# The fourth kind's types a Soul's object is moved as, at fixed dispatch numbers of the Souls' own (docs/project/claims/
+# bn4-souls.json, past bn4-air-units' 0xA0-0xA3), not the units' count: BN4's type -> its number
+TYPES4_SOULS = {0x44: 0xA4}   # (SrchSoul's, spawned as he unites, 0x080E6E4C)
 # BN4's computed powers (a chip's power of 1000 and up: the routine by power - 1000 in BN4_CHIP_POWERS, bn4.h) moved into
 # BN6's grown table (XC_POWERS, src/emu/xchips_code.h) at POWER4_FIRST + the entry, past BN5's (0x80-0xCB): a unit of kind
 # 'power' copies the routines, the installer points their entries at the copies (xchips_code.c powers4_stage) and a moved
@@ -344,6 +354,7 @@ UNITS = (
     ('support', 0x10, 'BigHamr'),
     ('power', 0x00, 'NaviPowers'),
     ('attack', 0x10, 'GutsRapid'),
+    ('attack', 0x3E, 'SrchSoul'),
     ('attack', 0x15, 'NumSoul'),
 )
 CANDIDATES = ()
@@ -677,6 +688,12 @@ UNIT_COPIED = {
     'BugCurse': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's and the Elem chips': the "
                              "curse's object (the third kind's 0x80) steps its sprite by it; BN6's nearest a frame ahead; copied, its "
                              "pause test BN6's"},
+    'SrchSoul': {0x0800FB3C: "SrchSoul's charged shot's target (r0, r1 a panel of the nearest foe ahead of him in his row's "
+                             "reach, 0 none): the panels the foe's flags by his side's two words (its table after it) hold, "
+                             "through 0x08009FC4 (BN6's 0x0800CE64), kept where their column is ahead of his, the nearest "
+                             "chosen; BN6's nearest (0x08016054-0x08016157, its table at 0x08016158) reads a side flip from "
+                             "its stack (eors r2,r3) and keeps a column past his where BN4's keeps his own (bgt for bge): "
+                             "copied"},
     'NumSoul': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's and the Elem chips': "
                             "NumSoul's charged shot's object (the third kind's 0x05) steps its sprite by it; BN6's nearest a frame "
                             "ahead; copied, its pause test BN6's"},
@@ -688,6 +705,11 @@ UNIT_COPIED = {
 # The data a routine a unit copies reads from the bytes after its code, copied with it as raw bytes (bn4_twins.COPIED_DATA's
 # way, for the unit alone; else zeroed as a copied routine's neighbours): the unit's name -> the routine -> (lo, hi, why)
 UNIT_COPIED_DATA = {
+    'SrchSoul': {
+        0x0800FB3C: (0x0800FC38, 0x0800FC48, "the panels' flags of a foe by his side, two words a side (0x200000 and 0x400000 "
+                                             "first), numbers alone: the same bits in BN6's panels (BN6's table of them at "
+                                             "0x08016158, its Meteors' aim's at 0x080161A4 as BN4's at 0x0800FC84)"),
+    },
     'NaviPowers': {
         0x08000BBC: (0x08000C00, 0x08000C18, "the BCD time's divisors, the frames in ten hours, an hour, ten minutes, a minute, ten "
                                              "seconds and a second, which it subtracts a digit at a time (numbers alone; zeroed, "
@@ -751,6 +773,9 @@ NUMBERS = {
                 "reach and its frames, bytes of a number as PropBom's",
     0x0605FF01: "BugCurse's curse's hit word (BN4 0x080DD528, r4 of the hit area's spawn 0x080CD7E2): its bits, its reach "
                 "and its frames, bytes of a number as PropBom's",
+    0x0A050001: "SrchSoul's charged shot's hit word for its first four shots (BN4 0x080EDBEA, r4 of the hit area's spawn "
+                "0x080CD7E2; 0x19050001 the last's, 0x080EDBF2): its bits, its reach and its frames, bytes of a number as "
+                "PropBom's",
     0x0405FF0F: "NumSoul's charged shot's object's hit word (BN4 0x080CDD48, r4 of the hit area's spawn 0x080CD7E2): its "
                 "bits, its reach and its frames, bytes of a number as PropBom's",
     0x0405FF11: "PropBom's bomb's blast's hit word (BN4 0x080DED2C, r4 of the hit area's spawn 0x080CD7E2): its bits, its "
@@ -810,6 +835,8 @@ def type_number(f, alloc, kind, ty=None):
         if who != f.name:
             f.decide('type', f'its third-kind type {ty:#x} is {who}\'s on the chips\' page: one copy a type (SHARED3)')
         return ty
+    if kind == 4 and ty in TYPES4_SOULS:
+        return TYPES4_SOULS[ty]   # (a Soul's object's: its own number, the count left as it is)
     n = alloc.types[kind]
     alloc.types[kind] += 1
     if kind != 4 or n >= TYPES4[1]:
@@ -885,6 +912,11 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             f.roots.append(p)
             f.powers.append((pid, p, soul))
             f.notes.append(f'{soul}\'s power attack {pid:#x} ({p:08X}), which returns the family: copied with it')
+        for form, soul in SOUL_ENTERS.get(sub, ()):
+            e = b4.u32(ENTERS4 + 4 * form) & ~1
+            bn4_twins.COPIED[e] = f'{soul}\'s taking of the form {form}, which spawns his object'
+            f.roots.append(e)
+            f.notes.append(f'{soul}\'s taking of the form {form} ({e:08X}, BN4_FORM_ENTERS), which spawns his object: copied with it')
     elif kind == 'support':
         # (each subfamily's routine the common spawner of a fourth-kind type of its own, each type moved, what they share
         # once: DrkStage's and Hole's objects both spawn the panel changer)

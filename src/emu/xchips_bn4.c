@@ -3314,7 +3314,93 @@ static const XcSong gutsrapid_songs[] = { { 0xA7, 0x301 } };
 	.sound_calls = gutsrapid_sound_calls, .nsound_calls = (int)(sizeof gutsrapid_sound_calls / sizeof *gutsrapid_sound_calls), \
 	.sprites = gutsrapid_sprites, .nsprites = (int)(sizeof gutsrapid_sprites / sizeof *gutsrapid_sprites), \
 	.effects = gutsrapid_effects, .neffects = (int)(sizeof gutsrapid_effects / sizeof *gutsrapid_effects) }
-/* ---- NumSoul: BN4's attack 0x15 (080EC165) as BN6's 0xda; its chips  ---- */
+/* ---- SrchSoul: BN4's attack 0x3e (080EDB5D) as BN6's 0xda; its chips  ---- */
+/* MegaMan's state 0x3e (080EDB5C-080EDC5A), the family of its chips' records: moved */
+/* SrchSoul's power attack 0xa (0800CDC4), which returns the family: copied with it */
+/* SrchSoul's taking of the form 4 (0800E13E, BN4_FORM_ENTERS), which spawns his object: copied with it */
+/* its fourth-kind 0x44 (080E6D74-080E6E68): no BN6 type of its body, moved with him */
+/* its effect 0x52: BN6's 0xbe, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0xbb (080EDC10): BN4's song copied into the grown song table's slot 0x283, on BN4's player 14 */
+
+static const XvBlock srchsoul_blocks[] = {
+	{ 0x080EDB5C, 0x080EDC5A, XC4_CODE + 0x6DA0, 0x6222380Fu },
+	{ 0x080E6D74, 0x080E6E68, XC4_CODE + 0x6EA0, 0xF5F383E3u },
+	{ 0x0800CDC4, 0x0800CDE2, XC4_CODE + 0x6FA0, 0x4711766Bu },
+	{ 0x0800E13E, 0x0800E146, XC4_CODE + 0x6FC2, 0xC987C1F6u },
+	{ 0x0800FB3C, 0x0800FC48, XC4_CODE + 0x6FD0, 0x84C832A4u },
+};
+static const XvData srchsoul_data[] = {
+	{ 0x080EDB6E, 0x080EDB70, XV_RAW },
+	{ 0x080EDB70, 0x080EDB74, XV_POOL },
+	{ 0x080EDB74, 0x080EDB80, XV_TABLE },
+	{ 0x080EDC32, 0x080EDC34, XV_RAW },
+	{ 0x080EDC34, 0x080EDC3C, XV_POOL },
+	{ 0x080E6D82, 0x080E6D84, XV_RAW },
+	{ 0x080E6D84, 0x080E6D88, XV_POOL },
+	{ 0x080E6D88, 0x080E6D94, XV_TABLE },
+	{ 0x080E6DA8, 0x080E6DAC, XV_POOL },
+	{ 0x080E6DAC, 0x080E6DB4, XV_TABLE },
+	{ 0x080E6E46, 0x080E6E48, XV_RAW },
+	{ 0x080E6E48, 0x080E6E4C, XV_POOL },
+	{ 0x080E6E62, 0x080E6E64, XV_RAW },
+	{ 0x080E6E64, 0x080E6E68, XV_POOL },
+	{ 0x0800FC32, 0x0800FC34, XV_ZERO },
+	{ 0x0800FC34, 0x0800FC38, XV_POOL },
+	{ 0x0800FC38, 0x0800FC48, XV_RAW },
+};
+static const XvPair srchsoul_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08003344, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x08007E46, 0x080011EC },   /* project:mettaur, DIFF (audited) */
+	{ 0x08007EFA, 0x0800A9EC },   /* search, SAME */
+	{ 0x08009FC4, 0x0800CE64 },   /* project:research, SAME */
+	{ 0x0800AB3E, 0x0800E276 },   /* project:research, SAME */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
+	{ 0x080CD81E, 0x080C6C16 },   /* project:project:chips, SAME */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair srchsoul_words[] = {
+	{ 0x0801056F, 0x08016C9D },   /* project:project:searchman, SAME */
+};
+static const XvImm srchsoul_imms[] = {
+	{ 0x0800CDDE, THUMB_MOVS, 0, 0, 0x3E, 0xDA },   /* SrchSoul's power attack 0xa: the family it returns, BN4's 0x3e, BN6's grown 0xda */
+	{ 0x080E6DFE, THUMB_MOVS, 4, 0, 0x52, 0xBE },   /* its effect: 0x52 in BN4, 0xbe in BN6 (moved) */
+	{ 0x080E6E50, THUMB_MOVS, 0, 0, 0x44, 0xA4 },   /* its object's type 0x44: moved, the dispatch's 0xa4 */
+	{ 0x080EDB60, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+	{ 0x080EDBAC, THUMB_MOVS, 4, 0, 0x52, 0xBE },   /* its effect: 0x52 in BN4, 0xbe in BN6 (moved) */
+};
+static const XvNumber srchsoul_numbers[] = {
+	{ 0x080EDC38, 0x0A050001, 0x0A050001 },   /* SrchSoul's charged shot's hit word for its first four shots (BN4 0x080EDBEA, r4 of the hit area's spawn 0x080CD7E2; 0x19050001 the last's, 0x080EDBF2): its bits, its reach and its frames, bytes of a number as PropBom's */
+};
+static const XvType srchsoul_types[] = {
+	{ 4, 0xA4, XV_TYPE_MOVED, 0x44 },   /* BN4's fourth-kind 0x44, moved, the dispatch's 0xa4 */
+};
+static const XvSprite srchsoul_sprites[] = {
+	{ 4, 0x23, 4, 0x93, XC4_ROOM_ROW(49), 0x500 },   /* BN4's 4:0x23, the room's row 49 */
+};
+static const XvId srchsoul_effects[] = { { 0x52, 0xBE } };
+static const XvSoundCall srchsoul_sound_calls[] = {
+	{ 0x080EDC10, 0x283 },   /* its sound 0xbb: BN4's song at the grown table's slot 0x283 */
+};
+static const XcSong srchsoul_songs[] = { { 0xBB, 0x283 } };
+
+#define SRCHSOUL_CODE { .name = "SrchSoul (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x9400), \
+	.blocks = srchsoul_blocks, .nblocks = (int)(sizeof srchsoul_blocks / sizeof *srchsoul_blocks), \
+	.data = srchsoul_data, .ndata = (int)(sizeof srchsoul_data / sizeof *srchsoul_data), \
+	.calls = srchsoul_calls, .ncalls = (int)(sizeof srchsoul_calls / sizeof *srchsoul_calls), \
+	.words = srchsoul_words, .nwords = (int)(sizeof srchsoul_words / sizeof *srchsoul_words), \
+	.imms = srchsoul_imms, .nimms = (int)(sizeof srchsoul_imms / sizeof *srchsoul_imms), \
+	.numbers = srchsoul_numbers, .nnumbers = (int)(sizeof srchsoul_numbers / sizeof *srchsoul_numbers), \
+	.types = srchsoul_types, .ntypes = (int)(sizeof srchsoul_types / sizeof *srchsoul_types), \
+	.sound_calls = srchsoul_sound_calls, .nsound_calls = (int)(sizeof srchsoul_sound_calls / sizeof *srchsoul_sound_calls), \
+	.sprites = srchsoul_sprites, .nsprites = (int)(sizeof srchsoul_sprites / sizeof *srchsoul_sprites), \
+	.effects = srchsoul_effects, .neffects = (int)(sizeof srchsoul_effects / sizeof *srchsoul_effects) }
+/* ---- NumSoul: BN4's attack 0x15 (080EC165) as BN6's 0xdb; its chips  ---- */
 /* MegaMan's state 0x15 (080EC164-080EC22E), the family of its chips' records: moved */
 /* NumSoul's power attack 0x11 (0800CE08), which returns the family: copied with it */
 /* its sprite 3:0xa (080CDA24): BN6's 3:0x84, copied */
@@ -3333,10 +3419,10 @@ static const XcSong gutsrapid_songs[] = { { 0xA7, 0x301 } };
 /* its sound 0xc8 (080CDAF2, 080CDD28): BN4's song copied into the grown song table's slot 0x205, on BN4's player 11 */
 
 static const XvBlock numsoul_blocks[] = {
-	{ 0x080EC164, 0x080EC22E, XC4_CODE + 0x6DA0, 0xAE425582u },
-	{ 0x080CD9E8, 0x080CDD64, XC4_CODE + 0x6E70, 0x9DB2BCB9u },
-	{ 0x0800CE08, 0x0800CE28, XC4_CODE + 0x71F0, 0xA363CB2Bu },
-	{ 0x08014446, 0x0801447A, XC4_CODE + 0x7212, 0x6AADAE25u },
+	{ 0x080EC164, 0x080EC22E, XC4_CODE + 0x70E0, 0xAE425582u },
+	{ 0x080CD9E8, 0x080CDD64, XC4_CODE + 0x71B0, 0x9DB2BCB9u },
+	{ 0x0800CE08, 0x0800CE28, XC4_CODE + 0x7530, 0xA363CB2Bu },
+	{ 0x08014446, 0x0801447A, XC4_CODE + 0x7552, 0x6AADAE25u },
 };
 static const XvData numsoul_data[] = {
 	{ 0x080EC176, 0x080EC178, XV_RAW },
@@ -3400,7 +3486,7 @@ static const XvPair numsoul_words[] = {
 	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
 };
 static const XvImm numsoul_imms[] = {
-	{ 0x0800CE24, THUMB_MOVS, 0, 0, 0x15, 0xDA },   /* NumSoul's power attack 0x11: the family it returns, BN4's 0x15, BN6's grown 0xda */
+	{ 0x0800CE24, THUMB_MOVS, 0, 0, 0x15, 0xDB },   /* NumSoul's power attack 0x11: the family it returns, BN4's 0x15, BN6's grown 0xdb */
 	{ 0x080CDA20, THUMB_MOVS, 2, 0, 0xA, 0x84 },   /* its object's sprite: list 3 0xa in BN4, 0x84 in BN6 (copied) */
 	{ 0x080CDA42, THUMB_STRB, 0, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080CDAB4, THUMB_LDR, 0, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
@@ -3418,7 +3504,7 @@ static const XvType numsoul_types[] = {
 	{ 3, 0x05, XV_TYPE_MOVED4, 0x05 },   /* BN4's third-kind 0x5, moved, the chips' page */
 };
 static const XvSprite numsoul_sprites[] = {
-	{ 3, 0x0A, 3, 0x84, XC4_ROOM_ROW(49), 0x1500 },   /* BN4's 3:0xa, the room's row 49 */
+	{ 3, 0x0A, 3, 0x84, XC4_ROOM_ROW(50), 0x1500 },   /* BN4's 3:0xa, the room's row 50 */
 };
 static const XvSoundCall numsoul_sound_calls[] = {
 	{ 0x080EC192, 0x206 },   /* its sound 0x90: BN4's song at the grown table's slot 0x206 */
@@ -3429,7 +3515,7 @@ static const XvSoundCall numsoul_sound_calls[] = {
 static const XcSong numsoul_songs[] = { { 0x90, 0x206 }, { 0xAC, 0x302 }, { 0xBC, 0x3F }, { 0xC8, 0x205 } };
 
 #define NUMSOUL_CODE { .name = "NumSoul (BN4's)", .game = XROM_BN4_RED_SUN_US, \
-	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x9400), \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x9800), \
 	.blocks = numsoul_blocks, .nblocks = (int)(sizeof numsoul_blocks / sizeof *numsoul_blocks), \
 	.data = numsoul_data, .ndata = (int)(sizeof numsoul_data / sizeof *numsoul_data), \
 	.calls = numsoul_calls, .ncalls = (int)(sizeof numsoul_calls / sizeof *numsoul_calls), \
@@ -3477,7 +3563,8 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x10, 0x90, 0x080E4C17, XC4_HOMES + 0x8800, BIGHAMR_CODE, bighamr_songs, (int)(sizeof bighamr_songs / sizeof *bighamr_songs), 0, 0 },
 	{ XCHIP_HELPER, 0x00, 0x00, 0x0801949F, XC4_HOMES + 0x8C00, NAVIPOWERS_CODE, NULL, 0, 0, 0 },
 	{ XCHIP_ATTACK, 0x10, 0xD9, 0x080EBDC1, XC4_HOMES + 0x9000, GUTSRAPID_CODE, gutsrapid_songs, (int)(sizeof gutsrapid_songs / sizeof *gutsrapid_songs), 0, 0 },
-	{ XCHIP_ATTACK, 0x15, 0xDA, 0x080EC165, XC4_HOMES + 0x9400, NUMSOUL_CODE, numsoul_songs, (int)(sizeof numsoul_songs / sizeof *numsoul_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x3E, 0xDA, 0x080EDB5D, XC4_HOMES + 0x9400, SRCHSOUL_CODE, srchsoul_songs, (int)(sizeof srchsoul_songs / sizeof *srchsoul_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x15, 0xDB, 0x080EC165, XC4_HOMES + 0x9800, NUMSOUL_CODE, numsoul_songs, (int)(sizeof numsoul_songs / sizeof *numsoul_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
 

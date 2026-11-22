@@ -107,7 +107,7 @@ static HookAct entered(HookRegs *r, void *user) {
 		if (routed && next < SOULS_BN5_FORMS) return go(r, soul_enter[next]);
 		if (soulbn4_k(next) >= 0) {
 			soulbn4_enter(me, soulbn4_k(next));   /* (BN4's routine as the form is taken: GutsSoul's hand pass) */
-			return go(r, 0);
+			return go(r, soulbn4_enter_copy(soulbn4_k(next)));   /* (... or its copy where it spawns an object: SrchSoul's) */
 		}
 	}
 	/* (a double of his set up in his form while a Soul is his, HolyDrem's or Poltrgst's: BN5 runs the Soul's own entry for

@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Souls on BN6's proxy form"
 description: "What moving BN4 Red Sun's twelve Souls (Red Sun's six and Blue Moon's six, which run in Red Sun's ROM) onto BN6's proxy form takes: how BN4 takes a form, each Soul's abilities and the code it brings against BN6's twins, what BN5's path supplies and what BN4 must, a cost ranking and which Souls first; ThunSoul moved, the first, and what is left."
 tags: [multirom, bn4, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T18:51:34Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T20:53:56Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, read in tools/romlab and by tools/bn4_souls.py"
@@ -310,6 +310,11 @@ from it (the differential's megaman_clock), while a press of B keeps the
 battle's, so a charge begun after a chip reads a frame early. Its four
 mutations: the charge 10 frames longer, the punch's damage another, the pass
 left out (the passives' `SOULPASSIVE_BREAK_PLUS`), another Soul's sprite.
+`bn4_soul_guts_atk` (with its control) takes him with an Attck+10 merged into
+PanlSht1 on the same Custom screen: 40 in both games, the pass on top of the
+merge. BN4's form state zeroes the hand's six bonuses before a form's routine
+(`0x0800E068`, its +0x26), but the merge lands after it; BN6 merges at OK and
+the pass adds as he enters the form. Its mutation leaves the pass out (10).
 
 **His rapid buster.** BN4's key handler in form 2 counts B's presses (AI
 data +0x12, a window of 10 frames at +0x11, 0x0800BE5A to 0x0800BE7A) and at
@@ -333,6 +338,19 @@ after it, counted from 0. Its three mutations: asked at seven presses
 (`SOULRAPID_BREAK_SEVEN`, `soulbreak` bit 30), seven shots, the count left
 standing at its end.
 
+**ThunSoul's Elec chips paralyse** (found 22 November 2026, after ThunSoul's
+port): BN4's chip use asks a bonus by form for a chip used uncharged too
+(`BN4_CHIP_BONUS`, `0x0800C4C4`), which gives form 6 0x4000 on an Elec chip
+whose power shows (kinds 0xC and 2, not left alone): the power word's
+paralysis bit, the one BN6's own bonus gives ElecCross's charged chips.
+BN6 plays its charged chip's sound for any bonus its own routine returns,
+which BN4 plays for a charged chip alone, so soulchips adds it past that
+sound (`BN6_CHARGED_BONUS_DONE`), its numbers read from BN4's code
+(`soulbn4.c`'s `soulbn4_chip_bonus`). `bn4_soul_thun_elec` holds it: united
+by two Ligtnin1, the first used at t30, its power 0x4064 in both games; its
+mutation leaves the bonus out (0x64). Ligtnin1 alone strikes nothing there,
+so the paralysis's own frames are not yet compared.
+
 ## AquaSoul in BN6's engine
 
 AquaSoul (Blue Moon's Soul 11, form 11) is BN6's Soul 15 (k 2 in
@@ -355,6 +373,25 @@ mutations: the charged chip not doubled, no chip charged, the charge 10
 frames longer, his element none, another Soul's sprite. Not moved: the
 unison picture's arm (`BN4_SOUL_PICTURE_DECOS`' 0x13 for him), which BN6's
 picture does not draw.
+
+## SrchSoul in BN6's engine
+
+SrchSoul (Red Sun's Soul 4, form 4, kind Invisible) is BN6's Soul 16 (k 3 in
+`soulbn4.c`'s `forms`, held bit 9), the first BN4 Soul with an object of its
+own. What it took past AquaSoul's parts:
+
+| Part | SrchSoul's |
+| --- | --- |
+| His charged shot | power attack 0x0A into family 0x3E, an attack unit at BN6's grown 0xDA: five shots of 10 at the nearest foe ahead of him, a scope (effect 0x52, BN6's 0xBE) on it. Its target finder (`0x0800FB3C`) is copied with its panel flags' table: BN6's nearest (`0x08016054`) reads a side flip and keeps a column past his where BN4's keeps his own |
+| His object | his taking of the form (`BN4_FORM_ENTERS`' 4, `0x0800E13E`) spawns the fourth kind's 0x44, which scans the other side for hidden foes (collision flags 0x206), puts a scope on each, and ten frames on lays a hit area and ends. The generator copies the routine with his charged shot's unit (`SOUL_ENTERS`) and moves the object at a fixed dispatch number of the Souls' own, 0xA4 (`TYPES4_SOULS`, the claim's 0xA4-0xA7 past bn4-air-units' 0xA0-0xA3); `soullife.c` runs the copy as he enters the proxy form (`soulbn4_enter_copy`) |
+| Its moment | BN4 runs a form's routine as the form is written, inside its unison (`BN4_FORM_STATE`), so its object is gone before the fight's first frame; BN6's crossing ends nearer the fight, so its object is still in play at t1-t3 and its hit area meets MegaMan there (`BN6_COLL_MET`). The comparator reads that as one state (`soul object`) |
+| His shots' sound | BN4's 0xBB, copied at slot 0x283 (DrkVulcn's), played on BN6's player 22 (`src/audio/xsong.c` XSOUNDS' `player`): on BN4's player 14 BN6's own release of a charged shot (0x72, player 14 in BN6, 26 in BN4) cut his first two shots' sound |
+
+The proof is `bn4_soul_srch` (with its control): united by two Invis, B held
+102 frames, his five shots at a MettaurSP at (5,2). Its three mutations: the
+charge 10 frames longer, the shots' damage another, another Soul's sprite.
+The object's scan finds no hidden foe there, so no frame of the fight tests
+it yet.
 
 ## Two Souls of one kind
 
