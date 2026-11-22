@@ -18,6 +18,8 @@
 #include "soulbn4.h"
 #include "soulcode.h"
 #include "soullife.h"
+#include "soulpower.h"
+#include "soulteam.h"
 #include "xnavi.h"
 #include "xnavi_sprites.h"
 
@@ -39,6 +41,9 @@
 #define PALETTE_CHAOS 2      /* ... in Chaos Unison */
 #define BN5_LIST_SOULS 0     /* BN5's list of MegaMan's sprites: a Soul's at its number (0x0800DA32's table 0x0800DA50) */
 #define SOUL_TOMAHAWK 10
+#define FACE_MEGAMAN 0       /* BN6's face of MegaMan himself (0x0801E6F4's first): Team ProtoMan's Souls' in the emotion window, as Team
+                                Colonel's ROM holds no face of theirs (its faces' table 0x087417FC holds Team Colonel's six by the Soul - 7; the
+                                0x600 bytes before it, drawn, are no faces), and its own battle shows one of MegaMan's, the Soul - 2 */
 #define TOMAHAWK_SHAKE_STRENGTH 2    /* TomahawkSoul's landing as he unites (BN5's phase 2, 0x08012128: camera_initShakeEffect(2, 0x1E)) */
 #define TOMAHAWK_SHAKE_FRAMES   0x1E
 
@@ -68,7 +73,7 @@ static bool chaos_of_obj(uint32_t obj) {
 	return hook_read8(soul_field_of(obj, hook_read8(soul_field_of(obj, BN6_SOUL_NEXT)) ? BN6_SOUL_NEXT_CHAOS : BN6_SOUL_CHAOS)) != 0;
 }
 
-static bool a_soul(int soul) { return soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS; }
+static bool a_soul(int soul) { return (soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS) || soulpower_team(soul); }
 /* ... one of BN4's whose look stands in the room (soul_room.h's SOULS4_*) */
 static bool a_soul4(int soul) { return done4 && soulbn4_k(soul) >= 0; }
 /* a Soul drawn as its own game draws it: BN5's six, or BN4's in the room (its palette 0 too: BN4's unison writes 0, 0x080EBB9E) */
@@ -92,6 +97,7 @@ static HookAct sprite_read(HookRegs *r, void *user) {
 	int k = soul - SOUL_FIRST + ((breaks & SOULLOOK_BREAK_SPRITE) ? 1 : 0);
 	/* (BN4's: the room's sprite, the united Soul's; broken, BN5's first) */
 	if (a_soul4(soul)) r->r[2] = (breaks & SOULLOOK_BREAK_SPRITE) ? SOUL_LIST0_FIRST : SOUL_LIST0_BN4;
+	else if (soulteam_is(soul)) r->r[2] = (uint32_t)(SOUL_LIST0_TEAM + (soul - SOUL_TEAM_FIRST + ((breaks & SOULLOOK_BREAK_SPRITE) ? 1 : 0)) % SOULS_TEAM);
 	else r->r[2] = (uint32_t)(SOUL_LIST0_FIRST + k % SOULS);
 	r->r[12] = BN6_FORM_SPRITE_BACK | 1;
 	return HOOK_JUMP;
@@ -173,7 +179,7 @@ static HookAct face(HookRegs *r, void *user) {
 	uint32_t owner = hook_read32(r->r[5] + BN6_FACE_OWNER);
 	int side = owner ? side_of(owner) : megaman_side(), soul = owner ? soul_of_obj(owner) : soul_of(side);
 	if (r->r[4] != BN6_FORM_PROXY || !looked(soul)) return HOOK_CONTINUE;
-	r->r[6] = a_soul4(soul) ? SOUL_FACE_BN4 : (uint32_t)(SOUL_FACE_FIRST + soul - SOUL_FIRST);
+	r->r[6] = a_soul4(soul) ? SOUL_FACE_BN4 : soulteam_is(soul) ? FACE_MEGAMAN : (uint32_t)(SOUL_FACE_FIRST + soul - SOUL_FIRST);
 	r->r[3] = hook_read8(owner ? soul_field_of(owner, BN6_SOUL_TURNS) : soul_field(side, BN6_SOUL_TURNS));
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
 	return HOOK_JUMP;
@@ -293,9 +299,26 @@ static bool sprites_copy(void) {
 		put32(table + 4 * k, at);
 		at = (at + len + 3) & ~3u;
 	}
+	/* (Team ProtoMan's six, BN5's 1-6, in their own room: soulteam.h; drawn only for a Soul of theirs that stands) */
+	uint8_t team[4 * SOULS_TEAM];
+	at = SOULS_TEAM_SPRITES;
+	for (int k = 0; k < SOULS_TEAM; ++k) {
+		uint32_t len;
+		uint8_t *d = xnavi_sprite_bytes(x->data, x->layout->sprite_lists, BN5_LIST_SOULS, SOUL_TEAM_FIRST + k, &len);
+		if (!d || at + len > SOULS_TEAM_SPRITES_END) {
+			fprintf(stderr, "soullook: BN5's Soul %d's sprite cannot be read, or does not fit\n", SOUL_TEAM_FIRST + k);
+			free(d);
+			return false;
+		}
+		emu_write(at, d, len);
+		free(d);
+		put32(team + 4 * k, at);
+		at = (at + len + 3) & ~3u;
+	}
 	/* (the list's bytes stay the Souls' code's, whoever fills an entry: claims.h) */
 	claims_begin(SOULCODE_CLAIMS);
 	emu_write(SOULS_LIST0 + 4u * SOUL_LIST0_FIRST, table, sizeof table);
+	emu_write(SOULS_LIST0 + 4u * SOUL_LIST0_TEAM, team, sizeof team);
 	claims_end();
 	return true;
 }
@@ -305,7 +328,7 @@ static bool sprites_copy(void) {
  * BN6's first; BN6's rows hold more, the rest MegaMan's own in BN6), the two words pointed at the copies */
 static void arm_points(void) {
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
-	uint8_t of[SOULS_ARM_OF_END - SOULS_ARM_OF], rows[BN6_ARM_ROW_SIZE * (BN6_ARM_ROWS0_COUNT + SOULS)];
+	uint8_t of[SOULS_ARM_OF_END - SOULS_ARM_OF], rows[BN6_ARM_ROW_SIZE * (BN6_ARM_ROWS0_COUNT + SOULS + SOULS_TEAM)];
 	memcpy(of, R.data + (BN6_ARM_ROW_OF - BUS), sizeof of);
 	memcpy(rows, R.data + (BN6_ARM_ROWS0 - BUS), BN6_ARM_ROW_SIZE * BN6_ARM_ROWS0_COUNT);
 	for (uint32_t k = 0; k < SOULS; ++k) {
@@ -313,6 +336,13 @@ static void arm_points(void) {
 		memcpy(row, R.data + (BN6_ARM_ROWS0 - BUS), BN6_ARM_ROW_SIZE);
 		memcpy(row, b5 + (rom5(BN5_ARM_LISTS) - BUS) + BN5_ARM_ROW_SIZE * (SOUL_FIRST + k), BN5_ARM_ROW_SIZE);
 		of[SOUL_LIST0_FIRST + k] = (uint8_t)(BN6_ARM_ROWS0_COUNT + k);
+	}
+	/* (Team ProtoMan's, BN5's rows 1-6, after Team Colonel's) */
+	for (uint32_t k = 0; k < SOULS_TEAM; ++k) {
+		uint8_t *row = rows + BN6_ARM_ROW_SIZE * (BN6_ARM_ROWS0_COUNT + SOULS + k);
+		memcpy(row, R.data + (BN6_ARM_ROWS0 - BUS), BN6_ARM_ROW_SIZE);
+		memcpy(row, b5 + (rom5(BN5_ARM_LISTS) - BUS) + BN5_ARM_ROW_SIZE * (SOUL_TEAM_FIRST + k), BN5_ARM_ROW_SIZE);
+		of[SOUL_LIST0_TEAM + k] = (uint8_t)(BN6_ARM_ROWS0_COUNT + SOULS + k);
 	}
 	emu_write(SOULS_ARM_OF, of, sizeof of);
 	emu_write(SOULS_ARM_ROWS, rows, sizeof rows);
@@ -461,6 +491,8 @@ bool soullook_install(int brk) {
 	if (!R.data || !R.layout || !emu_ready() || !x->data || !x->layout || !p1 || !flash_spawner || !expected()) return false;
 	for (int n = SOUL_FIRST; n < SOUL_FIRST + SOULS; ++n)
 		if (!xnavi_sprite_install(n)) return false;
+	/* (Team ProtoMan's Navis' battle sprites, their Souls' images, where each has its place: xnavi_sprites.c; ProtoMan's to come) */
+	for (int n = SOUL_TEAM_FIRST; n < SOUL_TEAM_FIRST + SOULS_TEAM; ++n) (void)xnavi_sprite_install(n);
 	claims_begin(SOULLOOK_CLAIMS);
 	bool ok = sprites_copy();
 	if (ok) {

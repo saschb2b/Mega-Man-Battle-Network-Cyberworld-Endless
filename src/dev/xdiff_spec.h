@@ -55,6 +55,9 @@ typedef struct {
 	uint16_t deck[2][BN6_FOLDER_ENTRIES];      /* each game's battle deck in this order, written as its battle runs (0 none given) */
 	int ndeck[2];
 	unsigned souls6;                           /* the Souls BN6's MegaMan holds, the Souls installed in its engine (soulunite.h); 0 none */
+	unsigned souls5;                           /* BN5's Team ProtoMan Souls its own battle takes, bit n - 1 its Soul n (ProtoSoul 1 ..
+	                                              MeddySoul 6): each one's flag entry, 0xFF in Team Colonel's ROM, written in the
+	                                              guest's ROM copy and the flag set (soulteam.h's SOUL_TEAM_FLAG); 0 none */
 	int unitebreak;                            /* (the comparator's own test) UNITE's rule broken (SOULUNITE_BREAK_*) */
 	int soulbreak;                             /* ... a Soul's look, abilities or passives broken (soulunite.h's SOULBREAK_*) */
 	int buster[3];                             /* Attack, Speed and Charge in both, levels less one; -1 each game's own */
@@ -111,6 +114,11 @@ bool xd_spec_parse(const char *text, Spec *s);
 /* Whether a poke of the spec's may name BN4's chips' units' code (an address of BN4's): a spec of BN4's, or one of BN6's
  * engine whose MegaMan holds a Soul of BN4's (souls6 past BN5's six: its charged shot's code is one of those units, soul_thun's) */
 bool xd_spec_bn4_code(const Spec *s);
+/* The spec's event flags in BN5's flags at `flags` (eToolkit +0x44: flag f in byte f >> 3, bit 0x80 >> (f & 7)); and (souls5)
+ * Team ProtoMan's Souls it gives BN5's own battle, which Team Colonel's ROM never gives: each one's entry of BN5_SOUL_FLAGS
+ * written in the guest's ROM copy (soulteam.h's SOUL_TEAM_FLAG) and that flag set, so BN5's UNITE takes it, its code and
+ * tables as the ROM has them; rd8 and wr8 the guest's */
+void xd_flags5_put(const Spec *s, uint32_t flags, uint8_t (*rd8)(uint32_t), void (*wr8)(uint32_t, uint8_t));
 
 /* A folder written as its game's first, each chip owned (its mark its key XOR the game's), with no Regular chip or
  * TagChips: the folders' pointer and marks' at their eToolkit places (game's own read and write) */

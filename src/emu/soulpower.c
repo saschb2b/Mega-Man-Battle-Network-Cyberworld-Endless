@@ -7,6 +7,7 @@
 
 #include "bn5.h"
 #include "bn6.h"
+#include "bn6_attacks.h"
 #include "bytes.h"
 #include "claims.h"
 #include "emu.h"
@@ -16,6 +17,9 @@
 #include "soulchaos.h"
 #include "soulcode.h"
 #include "soullife.h"
+#include "soulteam.h"
+#include "thumb_reloc.h"
+#include "xchips_registry.h"
 #include "xsong.h"
 
 #define BUS 0x08000000u
@@ -33,23 +37,47 @@ static const uint8_t empty_powers[] = { 0x12, 0x18, 0x1B };
 /* ... and the Souls' Chaos Unison's power attacks (their loadouts' sixth, AIData +0x11: the Souls track's S6), BN5's ids, their
  * routines Chaos Unison's Thumb (soulchaos.c), after the empty ones */
 static const uint8_t chaos_powers[] = { 0x3A, 0x31, 0x32, 0x33, 0x38, 0x34 };
+/* Team ProtoMan's (soulteam.h), from SOUL_POWER_TEAM, a fixed place past room for BN4's twelve so that neither moves the
+ * other's (the gap between stubs): their empty ones (ProtoSoul's, NapalmSoul's and MagnetSoul's A, their chip charge), their
+ * chaos ones (stubs until their Chaos Unison is moved), then their moved ones in the recipe's order */
+static const uint8_t team_empty_powers[] = { 0x05, 0x27, 0x16 };
+static const uint8_t team_chaos_powers[] = { 0x06, 0x39, 0x30, 0x37, 0x35, 0x36 };
+#define TEAM_AT (SOUL_POWER_TEAM - SOUL_POWER_FIRST)   /* their first entry past BN6's own */
+#define TEAM_CHAOS_AT (TEAM_AT + (int)sizeof team_empty_powers)
+#define TEAM_MOVED_AT (TEAM_CHAOS_AT + (int)sizeof team_chaos_powers)
+/* ... their chaos ones' DarkChips (BN5's 0x0800F660, 0x0800FA86, 0x0800FA2C, 0x0800FA72, 0x0800FA5E, 0x0800FA68: DrkSword, DarkTorn,
+ * DarkCirc, DarkMetr, DarkThnd, DrkRecov), each a stub of ours at SOULS_TEAM_CHAOS as Team Colonel's are Chaos Unison's Thumb */
+static const uint16_t team_chaos_chips[] = { 0xBC, 0xC5, 0xBB, 0xC3, 0xC1, 0xC2 };
+#define CHAOS_STUB 24        /* a stub's bytes: push {lr}; the chip; the writer; bl a bx r3; pop {pc}; its two words */
+_Static_assert(SOULS_TEAM_CHAOS + CHAOS_STUB * sizeof team_chaos_chips / sizeof *team_chaos_chips <= SOULS_TEAM_CHAOS_END,
+	"Team ProtoMan's chaos stubs past their room (soul_room.h)");
+static unsigned team_chaos_on;   /* bit k: team_chaos_powers[k]'s stub written (its DarkChip registered, Chaos Unison installed) */
 
 static int breaks;
 static int nmoved;   /* the recipe's power attacks */
 static int nchaos;   /* the chaos power attacks in the table (none where Chaos Unison is not installed) */
 static SoulBn4 bn4s[SOULS_BN4];   /* BN4's Souls (soulbn4.h), their power attacks after the chaos ones, */
 static int nbn4;                  /* ... how many are placed (none where BN4's ROM is not read or their code is not moved) */
+static int nteam;                 /* Team ProtoMan's moved power attacks, after BN4's */
+static unsigned team_on;          /* bit n - 1: Team ProtoMan's Soul n stands (its charged shot moved, its row written) */
+
+bool soulpower_team(int soul) { return soulteam_is(soul) && (team_on >> (soul - SOUL_TEAM_FIRST) & 1); }
 
 /* the Soul MegaMan `obj` is united with: his own (a side's partner's in his block, soul_id_of), BN5's or a placed BN4's */
 static int soul_on(uint32_t obj) {
 	int soul = soul_id_of(obj), k = soulbn4_k(soul);
-	return (soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS) || (k >= 0 && k < nbn4) ? soul : 0;
+	return (soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS) || (k >= 0 && k < nbn4) || soulpower_team(soul) ? soul : 0;
 }
 
 /* its row of the Souls' loadouts: BN5's six by number, then BN4's */
 static int row_of(int soul) { return soulbn4_k(soul) >= 0 ? SOULS + soulbn4_k(soul) : soul - SOUL_FIRST; }
 
 bool soulpower_bn4(int k) { return k >= 0 && k < nbn4; }
+
+/* the grown table's Souls' entries in order: Team Colonel's moved, their empty and chaos ones, BN4's, Team ProtoMan's moved
+ * and empty ones; where Team ProtoMan's begin */
+static int team_first(void) { return nmoved + (int)sizeof empty_powers + nchaos + nbn4; }
+_Static_assert(8 + 3 + 6 + SOULS_HELD_BN4_ALL == TEAM_AT, "Team ProtoMan's power attacks past room for Team Colonel's and BN4's (soul_room.h)");
 
 /* BN6's id of BN5's power attack `id5` in the grown table, NONE where it is none of the Souls' */
 static int power6(int id5) {
@@ -59,6 +87,13 @@ static int power6(int id5) {
 		if (empty_powers[i] == id5) return SOUL_POWER_FIRST + nmoved + (int)i;
 	for (int i = 0; i < nchaos; ++i)
 		if (chaos_powers[i] == id5) return SOUL_POWER_FIRST + nmoved + (int)sizeof empty_powers + i;
+	const SoulCode *c = &soulcode_bn5;
+	for (int i = 0; i < nteam; ++i)
+		if (c->powers[c->npowers_colonel + i].id == id5) return SOUL_POWER_FIRST + TEAM_MOVED_AT + i;
+	for (size_t i = 0; nteam && i < sizeof team_empty_powers; ++i)
+		if (team_empty_powers[i] == id5) return SOUL_POWER_FIRST + TEAM_AT + (int)i;
+	for (size_t i = 0; i < sizeof team_chaos_powers; ++i)
+		if (team_chaos_powers[i] == id5 && (team_chaos_on >> i & 1)) return SOUL_POWER_FIRST + TEAM_CHAOS_AT + (int)i;
 	return NONE;
 }
 
@@ -79,8 +114,24 @@ static uint32_t routine_of(int i, int *id5) {
 		*id5 = chaos_powers[i - nmoved - empty];
 		return soulchaos_power(*id5);
 	}
-	*id5 = -1;   /* (BN4's: its charge times its own row, not BN5's) */
-	return bn4s[i - nmoved - empty - nchaos].routine | 1;
+	if (i < team_first()) {
+		*id5 = -1;   /* (BN4's: its charge times its own row, not BN5's) */
+		return bn4s[i - nmoved - empty - nchaos].routine | 1;
+	}
+	if (i >= TEAM_CHAOS_AT && i < TEAM_MOVED_AT && (team_chaos_on >> (i - TEAM_CHAOS_AT) & 1)) {
+		*id5 = team_chaos_powers[i - TEAM_CHAOS_AT];
+		return (SOULS_TEAM_CHAOS + CHAOS_STUB * (uint32_t)(i - TEAM_CHAOS_AT)) | 1;
+	}
+	if (i < TEAM_AT || (i >= TEAM_CHAOS_AT && i < TEAM_MOVED_AT)) {
+		*id5 = -2;   /* (a gap before Team ProtoMan's, or a chaos one of theirs not written: never named, its charge times none) */
+		return BN6_POWER_EMPTY | 1;
+	}
+	if (i < TEAM_CHAOS_AT) {
+		*id5 = team_empty_powers[i - TEAM_AT];
+		return BN6_POWER_EMPTY | 1;
+	}
+	*id5 = c->powers[c->npowers_colonel + i - TEAM_MOVED_AT].id;
+	return soulcode_moved(c->powers[c->npowers_colonel + i - TEAM_MOVED_AT].entry);
 }
 
 /* ---- the hooks: MegaMan's loadout, element, weakness and buster bonus in a Soul ---- */
@@ -90,7 +141,8 @@ static HookAct loadout(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_on(r->r[5]);
 	if (!soul || r->r[0] != BN6_FORM_LOADOUTS + BN6_FORM_LOADOUT_SIZE * BN6_FORM_PROXY) return HOOK_CONTINUE;
-	r->r[0] = SOULS_LOADOUTS + (uint32_t)(BN6_FORM_LOADOUT_SIZE * row_of(soul));
+	r->r[0] = soulteam_is(soul) ? SOULS_TEAM_LOADOUTS + (uint32_t)(BN6_FORM_LOADOUT_SIZE * (soul - SOUL_TEAM_FIRST)) :
+		SOULS_LOADOUTS + (uint32_t)(BN6_FORM_LOADOUT_SIZE * row_of(soul));
 	return HOOK_CONTINUE;
 }
 
@@ -121,20 +173,38 @@ static HookAct none_for_soul(HookRegs *r, void *user) {
 
 static uint32_t rom5(uint32_t a) { return get32(XR[XROM_BN5_COLONEL_US].data + (a - BUS)); }
 
-/* BN6's power attacks and charge times grown with the Souls', their words pointed at the copies; the Souls' rows */
-static bool tables(void) {
+/* Team ProtoMan's Chaos Unison's power attacks, a stub each at SOULS_TEAM_CHAOS as BN5's (0x0800FA72: push {lr}; movs r0,
+ * #DarkChip; bl the chip writer's second entry; pop {pc}), the DarkChip in BN6's ids by the registry: where Team Colonel's are
+ * (Chaos Unison installed) and its DarkChip is registered; none written otherwise (their rows' chaos none) */
+static void team_chaos(void) {
+	uint8_t out[CHAOS_STUB * sizeof team_chaos_chips / sizeof *team_chaos_chips];
+	static const uint16_t code[] = {
+		0xB500,           /* push {lr} */
+		0x4803,           /* ldr r0,[pc,#12]: its DarkChip */
+		0x4B03,           /* ldr r3,[pc,#12]: the chip writer's second entry */
+		0, 0,             /* bl the bx r3 below */
+		0xBD00,           /* pop {pc} */
+		0x4718,           /* bx r3 */
+		0x46C0,           /* nop */
+	};
+	team_chaos_on = 0;
+	memset(out, 0xFF, sizeof out);
+	for (size_t k = 0; nchaos && rom_u16(BN6_CHIP_WRITE_NOLOG - BUS) == 0xB5D0 /* push {r4,r6,r7,lr} */ && k < sizeof team_chaos_chips / sizeof *team_chaos_chips; ++k) {
+		const XChipReg *row = xreg_of_bn5(team_chaos_chips[k]);
+		uint8_t *p = out + CHAOS_STUB * k;
+		uint32_t at = SOULS_TEAM_CHAOS + CHAOS_STUB * (uint32_t)k;
+		if (!row) continue;
+		for (size_t i = 0; i < sizeof code / sizeof *code; ++i) put16(p + 2 * i, code[i]);
+		put32(p + 16, row->bn6);
+		put32(p + 20, BN6_CHIP_WRITE_NOLOG | 1);
+		if (thumb_bl_write(p, 6, at, at + 12)) team_chaos_on |= 1u << k;
+	}
+	if (team_chaos_on) emu_write(SOULS_TEAM_CHAOS, out, sizeof out);
+}
+
+/* the grown power attacks' and charge times' entries past BN6's own, n in all; false where one has no routine */
+static bool grown(int n, uint8_t powers[4 * 0x100], uint8_t charges[BN6_CHARGE_ROW * 0x100]) {
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
-	const SoulCode *c = &soulcode_bn5;
-	nmoved = c->npowers;
-	nchaos = soulchaos_power(chaos_powers[0]) ? (int)sizeof chaos_powers : 0;
-	/* (BN4's Souls where BN4's ROM is read and their code moved, in their order: each one's whole or none from it on) */
-	for (nbn4 = 0; nbn4 < SOULS_BN4 && soulbn4_read(nbn4, &bn4s[nbn4]); ++nbn4) {}
-	int n = BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos + nbn4;
-	if (SOUL_POWER_FIRST != BN6_POWER_ATTACK_COUNT || SOULS_POWERS + 4u * (uint32_t)n > SOULS_POWERS_END ||
-		SOULS_CHARGES + BN6_CHARGE_ROW * (uint32_t)n > SOULS_CHARGES_END || n > NONE ||
-		SOULS_LOADOUTS + BN6_FORM_LOADOUT_SIZE * (uint32_t)(SOULS + SOULS_BN4) > SOULS_LOADOUTS_END)
-		return false;
-	uint8_t powers[4 * 0x100], charges[BN6_CHARGE_ROW * 0x100];
 	memcpy(powers, R.data + (BN6_POWER_ATTACKS - BUS), 4 * BN6_POWER_ATTACK_COUNT);
 	memcpy(charges, R.data + (BN6_CHARGE_TIMES - BUS), BN6_CHARGE_ROW * BN6_POWER_ATTACK_COUNT);
 	for (int i = 0; i < n - BN6_POWER_ATTACK_COUNT; ++i) {
@@ -143,13 +213,19 @@ static bool tables(void) {
 		if (!routine) return false;
 		put32(powers + 4 * (BN6_POWER_ATTACK_COUNT + i), routine);
 		uint8_t *row = charges + BN6_CHARGE_ROW * (BN6_POWER_ATTACK_COUNT + i);
-		if (id5 < 0) memcpy(row, bn4s[i - nmoved - (int)sizeof empty_powers - nchaos].charge, BN6_CHARGE_ROW);
+		if (id5 == -2) memset(row, 0, BN6_CHARGE_ROW);
+		else if (id5 < 0) memcpy(row, bn4s[i - nmoved - (int)sizeof empty_powers - nchaos].charge, BN6_CHARGE_ROW);
 		else memcpy(row, b5 + (BN5_CHARGE_TIMES - BUS) + BN6_CHARGE_ROW * (uint32_t)id5, BN6_CHARGE_ROW);
 		for (int k = 0; (breaks & SOULPOWER_BREAK_CHARGE) && k < BN6_CHARGE_ROW / 2; ++k) put16(row + 2 * k, get16(row + 2 * k) + 10);
 	}
+	return true;
+}
+
+/* Team Colonel's and BN4's Souls' loadouts into rows; false where one of Team Colonel's names a power attack not there */
+static bool rows_make(uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)]) {
+	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
 	/* (each Soul's loadout: BN5's row in BN6's ids, BN5's plain shot BN6's own 1, the same charge times) */
-	uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)];
-	memset(rows, NONE, sizeof rows);
+	memset(rows, NONE, BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4));
 	for (int k = 0; k < SOULS; ++k) {
 		const uint8_t *r5 = b5 + (BN5_SOUL_LOADOUTS - BUS) + BN6_FORM_LOADOUT_SIZE * (uint32_t)(SOUL_FIRST + k);
 		uint8_t *r6 = rows + BN6_FORM_LOADOUT_SIZE * k;
@@ -169,7 +245,52 @@ static bool tables(void) {
 		r6[ROW_6] = 0;
 		r6[ROW_B] = (uint8_t)(BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos + k);
 	}
+	return true;
+}
+
+/* Team ProtoMan's Souls whose charged shot is moved: their rows as Team Colonel's, their chaos where its stub is written;
+ * each Soul's whole or not at all, the ones that stand in team_on */
+static void team_rows(uint8_t team[BN6_FORM_LOADOUT_SIZE * SOULS_TEAM]) {
+	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
+	memset(team, NONE, BN6_FORM_LOADOUT_SIZE * SOULS_TEAM);
+	team_on = 0;
+	for (int k = 0; nteam && k < SOULS_TEAM; ++k) {
+		const uint8_t *r5 = b5 + (BN5_SOUL_LOADOUTS - BUS) + BN6_FORM_LOADOUT_SIZE * (uint32_t)(SOUL_TEAM_FIRST + k);
+		uint8_t *r6 = team + BN6_FORM_LOADOUT_SIZE * k;
+		int a = r5[ROW_A] == BN5_POWER_NORMAL ? BN5_POWER_NORMAL : power6(r5[ROW_A]), b = power6(r5[ROW_B]);
+		int left = r5[ROW_LEFT] == NONE ? NONE : power6(r5[ROW_LEFT]);
+		if (a == NONE || b == NONE || (r5[ROW_LEFT] != NONE && left == NONE)) continue;
+		r6[ROW_4] = r5[ROW_4];
+		r6[ROW_A] = (uint8_t)a;
+		r6[ROW_6] = r5[ROW_6];
+		r6[ROW_B] = (uint8_t)b;
+		r6[ROW_LEFT] = (uint8_t)left;
+		r6[ROW_11] = r5[ROW_11] == NONE ? NONE : (uint8_t)power6(r5[ROW_11]);   /* (NONE where its chaos stub is not written) */
+		if (breaks & SOULPOWER_BREAK_FAMILY) r6[ROW_B] = (uint8_t)(SOUL_POWER_FIRST + (r6[ROW_B] - SOUL_POWER_FIRST + 1) % nmoved);
+		team_on |= 1u << k;
+	}
+}
+
+/* BN6's power attacks and charge times grown with the Souls', their words pointed at the copies; the Souls' rows */
+static bool tables(void) {
+	const SoulCode *c = &soulcode_bn5;
+	nchaos = soulchaos_power(chaos_powers[0]) ? (int)sizeof chaos_powers : 0;
+	/* (BN4's Souls where BN4's ROM is read and their code moved, in their order: each one's whole or none from it on) */
+	for (nbn4 = 0; nbn4 < SOULS_BN4 && soulbn4_read(nbn4, &bn4s[nbn4]); ++nbn4) {}
+	nmoved = c->npowers_colonel;
+	nteam = c->npowers - c->npowers_colonel;
+	if (nteam) team_chaos();
+	int n = BN6_POWER_ATTACK_COUNT + (nteam ? TEAM_MOVED_AT + nteam : team_first());
+	if (SOUL_POWER_FIRST != BN6_POWER_ATTACK_COUNT || SOULS_POWERS + 4u * (uint32_t)n > SOULS_POWERS_END ||
+		SOULS_CHARGES + BN6_CHARGE_ROW * (uint32_t)n > SOULS_CHARGES_END || n > NONE ||
+		SOULS_LOADOUTS + BN6_FORM_LOADOUT_SIZE * (uint32_t)(SOULS + SOULS_BN4) > SOULS_LOADOUTS_END)
+		return false;
+	uint8_t powers[4 * 0x100], charges[BN6_CHARGE_ROW * 0x100], rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)];
+	uint8_t team[BN6_FORM_LOADOUT_SIZE * SOULS_TEAM];
+	if (!grown(n, powers, charges) || !rows_make(rows)) return false;
+	team_rows(team);
 	emu_write(SOULS_POWERS, powers, 4u * (uint32_t)n);
+	if (team_on) emu_write(SOULS_TEAM_LOADOUTS, team, sizeof team);
 	emu_write(SOULS_CHARGES, charges, BN6_CHARGE_ROW * (uint32_t)n);
 	emu_write(SOULS_LOADOUTS, rows, BN6_FORM_LOADOUT_SIZE * (uint32_t)(SOULS + nbn4));
 	emu_write32(BN6_POWER_ATTACKS_REF, SOULS_POWERS);
@@ -203,7 +324,8 @@ static bool expected(void) {
 }
 
 bool soulpower_chip_charge(int id) {
-	return nmoved && id >= SOUL_POWER_FIRST + nmoved && id < SOUL_POWER_FIRST + nmoved + (int)sizeof empty_powers;
+	return (nmoved && id >= SOUL_POWER_FIRST + nmoved && id < SOUL_POWER_FIRST + nmoved + (int)sizeof empty_powers) ||
+		(team_on && id >= SOUL_POWER_TEAM && id < SOUL_POWER_TEAM + (int)sizeof team_empty_powers);
 }
 
 bool soulpower_install(int brk) {

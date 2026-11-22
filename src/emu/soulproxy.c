@@ -82,7 +82,8 @@ static bool commit_hooked;
 static HookAct heat_bonus(HookRegs *r, void *user) {
 	(void)user;
 	int bonus, look;
-	if (r->r[0] == BN6_FORM_PROXY && soulpassive_bonus(r->r[5], (int)r->r[4], &bonus, &look)) {
+	/* (the chip charged: the routine's second argument, kept at sp+0 as it began, 0x0800EF38) */
+	if (r->r[0] == BN6_FORM_PROXY && soulpassive_bonus(r->r[5], (int)r->r[4], hook_read32(r->sp) != 0, &bonus, &look)) {
 		r->r[6] += (uint32_t)bonus;
 		r->r[7] = (uint32_t)look;
 		r->r[12] = BN6_CHIP_BONUS_DONE | 1;

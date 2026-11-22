@@ -27,10 +27,12 @@ enum {
 	SOULCHIPS_BREAK_FRONT = 8,    /* KnightSoul's front column gives no unharmed frames */
 	SOULCHIPS_BREAK_SWORD = 16,   /* ShadowSoul's charged sword run by BN6's sword family */
 	SOULCHIPS_BREAK_SHADOW = 32,  /* ShadowSoul keeps his shadow */
+	SOULCHIPS_BREAK_LAVA = 64,    /* NapalmSoul on lava adds nothing to his next chip */
+	SOULCHIPS_BREAK_NAPALM = 128, /* NapalmSoul's charged chip run by its own family, no Napalm Bomb */
 };
 
-/* The hooks and the one stub of Thumb they jump to (soul_room.h's
- * SOULS_THUMB), after the Souls' code (soulcode_install: the moved sword
+/* The hooks and the stubs of Thumb they jump to (soul_room.h's
+ * SOULS_THUMB, Team ProtoMan's SOULS_TEAM_THUMB), after the Souls' code (soulcode_install: the moved sword
  * family). Once a core; false (nothing written) where a byte it stands on
  * is not Gregar's as expected. */
 bool soulchips_install(int breaks);

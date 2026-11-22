@@ -363,8 +363,14 @@ and traces both:
   battle's phase first reads the Custom screen's: each game makes and
   shuffles its deck as the first turn begins, so without it each hand
   is its own game's shuffle's), the Souls in BN6's engine with MegaMan
-  holding them (`souls6=MASK`, bit k BN5's Soul 7 + k: src/emu/soulunite.h
-  over the proxy form, [The proxy form](proxy-form.md)), his buster's Attack, Speed and
+  holding them (`souls6=MASK`, bit k BN5's Soul 7 + k, Team ProtoMan's
+  Soul n at bit 17 + n: src/emu/soulunite.h, src/emu/soulteam.h,
+  over the proxy form, [The proxy form](proxy-form.md)), Team ProtoMan's
+  Souls in BN5's own battle (`souls5=MASK`, bit n - 1 its Soul n: Team
+  Colonel's ROM leaves their flags 0xFF, so each one's entry of
+  `BN5_SOUL_FLAGS` is written in the guest's ROM copy, Team Colonel's flag
+  at the same place, `BN5_FLAG_SOUL` + n - 1, and set: only UNITE's check
+  reads it), his buster's Attack, Speed and
   Charge (`buster=A:S:C`, levels less one), and `safe=1`, his collision
   data's `BN6_OBJ_INVULNERABLE` set before every frame of the battle (the
   same bit in BN5: no hit takes him, so a long spec keeps its course).

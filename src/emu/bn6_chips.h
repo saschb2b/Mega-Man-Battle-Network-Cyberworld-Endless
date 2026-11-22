@@ -239,6 +239,9 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
 
 /* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */
 #define BN6_FLASH_COUNT       0x080107DCu /* sub_80107D4 (the player's timers, a frame each): ldr r4,[r5,#0x58] past its time stop's test (0x0800A098) */
+#define BN6_PLAYER_TIMERS     0x080107DEu /* ... ldrb r0,[r4,#0x19], its first timer read, r4 his AI data: where BN5's twin (0x0800E532) has run
+                                             NapalmSoul's lava step (0x080125FA) before its timers, */
+#define BN6_PLAYER_TIMERS_NEXT 0x080107E0u /* ... and its next instruction */
 #define BN6_FLASH_COUNT_OP    0x6DAC      /* ... its ldr r4,[r5,#0x58] there, checked before the hook */
 #define BN6_FLASH_TINT        0x0801B15Au /* an object's colours' chain (0x0801AF44): bl 0x080168C8, BN5's 0x08013738 (BN5 tints before it) */
 #define BN6_FLASH_TINT_BL     0xFBB5F7FBu /* ... its two halves */

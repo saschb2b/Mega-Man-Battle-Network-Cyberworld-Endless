@@ -18,21 +18,31 @@
 #include "soulproxy.h"
 
 #define BUS 0x08000000u
-#define SOULS 6
-#define SOUL_FIRST 7
+#define SOUL_FIRST 1          /* BN5's Souls by number: Team ProtoMan's 1-6 (soulteam.h), Team Colonel's 7-12 */
+#define SOULS 12
 #define THUMB_BX_LR 0x4770u
 #define FREE_HALF 0xFFFFu    /* the free space as emu_init pads it */
 #define SOUL_NUMBER 9
 #define NUMBER_HAND 10       /* BN5's hand with NumberSoul (0x08025C24) */
 #define NUMBER_PLUS 10       /* ... and its bonus to an attack chip of no kind (0x0800D0CA) */
 #define NUMBER_LOOK 1        /* ... the bonus's mark (r7 there: 0x0800D0C8) */
+#define SOUL_NAPALM 4
+#define NAPALM_PLUS 40       /* NapalmSoul's bonus to a Fire attack chip (0x0800D0FC), */
+#define NAPALM_LOOK 2        /* ... its mark (0x0800D0FA) */
+#define KIND_FIRE 0          /* BN5_CHIP_KIND's Fire */
+#define CHARGE_A 1           /* BN6_AI_CHARGE_BUTTON's A */
+#define CHARGE_FULL 2        /* BN6_AI_CHARGE's full */
 
 static int breaks;
 static bool done;
 
 static int soul_on(int side) { return done && soul_united(side) ? hook_read8(soul_field(side, BN6_SOUL_ID)) : 0; }
 
-bool soulpassive_bonus(uint32_t obj, int chip, int *bonus, int *look) {
+static bool attack_chip(int chip) {
+	return chip > 0 && chip < CHIPS_IDS && (hook_read8(chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE + BN6_CHIP_EFFECT_FLAGS) & BN6_CHIP_SHOWS_POWER);
+}
+
+bool soulpassive_bonus(uint32_t obj, int chip, bool charged, int *bonus, int *look) {
 	int soul = done ? soul_id_of(obj) : 0;
 	if (!soul) return false;
 	*bonus = 0;
@@ -44,6 +54,14 @@ bool soulpassive_bonus(uint32_t obj, int chip, int *bonus, int *look) {
 			*bonus = NUMBER_PLUS;
 			*look = NUMBER_LOOK;
 		}
+	}
+	/* (BN5's 0x0800D0CE: a Fire attack chip used uncharged, unless his A is held to a full charge, AI data +0x1E 1 and +0x1D 2) */
+	uint32_t ai = hook_read32(obj + BN6_T1_AI_DATA);
+	bool full_a = ai && hook_read8(ai + BN6_AI_CHARGE_BUTTON) == CHARGE_A && hook_read8(ai + BN6_AI_CHARGE) >= CHARGE_FULL;
+	if (soul == SOUL_NAPALM && !(breaks & SOULPASSIVE_BREAK_NAPALM) && attack_chip(chip) && soulkinds_of(chip) == KIND_FIRE &&
+		!charged && !full_a) {
+		*bonus = NAPALM_PLUS;
+		*look = NAPALM_LOOK;
 	}
 	return true;
 }
@@ -59,6 +77,7 @@ static HookAct passive(HookRegs *r, uint32_t own, const uint32_t *of) {
 	int soul = done ? soul_id_of(r->r[5]) : 0;
 	uint32_t to = own;
 	if (soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS) to = (breaks & SOULPASSIVE_BREAK_READY) ? 0 : of[soul - SOUL_FIRST];
+	/* (Team ProtoMan's Souls whose passive is not moved: none, as one with none; soulpower_team stands for each that unites) */
 	r->r[12] = (to ? to : BN6_FORM_OVERLAY_NONE) | 1;
 	return HOOK_JUMP;
 }
@@ -66,7 +85,7 @@ static HookAct ready(HookRegs *r, void *user) { (void)user; return passive(r, pr
 static HookAct reapply(HookRegs *r, void *user) { (void)user; return passive(r, proxy_reapply, reapply_of); }
 
 /* each Soul's routine in BN5's table `table5`, moved (0 for a mov pc,lr alone; ColonelSoul's ready, which the recipe
- * leaves, tools/xsoul.py's UNITS) */
+ * leaves, tools/xsoul.py's UNITS; 0 for one not moved: Team ProtoMan's GyroSoul's and SearchSoul's until theirs are) */
 static void souls_of(uint32_t table5, uint32_t out[SOULS]) {
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
 	for (int k = 0; k < SOULS; ++k) {

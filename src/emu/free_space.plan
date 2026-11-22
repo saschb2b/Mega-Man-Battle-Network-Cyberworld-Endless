@@ -116,6 +116,7 @@ FREE_NAVI_ART          +0x5B0000  +0x600000  in=FREE_NAVIS  xnavi_install.c  mul
 FREE_CHIP_CODE         +0x600000  +0x640000  -    xattack_grow.c,xchips_code.c,xchips_bn5.c  multirom/chips-code.md  the code of BN5's chips
 FREE_ATTACK_FAMILIES   +0x600000  +0x600400  end,in=FREE_CHIP_CODE  xattack_grow.c  multirom/chips-code.md  BN6's attack families grown to 240 (the chips' and the Souls' one copy)
 FREE_CHIP_MOVED        +0x600400  +0x640000  end,in=FREE_CHIP_CODE  xchips_code.c  multirom/chips-code.md  the chips' moved code and its tables (what it draws: FREE_CHIP_ART)
+FREE_TEAM_SOULS        +0x640000  +0x6A0000  end  soulcode.c,soullook.c,soulpower.c  multirom/souls.md  Team ProtoMan's Souls (BN5's 1-6) in BN6's engine: their moved code, their sprites and art, their loadouts, and the Souls' arm rows grown past Team Colonel's room (soul_room.h lays it out)
 FREE_CHIP_ART          +0x6A0000  +0x700000  end  xchips_code.c             multirom/chips-code.md      what BN5's chips' moved code draws (XC_ART: its sprites, a place each)
 FREE_SOULS_ART         +0x700000  +0x710000  end  soulcode.c,soulcolonel.c  multirom/souls.md  the Souls' art past their room: BN5's effects BN6 redrew, copied
 FREE_BN4_CHIP_STUBS    +0x710000  +0x710040  end  xchips_code.c             multirom/bn4-chips.md       BN4's chips' own routines BN6 has no twin of: a side's first actor (BugCurse's target)
