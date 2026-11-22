@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 26
+#define ONLINE_PROTOCOL_VERSION 29
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v26"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v29"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -170,6 +170,7 @@
 #define ONLINE_WHERE_LAYER 0          /* on a layer's map */
 #define ONLINE_WHERE_HOME 1           /* at home between acts: drawn on no layer */
 #define ONLINE_WHERE_BATTLE 2         /* in a battle */
+#define ONLINE_WHERE_BUSY 3           /* v29: on a layer, not free (a chat, the PET, a shop) */
 #define ONLINE_DIVE_DELETED 1         /* a dive's end: deleted ... */
 #define ONLINE_DIVE_WON 2             /* ... or won */
 #define ONLINE_BUSTING_MOST 11        /* BN6's Busting Level: 1 to 10, 11 for S (docs/rom/battle.md) */
@@ -210,6 +211,7 @@
 #define ONLINE_CREW_OFFER 5
 #define ONLINE_CREW_ALONE 6
 #define ONLINE_CREW_VITALS 7          /* v24: a crewmate's HP, max HP or layer changed (the crew as it stands) */
+#define ONLINE_CREW_FULL 8            /* v29: to a diver in no crew, near a crew of ONLINE_PARTY_MOST: that crew (other: the one near) */
 #define ONLINE_CREW_VITALS_MS 500     /* a game's DIVE vitals at most so often; the server's CREW_STATE vitals at most so often a crew */
 #define ONLINE_CREW_JOIN_MS 3000      /* a battle's offer stands so long */
 #define ONLINE_CREW_NEAR 128          /* v20: world units (four panels) within which a crew forms, */

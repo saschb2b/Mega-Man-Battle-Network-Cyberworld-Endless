@@ -469,7 +469,7 @@ def dive_fields_ok(action, fields):
         hp, maximum = fields
         return 1 <= maximum <= 9999 and hp <= maximum
     if action == SPEC["dive_where"]:
-        return fields[0] <= SPEC["where_battle"]
+        return fields[0] <= SPEC["where_busy"]
     return True
 
 

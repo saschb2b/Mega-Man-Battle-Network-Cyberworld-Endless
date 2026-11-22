@@ -30,6 +30,25 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader) {
 
 
 const char *dive_join_joined_words(void) { return "Jumping in!"; }
+
+/* (the band's comings and goings, dive_comings.h: MegaMan senses a signal, never says why it went) */
+const char *dive_crew_gone_words(const char *name) {
+	static char s[64];
+	snprintf(s, sizeof s, "%s's signal is gone...", name);
+	return s;
+}
+
+const char *dive_crew_back_words(const char *name) {
+	static char s[64];
+	snprintf(s, sizeof s, "%s's signal is back!", name);
+	return s;
+}
+
+const char *dive_crew_full_words(const char *name) {
+	static char s[64];
+	snprintf(s, sizeof s, "%s's crew is full", name);
+	return s;
+}
 const char *dive_find_words(const char *name, bool mine) {
 	static char s[64];
 	if (mine) snprintf(s, sizeof s, "First to open this one this week!");

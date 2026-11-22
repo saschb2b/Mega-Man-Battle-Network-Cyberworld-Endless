@@ -9,6 +9,7 @@
 #include "bn6_fields.h"
 #include "director.h"
 #include "dive_band.h"
+#include "dive_comings.h"
 #include "dive_crew.h"
 #include "dive_join.h"
 #include "dive_party.h"
@@ -51,6 +52,7 @@ void dive_link_adopt(void) {
 	L.on = true;
 	dive_party_on(true);
 	dive_crew_reset();
+	dive_comings_reset();
 	dive_join_reset();
 	dive_mail_reset();
 	dive_band_reset();
@@ -169,6 +171,7 @@ void dive_link_frame(void) {
 	/* (the party at a guardian's door, and its fight; the crew's battles) */
 	dive_party_frame(&s, L.room);
 	dive_join_frame();
+	dive_comings_frame(&s, now);
 	/* (at home, between acts: nothing sent, his last place stands) */
 	if (!director_on_layer() || !s.connected) return;
 	room();
