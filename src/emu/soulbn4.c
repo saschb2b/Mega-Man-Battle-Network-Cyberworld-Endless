@@ -23,9 +23,13 @@
 enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
-/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2 };
+/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11 };
 #define FORM_GUTS 2
+#define FORM_AQUA 11
+#define OP_CMP_R0 0x2800u    /* cmp r0,#imm8 */
+#define OP_CMP_R2 0x2A00u    /* cmp r2,#imm8 */
+#define OP_CMP_R4 0x2C00u    /* cmp r4,#imm8 */
 #define OP_CMP_R1 0x2900u    /* cmp r1,#imm8 */
 #define OP_ADDS_R1 0x3100u   /* adds r1,#imm8 */
 #define HAND_END 0xFFFFu     /* a hand's ids after its last */
@@ -39,6 +43,30 @@ unsigned soulbn4_held(unsigned bn4) {
 
 int soulbn4_form(int k) { return k >= 0 && k < SOULS_BN4 ? forms[k] : 0; }
 
+/* AquaSoul's rule in BN4's code, its numbers read there: false where the code is not that */
+static bool aqua_rule(int *kind) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (!b4) return false;
+	uint16_t tf = get16(b4 + (BN4_AQUA_TEST_FORM - BUS)), tk = get16(b4 + (BN4_AQUA_TEST_KIND - BUS));
+	uint16_t bf = get16(b4 + (BN4_AQUA_BONUS_FORM - BUS)), bk = get16(b4 + (BN4_AQUA_BONUS_KIND - BUS));
+	if (tf != (OP_CMP_R0 | FORM_AQUA) || bf != (OP_CMP_R2 | FORM_AQUA) || (tk & 0xFF00u) != OP_CMP_R4 || bk != (0x2900u | (tk & 0xFF)))
+		return false;
+	*kind = tk & 0xFF;
+	return true;
+}
+
+bool soulbn4_charges(int k, int chip) {
+	int kind;
+	if (k < 0 || k >= SOULS_BN4 || forms[k] != FORM_AQUA || !aqua_rule(&kind)) return false;
+	uint32_t rec = chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE;
+	return chip > 0 && !(hook_read8(rec + BN6_CHIP_EFFECT_FLAGS) & BN6_CHIP_LEFT_ALONE) && soulkinds_bn4_of(chip) == kind;
+}
+
+unsigned soulbn4_charge_bonus(int k) {
+	int kind;
+	return k >= 0 && k < SOULS_BN4 && forms[k] == FORM_AQUA && aqua_rule(&kind) ? BN4_CHARGED_DOUBLE : 0;
+}
+
 int soulbn4_k(int soul) { return soul >= SOUL_BN4_FIRST && soul < SOUL_BN4_FIRST + SOULS_BN4 ? soul - SOUL_BN4_FIRST : -1; }
 
 bool soulbn4_read(int k, SoulBn4 *out) {
@@ -49,9 +77,13 @@ bool soulbn4_read(int k, SoulBn4 *out) {
 	const uint8_t *row = b4 + (BN4_FORM_LOADOUTS - BUS) + BN4_FORM_LOADOUT_SIZE * (uint32_t)form;
 	/* (the shape the move reads: no plain shot or chip charge of its own, a charged shot among BN4's power attacks; the moved
 	 * Souls' others are later ones') */
-	if (form < 1 || form >= FORMS || row[ROW4_0] != NONE || row[ROW4_PLAIN] != POWER_PLAIN4 || row[ROW4_CHIP] != NONE ||
-		row[ROW4_CHARGED] >= BN4_POWER_ATTACK_COUNT)
+	/* (a chip charge only where its power attack is BN4's empty routine, its charge times serving alone: AquaSoul's) */
+	bool chip = row[ROW4_CHIP] != NONE;
+	if (form < 1 || form >= FORMS || row[ROW4_0] != NONE || row[ROW4_PLAIN] != POWER_PLAIN4 || row[ROW4_CHARGED] >= BN4_POWER_ATTACK_COUNT ||
+		(chip && (row[ROW4_CHIP] >= BN4_POWER_ATTACK_COUNT || get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * row[ROW4_CHIP]) != (BN4_POWER_EMPTY | 1))))
 		return false;
+	out->chip = row[ROW4_CHIP];
+	if (chip) memcpy(out->chip_charge, b4 + (BN4_CHARGE_TIMES - BUS) + CHARGE_ROW * (uint32_t)out->chip, CHARGE_ROW);
 	out->form = (uint8_t)form;
 	out->kind = b4[BN4_SOUL_KINDS - BUS + (uint32_t)(form - 1)];
 	out->element = b4[BN4_FORM_ELEMENTS - BUS + (uint32_t)form];

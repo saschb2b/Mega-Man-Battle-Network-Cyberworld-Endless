@@ -122,7 +122,7 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 # block of its own, its return given the unit's number (POWER_RETURN); the Souls' engine runs it from BN6's grown power
 # attacks (src/emu/soulbn4.c, xchips_bn4_moved_at). By BN4's family: (the power attack's id, its Soul)
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
-SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),)}
+SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),)}
 # BN4's computed powers (a chip's power of 1000 and up: the routine by power - 1000 in BN4_CHIP_POWERS, bn4.h) moved into
 # BN6's grown table (XC_POWERS, src/emu/xchips_code.h) at POWER4_FIRST + the entry, past BN5's (0x80-0xCB): a unit of kind
 # 'power' copies the routines, the installer points their entries at the copies (xchips_code.c powers4_stage) and a moved
@@ -460,13 +460,14 @@ ROW_TABLES = {
                      why="the blasts' kinds (the fourth kind's 0x24: five of 2 bytes, the effect it draws on each panel of its "
                          "list and its sound, 0 none), read each time it draws one (0x080E4A70, by +4); TimeBomb's bomb spawns "
                          "kind 1 (0x080D6E2E: movs r4,#1), the burst 0x00 and no sound; 0, 2, 3 and 4 are other chips', left BN4's"),
-    0x080CF3DC: dict(size=0x44, entry=4, kinds=(4, 5, 6, 7, 8, 9, 0x0A, 0x0B, 0x0E, 0x0F), effect=2, sound=3,
+    0x080CF3DC: dict(size=0x44, entry=4, kinds=(4, 5, 6, 7, 8, 9, 0x0A, 0x0B, 0x0D, 0x0E, 0x0F), effect=2, sound=3,
                      effect_sites={0x080CF55E}, sound_sites={0x080CF56A}, when=True,
                      why="the spread shot's kinds (the third kind's 0x12: 17 of 4 bytes, its burst's shape, its collision's "
                          "argument, its burst's effect, its sound), read by its init (0x080CF452, by +4, the chip's first "
                          "parameter): 4-6 Bubbler, Bub-V and BublSide, 7 BubSprd, 8-0xA HeatShot, Heat-V and HeatSide, 0xB HeatSprd; "
-                         "0xE DrkVulcn's shots (the vulcans' state passes it, 0x080EC910), 0xF DrkSpred's (its record's first parameter); "
-                         "0-3 are Spreader's (a run's by BN6's own) and 0xC, 0xD and 0x10 other families', left BN4's"),
+                         "0xD AquaSoul's charged shot (his power attack 0x23), 0xE DrkVulcn's shots (the vulcans' state passes it, "
+                         "0x080EC910), 0xF DrkSpred's (its record's first parameter); 0-3 are Spreader's (a run's by BN6's own) and "
+                         "0xC and 0x10 other families', left BN4's"),
     0x080CE277: dict(size=7, entry=1, kinds=(6,), effect=0, sound=None,
                      effect_sites={0x080CE212}, sound_sites=set(),
                      why="the bombs' object's blast's effect by its kind (the third kind's 0x8: 7 bytes, its +4's), read as it "
@@ -1808,6 +1809,13 @@ def c_file(units):
                  'const uint32_t xchips_bn4_powers[] = {\n' + '\n'.join('\t' + ', '.join(words[k:k + 8]) + ','
                                                                    for k in range(0, len(words), 8)) + '\n};\n'
                  'const int xchips_bn4_powers_count = (int)(sizeof xchips_bn4_powers / sizeof *xchips_bn4_powers);\n')
+    # (MegaMan's animations its attack units give BN6's art's numbers, IMMS' "MegaMan's animation" rows: which a BN4 Soul, whose
+    # sprite is BN4's art, takes back, src/emu/soullook.c)
+    anims = sorted({(f.number, i['now'], i['was']) for f in units if f.kind == 'attack' for i in f.imms
+                    if i['why'].startswith("MegaMan's animation")})
+    parts.append('/* (MegaMan\'s animations the attack units give BN6\'s art\'s numbers: the unit\'s family, BN6\'s number, BN4\'s) */\n'
+                 'const uint8_t xchips_bn4_anims[][3] = {\n' + '\n'.join(f'\t{{ 0x{a:02X}, 0x{b:02X}, 0x{c:02X} }},' for a, b, c in anims) +
+                 '\n};\nconst int xchips_bn4_anims_count = (int)(sizeof xchips_bn4_anims / sizeof *xchips_bn4_anims);\n')
     return '\n'.join(parts)
 
 

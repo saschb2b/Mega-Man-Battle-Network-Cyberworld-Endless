@@ -111,6 +111,10 @@ in his AI data and NaviStats, BN6's in its Souls block, held to each
 other at every frame (a Soul's turns or form apart fails it); the
 pending form, which BN4 clears at each turn's start; BN4's timed form's
 frames and its count of a form's charged shots, which BN6 has none of;
+a moved Soul's chip charge's power attack, BN6's BN5 empty power of its
+times (AquaSoul's); A's chip charge read as B's is, BN4's counter in the
+trace's spare (its +0x30, at +0xF5), its time and level against BN6's one
+counter, button 1; each engine's sound of a charged chip;
 GutsSoul's count of B's presses toward his rapid buster and its window,
 BN4's in his AI data, BN6's in his side's Souls block (`soulrapid.c`),
 held to each other at every frame;
