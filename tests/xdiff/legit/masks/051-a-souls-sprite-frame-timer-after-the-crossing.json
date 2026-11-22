@@ -1,0 +1,21 @@
+{
+ "name": "a Soul's sprite's frame timer left running after BN6's crossing",
+ "part": "obj",
+ "whose": [
+  "megaman"
+ ],
+ "kinds": [
+  "T1"
+ ],
+ "offsets": [
+  "0x91"
+ ],
+ "bits": "0xFF",
+ "direction": "bn6",
+ "when": "united",
+ "why": "MegaMan's sprite block stands at his object's +0x90 (its place his +2's high nibble, 0x91: BN5's sprite_load 0x08002650 and BN6's twin 0x080026E4 the same code), its +1 the frames its current frame has left. BN6 crosses before the fight (the crossing's phases, run in the battle's phase before its timer counts), setting the Soul's ready animation on its last phase, so the frame's own count is still running down as the fight begins; BN5's unison sets it during its own phases, and it has run out by the fight's first frame. Seen only where the Soul's ready frame has a count at all (MeddySoul's, 28 frames; the other Souls' hold theirs at none): BN6 counts 28 to 0 by t29, then both hold 0, the frame drawn the same in both (the block's other bytes equal throughout). Read so, the bits BN6 has and BN5 not, while united.",
+ "evidence": [
+  "soul_meddy_shot: MegaMan's +0x91 BN6 0x1C at t1, one less each frame to 0 at t29, BN5 0 throughout to t242; +0x90 and +0x92-+0x9F equal at every frame (the animation, its frame, its place)",
+  "soul_search, soul_proto, soul_magnet: +0x91 0 in both from t1 (their ready frames hold no count)"
+ ]
+}
