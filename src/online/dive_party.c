@@ -188,7 +188,7 @@ static bool queued_through_a_drop(const OnlineSnapshot *s) {
 	if (Q.door != DOOR_QUEUED && Q.door != DOOR_FULL) { Q.down_at = Q.rejoin_at = 0; return false; }
 	if (down) {
 		if (!Q.down_at) { Q.down_at = now | 1u; fprintf(stderr, "dive: the link dropped at the door; waiting on it\n"); }
-		if (now - Q.down_at < DOWN_ALONE_MS) return true;
+		if ((int32_t)(now - Q.down_at) < DOWN_ALONE_MS) return true;
 		fprintf(stderr, "dive: the link stayed down at the door: in alone\n");
 		Q.door = DOOR_ALONE;
 		Q.down_at = 0;

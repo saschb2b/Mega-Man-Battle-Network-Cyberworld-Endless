@@ -188,7 +188,7 @@ static uint32_t again_wait(unsigned tries) {
  * rest of the frame waits */
 static bool held_away(const OnlineSnapshot *s, uint32_t now) {
 	if (L.alone_at) {
-		if (now - L.alone_at >= ALONE_SHOWN_MS) dive_link_close();
+		if ((int32_t)(now - L.alone_at) >= ALONE_SHOWN_MS) dive_link_close();
 		return true;
 	}
 	if (!s->error[0]) return false;
@@ -224,7 +224,7 @@ static void back_or_down(const OnlineSnapshot *s, uint32_t now) {
 		return;
 	}
 	bool again = L.away || s->resumes != L.resumes;
-	if (L.down_since && now - L.down_since >= DOWN_SHOWN_MS) dive_band_back();
+	if (L.down_since && (int32_t)(now - L.down_since) >= DOWN_SHOWN_MS) dive_band_back();
 	L.down_since = 0;
 	L.away = false;
 	L.resumes = s->resumes;
@@ -235,7 +235,7 @@ static void back_or_down(const OnlineSnapshot *s, uint32_t now) {
 }
 
 bool dive_link_down(uint32_t now, bool *away) {
-	if (!L.on || L.alone_at || !L.down_since || now - L.down_since < DOWN_SHOWN_MS) return false;
+	if (!L.on || L.alone_at || !L.down_since || (int32_t)(now - L.down_since) < DOWN_SHOWN_MS) return false;
 	*away = L.away;
 	return true;
 }
