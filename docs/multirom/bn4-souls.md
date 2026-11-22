@@ -335,10 +335,18 @@ What is left, in order:
 1. ~~**The rest of the look**~~ (22 November 2026, The shared room,
    below): the unison's picture and his buster's flash moved, the room
    filled as a Soul is committed.
-2. **The comparator's BN4 Souls.** `tools/xdiff_bn4.py` gets what
-   `tools/xdiff.py` has for BN5's (`united`, the form by legit.json's map,
-   the proxy's overlay, the power attack's number), each rule from both
-   games' code. Then `bn4_soul_thun` PASSes whole.
+2. **The comparator's BN4 Souls.** Its rules are in (22 November 2026:
+   `tools/xdiff_bn4_souls.py`, legit.json's bn4 `souls`, [the
+   differential](../devtools/differential.md), BN4): BN4's unison's last
+   frame on the fight's clock, his ready state's clock after it, the power
+   attack and his NameID by each game's number, the Soul's form and turns
+   held to BN6's Souls block, the pending form, BN4's own counters and the
+   buster's charge. `bn4_soul_thun` still parts at t1 on three bytes no
+   rule reads, each one's writer in BN4 not located: the Mettaur's +0x30
+   (0x3C in BN4's battle with a Soul, 0 in BN6's and in every BN4 spec
+   without one) and its +0x18 at the unison's frame, and MegaMan's attack
+   variables' +5 (2 from the unison to his charged shot). Its FAIL is
+   recorded with them; its mutations wait for it to pass.
 3. **AquaSoul and GutsSoul**, adding a chip charge, a hand pass and the
    first engine hook (Cost and order, above). Past ThunSoul's 13, the used
    word has 14 and 15 left below BN5's chaos bits (from 16), so the twelve

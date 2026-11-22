@@ -110,8 +110,8 @@ pending form, which BN4 clears at each turn's start; BN4's timed form's
 frames and its count of a form's charged shots, which BN6 has none of;
 and the buster's charge, BN4's two counters, levels (0, 1, 3) and button
 against BN6's one counter held at the charge time, its level (0, 1, 2),
-button and request bits, and each engine's glow. Its mutations break the
-turns, the charge time, the element and the shot's damage. A sound row
+button and request bits, and each engine's glow. Three bytes are left
+unread (its recorded FAIL says which), so it has no mutations yet. A sound row
 may name `souls`, BN4's Soul numbers, for a moved Soul's copy of a
 sound (ThunSoul's ring's 0x91 at slot 0x300). `soul_thun` is BN6's battle
 alone (`kind: engine`), held to BN4's trace by its `expect`: MegaMan's
