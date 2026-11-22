@@ -11,6 +11,7 @@
 #include "director_folder.h"
 #include "director_state.h"
 #include "duel_words.h"
+#include "forms.h"
 #include "game.h"
 #include "loot.h"
 #include "pacing.h"
@@ -210,5 +211,7 @@ void duel_verdict(bool won, bool spared) {
 	if (opened) flag_set(LAYER_CLEARED_FLAG);
 	DuelVerdict v = { won, beat, opened, spared, rung, mine, his, before, after };
 	verdict_words(D.duel_verdict, (int)sizeof D.duel_verdict, &v);
+	/* (a form run: the netbattle won pays ProtoMan's kind, issue #774) */
+	if (beat && rung == 2) forms_rival_pay(D.duel_verdict, sizeof D.duel_verdict);
 	D.duel_verdict_due = true;
 }

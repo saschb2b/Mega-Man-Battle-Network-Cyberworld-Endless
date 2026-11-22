@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stddef.h>
 
+#include "bn6.h"
+#include "bn6_forms.h"
+#include "emu.h"
 #include "guardians.h"
 #include "run.h"
 #include "save_blob.h"
@@ -23,13 +26,12 @@ _Static_assert(sizeof(SoulSave) == 12 && offsetof(SoulSave, seed) == 0 && offset
 	offsetof(SoulSave, bn4) == 8 && offsetof(SoulSave, bn4_layer) == 10, "Soul save layout changed");
 uint8_t souls_dev_mask;
 
-/* (a Soul by its game's number, 1-12: BN5's, BN4's) */
-static void give_bn5(int soul) {
+void souls_give_bn5(int soul) {
 	if (soul >= 1 && soul <= SOULS_TEAM) souls.team |= (uint8_t)(1u << (soul - 1));
 	if (soul > SOULS_TEAM && soul <= SOULS_OF_BN5) souls.held |= (uint8_t)(1u << (soul - SOULS_TEAM - 1));
 }
 
-static void give_bn4(int soul) {
+void souls_give_bn4(int soul) {
 	if (soul >= 1 && soul <= SOULS_OF_BN4) souls.bn4 |= (uint16_t)(1u << (soul - 1));
 }
 
@@ -38,8 +40,8 @@ void souls_new_run(uint32_t seed) {
 	souls.seed = seed;
 	souls.held = (uint8_t)(souls_dev_mask & ((1u << SOULS) - 1));
 	/* (the Soul a Soul form brought from the start, run.soul_start) */
-	if (run.seed == seed && run.soul_start && run.form == RUN_FORM_SOUL_BN5) give_bn5(run.soul_start);
-	if (run.seed == seed && run.soul_start && run.form == RUN_FORM_SOUL_BN4) give_bn4(run.soul_start);
+	if (run.seed == seed && run.soul_start && run.form == RUN_FORM_SOUL_BN5) souls_give_bn5(run.soul_start);
+	if (run.seed == seed && run.soul_start && run.form == RUN_FORM_SOUL_BN4) souls_give_bn4(run.soul_start);
 	souls_note_layer();
 }
 
@@ -71,6 +73,12 @@ bool soul_held(int navi) {
 void soul_give(int navi) {
 	if (guardian_older(navi)) souls.held |= (uint8_t)(1u << (navi - GUARDIAN_OLDER_FIRST));
 	if (guardian_team(navi)) souls.team |= (uint8_t)(1u << (navi - GUARDIAN_TEAM_FIRST));
+}
+
+void souls_battle_begins(void) {
+	if (run_form_crosses() || !run.soul_turns) return;
+	uint32_t at = BN6_BATTLE_NAVI + BN6_NAVI_TURN_EXTRA;
+	if ((int8_t)emu_read8(at) < 1) emu_write8(at, 1);
 }
 
 unsigned souls_held_bn5(void) { return (unsigned)souls.team | (unsigned)souls.held << SOULS_TEAM; }

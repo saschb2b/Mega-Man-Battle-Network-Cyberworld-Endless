@@ -170,6 +170,16 @@ typedef struct {
 	/* Falzar's Cross starts announced, a bit per navi 6-10 (bit navi - 6; issue #706): in the
 	 * byte after `heard` that was the struct's padding, so the size stands */
 	uint8_t crosses_falzar;
+	/* MegaMan's forms (issue #774, docs/game/meta/forms.md): the Soul forms
+	 * opened (1 << RUN_FORM_*: a Navi of its game deleted as a guardian, in
+	 * any run) and those announced; the last setup's form and Soul brought;
+	 * the best threat rung won with each form, plus one (0 none); the Souls
+	 * given in any run, BN5's and BN4's, a bit each (soul - 1), which a Soul
+	 * form may bring from its start. A profile saved before reads them 0. */
+	uint8_t forms_open, forms_told;
+	uint8_t last_form, last_soul;
+	uint8_t form_best[4];
+	uint16_t souls_won[2];
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

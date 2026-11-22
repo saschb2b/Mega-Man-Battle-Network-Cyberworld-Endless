@@ -132,6 +132,7 @@ void note_folder_codes(void) {
 	loot_folder_codes(folder_made, BN6_FOLDER_ENTRIES, run.codes);
 	loot_folder_counts(folder_made, BN6_FOLDER_ENTRIES);
 	souls_note_layer();
+	run.cross_layer = run.cross_held;   /* (a CROSS run's Crosses, as its Souls: forms.h) */
 	loot_soul_souls(souls_layer());
 }
 

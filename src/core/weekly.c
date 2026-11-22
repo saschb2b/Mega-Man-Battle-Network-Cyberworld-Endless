@@ -104,6 +104,7 @@ bool weekly_dive(uint16_t week, uint32_t seed) {
 	rivals_load();
 	run_new(seed);
 	run_setup(RUN_SHORT, FOLDER_STANDARD, 0, 0, 0);
+	run_setup_form(run_week_form(seed), 0);   /* (the mix without --dev forms) */
 	meta_run_begun();
 	W.week = week;
 	W.seed = seed;
