@@ -200,6 +200,8 @@ void party_play_on(bool on) {
 	online_visit_hold = on ? &hold : NULL;
 }
 
+unsigned party_play_join_wait_ms(void) { return PP.dev.join_wait > 0 ? (unsigned)PP.dev.join_wait * 1000u / 60u : 0; }
+
 void party_play_dev(const PartyDev *d) {
 	PP.dev = *d;
 	party_play_on(d->n >= 1);

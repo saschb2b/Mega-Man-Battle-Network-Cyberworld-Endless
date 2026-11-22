@@ -36,6 +36,8 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader, unsi
 const char *dive_door_full_words(void) { return "The party's full!  A:Go in alone"; }
 
 
+const char *dive_join_dropped_words(void) { return "Link lost. The battle goes on without us"; }
+
 const char *dive_join_joined_words(const char *owner) {
 	static char s[48];
 	snprintf(s, sizeof s, "%s's battle!", owner);
