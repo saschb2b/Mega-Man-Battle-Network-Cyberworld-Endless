@@ -223,7 +223,7 @@ void forms_note_falls(void) {
 }
 
 void forms_describe(FILE *f) {
-	fprintf(f, "form %s\npowers", meta_form_name(run.form));
+	fprintf(f, "runform %s\npowers", meta_form_name(run.form));
 	unsigned held = forms_held();
 	for (int p = 1; p <= FORM_POWERS; ++p)
 		if (held >> (p - 1) & 1) fprintf(f, " %s", forms_power_name(run.form, p));

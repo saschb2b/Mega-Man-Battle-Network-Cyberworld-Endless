@@ -62,7 +62,8 @@ const char *forms_reward_cross(int navi);
  * rivals' records keep, as a run begins */
 void forms_note_fall(int navi);
 void forms_note_falls(void);
-/* The run's form in its state, a line each: `form` its name, `powers`
+/* The run's form in its state, a line each: `runform` its name (`form`
+ * is MegaMan's in a battle, battle_state.c), `powers`
  * those it holds ("HeatCross SpoutCross", none), `soulturns` SoulT+1's */
 void forms_describe(FILE *f);
 

@@ -12,7 +12,7 @@ BASE = 'CYBERWORLD_AUTOPILOT=1 --scene emu --seed 3 --run-depth 3 --dev onehit,q
 
 def course(form, power):
     return [
-        ('expect', f'form={form}'),
+        ('expect', f'runform={form}'),
         ('expect', 'powers=none'),
         ('until', 'battle=guardian', 4200),
         ('until', 'data=fresh|data=waiting', 4600),
