@@ -10,6 +10,7 @@
 #include "bn6.h"
 #include "bytes.h"
 #include "dive_crew.h"
+#include "dive_crew_recent.h"
 #include "dive_join.h"
 #include "dive_words.h"
 #include "emu.h"
@@ -37,6 +38,8 @@ static struct {
 	uint32_t me;              /* this game's session */
 	uint32_t waited_from;     /* the door's wait's start (ms): the join */
 	int pending;              /* crewmates on the layer not yet in the queue */
+	uint32_t waits[8];        /* whom the door waits for: the crew as it was as MegaMan came (dive_crew_recent.h) */
+	int nwaits;
 	int calm;                 /* frames since a chat box or a talk was last open */
 	bool holding;             /* A pressed with no chat box, held since */
 	int held;                 /* ... its frames */
@@ -76,6 +79,7 @@ static void join(const OnlineSnapshot *s) {
 	queue(ONLINE_QUEUE_JOIN);
 	Q.notices = s->notice_serial;
 	Q.asked_at = Q.waited_from = SDL_GetTicks();
+	Q.nwaits = dive_crew_recent_here(s, Q.waited_from, Q.waits, 8);
 }
 
 static void go_in(const char *why) {
@@ -89,14 +93,23 @@ static bool queued(uint32_t session) {
 	return false;
 }
 
+static bool free_in(const OnlineSnapshot *s, uint32_t session) {
+	for (size_t i = 0; s->connected && i < s->peer_count; ++i)
+		if (s->peers[i].id == session) return s->peers[i].busy == 0;
+	return false;
+}
+
 /* The leader's door (issue #752, the owner's call of 22 November 2026): it
- * waits up to CREW_WAIT_MS for his crewmates on the layer, each told he
- * waits (the server's flare); meanwhile only A held takes the party in */
-static void lead(void) {
-	const CrewMember *m;
+ * waits up to CREW_WAIT_MS for his crew, each told he waits (the server's
+ * flare); meanwhile only A held takes the party in. His crew is as it was
+ * as he came, not as it stands at the door (issue #778: a crew lives on
+ * screen, and one who walks ahead has none at the door): those in it
+ * within CREW_RECENT_MS then, still on the layer and free, not yet in the
+ * queue */
+static void lead(const OnlineSnapshot *s) {
 	int pending = 0;
-	for (int k = 0; (m = dive_crew_member(k)) != NULL; ++k)
-		if (m->session != Q.me && m->where == ONLINE_WHERE_LAYER && m->depth == Q.at.depth && !queued(m->session)) ++pending;
+	for (int k = 0; k < Q.nwaits; ++k)
+		if (Q.waits[k] != Q.me && free_in(s, Q.waits[k]) && !queued(Q.waits[k])) ++pending;
 	Q.pending = pending;
 }
 
@@ -188,7 +201,7 @@ void dive_party_frame(const OnlineSnapshot *s, DiveWay room) {
 	}
 	Q.me = s->player_id;
 	door(s, room);
-	if (Q.door == DOOR_QUEUED && Q.q.place == 1) lead();
+	if (Q.door == DOOR_QUEUED && Q.q.place == 1) lead(s);
 }
 
 /* the door's own A: pressed with no chat box open for CALM_FRAMES, never
@@ -292,11 +305,11 @@ void dive_party_mail(const uint8_t *m, size_t n) {
 	}
 }
 
-void dive_party_draw(int x, int y) {
-	if (Q.door == DOOR_FULL) { look_band(x, y + 160 - LOOK_BAND_H - 1, 240, dive_door_full_words()); return; }
-	if (Q.door != DOOR_QUEUED) return;
+const char *dive_party_band(void) {
+	if (Q.door == DOOR_FULL) return dive_door_full_words();
+	if (Q.door != DOOR_QUEUED) return NULL;
 	const char *leader = Q.q.count ? Q.q.e[0].name : "";
-	look_band(x, y + 160 - LOOK_BAND_H - 1, 240, dive_door_words(Q.q.count, Q.q.place == 1, leader, wait_left()));
+	return dive_door_words(Q.q.count, Q.q.place == 1, leader, wait_left());
 }
 
 int dive_party_members(const QueueEntry **out) {

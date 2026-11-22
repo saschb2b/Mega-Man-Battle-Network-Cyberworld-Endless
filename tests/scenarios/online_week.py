@@ -635,3 +635,36 @@ MANY['door-waits-crew'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.c
     soon('partyfield~seat', 'beta', 3000),
     ('expect', 'partyfield~2 seat'),                      # two MegaMen on one field
 ))
+
+# The door waits for the crew as it was (issue #778): Alpha, Beta and Gamma a crew on the guardian's layer. Alpha goes
+# on ahead, out of their sight, and the crew splits (#770: a crew lives on screen); at the door it still waits for the
+# two who were his crew ("Waiting for crew 2"). They come one after the other; each is told of the door once, and
+# Gamma, in the queue, reads his own line, not a flare.
+THREE = {'beta': online.HOME, 'gamma': online.HOME}
+MANY['door-waits-who'] = dict(CAST, GAMES=THREE, STEPS=online.course(
+    online.into_square(), dive(),
+    online.into_square('beta'), dive('beta'),
+    online.into_square('gamma'), dive('gamma'),
+    ('sleep', 1.5),
+    soon('crew=3: Alpha Beta Gamma', '', 900),
+    to_layer(''), to_layer('beta'), to_layer('gamma'),
+    ('sleep', 1.5),
+    soon('crew~3: Alpha', '', 900),
+    ('do', 'by arena; wait 60'),                          # Alpha ahead, out of their sight,
+    ('repeat', 'press A; wait 30', 'chat=closed', 30),
+    ('sleep', 3),                                         # ... the crew split (crew_split_ms)
+    soon('crew=0', '', 600),
+    ('do', 'by arena; wait 5; hold AHEAD 90; wait 30'),   # and in at the door: it waits for the two
+    soon('door=queued: Alpha', '', 300),
+    ('expect', 'doorwait~for 2'),
+    ('expect', 'band~Waiting for crew'),
+    soon('band~Alpha waits at the door', 'beta', 600),
+    to_door('beta'),
+    soon('door=queued: Alpha Beta', '', 300),
+    ('expect', 'doorwait~for 1'),
+    to_door('gamma'),
+    soon('door=queued: Alpha Beta Gamma', '', 300),
+    ('expect', 'doorwait=0 for 0'),                       # all here: the wait over
+    ('@gamma', 'do', 'wait 30'),
+    ('@gamma', 'expect', 'band=Alpha leads 3  B:Go alone'),   # his own line: Beta's join told him nothing again
+))

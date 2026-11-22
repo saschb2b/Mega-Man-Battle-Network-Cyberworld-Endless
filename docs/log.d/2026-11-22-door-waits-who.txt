@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T11:13:02Z
+* **Update**: online/shared-dive.md (whom the door waits for: the crew as it was in the last thirty seconds, still on the layer and free; one flare a door each; the queue's own line before the feed's; the window measured; issue #778), code/online.md (`dive_crew_recent.c`).

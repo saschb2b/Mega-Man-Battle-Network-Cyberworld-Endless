@@ -339,23 +339,23 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await a.send(protocol.dive(END, SPEC["dive_won"], 0, 0, 0, 0, 0, 0, 0))
         self.assertEqual(await self.notice(a), 25)
 
-    async def test_the_flare_on_the_door_s_own_layer(self):
-        # (issue #752: a diver on the layer of the door is told someone waits there; one already in the queue is not,
-        # nor the one who joined)
+    async def test_one_flare_a_door_each(self):
+        # (issue #752: divers on the door's own layer are told someone waits there; issue #778: the first joiner's flare
+        # tells them, a second joiner tells nobody again, and the queued are never told)
         a, b, c = await self.connect("Alpha"), await self.connect("Beta"), await self.connect("Gamma")
         for client in (a, b, c):
             await self.enter(client, 3, 0, 4)
-        await b.send(protocol.queue(SPEC["queue_join"], (3, 0, 4)))
-        await b.message(SPEC["queue_state"])
         await a.send(protocol.queue(SPEC["queue_join"], (3, 0, 4)))
-        flare = protocol.DIVE_FEED.unpack(await self.until(c, SPEC["dive_feed"], lambda d: d[1] == SPEC["feed_flare"]
-                                                           and name(protocol.DIVE_FEED.unpack(d)[2]) == "Alpha"))
-        self.assertEqual(flare[3:6], (3, 0, 4))
-        for client in (a, b):
+        await a.message(SPEC["queue_state"])
+        flare = protocol.DIVE_FEED.unpack(await self.until(c, SPEC["dive_feed"], lambda d: d[1] == SPEC["feed_flare"]))
+        self.assertEqual(name(flare[2]), "Alpha")
+        await self.until(b, SPEC["dive_feed"], lambda d: d[1] == SPEC["feed_flare"])
+        await b.send(protocol.queue(SPEC["queue_join"], (3, 0, 4)))
+        await self.until(b, SPEC["queue_state"], lambda d: d[1] == SPEC["queue_waiting"])
+        for client in (a, b, c):
             for _ in range(20):
                 data = await client.receive()
-                self.assertFalse(data[0] == SPEC["dive_feed"] and data[1] == SPEC["feed_flare"]
-                                 and name(protocol.DIVE_FEED.unpack(data)[2]) == "Alpha")
+                self.assertFalse(data[0] == SPEC["dive_feed"] and data[1] == SPEC["feed_flare"])
 
     # -- crews --
 
