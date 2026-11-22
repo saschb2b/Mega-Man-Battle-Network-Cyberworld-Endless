@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T21:46:48Z
+* **Update**: multirom/souls.md (MeddySoul's battle in BN6's engine: UNITE, the capsule bomb), rom/souls.md (MeddySoul's charged shot's addresses), game/team-protoman.md (unit 8: MeddySoul's battle built, his capsules the Soul button to come).

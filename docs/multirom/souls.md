@@ -393,6 +393,15 @@ the next.
   shows no count of the shuffles left, where BN5's does. MeddySoul's
   capsules (types 6 and 7) have no such button in BN6: they are still to
   come, on ColonelSoul's (DustCross's, `src/emu/soulcolonel.c`) or apart.
+  **MeddySoul** (6), his battle: UNITE by a Recovery chip, his look, his
+  charged shot (0x0E, family 0x3E as 0xCE: the capsule bomb); BN5 gives
+  form 6 no passive and no chip charge: `soul_meddy` (to t523) and
+  `soul_meddy_shot` PASS against BN5's battle, their mutations FAIL, with
+  one difference of the engines' written down as legit (mask 051): BN6
+  crosses into the Soul just before the fight, so his ready frame's own
+  count (28 frames, the one Soul's with any) is still running down at t1,
+  where BN5's unison let it run out; the frame drawn is the same. His
+  two capsules are the Soul button's types 6 and 7 (above), still to come.
   Open: `soul_napalm_charge` ends at t320, before CanGard's last frames,
   where the games part on a fourth-kind object of his (BN5's let go at
   t321, BN6's 0x11 still in play): not traced yet. His Chaos Unison

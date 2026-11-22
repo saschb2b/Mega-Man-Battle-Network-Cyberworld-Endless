@@ -89,10 +89,13 @@ UNITS = (
     # the fourth kind's 0x8F, BN6's the same code, which marks the foe side's invisible objects; in a netbattle the
     # foe Navi's shadow taken off))
     ('search', 3, (0x0800F68E, 0x080EE93C, 0x08011BF8)),
+    # (MeddySoul: his charged shot's power attack and family, the capsule bomb; no passive, no chip charge (BN5's 0x08010902
+    # names no form 6); his capsules are the Custom screen's Soul button, SearchSoul's SHUFFLE's)
+    ('meddy', 6, (0x0800F720, 0x080EEB40)),
 )
 # Team ProtoMan's units: their blocks in a room of their own (soul_room.h's SOULS_TEAM_CODE), their sprites too
 # (SOULS_TEAM_ART, list 0 from TEAM_ART_FIRST), so that Team Colonel's code and numbers stay where they were
-TEAM_UNITS = ('napalm', 'gyro', 'magnet', 'proto', 'search')
+TEAM_UNITS = ('napalm', 'gyro', 'magnet', 'proto', 'search', 'meddy')
 TEAM_CODE_ROOM = 0x8000     # SOULS_TEAM_CODE's bytes
 TEAM_ART_ROOM = 0x18000     # SOULS_TEAM_ART's
 TEAM_ART_FIRST, TEAM_ART_LAST = 0x66, 0x7F   # (list 0's numbers past Team ProtoMan's Souls' own 0x60-0x65: soul_room.h)
@@ -106,7 +109,7 @@ TEAM_OVERLAY_KINDS = {2: 63}
 FAMILIES = ((0x43, 0xC0, 0x080EED92), (0x3A, 0xC1, 0x080EE864), (0x40, 0xC2, 0x080EEBDE), (0x50, 0xC3, 0x080EF68A),
             (0x3D, 0xC4, 0x080EEADC), (0x45, 0xC5, 0x080EEF6C), (0x13, 0xC6, 0x080EBDC6),
             # (Team ProtoMan's, past Chaos Unison's failure 0xC7: NapalmSoul's charged shot, its vulcan of fire)
-            (0x44, 0xC8, 0x080EEE82), (0x4B, 0xC9, 0x080EF38A), (0x3C, 0xCA, 0x080EEA40), (0x42, 0xCB, 0x080EEC86), (0x1A, 0xCC, 0x080EC7DE), (0x3B, 0xCD, 0x080EE93C))
+            (0x44, 0xC8, 0x080EEE82), (0x4B, 0xC9, 0x080EF38A), (0x3C, 0xCA, 0x080EEA40), (0x42, 0xCB, 0x080EEC86), (0x1A, 0xCC, 0x080EC7DE), (0x3B, 0xCD, 0x080EE93C), (0x3E, 0xCE, 0x080EEB40))
 
 # The power attacks moved: BN5's id, its entry, and the Soul's role for it (its loadout row's byte); BN6's id is
 # soul_room.h's SOUL_POWER_FIRST on in this order
@@ -117,7 +120,7 @@ POWERS = ((0x14, 0x0800F7DC, 'ColonelSoul\'s charged shot'), (0x13, 0x0800F7D0, 
           (0x19, 0x0800F840, 'NapalmSoul\'s charged shot'), (0x09, 0x0800F6A6, 'GyroSoul\'s charged shot'),
           (0x15, 0x0800F7FC, 'MagnetSoul\'s charged shot'), (0x25, 0x0800F9A0, 'MagnetSoul\'s B+Left'),
           (0x03, 0x0800F604, 'ProtoSoul\'s charged shot'), (0x04, 0x0800F62C, 'ProtoSoul\'s B+Left'),
-          (0x08, 0x0800F68E, 'SearchSoul\'s charged shot'))
+          (0x08, 0x0800F68E, 'SearchSoul\'s charged shot'), (0x0E, 0x0800F720, 'MeddySoul\'s charged shot'))
 POWERS_COLONEL = 8   # (Team Colonel's, the first; Team ProtoMan's after: src/emu/soulpower.c numbers them past BN4's)
 
 # BN5's routines a moved routine calls that BN6 answers otherwise, aimed at the Souls' stubs (soul_room.h: SOUL_STUB_*),
