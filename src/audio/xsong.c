@@ -354,6 +354,8 @@ static bool slot_empty(int slot) {
  * the players its game's entry names (as BN6's and BN5's players are the
  * same 32); false where it cannot be (the slot then stays BN6's empty
  * one). */
+static int sound_player(int xrom, int song);
+
 static bool copy_in(int xrom, int song, bool own, int slot) {
 	if ((own ? !sound_slot(slot) : slot < SLOT_FIRST || slot > SLOT_LAST) || X.nsongs >= (int)(sizeof X.song / sizeof *X.song) ||
 		xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data || !XR[xrom].layout->song_table || song < 0 ||
@@ -366,8 +368,9 @@ static bool copy_in(int xrom, int song, bool own, int slot) {
 	uint8_t entry[8];
 	const uint8_t *was = xr + XR[xrom].layout->song_table + (uint32_t)song * 8;
 	put32(entry, header);
-	put16(entry + 4, own ? get16(was + 4) : BGM_PLAYER);
-	put16(entry + 6, own ? get16(was + 6) : BGM_PLAYER);
+	int player = own ? sound_player(xrom, song) : 0;
+	put16(entry + 4, own ? (player ? (uint16_t)player : get16(was + 4)) : BGM_PLAYER);
+	put16(entry + 6, own ? (player ? (uint16_t)player : get16(was + 6)) : BGM_PLAYER);
 	emu_write(song_entry_bus(slot), entry, sizeof entry);
 	X.song[X.nsongs++] = (__typeof__(X.song[0])){ xrom, song, slot, header };
 	if (emu_debug_on())
@@ -460,7 +463,8 @@ int xsong_copy_of(int slot, int *xrom) {
  * whichever track's code plays it (issue #82's plan for its tracks and its
  * amendments; docs/rom/sound.md, BN6's empty song slots): copied by the
  * first install that needs it, found there by the others */
-static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = {
+/* (`player`: the music player BN6 plays it on, where its game's would share one with a BN6 sound played with it; 0 its game's) */
+static const struct { uint8_t xrom; uint16_t song; uint16_t slot; uint8_t player; } XSOUNDS[] = {
 	{ XROM_BN5_COLONEL_US, 0xC0, 0x62 }, { XROM_BN5_COLONEL_US, 0xB7, 0x61 }, { XROM_BN5_COLONEL_US, 0xBA, 0x60 },
 	{ XROM_BN5_COLONEL_US, 0x70, 0x5F }, { XROM_BN5_COLONEL_US, 0x117, 0x5E }, { XROM_BN5_COLONEL_US, 0x129, 0x5D },
 	{ XROM_BN5_COLONEL_US, 0x16B, 0x5C }, { XROM_BN5_COLONEL_US, 0xE1, 0x5B }, { XROM_BN5_COLONEL_US, 0x115, 0x5A },
@@ -533,7 +537,9 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0x105, 0x280 }, { XROM_BN4_RED_SUN_US, 0x106, 0x281 }, { XROM_BN4_RED_SUN_US, 0x107, 0x282 },
 	{ XROM_BN4_RED_SUN_US, 0x124, 0x29F },
 	/* ... DrkVulcn's shots (the dark chips' 0x283 up: docs/project/claims/bn4-dark-units.json) */
-	{ XROM_BN4_RED_SUN_US, 0xBB, 0x283 },
+	/* (on BN6's player 22, which BN6 gives one song, 0x6B: BN4's player 14 is BN6's release of a charged shot's, 0x72, which cut
+	 * SrchSoul's first two shots' sound after his charged shot's release, BN4's 0x72 on its player 26: bn4_soul_srch t142) */
+	{ XROM_BN4_RED_SUN_US, 0xBB, 0x283, 22 },
 	/* ... the Elem chips' shot, its two sounds by one call, each its number plus 0x1DD (SOUND_ADDS) */
 	{ XROM_BN4_RED_SUN_US, 0xA8, 0x285 }, { XROM_BN4_RED_SUN_US, 0x14C, 0x329 },
 	/* ... DarkBomb's bomb, its two sounds (the dark chips' 0x286 and 0x287) */
@@ -543,6 +549,13 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	/* ... AirHoc's puck, its launch and its bounce (the air line's 0x289 up: docs/project/claims/bn4-air-units.json) */
 	{ XROM_BN4_RED_SUN_US, 0xC0, 0x289 }, { XROM_BN4_RED_SUN_US, 0xCC, 0x28A },
 };
+
+/* the player a copied sound is given (XSOUNDS' `player`), 0 its game's */
+static int sound_player(int xrom, int song) {
+	for (size_t i = 0; i < sizeof XSOUNDS / sizeof *XSOUNDS; ++i)
+		if (XSOUNDS[i].xrom == xrom && XSOUNDS[i].song == song) return XSOUNDS[i].player;
+	return 0;
+}
 
 int xsong_sound_slot(int xrom, int song) {
 	for (size_t i = 0; i < sizeof XSOUNDS / sizeof *XSOUNDS; ++i)

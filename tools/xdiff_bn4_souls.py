@@ -66,6 +66,8 @@ WINDOW6, PRESSES6 = 0x19, 0x18            # (... BN6's in his side's Souls block
 REQUESTS, RAPID4, CHARGED6, RAPID_AT = 0x44, 0x20, 0x02, 6   # (... at six asked: BN4's request 0x20, BN6's its charged B's 2)
 CHAOS6_NONE = 0xFF                        # (BN6's +0x11, its chip's chaos power, 0xFF none: BN6_AI_POWER_CHIP's note)
 GLOW4, GLOW6, GLOW_SLOT = ('T4', 0x05), ('T4', 0x08), 0x58
+SOUL_OBJECTS4 = (('T4', 0x44),)
+COLL_MET = 0x68                           # (BN6_COLL_MET: the regions a collision data met, BN4's +0x4C at BN6's place in the trace)           # (a Soul's object spawned as he takes the form: SrchSoul's, tools/xchiprecipe_bn4.py SOUL_ENTERS)
 
 
 def rules():
@@ -191,7 +193,7 @@ class Souls4:
 
     def mask(self, d, fa, fb):
         """the rule's name that reads d as the same state, None where none"""
-        for key, rule in (('unison', self.unison), ('held', self.held), ('unison var', self.unison_var), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
+        for key, rule in (('unison', self.unison), ('soul object', self.soul_object), ('held', self.held), ('unison var', self.unison_var), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
                           ('soul', self.soul), ('pending', self.pending), ('form frames', self.form_frames),
                           ('shots', self.shots), ('presses', self.presses), ('charge', self.charge)):
             if key in self.names and rule(d, fa, fb):
@@ -232,6 +234,24 @@ class Souls4:
         # (its sounds, begun before the fight, said at the frame after its last)
         return d.part == 'sounds' and self.unison_last is not None and fa.fr['t'] == self.unison_last + 1 and \
             isinstance(d.a, list) and set(d.a) <= set(UNISON_SOUNDS) and not d.b
+
+    def soul_object(self, d, fa, fb):
+        """a Soul's object spawned as he takes the form, BN4's inside its unison (BN4_FORM_STATE runs the form's routine as the form is
+        written, before the fight's first frame), BN6's as he enters the proxy form, which its crossing ends nearer the fight: BN6's
+        alone in play in the fight's first frames, BN4's gone before them"""
+        mine = lambda x: isinstance(x, tuple) and tuple(x[:2]) in SOUL_OBJECTS4
+        objs = lambda fr: [o for o in fr['objs'] if mine(o.role)]
+        if objs(fa.fr) or not objs(fb.fr):
+            return False
+        if d.part == 'in play':
+            return mine(d.role) and d.a is False and d.b is True
+        if d.part == 'run order' and isinstance(d.a, list) and isinstance(d.b, list):
+            return [x for x in d.b if not (isinstance(x, tuple) and any(x[0].startswith(f'{k}:{t:#x}#') for k, t in SOUL_OBJECTS4))] == d.a
+        # (MegaMan's word of the regions he met, BN6_COLL_MET: BN6's with the bits of the hit area the object lays as it ends, which
+        # BN4's met before the fight; no bit of BN4's missing)
+        if isinstance(d.role, tuple) and d.role[:2] == MEGAMAN and d.part == 'coll' and COLL_MET <= d.off < COLL_MET + 4:
+            return isinstance(d.a, int) and isinstance(d.b, int) and d.a & ~d.b == 0
+        return False
 
     def held(self, d, fa, fb):
         if self.unison_last is None or not isinstance(d.role, tuple) or d.role[:2] == MEGAMAN or d.part != 'obj':

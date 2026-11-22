@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T20:53:56Z
+* **Update**: multirom/bn4-souls.md (SrchSoul in BN6's engine: his charged shot, his object at the dispatch's 0xA4 and its moment, his shots' sound on BN6's player 22, bn4_soul_srch), code/emu.md (soulbn4.c's SrchSoul), devtools/differential.md (a Soul's object at each engine's moment).

@@ -1,0 +1,119 @@
+{
+ "about": "BN4 Red Sun's SrchSoul (Soul 4, form 4: kind Invisible, his charged shot power attack 0x0A into family 0x3E, 100 frames: five shots of 10 at the nearest foe ahead of him, a scope on it; his taking the form spawns his object, the fourth kind's 0x44) in BN4's own battle, fought twice, each in a process of its own, the same frame for frame: SrchSoul's control. A deck of two Invis * (BN4's 133, kind Invisible; the run's 558): the first Custom screen picks both, moves to UNITE and takes it and the Soul, the second given up. B held from fight frame 30 for 102 frames, two past its charge, its release the charged shot. A MettaurSP at (5,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "safe": true,
+ "souls4": "8",
+ "folder4": [
+  "3485",
+  "3485"
+ ],
+ "deck4": [
+  "3485",
+  "3485"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   102
+  ]
+ ]
+}
