@@ -220,8 +220,10 @@
 0800CF00 BN5_ENEMY_RAISED
 0800CF70 entries_0x4f_0x54_literal
 0800D010 chip_object_uses
+0800D09E chips_bonus_by_form
 0800D0A0 soul_passives.0x0800d0ca
 0800D0CA soul_passives
+0800D0CE team_protoman_souls
 0800D17C BN5_ENEMY_STATS
 0800D188 sprite_enemy_or_obstacle_by_nameid
 0800D36A obstacle_cosmoman_gate_leaves_alone
@@ -243,6 +245,7 @@
 0800E234 with_record_second_parameter_literal_0xffff
 0800E2C2 attack_begun_as_chip
 0800E532 bn5_darkplus_green.drawn_by
+0800E53A from_player_timers
 0800E62C BN5_SOUL_ELEMENTS
 0800E6F0 bn5_chips_code.reader
 0800E720 bn5_chips_code.word
@@ -288,6 +291,9 @@
 0800F350 dark_soul_bn6.bn6
 0800F368 dark_soul_bn6.table
 0800F486 obstacle_gate_leaves_alone
+0800F660 chaos_unison_power_attacks
+0800F840 family_0x44
+0800FA2C emotion_window_faces_none_team_colonel
 0800FAFE setup_0x3e_navis_buster
 0800FE6A chip_numbers_written_for_attack
 0800FF40 chip_used
@@ -299,10 +305,12 @@
 08010110 chip_usable_test
 08010162 bn5_sea_submerge_2
 0801021E chaos_unison.0x0810436c
+080102CA his_ai_data_0x0d_sound_0x167
 08010312 bn5_darkinvs_bn6.set_by_2
 08010322 soul_chips
 0801038A soul_chips_2
 080103C8 knightsoul_toadsoul_0xff
+0801043A napalmsoul_charged_chip_family
 080104D8 cycle_aidata_0x1c
 080105F0 after_charge_step
 08010648 chaos_unison.rows
@@ -329,6 +337,8 @@
 08012484 BN5_TURN_COUNT
 080124A6 ai_data_0x32_his_chip_7
 08012530 soul_chips.empty_power_attacks_name_charge_time_3
+080125FA his_lava_step
+080126EA push_r4_r6_r7_lr
 08012704 bn5_souls.emotion
 08012705 bn5_darkchips.emotion
 08012738 emotion_getter
@@ -927,7 +937,9 @@
 080EE745 chaos_unison_3
 080EE783 chaos_unison_4
 080EE7E5 battle_0x32_bit_4
+080EEE82 his_charged_shot_power_attack_0x19
 080EF270 bn5_darkinvs_bn6_5
+080EF38A team_protoman_souls_2
 080EF548 bn5_chips_code.mrkcan
 080F0436 release_consumer
 080F04CC idle_states
