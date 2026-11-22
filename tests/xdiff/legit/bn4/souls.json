@@ -8,6 +8,24 @@
   ]
  },
  {
+  "key": "held",
+  "name": "the battle's actors held through BN4's unison",
+  "why": "BN4's unison stops the battle's time (the battle's flags' bit 4, BN4_TIME_STOP 0x08007948, BN6's twin 0x0800A098), and its actors' runner gives every actor its held routine instead of its state while it is stopped (0x08013D94-0x08013DA8: bl 0x080104DC): on its first held frame, +0x18 0, the routine copies +0x36 to +0x30 and +0x3E to +0x32 and sets +0x18 4 (0x080104DE-0x080104F2); +0x18 goes back to 0 as time runs again, +0x30 and +0x32 keep the copies. BN6's runner and held routine are the same code (BN6 0x0801B4AA, 0x08016BFC, the same bytes), but BN6 crosses before the fight, its time never stopped in the fight's frames, so its actors keep their +0x30 and +0x32 as they began. Read so after BN4's unison: an actor's +0x18 4 at the unison's frame where BN6's is as it began, and its +0x30 to +0x33 BN4's copies of its own +0x36 to +0x39 where BN6's are as they began",
+  "evidence": [
+   "romlab, BN4's state at bn4_soul_thun's first Custom screen and its keys: write 0203b288=3c/2 at 080104e6 lr 08013dad f12912, the frame MegaMan enters state 0x0D (the Mettaur's object 0x0203B258: +0x30 the copy of its +0x36, 0x3C)",
+   "bn4_soul_thun: the Mettaur's obj+0x30 BN4 0x3C at every frame, BN6 0; its +0x18 4 at t1 alone; bn4_chip_invis (no Soul): 0 in both"
+  ]
+ },
+ {
+  "key": "unison var",
+  "name": "the attack's variables' +5 BN4's unison leaves",
+  "why": "As MegaMan's turn starts with a form pending (0x08013B14: 0x0800B8B0's test), BN4 writes 2 into his attack's variables' +5 (movs r0,#2; movs r1,#0x70; adds r1,r1,r7; strb r0,[r1,#5] at 0x08013B1C-0x08013B22) and sets his state 0x0D, the unison (0x08013B24-0x08013B26: BN4_SET_ACTION, which clears the variables' +0 alone). BN6 crosses by the crossing's phases (BN6_CROSSING_PHASES), which write none of his attack's variables. The byte stays BN4's 2 while his state is his ready one, until his next attack's power attack writes it in both (ThunSoul's 0x58: strb r0,[r7,#5] at 0x0800D2A4); read so from the unison until his first other state",
+  "evidence": [
+   "romlab: write 02035b95=2/1 at 08013b22 (BN4's state at bn4_soul_thun's first Custom screen, its keys, `writes 02035B94 4`)",
+   "bn4_soul_thun: ai+0xA5 BN4 2 from t1 to t153, BN6 0; equal from t154, his charged shot"
+  ]
+ },
+ {
   "key": "ready clock",
   "name": "his ready state after the unison, BN4's two frames behind",
   "why": "After the unison BN4's MegaMan enters his ready state (6) at t2, BN6's (8) before the fight: its first wait (its phase +0x0A 0 until its count +0x20 runs out, its set-up byte +0x0B) runs in both, BN6's two of BN4's fight frames ahead at the spec's lag of 1. Each such field of his object is read against BN4's two frames on, while BN4's wait is not done and his state is the same then; from BN4's phase 4 (t11) both are compared as ever",

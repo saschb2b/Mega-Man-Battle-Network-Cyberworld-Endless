@@ -6,6 +6,11 @@ same state, from both games' code, and names it by its entry of tests/xdiff/legi
 there); a difference no rule reads stays the spec's. The rules check the numbers they read as one another, so a Soul's
 wrong turns, form, power attack, charge or level still parts:
 
+  held          the battle's other actors held through BN4's unison by its actors' runner (time stopped: BN4_TIME_STOP): its held
+                routine's first frame sets +0x18 to 4 and copies +0x36 and +0x3E to +0x30 and +0x32, kept after; BN6, crossing
+                before the fight, holds none
+  unison var    BN4's attack's variables' +5, 2 as it enters its unison (0x08013B1C-0x08013B22), BN6's crossing none: until his
+                next state, where his attack's power attack writes it in both
   unison        BN4's unison (family 0x0D) runs as his state on the fight's clock, its last frame the fight's first; BN6's
                 crossing ends before the fight. That frame's differences of MegaMan, his pending form, the unison's effect,
                 the run order and his panel; and its three sounds, begun before the fight, said at the frame after
@@ -31,6 +36,10 @@ PLAYER_SOULS = 0x78            # (xdiff_snap.PLAYER_SOULS: BN6's Souls block, si
 SOUL_ID, SOUL_TURNS = 0x00, 0x02   # (BN6_SOUL_ID, BN6_SOUL_TURNS: src/emu/bn6_forms.h)
 BN4_NAVI_FORM = 0x24           # (bn4.h BN4_NAVI_FORM: the battle NaviStats' form, the BN4 player block's +0x24)
 BN4_UNITE = 0x0D               # (bn4.h BN4_FAMILY_UNITE: MegaMan's state for the unison)
+READY4 = 6                     # (BN4's MegaMan's ready state: bn4_twins.GENERIC4's own first)
+HELD_FLAG, HELD = 0x18, 4      # (an actor's held routine, BN4 0x080104DC, BN6's twin 0x08016BFC: +0x18 4 on its first held frame,
+HELD_COPY, HELD_FROM = range(0x30, 0x34), 6   # ... +0x36 and +0x3E copied to +0x30 and +0x32)
+VARS5, UNISON_VAR5 = 0xA5, 2   # (his attack's variables' +5 at BN6's +0xA0 + 5; BN4's 2 as the unison begins, 0x08013B1C)
 UNISON_SOUNDS = (0x129, 0x157, 0x158)   # (its phase 0's, 0x080EBABE; the picture's, 0x080E369A; its phase 1's, 0x080EBB32)
 BN6_FORM_PROXY, BN6_FORM_NAME_BASE = 8, 0x1AB
 MEGAMAN = ('T1', 0x1A0)
@@ -109,6 +118,7 @@ class Souls4:
         self.names, self.forms, self.powers, self.frames = rules(), bn4_forms(), power_map(rom4), form_frames(rom4)
         self.a, self.b, self.lag = {f['t']: f for f in ta['frames']}, {f['t']: f for f in tb['frames']}, lag
         self.unison_last = None   # (BN4's last frame of its unison)
+        self.since_unison = False  # (BN4's MegaMan in no state but his ready one since it: unison var)
 
     @staticmethod
     def mm(fr):
@@ -129,12 +139,16 @@ class Souls4:
 
     def see(self, fa):
         """a frame of BN4's looked at, in order"""
+        o = self.mm(fa.fr)
         if self.in_unison(fa):
             self.unison_last = fa.fr['t']
+            self.since_unison = True
+        elif o is not None and o.rec[NODE + OBJ_ACTION] != READY4:
+            self.since_unison = False
 
     def mask(self, d, fa, fb):
         """the rule's name that reads d as the same state, None where none"""
-        for key, rule in (('unison', self.unison), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
+        for key, rule in (('unison', self.unison), ('held', self.held), ('unison var', self.unison_var), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
                           ('soul', self.soul), ('pending', self.pending), ('form frames', self.form_frames),
                           ('shots', self.shots), ('charge', self.charge)):
             if key in self.names and rule(d, fa, fb):
@@ -175,6 +189,25 @@ class Souls4:
         # (its sounds, begun before the fight, said at the frame after its last)
         return d.part == 'sounds' and self.unison_last is not None and fa.fr['t'] == self.unison_last + 1 and \
             isinstance(d.a, list) and set(d.a) <= set(UNISON_SOUNDS) and not d.b
+
+    def held(self, d, fa, fb):
+        if self.unison_last is None or not isinstance(d.role, tuple) or d.role[:2] == MEGAMAN or d.part != 'obj':
+            return False
+        oa = next((x for x in fa.fr['objs'] if x.role == d.role), None)
+        first = next((x for x in self.first_b() if x.role == d.role), None)
+        if oa is None or first is None:
+            return False
+        if d.off == HELD_FLAG:   # (at the unison's frame: held, BN4's 4 where BN6's runs it as ever)
+            return self.in_unison(fa) and d.a == HELD and d.b == first.rec[NODE + d.off]
+        # (its +0x30-+0x33 BN4's copies of its own +0x36-+0x39, BN6's as it began)
+        return d.off in HELD_COPY and oa.rec[NODE + d.off] == oa.rec[NODE + d.off + HELD_FROM] and d.b == first.rec[NODE + d.off]
+
+    def first_b(self):
+        return self.b[min(self.b)]['objs'] if self.b else []
+
+    def unison_var(self, d, fa, fb):
+        ai = self.ai_bytes(d, fa, fb)
+        return ai is not None and self.since_unison and d.off == VARS5 and ai[0][VARS5] == UNISON_VAR5 and ai[1][VARS5] == 0
 
     def ready(self, d, fa, fb):
         if self.unison_last is None or not (isinstance(d.role, tuple) and d.role[:2] == MEGAMAN) or d.part != 'obj' or d.off not in READY:

@@ -2080,7 +2080,9 @@ def spec_text(spec, out, game):
         (rng_twins() if spec.get('rng') == 'replay' and game == 'bn4:bn6' else []) + \
         [f'poke={p}' for p in (alignments(spec) if game == 'bn4:bn6' else []) + spec.get('poke', [])] + \
         [f'call={c}' for c in spec.get('call', [])] + \
-        (['film=' + ':'.join(str(x) for x in spec['film'])] if spec.get('film') else [])   # (pictures, as xdiff.py's)
+        (['film=' + ':'.join(str(x) for x in spec['film'])] if spec.get('film') else []) + \
+        ([f'state4={spec["state4"]}'] if spec.get('state4') else []) + \
+        [f'shot={g}:{n}:{f}:{path}' for g, n, f, path in spec.get('shots', [])]   # (pictures, as xdiff.py's; BN4's state for romlab)
     return ';'.join(parts + megaman_items(spec, game) + ([f'keys={keys}'] if keys else []) + (['safe=1'] if spec.get('safe') else []) + extra)
 
 
