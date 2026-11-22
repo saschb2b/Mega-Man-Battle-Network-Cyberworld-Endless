@@ -1,4 +1,4 @@
-"""Issue #774's forms screen: R on the PET's menu opens it, CROSSSELECT's
+"""Issue #774's forms screen: the PET menu's Forms (#793) opens it, CROSSSELECT's
 five on the left and the other Crosses held as spares. A sixth Cross won
 goes among the spares (BN6's first five held stay CROSSSELECT's); one
 swapped in from them is CROSSSELECT's in BN6's order, kept by the run
@@ -18,7 +18,7 @@ ARRIVE = [
 ]
 FORMS = [
     ('repeat', 'press START; wait 40', 'screen=pet', 6),
-    ('do', 'wait 20; press R; wait 40'),
+    ('do', 'wait 20; ' + 'press DOWN; wait 6; ' * 4 + 'press A; wait 40'),   # Forms, after MegaMan
     ('expect', 'screen=forms'),
 ]
 LEAVE = [('repeat', 'press B; wait 40', 'screen=map', 6)]

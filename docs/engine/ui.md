@@ -179,11 +179,15 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   chosen as NaviCust's quit opens.
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
-- BN6's own PET menu carries the one hint of ours on a screen of BN6's:
-  in the Net Square `R:NETPASS` at its band's right end, which BN6 leaves
+- BN6's own PET menu in the Net Square carries the one hint of ours on a
+  screen of BN6's: `R:NETPASS` at its band's right end, which BN6 leaves
   empty, R a key BN6 does not use there (`square_pet.c`,
-  [The PET in the Square](../online/square/pet.md)); in a run `R:FORMS`
-  in the same place, the forms screen's key (`pet_forms.c`).
+  [The PET in the Square](../online/square/pet.md)).
+- In a run the PET's start menu is ours ([The PET's start menu](../game/pet-menu.md)):
+  BN6's own menu laid out again in two columns of six, every piece BN6's
+  (its buttons from its label tiles, its icons, its panel cut into one strip,
+  PLACE's name on the band's stripe, EXIT under one line), the cursor lit and
+  EXIT pulsed by BN6 itself, its cursor set to ours.
 - The forms screen ([The forms screen](../game/meta/forms-screen.md)) is the
   folder editor's two windows side by side, CROSSSELECT's five and the
   spares, each row CROSSSELECT's own art from the ROM (in colour among the

@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T15:10:00Z
+* **New**: game/pet-menu.md (the PET's start menu of ours, issue #793: BN6's own menu laid out again in two columns from its own pieces, its list folded, BN6 run underneath; the owner's calls and the reviews). **Update**: game/index.md (its line), game/pet.md (Forms in the menu, R gone), game/meta/forms-screen.md (Where it opens), engine/ui.md (the start menu among Ours, R:FORMS gone), game/fidelity.md (the start menu, new row), code/director.md (pet_menu.c, pet_menu_frame.c), code/screens.md (Forms in the menu), GUIDE.md (the PET's menu, Forms in it).

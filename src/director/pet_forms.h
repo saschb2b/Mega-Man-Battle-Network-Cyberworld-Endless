@@ -14,15 +14,10 @@ void pet_forms_open(void);
 /* Each game frame: the five handed to CROSSSELECT (none marked again in
  * another run) */
 void pet_forms_update(void);
-/* The player's keys on the PET's menu: R opens the forms screen, the R
- * kept from the game (the caller's outside the Net Square, where R is the
- * NetPass's: square_pet.h) */
-uint32_t pet_forms_keys(uint32_t keys);
 /* The screen's course while it is up (forms_screen.h's): true while it holds the game */
 bool pet_forms_holds(void);
 bool pet_forms_shown(void);
-/* Over the game's picture: the screen while it is up, and R's hint at the
- * PET menu's band's right end while the menu takes input */
+/* Over the game's picture while it is up */
 void pet_forms_draw(void);
 /* The game's scene left: put away */
 void pet_forms_leave(void);

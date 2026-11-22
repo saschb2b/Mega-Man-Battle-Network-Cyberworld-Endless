@@ -14,10 +14,11 @@ OPTIONS = 'wait 60; press SELECT; wait 40'
 # (Lan's room at a new run: Dad's call paged, Lan free from about frame 530)
 TOWN = ['--scene', 'town', '--seed', '2']
 ROOM = 'wait 40; mash A 460; wait 30'
-# (the PET's menu: Folder, SubChip, Library, MegaMan, E-Mail, KeyItem, then
-# Comm's row, our Options in a run; Save says nothing in Lan's room)
+# (the PET's menu, ours over BN6's (#793): Down walks BN6's list folded in two
+# columns, Folder, SubChip, Library, MegaMan, Forms, E-Mail, KeyItem, then
+# Options in Comm's place; Up from the top is Save, which says nothing in Lan's room)
 PET = ROOM + '; press START; wait 40'
-PET_ROWS = ('folder', 'subchip', 'library', 'megaman', 'mail', 'keyitem', 'options')
+PET_ROWS = ('folder', 'subchip', 'library', 'megaman', 'forms', 'mail', 'keyitem', 'options')
 # (a layer: the arrival's words paged, then the run's opening gift picked,
 # its first offer; quiet keeps random battles off)
 NET = ['--scene', 'emu', '--dev', 'quiet']
@@ -49,8 +50,8 @@ ROUTES = {
     'room': (TOWN, ROOM, 'town'),
     'pet': (TOWN, PET, 'pet'),
     **{f'pet/{name}': (TOWN, pet_entry(row), screen) for row, (name, screen) in
-       enumerate(zip(PET_ROWS, ('folders', 'subchip', 'library', 'status', 'mail', 'keyitem', 'options-display')))},
-    'jukebox': (TOWN, pet_entry(5) + '; press DOWN; press RIGHT; wait 14; press A; wait 40', 'jukebox'),
+       enumerate(zip(PET_ROWS, ('folders', 'subchip', 'library', 'status', 'forms', 'mail', 'keyitem', 'options-display')))},
+    'jukebox': (TOWN, pet_entry(PET_ROWS.index('keyitem')) + '; press DOWN; press RIGHT; wait 14; press A; wait 40', 'jukebox'),
     'layer': (NET, LAYER, 'map'),
     'battle': (NET, LAYER + '; battle; wait 240', 'battle'),
     **{f'darkloid/{name}': (NET, LAYER + f'; foes {v1:X}@52; wait 200', 'battle') for name, v1 in DARKLOIDS.items()},
