@@ -472,8 +472,30 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await self.enter(b, 3)
         await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_vitals"] and crew_state(m)["where"][b.id] == SPEC["where_layer"])
         self.assertNotIn(b.id, self.server.crews.at)
+        # (v29: busy, a chat or the PET open on his layer: told so, still drawn)
+        await a.send(protocol.dive(where, SPEC["where_busy"]))
+        await self.until(b, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_vitals"] and crew_state(m)["where"][a.id] == SPEC["where_busy"])
         with self.assertRaises(protocol.ProtocolError):
-            protocol.read_dive(protocol.dive(where, 3))
+            protocol.read_dive(protocol.dive(where, 4))
+
+    async def test_a_full_crew_told_to_the_one_near(self):
+        """v29, issue #758: a diver in no crew near a crew of four is told once that it is full (CREW_STATE full, that
+        crew's members), so his game draws no "about to be" ring for it."""
+        a, b, c, d, e = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma", "Delta", "Echo")]
+        for client in (a, b, c, d, e):
+            await self.enter(client, 2)
+        for k, client in enumerate((a, b, c, d)):
+            await self.place(client, 20 * k)
+        await self.place(e, 4000)
+        await self.settled(lambda: len(self.crew_ids(a)) == 4)
+        await self.place(e, 40)
+        full = crew_state(await self.until(e, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_full"]))
+        self.assertEqual(sorted(full["members"]), sorted([a.id, b.id, c.id, d.id]))
+        self.assertNotIn(e.id, self.server.crews.of)
+        # (once: nothing more while he stands there)
+        for _ in range(40):
+            data = await e.receive()
+            self.assertFalse(data[0] == SPEC["crew_state"] and data[1] == SPEC["crew_full"])
 
     async def test_crews_across_a_portal_and_two_crews_met(self):
         a, b, c, d = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma", "Delta")]

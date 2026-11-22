@@ -613,13 +613,13 @@ static void dive_heard_crews_and_parties(void) {
 		c.m[0].session == 1 && c.m[1].session == 2 && !strcmp(c.m[1].name, "Beta") && c.m[1].hp == 120 && c.m[1].max_hp == 200 &&
 		c.m[1].depth == 3 && c.m[1].where == ONLINE_WHERE_HOME && !c.m[0].max_hp && c.m[0].where == ONLINE_WHERE_LAYER);
 	m[1] = ONLINE_CREW_VITALS; assert(dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c) && c.stage == ONLINE_CREW_VITALS);
-	m[1] = 8; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 3;
+	m[1] = ONLINE_CREW_FULL; assert(dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 9; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 3;
 	m[7 + ONLINE_CREW_MEMBER_BYTES + 21] = 201; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 21] = 120;   /* (HP past his max) */
 	m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 24] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 24] = 0;   /* (a layer past the members) */
-	m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 3; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 1;   /* (a where past battle) */
+	m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 4; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 1;   /* (a where past busy) */
 	m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 25] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 25] = 0;   /* (a where past the members) */
 	uint8_t wh[ONLINE_DIVE_WHERE_BYTES];
-	assert(dive_wire_where(wh, ONLINE_WHERE_HOME) == sizeof wh && wh[0] == ONLINE_DIVE && wh[1] == ONLINE_DIVE_WHERE && wh[2] == 1 && !dive_wire_where(wh, 3));
+	assert(dive_wire_where(wh, ONLINE_WHERE_HOME) == sizeof wh && wh[0] == ONLINE_DIVE && wh[1] == ONLINE_DIVE_WHERE && wh[2] == 1 && !dive_wire_where(wh, 4) && dive_wire_where(wh, ONLINE_WHERE_BUSY));
 	uint8_t v[ONLINE_DIVE_VITALS_BYTES];
 	static const uint8_t vitals[] = { ONLINE_DIVE, ONLINE_DIVE_VITALS, 0, 120, 0, 200 };
 	assert(dive_wire_vitals(v, 120, 200) == sizeof v && !memcmp(v, vitals, sizeof v) && !dive_wire_vitals(v, 201, 200) && !dive_wire_vitals(v, 0, 0) &&

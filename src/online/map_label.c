@@ -1,6 +1,7 @@
 /* map_label.h. Moved out of online_labels.c (the shared dive's name tags,
  * issue #712). */
 #include "map_label.h"
+#include "pet_look.h"
 
 #include "bn6.h"
 #include "bn6_fields.h"
@@ -48,4 +49,9 @@ int map_label_plate(int px, int py, const char *text, SDL_Color colour) {
 	fill_rect(P.core_x + x - w / 2 - 2, P.core_y + py - 1, w + 4, MAP_LABEL_ROW - 1, rgba(9, 24, 42, 210));
 	pixfont_draw(P.core_x + x, P.core_y + py, text, colour, BLACK, PIXFONT_CENTER, 1);
 	return x;
+}
+
+void map_label_cursor(int px, int py) {
+	/* (the PET's own cursor, pointing at him from his left) */
+	look_cursor(P.core_x + px - 14, P.core_y + py);
 }
