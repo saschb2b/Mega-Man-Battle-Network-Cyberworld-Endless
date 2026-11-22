@@ -63,6 +63,7 @@ layer:        formats core.base core.data core emu net map
 world:        formats core.base core.data core emu net map layer
 jukebox:      formats core.base audio gfx
 library:      formats core.base core.data core audio gfx
+forms:        formats core.base core.data core audio gfx
 core.options: formats core.base emu audio gfx analytics update discord
 director:     *
 online:       formats core.base core.data core emu net audio gfx analytics map layer jukebox library director

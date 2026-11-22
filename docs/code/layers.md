@@ -3,7 +3,7 @@ type: Measurement
 title: "The code's layers"
 description: "Which part of `src/` may include which: the dependencies between its folders measured (`tools/layers.py`), the intended order as 27 units lowest first (`tests/lint/layers.txt`), the rule `build.py lint` holds with a baseline that only shrinks, how to fix a violation, what the six widest headers' includers use of them, the files a tool writes, the first ten cuts and the numbers a release records."
 tags: [code, lint, architecture, process]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T21:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:10:00Z }
 sources:
   - { id: measure, title: "python3 tools/layers.py and its --cuts, --uses and --generated on dev at 2744367e (12 November 2026)", resource: "tools/layers.py" }
   - { id: rule, title: "tests/lint/layers.txt, the units and what each may include; tests/lint/layer_violations.txt, the includes it does not allow as they stood", resource: "tests/lint/layers.txt, tests/lint/layer_violations.txt" }
@@ -104,6 +104,7 @@ names, and a line names only units above it:
 | `world` | The real world and the town | 31 | the same, and `layer` |
 | `jukebox` | The Jukebox | 6 | `formats` `core.base` `audio` `gfx` |
 | `library` | The Library | 6 | `formats` `core.base` `core.data` `core` `audio` `gfx` |
+| `forms` | The forms screen | 6 | `formats` `core.base` `core.data` `core` `audio` `gfx` |
 | `core.options` | Options and its panels | 15 | `formats` `core.base` `emu` `audio` `gfx` `analytics` `update` `discord` |
 | `director` | The run on the game | 163 | everything above this line |
 | `online` | Online play's client | 201 | everything above the director's line but `world` and `core.options`, and `director` |
