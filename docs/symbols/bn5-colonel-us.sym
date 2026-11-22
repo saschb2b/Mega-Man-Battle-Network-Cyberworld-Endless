@@ -295,7 +295,9 @@
 0800F486 obstacle_gate_leaves_alone
 0800F660 chaos_unison_power_attacks
 0800F6A6 family_0x3c
+0800F7FC family_0x42
 0800F840 family_0x44
+0800F9A0 his_b_left_0x25
 0800FA2C emotion_window_faces_none_team_colonel
 0800FAFE setup_0x3e_navis_buster
 0800FE6A chip_numbers_written_for_attack
@@ -345,6 +347,7 @@
 08012464 BN5_TURN_END
 08012484 BN5_TURN_COUNT
 080124A6 ai_data_0x32_his_chip_7
+080124C8 by_routines_table_0x080ec818_sub_family
 08012530 soul_chips.empty_power_attacks_name_charge_time_3
 080125FA his_lava_step
 080126EA push_r4_r6_r7_lr
@@ -431,6 +434,7 @@
 080171AC from_bn5_panel_arrived
 080171E0 under_effect_0x63_spawned
 0801720E BN5_MAGNET_ARRIVED
+08017222 form_5
 080172F0 his_state_0
 080172F6 his_set_up_past_ai_data
 080178E4 bn5_darkinvs_bn6.twin
@@ -871,6 +875,8 @@
 080CBEF6 BN5_CLOUD_PANEL
 080CBFBC BN5_CLOUD_FIND_37
 080CC2A2 BN5_NAPALM_PANEL_FLAMES
+080CD3C1 team_protoman_souls_3
+080CD466 by_spawner
 080CEFCC kinds_bn5
 080CF118 state_table_bn5
 080CF37E spawner_bn5
@@ -882,6 +888,7 @@
 080D1F86 called_by_0x5f
 080D3828 BN5_COSMO_SPAWN_6C
 080D3964 BN5_COSMO_SPAWN_6D
+080D4C49 team_protoman_souls_4
 080D56E0 BN5_COSMO_SPAWN_79
 080D951C football_burst_effect_id
 080DB608 find_kept_as_battle_is_won
@@ -942,6 +949,7 @@
 080EC400 support_family
 080EC448 bn6_chip_writer_chip_routine_attack
 080EC450 support_family_word_for_them
+080EC7DE team_protoman_souls_5
 080EC818 misc_family_subfamilies
 080ECE2F bn5_last_chips_6
 080ECE5C bn5_last_chips_7
@@ -953,9 +961,10 @@
 080EE783 chaos_unison_4
 080EE7E5 battle_0x32_bit_4
 080EEA40 flash_image_object_kind_0x22_sprite
+080EEC86 magnetsoul_charged_shot_0x15_0x0800f7fc_family
 080EEE82 his_charged_shot_power_attack_0x19
 080EF270 bn5_darkinvs_bn6_5
-080EF38A team_protoman_souls_3
+080EF38A team_protoman_souls_6
 080EF548 bn5_chips_code.mrkcan
 080F0436 release_consumer
 080F04CC idle_states
