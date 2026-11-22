@@ -7,6 +7,7 @@
 #include <SDL.h>
 
 #include "dive_comings.h"
+#include "dive_crew_recent.h"
 #include "dive_crew_view.h"
 #include "dive_join.h"
 #include "online_transport.h"
@@ -16,6 +17,7 @@ static CrewState C;           /* the crew as the server last said (count 0 alone
 void dive_crew_reset(void) {
 	memset(&C, 0, sizeof C);
 	dive_comings_reset();
+	dive_crew_recent_reset();
 }
 
 int dive_crew_count(void) { return C.count; }
@@ -62,12 +64,14 @@ void dive_crew_mail(const uint8_t *m, size_t n) {
 		bool changed = c.count != C.count;
 		for (int k = 0; !changed && k < c.count; ++k) changed = c.m[k].session != C.m[k].session;
 		dive_comings_crew(&C, &c, me(), SDL_GetTicks());
+		dive_crew_recent_note(&C, &c, me(), SDL_GetTicks());
 		C = c;
 		if (changed) log_crew("now", &C);
 	} else if (c.stage == ONLINE_CREW_SPLIT_UP && C.count) {
 		CrewState none;
 		memset(&none, 0, sizeof none);
 		dive_comings_crew(&C, &none, me(), SDL_GetTicks());
+		dive_crew_recent_note(&C, &none, me(), SDL_GetTicks());
 		C = none;
 		log_crew("none", &C);
 	}
