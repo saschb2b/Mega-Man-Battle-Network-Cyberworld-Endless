@@ -15,7 +15,7 @@
 #include <stdint.h>
 
 #define SOUL_BN4_FIRST 13   /* BN6's Soul number (BN6_SOUL_ID, the element's +BN6_ELEMENT_SOUL, a used bit) of BN4's first moved */
-#define SOULS_BN4      1    /* BN4's Souls moved: ThunSoul (BN4's 6) */
+#define SOULS_BN4      2    /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2) */
 #define SOULS_HELD_BN4 6    /* the bit of the first in the Souls held (soulunite_held), past BN5's six */
 
 /* A BN4 Soul's rows as BN6's engine takes them, read from BN4's ROM */
@@ -34,6 +34,13 @@ typedef struct {
 bool soulbn4_read(int k, SoulBn4 *out);
 /* k of BN6's Soul number `soul`, -1 for none of BN4's */
 int soulbn4_k(int soul);
+/* (a hook's, MegaMan `obj` entering the proxy form with BN4's k-th Soul)
+ * what BN4's routine as the form is taken does (BN4_FORM_ENTERS) where it
+ * is moved: GutsSoul's pass of his side's hand, +30 to the bonus of each
+ * chip up next of no kind or panel-cracking whose power shows (BN4_GUTS_PASS,
+ * its numbers read from BN4's code; BN4's hand's +0x26 on, BN6's
+ * BN6_HAND_BONUS: the attack's +6 beside its power at +8 in both) */
+void soulbn4_enter(uint32_t obj, int k);
 /* BN4's Souls a run holds, bit n - 1 its Soul n by BN4's numbers (its forms,
  * src/director/souls.h souls_held_bn4), as the engine's bits of them in the
  * mask soulunite_held takes (from SOULS_HELD_BN4, by k): the moved ones

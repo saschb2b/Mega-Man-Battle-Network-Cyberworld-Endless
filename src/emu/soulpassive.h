@@ -20,7 +20,7 @@
 /* (soulbreak's passives, tests/xdiff/mutations.json; from 0x08 ColonelSoul's, soulcolonel.h) */
 enum {
 	SOULPASSIVE_BREAK_HAND = 1,    /* NumberSoul's hand of 9 where BN5 deals 10 */
-	SOULPASSIVE_BREAK_PLUS = 2,    /* NumberSoul's +10 to plain attack chips left out */
+	SOULPASSIVE_BREAK_PLUS = 2,    /* NumberSoul's +10 to plain attack chips left out, and BN4's GutsSoul's +30 (soulbn4.c) */
 	SOULPASSIVE_BREAK_READY = 4,   /* a Soul's passives as it unites left out (ShadowSoul's FloatShoe) */
 };
 
@@ -35,5 +35,7 @@ bool soulpassive_install(int breaks);
  * HeatCross's). BN5's 0x0800D0A0: NumberSoul +10 to an attack chip of no
  * kind; the other Souls none. */
 bool soulpassive_bonus(uint32_t obj, int chip, int *bonus, int *look);
+/* the passives' break bits the install took (SOULPASSIVE_BREAK_*), 0 none: BN4's Souls' passives read them too */
+int soulpassive_breaks(void);
 
 #endif

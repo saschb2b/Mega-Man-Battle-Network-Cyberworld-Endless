@@ -1,0 +1,28 @@
+[
+ {
+  "name": "GutsSoul's charge 10 frames longer",
+  "spec": "bn4_soul_guts",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 110 frames for his grown power attack where BN4_CHARGE_TIMES' row of 0x24 holds 100 at every Charge: B held 102 frames fires the plain buster, not the punch"
+ },
+ {
+  "name": "GutsSoul's punch's damage another",
+  "spec": "bn4_soul_guts",
+  "poke": [
+   "0800CF76:2078"
+  ],
+  "what": "the power attack's copy (BN4 0x0800CF62, moved with family 0x12's unit) with its movs r0,#0x3c (the attack's damage at its +8, 60) made #0x78: the Mettaur loses 120, not 60"
+ },
+ {
+  "name": "GutsSoul's hand pass left out",
+  "spec": "bn4_soul_guts",
+  "soulbreak": 512,
+  "what": "the passives' break SOULPASSIVE_BREAK_PLUS leaves his entering's pass out (src/emu/soulbn4.c soulbn4_enter): PanlSht1's bonus 0 where BN4's hand gives it 30, the attack's +6 and the Mettaur's HP after it"
+ },
+ {
+  "name": "GutsSoul drawn as another Soul",
+  "spec": "bn4_soul_guts",
+  "soulbreak": 1,
+  "what": "the sprite's hook gives BN5's first Soul's sprite (list 0 number 0x45) where the room's is his: his sprite's address another"
+ }
+]

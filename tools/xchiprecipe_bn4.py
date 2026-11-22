@@ -65,6 +65,7 @@ STATES4, NSTATES4 = 0x080EAEFC, 116   # BN4_PLAYER_STATES, BN4_PLAYER_STATE_COUN
 ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 # BN4's family -> its number, fixed for good as a unit is written (a saved state's CurAction names it), in the units' order
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
+                  0x12: 0xD8,   # (BN4's Souls' own families from 0xD8, docs/project/claims/bn4-souls.json)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -120,7 +121,7 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 # block of its own, its return given the unit's number (POWER_RETURN); the Souls' engine runs it from BN6's grown power
 # attacks (src/emu/soulbn4.c, xchips_bn4_moved_at). By BN4's family: (the power attack's id, its Soul)
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
-SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),)}
+SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),)}
 # BN4's computed powers (a chip's power of 1000 and up: the routine by power - 1000 in BN4_CHIP_POWERS, bn4.h) moved into
 # BN6's grown table (XC_POWERS, src/emu/xchips_code.h) at POWER4_FIRST + the entry, past BN5's (0x80-0xCB): a unit of kind
 # 'power' copies the routines, the installer points their entries at the copies (xchips_code.c powers4_stage) and a moved
@@ -302,6 +303,7 @@ UNITS = (
     ('attack', 0x59, 'MagBolt'),
     ('attack', 0x62, 'PropBom'),
     ('attack', 0x47, 'ThunSoul'),
+    ('attack', 0x12, 'GutsSoul'),
     ('attack', 0x09, 'SeekBom'),
     ('misc', 0x11, 'Meteors'),
     ('support', 0x11, 'TimeBomb'),
@@ -423,14 +425,15 @@ TABLES = {
                          "copied with the unit, three rows"),
     # (the arm, BN4_T3_02_KINDS: tools/bn4_twins.py TABLES has it with Roll's kind; here the kinds the chips' states spawn,
     # each state's own bytes of them by subfamily read by hand, a row's sprite its list's offset and its number)
-    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C, 0x31, 0x11, 0x1D), sprite=(0, 1), list=None, loads={0x080CD628},
+    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C, 0x31, 0x11, 0x1D, 0x05), sprite=(0, 1), list=None, loads={0x080CD628},
                      why="the arm's kinds (the third kind's 0x02: 53 of 4 bytes, its sprite's list offset and number, its "
                          "palette, its +0xC), read by its init (0x080CD61E, by +4); the spread state spawns 0x0A, 0x06, 0x0E "
                          "and 0x32 by subfamily (its bytes at 0x080EC814), FlmLine's 0x0C (0x080ECAF6), MagBolt's 0x23 + its "
                          "subfamily, 0x23 again for MagShok's 3 (0x080EE05E-0x080EE068), the Elem chips' 0x2C (0x080EE35A: movs r4,#0x2c, "
                          "its high byte from NaviStats +0x23), DrkVulcn's 0x31 (0x080EC88E: movs r1,#0x31 for its subfamily 4), DarkBomb's 0x11 (the bombs' state's table "
                          "by subfamily, 0x080EB4EC, its subfamily 2's), SandRing's state's 0x1D (0x080EDCAC: movs r4,#0x1d, its high "
-                         "byte from NaviStats +0x23; ThunSoul's charged shot, his buster's flash where the attack's +0xC is not 3)"),
+                         "byte from NaviStats +0x23; ThunSoul's charged shot, his buster's flash where the attack's +0xC is not 3), and GutsSoul's punch's 0x05 (0x080EBF9A: "
+                         "movs r4,#5, family 0x12's first frame)"),
     0x080DF674: dict(size=0x18, entry=12, kinds=(0, 1), sprite=(0, 1), list=3, loads={0x080DF6C4}, sound=(0x0A, {0x080DF762}),
                      why="the geyser's and the tower's rows (the third kind's 0x92, AquaUp's and GreenWd's strike: 12 bytes each, its "
                          "sprite's list's offset and number, three animations with their frames, its collision's argument, and at "
@@ -461,6 +464,13 @@ ROW_TABLES = {
                          "0x080CE270 by the same kind): DarkBomb's bomb is kind 6, 0x2B; the others' none (0), left BN4's"),
     # (a table whose rows name a sound alone, `effect` None; `queue` where that sound's slot is past a byte (SOUND_SLOTS): the
     # sites that play it by the row's byte called through the unit's shim that gives r0 the slot, every kind moved its one sound)
+    0x080D0A60: dict(size=0x12, entry=6, kinds=(), effect=None, sound=4, effect_sites=set(), sound_sites={0x080D0B1A},
+                     why="the punch's kinds (the third kind's 0x1E, family 0x12's hit object: 3 of 6 bytes, its speed, its count, "
+                         "its animation, its collision's argument, its sound, a flag), read by its init (0x080D0AA8-0x080D0AB0, by "
+                         "+4, the row kept at its +0x60) and its sound played from the row's +4 (0x080D0B18-0x080D0B1A). Family "
+                         "0x12 spawns it where the attack's +3 is not 0 (0x080EBFD2-0x080EBFEA): no chip record names the family, "
+                         "and GutsSoul's power attack 0x24 writes +3 0 (0x0800CF68), so his charged shot strikes through the "
+                         "generic hit (0x080CD7E2) and never spawns it: every row left BN4's"),
     0x080DAFB0: dict(size=12, entry=3, kinds=(0,), effect=None, sound=2, effect_sites=set(), sound_sites={0x080DB05C}, queue=True,
                      why="the ring's kinds (the third kind's 0x6D: 4 of 3 bytes, its speed, a flag, its sound), read by its init "
                          "(0x080DB01A, by +4), the state passing the attack's +0xC (0x080EDCE2): ThunSoul's charged shot kind 0 "
@@ -579,6 +589,10 @@ IMMS = {
     0x080C855A: dict(form='THUMB_MOVS', rd=7, rn=0, was=0x21, now=0x61,
                      why="its punch's hit's bits (the collision region's r7): struck and pushed is bit 0x01 with a push bit in BN4 "
                          "(BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED)"),
+    # GutsSoul's charged shot, a punch struck and pushed back a panel (family 0x12's region, r7 of BN4's 0x080CD7E2 there)
+    0x080EBFDE: dict(form='THUMB_MOVS', rd=7, rn=0, was=0x21, now=0x61,
+                     why="his punch's hit's bits (the collision region's r7): struck and pushed is bit 0x01 with a push bit in BN4 "
+                         "(BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED), GutPnch's row's"),
 }
 # A routine of BN4's the project pairs with BN6's own for the families (tools/bn4_twins.py TWINS) that a chip's unit moves
 # instead, with the object type it spawns: BN6's own object draws BN6's art, which a family's rule allows by its foe and a
