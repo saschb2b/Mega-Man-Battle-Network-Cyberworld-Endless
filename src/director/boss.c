@@ -212,6 +212,14 @@ void boss_bracket_describe(FILE *f) {
 		B.round > 2 ? "won" : B.state == B_BRACKET ? "screen" : B.state > B_ENTER ? "round" : B.door_taken ? "door" : "ahead", B.round + 1, guardian(B.foe)->name, held);
 }
 
+static struct { int n, hp_per, steps; } dev_party = { 0, -1, -1 };
+
+void boss_party_dev(int n, int hp_per, int steps) {
+	dev_party.n = n;
+	dev_party.hp_per = hp_per;
+	dev_party.steps = steps;
+}
+
 void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
 	B.archive = archive;
 	B.g = *g;
@@ -221,7 +229,7 @@ void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
 		fprintf(stderr, "guardian %d at %d %d, arena entered along %d, MegaMan meets him at %d %d facing %d\n", g->navi, g->x, g->y,
 			layer.arena_dir, g->stand_x, g->stand_y, g->stand_face);
 	B.door = B.door_taken = false;
-	B.party = 1;
+	B.party = dev_party.n > 0 ? dev_party.n : 1;
 	emu_encounters_hold(false);
 	round_set(g->bracket ? 0 : 2);
 	to(g->navi ? B_WAIT : B_NONE);
@@ -306,12 +314,14 @@ static void reward_taught(void) {
  * versions go (`most`); past them his HP alone grows (party_hp) */
 static int party_version(int version, int most) {
 	int steps = B.party >= 3 ? 2 : B.party == 2 ? 1 : 0;
+	if (dev_party.steps >= 0 && B.party > 1) steps = dev_party.steps;
 	if (B.g.bracket || super_boss(B.foe)) return version;
 	return version + steps < most ? version + steps : most - 1;
 }
 
 static int party_hp(int hp) {
 	long n = (long)hp * (B.party > 1 ? B.party : 1);
+	if (dev_party.hp_per >= 0) n = (long)hp * (100 + dev_party.hp_per * (B.party > 1 ? B.party - 1 : 0)) / 100;
 	return n > PARTY_HP_MOST ? PARTY_HP_MOST : (int)n;
 }
 

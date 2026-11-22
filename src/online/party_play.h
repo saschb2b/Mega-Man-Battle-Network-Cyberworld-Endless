@@ -30,7 +30,7 @@
 /* The fight taken over from the staging (dev's partycore, or a party's
  * START): on or off */
 void party_play_on(bool on);
-/* --dev partycore=N (2-4; partytwin, partyroll, partyend): every guardian's
+/* --dev partycore=N (1-4, one the dev's solo on the same field and bot; partytwin, partyroll, partyend): every guardian's
  * fight on the party's core, the partners scripted; partybot=1 my keys in
  * a party's fight a bot's, as the Arena's arenaboth (the Custom screen's OK,
  * then charged shots); partyroll=W over the server the rollback window,
@@ -40,8 +40,10 @@ void party_play_on(bool on);
  * partydel=MASK with partyend those seats' MegaMen deleted then (a crew's
  * pull-back's test, issue #718); partyhp=N under partycore the stood-in
  * partners' HP going in (a partner's own HP told from his lead's, issue
- * #757) */
-typedef struct { int n, twin, roll, end, bot, delay, lead, view, del, hp; } PartyDev;
+ * #757); partyscale=1 every guardian scaled for N as a party's door scales
+ * him, partyhpper=P and partysteps=S other rules for it (boss_party_dev,
+ * tools/party_guardian.py) */
+typedef struct { int n, twin, roll, end, bot, delay, lead, view, del, hp, scale, hp_per, steps; } PartyDev;
 void party_play_dev(const PartyDev *d);
 /* The dive's party battle START: its battle id, my seat, the party's
  * size, the input delay and the seats' sessions (each MegaMan's name on

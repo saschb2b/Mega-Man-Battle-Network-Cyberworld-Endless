@@ -1,9 +1,0 @@
-{
-  "branch": "party-guardian-scale",
-  "what": "The shared dive: a party's guardian per head against going alone, measured (issue #754, from the friction hunt of 21 November 2026)",
-  "takes": {},
-  "units": [
-    "shared dive: a party's guardian per head against going alone (#754)"
-  ],
-  "run": false
-}
