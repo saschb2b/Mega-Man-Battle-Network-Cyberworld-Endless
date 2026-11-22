@@ -6,6 +6,7 @@
 #include "devtools.h"
 #include "discord.h"
 #include "discord_game.h"
+#include "dive_people.h"
 #include "game.h"
 #include "network_prefs.h"
 #include "saves_cloud.h"
@@ -20,4 +21,6 @@ void start_net(bool headless, bool plain) {
 	transfer_link_set(online_transfer_link(url));
 	cloud_link_set(online_cloud_link(url));
 	saves_cloud_start();
+	/* (a dive's layers with little room for the divers: dive_people.h) */
+	if (dev.dive_room > 0) dive_people_dev_room(dev.dive_room);
 }
