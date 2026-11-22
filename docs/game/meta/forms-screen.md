@@ -3,7 +3,7 @@ type: Design
 title: "The forms screen"
 description: "The forms screen (issue #774): a PET screen of ours that lists the run's Crosses in BN6's folder editor's two windows, CROSSSELECT's five and the spares, swapped freely at no cost, and the run's Souls with their kind; CROSSSELECT then lists the five in BN6's order."
 tags: [game, meta, pet, ui]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:10:00Z }
 sources:
   - id: issue-774
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/774"

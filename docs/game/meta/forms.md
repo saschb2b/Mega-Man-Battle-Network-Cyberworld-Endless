@@ -3,7 +3,7 @@ type: Design
 title: "MegaMan's forms"
 description: "MegaMan's form for a run (issue #774): CROSS, SOUL BN5 or SOUL BN4, one system a run, chosen on the setup's FORM row; every guardian pays in the run's form by his kind, else a power the run lacks; the Soul forms opened by their games' Navis; one power brought; SoulT+1 in place of BeastOut; the week's form."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:35:44Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T14:30:59Z }
 ---
 
 # MegaMan's forms (22 November 2026, issue #774)
