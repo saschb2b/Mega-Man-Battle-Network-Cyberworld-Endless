@@ -80,6 +80,8 @@ typedef struct {
 	int ndschips;
 	int hold;                                  /* (a chip's spec) the foes kept paralysed this many frames from each fight frame on, the chip's
 	                                              target holding still in both games; 0 none */
+	int hide;                                  /* the foes flashing this many frames from the fight's first frame (the Invis chip's
+	                                              status, xdiff.c hide_step): a hidden foe for SearchSoul's ready; 0 none */
 	struct { uint8_t col, row, type; } panels[MAX_PANELS];   /* (panels=) panels given a type in each game as its fight begins: a
 	                                              panel chip's spec (AquaUp's cracked, GreenWd's grass), the type's number the same in BN4,
 	                                              BN5 and BN6 for the ones a spec names (bn4.h's panel types) */

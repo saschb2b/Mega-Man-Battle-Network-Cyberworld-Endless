@@ -206,6 +206,8 @@ def megaman_items(spec):
         parts.append('dschips=' + ','.join(spec['dschips']))
     if spec.get('hold'):
         parts.append(f'hold={spec["hold"]}')
+    if spec.get('hide'):
+        parts.append(f'hide={spec["hide"]}')
     if spec.get('kind') == 'reference':
         parts.append('game=bn5')
     if spec.get('kind') == 'engine':

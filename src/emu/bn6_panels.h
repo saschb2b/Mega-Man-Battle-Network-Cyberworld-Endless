@@ -194,6 +194,9 @@
 #define BN6_OBJ_IMMOBILIZED   0x4000      /* BN6_COLL_FLAGS: it cannot move (bn6f OBJECT_FLAGS_IMMOBILIZED) */
 #define BN6_OBJ_FLOATS        0x20        /* BN6_COLL_FLAGS: it floats (bn6f OBJECT_FLAGS_FLOATSHOE) */
 #define BN6_SEA_HOLD          0x14        /* the frames BN5's sea holds it (movs r0,#0x14 at 0x080171D4) */
+#define BN6_OBJ_FLASHING      0x02        /* BN6_COLL_FLAGS: flashing, BN6_COLL_FLASH frames: the Invis chip's status (0x08010474, sound 0x93; BN5's
+                                             0x0800E17C, BN5_COLL_FLASH), which SearchSoul's ready (the fourth kind's 0x8F, 0x080EB5E4) finds on
+                                             the other side with 0x200 and clears */
 #define BN6_OBJ_HIDDEN        0x04        /* BN6_COLL_FLAGS: invisible (BN5's 0x80000004 the invisible and the submerged) */
 #define BN6_COLL_INVISIBLE    0x26        /* u16 the invisibility's frames, 0xFFFF for ever (BN4_COLL_INVISIBLE, +0x1A) */
 #define BN6_INVISIBLE_STEP    0x08010162u /* its timer, from the status step (0x0801B12E): BN4_INVISIBLE_STEP's twin, sound 0x94 */
