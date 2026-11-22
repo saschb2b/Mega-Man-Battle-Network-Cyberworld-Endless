@@ -104,6 +104,7 @@ names, and a line names only units above it:
 | `world` | The real world and the town | 31 | the same, and `layer` |
 | `jukebox` | The Jukebox | 6 | `formats` `core.base` `audio` `gfx` |
 | `library` | The Library | 6 | `formats` `core.base` `core.data` `core` `audio` `gfx` |
+| `forms` | The forms screen | 6 | `formats` `core.base` `core.data` `core` `audio` `gfx` |
 | `core.options` | Options and its panels | 15 | `formats` `core.base` `emu` `audio` `gfx` `analytics` `update` `discord` |
 | `director` | The run on the game | 163 | everything above this line |
 | `online` | Online play's client | 201 | everything above the director's line but `world` and `core.options`, and `director` |
