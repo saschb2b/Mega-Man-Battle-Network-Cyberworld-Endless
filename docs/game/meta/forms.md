@@ -116,8 +116,9 @@ has every game's ROM, which the Deep Net's dive asks.
   SOUL BN5's list until their branch moves them ([Team ProtoMan](../team-protoman.md)), so HeatMan
   pays one of Team Colonel's there today; BN4's twelve come one by one
   (ThunSoul alone now, [BN4's Souls on BN6's proxy form](../../multirom/bn4-souls.md)),
-  and a SOUL BN4 run's Souls reach BN6's engine through
-  `soulunite_held_bn4` (bn4-souls, PR #792).
+  and a SOUL BN4 run's Souls reach UNITE beside BN5's
+  (`soulunite_bn4_bits`, `encounter.c`): ThunSoul, won from a guardian, unites
+  in the next battle (`tests/scenarios/forms.py`).
 - **The flag.** `--dev forms` stays until every Soul has landed; the
   orchestrating session switches it on for good.
 

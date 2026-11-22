@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T14:30:59Z
+* **Update**: game/meta/forms.md (a SOUL BN4 run's Souls reach UNITE through `soulunite_bn4_bits`; ThunSoul won from a guardian unites in the next battle, a scenario's step).
