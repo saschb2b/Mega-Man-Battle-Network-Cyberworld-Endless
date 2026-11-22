@@ -55,6 +55,7 @@ class Queue:
     def __init__(self, room):
         self.key = room.key
         self.members = []       # player ids, the leader first
+        self.flared = set()     # divers told of this door already: one flare a door each (issue #778)
 
 
 class Battle:
@@ -145,7 +146,7 @@ class Parties:
         queue.members.append(player.id)
         self.in_queue[player.id] = room.key
         self.send_queue(queue)
-        self.server.dive.flare(player, room, queued=queue.members)
+        queue.flared |= self.server.dive.flare(player, room, skip=set(queue.members) | queue.flared)
 
     def leave(self, player_id, told=True):
         key = self.in_queue.pop(player_id, None)

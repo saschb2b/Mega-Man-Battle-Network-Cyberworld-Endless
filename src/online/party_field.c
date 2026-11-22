@@ -174,6 +174,8 @@ static void dev_end(const PartyField *f, uint32_t tick) {
 /* side 0's copy (r0 0): each partner's keys into his AI data as the copy
  * writes the player's */
 
+static void trade(unsigned k);
+
 static HookAct keys(HookRegs *r, void *user) {
 	PartyField *f = user;
 	if (r->r[0] != 0 || f->standing < 1) return HOOK_CONTINUE;
@@ -188,7 +190,7 @@ static HookAct keys(HookRegs *r, void *user) {
 		uint32_t obj = actor(0, k);
 		uint32_t ai = obj ? hook_read32(obj + BN6_T1_AI_DATA) : 0;
 		if (!ai) continue;
-		uint16_t key = (uint16_t)((f->scripted ? scripted(k, tick) : f->keys[k] & (f->own ? OWN_KEYS : PARTNER_KEYS)) | BN6_KEYS_VALID);
+		uint16_t key = (uint16_t)((f->still ? 0 : f->scripted ? scripted(k, tick) : f->keys[k] & (f->own ? OWN_KEYS : PARTNER_KEYS)) | BN6_KEYS_VALID);
 		uint16_t held = hook_read16(ai + BN6_AI_HELD);
 		hook_write16(ai + BN6_AI_LAST, held);
 		hook_write16(ai + BN6_AI_HELD, key);
@@ -196,6 +198,8 @@ static HookAct keys(HookRegs *r, void *user) {
 		hook_write16(ai + BN6_AI_UP, (uint16_t)(~key & held));
 	}
 	if (tick == 1) first_iteration(f);
+	/* (the viruses' bench: the lead's slot and partner 1's traded for good at this iteration, issue #777) */
+	if (f->swap_at > 0 && tick == (uint32_t)f->swap_at && f->standing > 1) trade(1);
 	if (f->own) hands_watch(f, tick);
 	if (f->end > 0) dev_end(f, tick);
 	watch(f, tick);
@@ -229,6 +233,7 @@ static unsigned aimed(const PartyField *f) {
 	return n ? up[(f->tick / AIM_TURN) % n] : 0;
 }
 
+
 /* an object's routine about to run (r5 the object): one of side 1's sees the MegaMan in turn in side 0's first slot */
 static HookAct logic_in(HookRegs *r, void *user) {
 	PartyField *f = user;
@@ -259,15 +264,19 @@ bool party_field_hooks(HookCore *core, PartyField *f) {
 }
 
 
-void party_field_install(int n, int hp, int end) {
+void party_field_install(int n, int hp, int end, int aim, int swap_at) {
 	static PartyField spike;
 	static bool done;
 	spike.n = n < 1 ? 1 : n > PARTY_MOST ? PARTY_MOST : n;
 	spike.scripted = true;
 	spike.hp_set = hp;
 	spike.end = end;
+	spike.spread = aim & 1;
+	spike.still = (aim & 2) != 0;
+	spike.swap_at = swap_at;
 	if (done) return;
 	done = true;
-	if (!emu_hook(BN6_SPAWN_ENTITIES, spawn, &spike) || !emu_hook(BN6_KEY_COPY, keys, &spike))
+	if (!emu_hook(BN6_SPAWN_ENTITIES, spawn, &spike) || !emu_hook(BN6_KEY_COPY, keys, &spike) ||
+		((aim & 1) && (!emu_hook(BN6_OBJECT_LOGIC_CALL, logic_in, &spike) || !emu_hook(BN6_OBJECT_LOGIC_BACK, logic_back, &spike))))
 		printf("party: the hooks (%08X, %08X) not taken\n", BN6_SPAWN_ENTITIES, BN6_KEY_COPY);
 }

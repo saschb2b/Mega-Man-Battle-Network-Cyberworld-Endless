@@ -1,0 +1,12 @@
+{
+  "branch": "team-protoman-souls",
+  "what": "Team ProtoMan's six Souls in BN6's engine and their Navis as guardians (docs/game/team-protoman.md units 7-10, for #774's SOUL BN5): NapalmSoul, GyroSoul, MagnetSoul, SearchSoul, MeddySoul, ProtoSoul, each held to BN5's battle; the partner coin, bodies, faces and intro lines; the board. What a guardian gives is run-forms'",
+  "takes": {
+    "free_rom": [["0x640000", "0x69FFFF"]],
+    "song_slots": [["0x340", "0x37F"]],
+    "list0": [["0x60", "0x7F"]],
+    "attack_families": [["0xC7", "0xD7"]]
+  },
+  "units": ["BN5 Soul NapalmSoul", "BN5 Soul GyroSoul", "BN5 Soul MagnetSoul", "BN5 Soul SearchSoul", "BN5 Soul MeddySoul", "BN5 Soul ProtoSoul", "Team ProtoMan guardians", "Team ProtoMan board"],
+  "run": false
+}

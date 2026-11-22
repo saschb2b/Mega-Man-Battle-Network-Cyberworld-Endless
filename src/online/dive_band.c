@@ -54,6 +54,9 @@ static const char *band_line(uint32_t now) {
 	if (join) return join;
 	bool away = false;
 	if (dive_link_down(now, &away)) return dive_down_words(away, (int)(now / 400 % 4));
+	/* (at a door the queue's own line before the feed's: issue #778) */
+	const char *door = dive_party_band();
+	if (door) return door;
 	return B.nfeed ? B.feed[0] : NULL;
 }
 
@@ -123,5 +126,4 @@ void dive_link_draw(void) {
 	/* (never over BN6's chat box: its words first) */
 	if (chat) return;
 	if (line) look_band(P.core_x, y, 240, line);
-	else dive_party_draw(P.core_x, P.core_y);
 }

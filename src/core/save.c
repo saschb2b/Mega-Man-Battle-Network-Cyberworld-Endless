@@ -21,7 +21,7 @@
 
 /* (Run is saved as it lies in memory: a change to it does not compile
  * until someone decides about the saves before it, issue #19) */
-_Static_assert(sizeof(Run) == 116, "Run changed: old saves no longer read as they are; bump RUN_MAGIC (and read the "
+_Static_assert(sizeof(Run) == 124, "Run changed: old saves no longer read as they are; bump RUN_MAGIC (and read the "
 	"previous one where it can carry over), then set this size");
 
 Profile profile;
@@ -182,7 +182,7 @@ bool load_run(void) {
 	state_nine = false;
 	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; upgrade_run(); load_battle(); battle_data_load(run.seed); return true; }
 	if (!legacy_load_run()) return false;
-	state_nine = CHIP_ID_BITS != 9;
+	state_nine = legacy_run_nine();
 	upgrade_run();
 	load_battle();
 	battle_data_load(run.seed);
