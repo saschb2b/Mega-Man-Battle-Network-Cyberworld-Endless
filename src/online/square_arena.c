@@ -873,7 +873,9 @@ void square_arena_frame(uint32_t keys) {
 	me = s.player_id;
 	if (lost && SA.stage == SA_BATTLE) arena_link_net_lost(&SA.link, "the connection to the Square was lost");
 	else if (lost && SA.stage >= SA_LOADOUT && SA.stage < SA_OVER) fail("the connection to the Square was lost", ARENA_STOP_LOST);
-	else if (lost && SA.card.up && !SA.card.closing) SA.card.closing = 1;
+	/* (a card up while the link is tried again stays to be read: a battle
+	 * the drop stopped says so, B closes it; issue #180. Given up, it goes) */
+	else if (lost && !s.reconnecting && SA.card.up && !SA.card.closing) SA.card.closing = 1;
 	switch (SA.stage) {
 	case SA_LOADOUT:
 		if (SA.theirs_in) build();

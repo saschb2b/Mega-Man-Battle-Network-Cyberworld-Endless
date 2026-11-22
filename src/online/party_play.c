@@ -259,6 +259,13 @@ bool party_play_mail(const uint8_t *m, size_t n) {
 
 bool party_play_held(void) { return PP.stage != PP_NONE; }
 
+bool party_play_hp(int *hp, int *max) {
+	if (!PP.core || (PP.stage != PP_FIGHT && PP.stage != PP_RESULTS)) return false;
+	*hp = (int)party_core_hp(PP.core, PP.seat);
+	*max = PP.b.seat[PP.seat].max_hp;
+	return *max > 0;
+}
+
 /* ---- the fight's frames ---- */
 
 static void failed(const char *why) {

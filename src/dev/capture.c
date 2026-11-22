@@ -39,7 +39,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16], by[16], board[16], drop[160]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab, ahead; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16], by[16], board[16], drop[160]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab, ahead, home; } InputStep;
 /* (the steps taken from the heap by the first script, as only headless
  * tests and remote play have one: a megabyte no game holds otherwise) */
 #define SCRIPT_MAX 1024
@@ -75,6 +75,14 @@ static void parse_buttons(const char *s, InputStep *step) {
 /* a dev step that takes its words whole ("foes SPEC", "status SPEC",
  * "swap FORMS", "xrecord ADDR", "chip ID CODE [N]" or "chip ID", "cross F", "folder K", "onehit", "by NAME"), into its step;
  * false where `tok` is none */
+/* a step of one word with no argument: "battle", "home" */
+static bool bare_step(const char *tok, InputStep *s) {
+	if (!strcmp(tok, "battle")) s->battle = true;
+	else if (!strcmp(tok, "home")) s->home = true;
+	else return false;
+	return true;
+}
+
 static bool text_step(const char *tok, InputStep *s) {
 	if (!strcmp(tok, "onehit")) s->onehit = true;
 	else if (!strncmp(tok, "foes ", 5)) snprintf(s->foes, sizeof s->foes, "%s", tok + 5);
@@ -115,7 +123,7 @@ static bool text_step(const char *tok, InputStep *s) {
 
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
-	return s->placed || s->flagged || s->battle || s->foes[0] || s->swap[0] || s->status[0] || s->xrecord[0] || s->bracket[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
+	return s->placed || s->flagged || s->battle || s->home || s->foes[0] || s->swap[0] || s->status[0] || s->xrecord[0] || s->bracket[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
 		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2] || s->dump[0] || s->by[0] || s->board[0] || s->drop[0];
 }
 
@@ -146,7 +154,7 @@ static void parse_script(const char *spec) {
 		if (colon && !strncmp(colon + 1, "dump ", 5)) snprintf(s->dump, sizeof s->dump, "%s", colon + 6);
 		else if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
-		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
+		else if (colon && bare_step(colon + 1, s)) {}
 		else if (colon && text_step(colon + 1, s)) {}
 		else if (colon && !strcmp(colon + 1, "sig")) s->sig = 1;
 		else if (colon && !strcmp(colon + 1, "glitch")) s->sig = 2;
@@ -245,6 +253,7 @@ static void place_steps(const InputStep *s) {
  * #23), its enemies held at 1 HP */
 static void emu_steps(const InputStep *s) {
 	if (s->battle) director_dev_battle();
+	if (s->home && !director_dev_go_home()) fprintf(stderr, "home: only from a layer's map\n");
 	if (s->foes[0] && s->lab) director_dev_lab(s->foes);
 	else if (s->foes[0]) director_dev_foes(s->foes);
 	if (s->swap[0]) swap_dev_step(s->swap);
@@ -320,7 +329,8 @@ static bool remote_open(const char *dir) {
 /* One line: "N BUTTONS" holds them N frames, "shot PATH", "second PATH"
  * (the second screen's picture), "state PATH",
  * "dump PREFIX" (the video memory, emu_debug_dump), "place X Y FACING", "flags FROM TO 1" (set; 0: back as they were),
- * "battle" (the layer's next random battle, director_dev_battle), "foes
+ * "battle" (the layer's next random battle, director_dev_battle), "home"
+ * (the run home between acts, director_dev_go_home), "foes
  * SPEC" (a battle of these foes, director_dev_foes), "xrecord ADDR" (a
  * record of BN5's in BN6's engine, director_dev_xrecord), "status SPEC" (the
  * battle's enemies given a status, director_dev_status), "chip ID CODE
@@ -344,7 +354,7 @@ static void remote_parse(char *line) {
 		else if (!strncmp(tok, "dump ", 5)) snprintf(s->dump, sizeof s->dump, "%s", tok + 5);
 		else if (!strncmp(tok, "place ", 6)) s->placed = sscanf(tok + 6, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (!strncmp(tok, "flags ", 6)) s->flagged = sscanf(tok + 6, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
-		else if (!strcmp(tok, "battle")) s->battle = true;
+		else if (bare_step(tok, s)) {}
 		else if (text_step(tok, s)) {}
 		else if (!strcmp(tok, "sig")) s->sig = 1;
 		else if (!strcmp(tok, "glitch")) s->sig = 2;

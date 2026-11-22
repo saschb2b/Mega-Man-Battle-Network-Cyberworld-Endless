@@ -18,7 +18,8 @@
 #include "mapslot.h"
 
 /* The NPC slots the traces take as a layer is built, of the `room` left
- * after the layer's own: none, one (the marks') or two (and the sparkle's). */
+ * after the layer's own and a full crew's MegaMen (dive_people.c): none,
+ * one (the marks', from one left) or two (and the sparkle's, from three). */
 int dive_traces_more(NpcList *npcs, int room);
 /* A new layer's room entered: its traces forgotten till the server's come. */
 void dive_traces_room(DiveWay way);

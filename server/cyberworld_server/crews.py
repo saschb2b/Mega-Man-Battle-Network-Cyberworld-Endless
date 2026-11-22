@@ -75,6 +75,7 @@ class Crews:
         self.hp = {}            # player id -> (hp, max_hp) as his DIVE vitals last said
         self.hp_at = {}         # ... and when it was taken
         self.told = {}          # id(crew) -> (what its last CREW_STATE said of each member, when)
+        self.at = {}            # player id -> where his game said he is (v26: where_home, where_battle; none on the layer)
 
     # -- the wire --
 
@@ -96,10 +97,27 @@ class Crews:
     # -- each one's HP and layer (v24, issue #717): information, told to his crew alone --
 
     def vitals_of(self, player_id):
-        """(hp, max_hp, the depth of the layer he dives), 0 each where not known or not on a layer."""
+        """(hp, max_hp, the depth of the layer he dives, where he is), 0 each where not known or not on a layer."""
         room = self.server.dive.room_of(player_id)
         hp, maximum = self.hp.get(player_id, (0, 0))
-        return hp, maximum, room.depth if room else 0
+        return hp, maximum, room.depth if room else 0, self.at.get(player_id, SPEC["where_layer"])
+
+    # -- where each one is (v26, issue #756) --
+
+    def where_set(self, player_id, where):
+        """A DIVE where (or a room entered: on a layer). A diver at home between acts is drawn on no layer (hidden),
+        forms no crew from the place he left, and stays in his crew as it stood; his crew is told (CREW_STATE vitals)."""
+        if where == SPEC["where_layer"]:
+            self.at.pop(player_id, None)
+        else:
+            self.at[player_id] = where
+
+    def home(self, player_id):
+        return self.at.get(player_id) == SPEC["where_home"]
+
+    def hidden(self):
+        """The divers drawn on no layer: those at home."""
+        return {player_id for player_id, where in self.at.items() if where == SPEC["where_home"]}
 
     def said(self, crew):
         return tuple((member, self.vitals_of(member)) for member in crew.members)
@@ -146,7 +164,7 @@ class Crews:
         """(room, x, y) where his place was sent in the room he stands in, else (room, None, None)."""
         room = self.server.dive.room_of(player_id)
         player = self.server.players.get(player_id)
-        if not room or not player or self.placed.get(player_id) is not room:
+        if not room or not player or self.placed.get(player_id) is not room or self.home(player_id):
             return room, None, None
         return room, player.position[0], player.position[1]
 
@@ -202,7 +220,8 @@ class Crews:
         room = self.server.dive.room_of(next(iter(core)))
         gone = []
         for member in crew.members:
-            if member in core:
+            # (at home between acts: his crew kept as it stood, issue #756)
+            if member in core or self.home(member):
                 crew.away.pop(member, None)
                 continue
             since = crew.away.setdefault(member, now)
@@ -268,6 +287,7 @@ class Crews:
         self.placed.pop(player_id, None)
         self.hp.pop(player_id, None)
         self.hp_at.pop(player_id, None)
+        self.at.pop(player_id, None)
         self.near = {pair: since for pair, since in self.near.items() if player_id not in pair}
         self.out(player_id)
 
