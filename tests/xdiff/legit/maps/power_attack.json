@@ -26,7 +26,11 @@
   "0x15": "0xBC",
   "0x25": "0xBD",
   "0x16": "0xB3",
-  "0x35": "0xB8"
+  "0x35": "0xB8",
+  "0x03": "0xBE",
+  "0x04": "0xBF",
+  "0x05": "0xB1",
+  "0x06": "0xB4"
  },
  "evidence": [
   "src/emu/soulpower.c's tables(): the grown table, BN5's rows of 0x0801CA18 by the Soul written in BN6's ids into SOULS_LOADOUTS, the loadout's read (0x0800FEEC) hooked to them for the proxy form with a Soul; soulcode_bn5.c's powers",

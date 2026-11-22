@@ -82,10 +82,13 @@ UNITS = (
     # family of the Souls' own (BN6's 0xCC), its sub-family 0xA's routine (0x080124C8: the magnet panels of his row, effect 0x1B)
     # by SUB_TABLES)
     ('magnet', 5, (0x0800F7FC, 0x080EEC86, 0x0800F9A0, 0x080EC7DE)),
+    # (ProtoSoul: his charged shot's power attack, the sword family's sub-family 1 (the Souls' copy, ShadowSoul's), and his
+    # B+Left's, the Guard family's sub-family 4 (the chips' copy, FAMILIES_SHARED))
+    ('proto', 1, (0x0800F604, 0x0800F62C)),
 )
 # Team ProtoMan's units: their blocks in a room of their own (soul_room.h's SOULS_TEAM_CODE), their sprites too
 # (SOULS_TEAM_ART, list 0 from TEAM_ART_FIRST), so that Team Colonel's code and numbers stay where they were
-TEAM_UNITS = ('napalm', 'gyro', 'magnet')
+TEAM_UNITS = ('napalm', 'gyro', 'magnet', 'proto')
 TEAM_CODE_ROOM = 0x8000     # SOULS_TEAM_CODE's bytes
 TEAM_ART_ROOM = 0x18000     # SOULS_TEAM_ART's
 TEAM_ART_FIRST, TEAM_ART_LAST = 0x66, 0x7F   # (list 0's numbers past Team ProtoMan's Souls' own 0x60-0x65: soul_room.h)
@@ -108,7 +111,8 @@ POWERS = ((0x14, 0x0800F7DC, 'ColonelSoul\'s charged shot'), (0x13, 0x0800F7D0, 
           (0x07, 0x0800F66A, 'NumberSoul\'s charged shot'), (0x1A, 0x0800F864, 'TomahawkSoul\'s charged shot'),
           (0x11, 0x0800F79E, 'KnightSoul\'s charged shot'), (0x2D, 0x0800F9E6, 'ToadSoul\'s charged shot'),
           (0x19, 0x0800F840, 'NapalmSoul\'s charged shot'), (0x09, 0x0800F6A6, 'GyroSoul\'s charged shot'),
-          (0x15, 0x0800F7FC, 'MagnetSoul\'s charged shot'), (0x25, 0x0800F9A0, 'MagnetSoul\'s B+Left'))
+          (0x15, 0x0800F7FC, 'MagnetSoul\'s charged shot'), (0x25, 0x0800F9A0, 'MagnetSoul\'s B+Left'),
+          (0x03, 0x0800F604, 'ProtoSoul\'s charged shot'), (0x04, 0x0800F62C, 'ProtoSoul\'s B+Left'))
 POWERS_COLONEL = 8   # (Team Colonel's, the first; Team ProtoMan's after: src/emu/soulpower.c numbers them past BN4's)
 
 # BN5's routines a moved routine calls that BN6 answers otherwise, aimed at the Souls' stubs (soul_room.h: SOUL_STUB_*),
@@ -317,6 +321,18 @@ def before_tracks():
             for l5, i5, l6, i6 in re.findall(r'\{ (\d), 0x([0-9A-F]{2}), (\d), 0x([0-9A-F]{2}), ', body):
                 sprites.setdefault((int(l5), int(i5, 16)), (int(l6), int(i6, 16)))
     return blocks, effects, sprites
+
+
+def shared_families():
+    """the attack families the tracks installed before the Souls' code moved (BEFORE): BN5's CurAction -> BN6's, read from the
+    head of each unit (\"BN5's attack 0x1f (...) as BN6's 0x6f\"): a Soul's power attack may return one of theirs where
+    their copy runs its sub-family as BN5's does (ProtoSoul's B+Left, the Guard family's sub-family 4 in its one state)"""
+    out = {}
+    for _, path in BEFORE:
+        with open(path, encoding='utf-8') as f:
+            for f5, f6 in re.findall(r"BN5's attack 0x([0-9a-f]+) \([0-9A-F]{8}\) as BN6's 0x([0-9a-f]+)", f.read()):
+                out.setdefault(int(f5, 16), int(f6, 16))
+    return out
 
 
 # Tables of routines by sub-family a moved dispatcher reads (BN5's misc family 0x1A's, 0x080EC818: BN6's grown family 0xCC
@@ -1166,6 +1182,7 @@ def derive(b5, b6, pairs):
     # (each power attack returns its family by its last movs r0 before pop {pc})
     families = {}
     fam6 = {f5: f6 for f5, f6, _ in FAMILIES}
+    others = shared_families()
     for id5, entry, why in POWERS:
         w = d.walks.get(entry)
         last = None
@@ -1177,8 +1194,10 @@ def derive(b5, b6, pairs):
                 break
         if last and last[1] in fam6:
             families[last[0]] = (last[1], fam6[last[1]])
+        elif last and last[1] in others:
+            families[last[0]] = (last[1], others[last[1]])
         elif last:
-            d.decide(f'{entry:08X}: {why} returns family {last[1]:#x}, which is not moved (FAMILIES)')
+            d.decide(f'{entry:08X}: {why} returns family {last[1]:#x}, which is moved neither here (FAMILIES) nor by a track before')
     d.resolve_calls()
     for a in ROUTED:
         if d.shared_at(a):

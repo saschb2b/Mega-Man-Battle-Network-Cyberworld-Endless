@@ -1,0 +1,298 @@
+{
+ "about": "BN5's ProtoSoul (Team ProtoMan's Soul 1) in both engines: its flag entry written in BN5's ROM copy and set (souls5), the Souls installed in BN6's engine holding it (souls6 bit 18), a deck of Sword L in both (BN5's 48, BN6's 71: Sword, ProtoSoul's kind), the first Custom screen's first chip picked and given up, UNITE and OK; it unites as the first turn starts (no passive: BN5's ready and collision tables name none for form 1), the Custom screens opened by L count its turns down, and it ends as the turn after its last starts. CanGard V1 at (6,2), MegaMan at (2,2) with 2000 HP, kept from harm (docs/game/team-protoman.md, unit 9).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 2300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "1630"
+ ],
+ "deck5": [
+  "1630"
+ ],
+ "folder6": [
+  "1647"
+ ],
+ "deck6": [
+  "1647"
+ ],
+ "souls6": "40000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ],
+  [
+   1040,
+   "L",
+   3
+  ],
+  [
+   1560,
+   "L",
+   3
+  ],
+  [
+   2080,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x01"
+    ],
+    [
+     1563,
+     "0x01"
+    ],
+    [
+     1564,
+     "0x00"
+    ],
+    [
+     2300,
+     "0x00"
+    ]
+   ],
+   "chaos": [
+    [
+     1,
+     "0x00"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x03"
+    ],
+    [
+     523,
+     "0x03"
+    ],
+    [
+     524,
+     "0x02"
+    ],
+    [
+     1043,
+     "0x02"
+    ],
+    [
+     1044,
+     "0x01"
+    ],
+    [
+     1563,
+     "0x01"
+    ],
+    [
+     1564,
+     "0x00"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x02"
+    ],
+    [
+     2300,
+     "0x02"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ],
+    [
+     524,
+     "0x01"
+    ]
+   ],
+   "hp": [
+    [
+     2300,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own course, as soul_knight's: the Soul united as the first turn starts (ProtoMan's AI index 1), its turns 3, one less as each Custom screen opens, and its end as the turn after the screen that took the last starts (t1564); its used bit 1 (0x02) for the battle; UNITE chosen on the first screen (+7 2), grey on the next (no pick); MegaMan never hit (safe=1).",
+ "souls5": "1"
+}

@@ -1,0 +1,207 @@
+{
+ "about": "BN5's ProtoSoul's B+Left in both engines: ProtoSoul united (souls5 1, souls6 bit 18) by Sword L given up for UNITE (a Guard1 A in each folder, never dealt: the Guard unit's code in place as the battle starts, where its moved ranges are read for the trace); B held from t270 for 40 frames, LEFT at t274: B+Left (BN5's power attack 0x04: the Guard family 0x1F's sub-family 4, the chips' copy as BN6's 0x6F) stands him behind his shield, and CanGard's shot striking him in it at t279 is turned back. CanGard V1 at (6,2), MegaMan at (2,2), 2000 HP, not kept from harm (CanGard's shot strikes him at t85 in both).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 380,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": false,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "1630",
+  "0058"
+ ],
+ "deck5": [
+  "1630"
+ ],
+ "folder6": [
+  "1647",
+  "0127"
+ ],
+ "deck6": [
+  "1647"
+ ],
+ "souls6": "40000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   270,
+   "B",
+   40
+  ],
+  [
+   274,
+   "LEFT",
+   4
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: ProtoSoul united from t1, B+Left's shield from t274, CanGard's shot at t279.",
+ "souls5": "1"
+}

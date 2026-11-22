@@ -1,0 +1,22 @@
+{
+ "name": "BN6's buster shot leaving his attack's bytes +0xD-+0xF",
+ "part": "ai",
+ "whose": [
+  "megaman"
+ ],
+ "offsets": [
+  "0xAD-0xAF"
+ ],
+ "families": [
+  "0x11",
+  "0x08",
+  "0x03"
+ ],
+ "bits": "0xFF",
+ "direction": "bn6",
+ "why": "MegaMan's plain buster shot (power attack 0x00, family 0x11) writes his AttackVars +0xC: BN5's as a byte, then, on a random draw's bit, as the word his NaviStats +0x4D names (0 where none), which clears +0xD-+0xF; BN6's twin writes the byte alone, so +0xD-+0xF keep what the attack before left there. Seen only where that attack left them other than 0: ProtoSoul's B+Left (power attack 0x04) writes the word 0x114 there. Read so, the bits BN6 has and BN5 not, in the shot and the states that follow it until an attack writes the word: his ready state (BN6's 8) and his being struck (3).",
+ "evidence": [
+  "BN5 0x0800F51A (power attack 0x00): strb r0,[r7,#0xc] at 0x0800F55E, then bl 0x080014A6 (the random draw), lsrs r0,r0,#3, bcc; ldr NaviStats +0x4D; str r0,[r7,#0xc] at 0x0800F56E; BN6 0x08011A26: strb r4,[r7,#0xc] at 0x08011A74 alone",
+  "soul_proto_left t312: AI data +0xAC-+0xAF BN5 00 00 00 00, BN6 00 01 00 00 (BN5's word written, BN6's byte), from his B+Left's 14 01 00 00 at t311; still so in his ready state from t334 and struck at t376 (BN5 0, BN6 the 01 kept)"
+ ]
+}

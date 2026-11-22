@@ -26,7 +26,7 @@ enum {
 	SOULCHIPS_BREAK_DOUBLE = 2,   /* a charged chip not doubled */
 	SOULCHIPS_BREAK_GRASS = 4,    /* TomahawkSoul's Wood chip not doubled on grass */
 	SOULCHIPS_BREAK_FRONT = 8,    /* KnightSoul's front column gives no unharmed frames */
-	SOULCHIPS_BREAK_SWORD = 16,   /* ShadowSoul's charged sword run by BN6's sword family */
+	SOULCHIPS_BREAK_SWORD = 16,   /* ShadowSoul's and ProtoSoul's charged sword run by BN6's sword family */
 	SOULCHIPS_BREAK_SHADOW = 32,  /* ShadowSoul keeps his shadow */
 	SOULCHIPS_BREAK_LAVA = 64,    /* NapalmSoul on lava adds nothing to his next chip */
 	SOULCHIPS_BREAK_NAPALM = 128, /* NapalmSoul's charged chip run by its own family, no Napalm Bomb, and GyroSoul's propeller

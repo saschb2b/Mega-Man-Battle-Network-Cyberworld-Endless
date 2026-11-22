@@ -1,0 +1,14 @@
+[
+ {
+  "name": "ProtoSoul lit by the kind after its own",
+  "spec": "soul_proto",
+  "unitebreak": 4,
+  "what": "UNITE's check reads the chip's kind one up (Sword as Invisible): the Sword lights ShadowSoul, which BN6's MegaMan does not hold, so ProtoSoul never unites where BN5's does at t1"
+ },
+ {
+  "name": "ProtoSoul drawn as the next Soul",
+  "spec": "soul_proto",
+  "soulbreak": 1,
+  "what": "the sprite selector draws GyroSoul's sprite (list 0 0x61) where BN5 draws ProtoSoul's (its list 0's 1): his object's sprite word"
+ }
+]
