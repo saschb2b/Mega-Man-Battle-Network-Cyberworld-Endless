@@ -58,13 +58,19 @@ static bool mail(uint8_t kind) {
 #define RETRY_MOST_MS 4000
 #define REST_MS 10           /* the worker's longest rest between two looks at the link: its position, pings and timers kept to it */
 
+#ifndef __EMSCRIPTEN__
+/* a test's dropped link's end (online_transport_cut): kept apart from the
+ * transport's state, which a start again (online_transport_again) clears */
+static SDL_atomic_t cut_until;
+#endif
+
 static struct {
 	Ring outbox, inbox;
 	bool enabled;
 	SDL_Thread *thread;
 	SDL_mutex *mutex;
 	SDL_atomic_t stop, bye, done;
-	SDL_atomic_t cut, cut_until;   /* (a test's dropped link: online_transport_cut) */
+	SDL_atomic_t cut;              /* (a test's dropped link: online_transport_cut; its end below) */
 	SDL_atomic_t hurry_until;      /* (a battle waiting on the link back: online_transport_hurry) */
 	OnlineSnapshot snapshot;
 	OnlinePeer local;
@@ -486,7 +492,7 @@ static int worker(void *unused) {
 	for (;;) {
 		why[0] = '\0';
 		/* (a test's dropped link: no answer until its time is up) */
-		if ((int32_t)(SDL_GetTicks() - (uint32_t)SDL_AtomicGet(&transport.cut_until)) < 0) SDL_strlcpy(why, "the link is cut (a test)", sizeof why);
+		if ((int32_t)(SDL_GetTicks() - (uint32_t)SDL_AtomicGet(&cut_until)) < 0) SDL_strlcpy(why, "the link is cut (a test)", sizeof why);
 		else if (online_socket_open(transport.url, &transport.stop, why, sizeof why) &&
 		    online_socket_send(transport.hello, transport.hello_size)) connected_loop(&snapshot);
 		online_socket_close();
@@ -516,7 +522,7 @@ static int worker(void *unused) {
 void online_transport_hurry(void) { SDL_AtomicSet(&transport.hurry_until, (int)(SDL_GetTicks() + 1000u)); }
 
 void online_transport_cut(uint32_t ms) {
-	SDL_AtomicSet(&transport.cut_until, (int)(SDL_GetTicks() + ms));
+	SDL_AtomicSet(&cut_until, (int)(SDL_GetTicks() + ms));
 	SDL_AtomicSet(&transport.cut, 1);
 	online_socket_wake();
 	printf("online: the link cut for %u ms (a test)\n", (unsigned)ms);
@@ -531,18 +537,11 @@ static bool linked(void) {
 }
 #endif
 
-bool online_transport_start(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
-	online_transport_end();
-	transport.enabled = true;
-	if (!url || !name || !identity || strlen(url) >= sizeof transport.url || !build_hello(name, identity)) {
-		SDL_strlcpy(transport.snapshot.error, "Online needs BN6 and a 1-16 character name", sizeof transport.snapshot.error);
-		return false;
-	}
-	SDL_strlcpy(transport.url, url, sizeof transport.url);
-	SDL_strlcpy(transport.name, name, sizeof transport.name);
+/* the socket opened (the browser's) or the worker started, transport.url and hello set */
+static bool dial(void) {
 #ifdef __EMSCRIPTEN__
 	transport.last_receive = SDL_GetTicks();
-	transport.dialing = online_browser_open(url, transport.hello, transport.hello_size, browser_received, browser_closed);
+	transport.dialing = online_browser_open(transport.url, transport.hello, transport.hello_size, browser_received, browser_closed);
 	if (transport.dialing) return true;
 	SDL_strlcpy(transport.snapshot.error, "Could not open browser WebSocket", sizeof transport.snapshot.error);
 	return false;
@@ -553,6 +552,39 @@ bool online_transport_start(const char *url, const char *name, const uint8_t ide
 	SDL_strlcpy(transport.snapshot.error, "Could not start online worker", sizeof transport.snapshot.error);
 	return false;
 #endif
+}
+
+bool online_transport_start(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
+	online_transport_end();
+	transport.enabled = true;
+	if (!url || !name || !identity || strlen(url) >= sizeof transport.url || !build_hello(name, identity)) {
+		SDL_strlcpy(transport.snapshot.error, "Online needs BN6 and a 1-16 character name", sizeof transport.snapshot.error);
+		return false;
+	}
+	SDL_strlcpy(transport.url, url, sizeof transport.url);
+	SDL_strlcpy(transport.name, name, sizeof transport.name);
+	return dial();
+}
+
+bool online_transport_again(void) {
+	char url[sizeof transport.url], name[sizeof transport.name];
+	uint8_t hello[sizeof transport.hello];
+	size_t size = transport.hello_size;
+	uint16_t channel = transport.snapshot.channel;
+	if (!transport.enabled || !size || !transport.url[0]) return false;
+	memcpy(url, transport.url, sizeof url);
+	memcpy(name, transport.name, sizeof name);
+	memcpy(hello, transport.hello, sizeof hello);
+	online_transport_end();
+	transport.enabled = true;
+	memcpy(transport.url, url, sizeof url);
+	memcpy(transport.name, name, sizeof name);
+	memcpy(transport.hello, hello, sizeof hello);
+	transport.hello_size = size;
+	/* (the place the last session held taken back where the server holds it still, else a new one) */
+	hello_resume(channel);
+	fprintf(stderr, "online: the link started again\n");
+	return dial();
 }
 
 

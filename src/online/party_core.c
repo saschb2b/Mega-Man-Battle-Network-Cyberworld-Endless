@@ -337,6 +337,39 @@ unsigned party_core_phase(PartyCore *pc) { return (unsigned)(uint8_t)pc->core->r
 
 unsigned party_core_hp(const PartyCore *pc, unsigned seat) { return seat < PARTY_MOST ? pc->hp[seat] : 0; }
 
+void party_core_seat_hp(PartyCore *pc, unsigned seat, unsigned *hp, unsigned *max) {
+	struct mCore *c = pc->core;
+	uint32_t o = seat < PARTY_MOST && (int)seat < pc->field.standing ? (uint32_t)c->rawRead32(c, BN6_BATTLE_PLAYERS + seat * BN6_SIDE_PARTNER, -1) : 0;
+	*hp = *max = 0;
+	if (seat >= PARTY_MOST) return;
+	/* (before the battle's first iteration his going in, which the field writes into his object then: party_field.h) */
+	if (!pc->field.tick && pc->field.max_hp[seat]) {
+		*hp = pc->field.hp[seat];
+		*max = pc->field.max_hp[seat];
+		return;
+	}
+	if (!o) return;
+	*hp = (unsigned)(uint16_t)c->rawRead16(c, o + BN6_T1_HP, -1);
+	*max = (unsigned)(uint16_t)c->rawRead16(c, o + BN6_T1_MAX_HP, -1);
+}
+
+unsigned party_core_navi_hp(PartyCore *pc) { return (unsigned)(uint16_t)pc->core->rawRead16(pc->core, BN6_NAVI_HP, -1); }
+
+void party_core_results_as(PartyCore *pc, unsigned seat) {
+	struct mCore *c = pc->core;
+	if (!seat || seat >= PARTY_MOST || (int)seat >= pc->field.standing) return;
+	uint32_t lead = (uint32_t)c->rawRead32(c, BN6_BATTLE_PLAYERS, -1), his = (uint32_t)c->rawRead32(c, BN6_BATTLE_PLAYERS + seat * BN6_SIDE_PARTNER, -1);
+	uint16_t hp = (uint16_t)pc->hp[seat], max = pc->field.max_hp[seat];
+	if (his) max = (uint16_t)c->rawRead16(c, his + BN6_T1_MAX_HP, -1);
+	if (!max) return;
+	if (lead) {
+		c->rawWrite16(c, lead + BN6_T1_HP, -1, hp);
+		c->rawWrite16(c, lead + BN6_T1_MAX_HP, -1, max);
+	}
+	c->rawWrite16(c, BN6_NAVI_HP, -1, hp);
+	c->rawWrite16(c, BN6_NAVI_MAX_HP, -1, max);
+}
+
 unsigned party_core_foe_hp(PartyCore *pc) {
 	uint32_t o = pc->core->rawRead32(pc->core, BN6_BATTLE_PLAYERS + BN6_BATTLE_PLAYER_STEP, -1);
 	return o ? (unsigned)(uint16_t)pc->core->rawRead16(pc->core, o + BN6_T1_HP, -1) : 0;

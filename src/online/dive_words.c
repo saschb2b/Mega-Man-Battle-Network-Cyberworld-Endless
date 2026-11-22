@@ -28,6 +28,8 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader) {
 	return s;
 }
 
+const char *dive_door_full_words(void) { return "The party's full!  A:Go in alone"; }
+
 
 const char *dive_join_joined_words(void) { return "Jumping in!"; }
 
@@ -49,6 +51,18 @@ const char *dive_crew_full_words(const char *name) {
 	snprintf(s, sizeof s, "%s's crew is full", name);
 	return s;
 }
+
+const char *dive_down_words(bool away, int dots) {
+	static char s[48];
+	int n = dots < 0 ? 0 : dots > 3 ? 3 : dots;
+	snprintf(s, sizeof s, "%sReconnecting%.*s", away ? "Diving alone  " : "", n, "...");
+	return s;
+}
+
+const char *dive_back_words(void) { return "Back online!"; }
+const char *dive_back_week_words(void) { return "A new week's net! We'll dive alone."; }
+const char *dive_alone_words(void) { return "Offline. Diving alone this time"; }
+const char *dive_alone_back_words(void) { return "The Board's portal links the next dive"; }
 const char *dive_find_words(const char *name, bool mine) {
 	static char s[64];
 	if (mine) snprintf(s, sizeof s, "First to open this one this week!");

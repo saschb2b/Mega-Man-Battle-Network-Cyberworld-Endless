@@ -15,6 +15,9 @@
 
 static WeeklyRecord W;
 static bool W_read;
+static WeeklyEnd E;
+
+const WeeklyEnd *weekly_last_end(void) { return &E; }
 int title_dive;
 
 const WeeklyRecord *weekly_record(void) {
@@ -115,9 +118,25 @@ bool weekly_dive(uint16_t week, uint32_t seed) {
 	return true;
 }
 
+int weekly_unfinished(void) {
+	weekly_record();
+	if (!W.running || !W.week) return 0;
+	bool was = save_slot_weekly();
+	save_slot(true);
+	Run r;
+	int depth = peek_run(&r) && r.depth > 0 ? r.depth : 1;
+	save_slot(was);
+	return depth;
+}
+
+static unsigned resumes;
+
+unsigned weekly_resumes(void) { return resumes; }
+
 bool weekly_continue(void) {
 	weekly_record();
 	if (!W.running || !W.week) return false;
+	++resumes;
 	int music = profile.music_volume, sfx = profile.sfx_volume;
 	save_slot(true);
 	profile_load();
@@ -150,6 +169,7 @@ void weekly_ended(bool won) {
 	if (depth > SHORT_LAYERS) depth = SHORT_LAYERS;
 	unsigned minutes = profile.played_run == run.seed ? (profile.played_frames + 3599u) / 3600u : 0;
 	if (minutes > 0xFFFF) minutes = 0xFFFF;
+	E = (WeeklyEnd){ true, won && depth == SHORT_LAYERS, W.pulled != 0, (uint16_t)depth, (uint16_t)minutes };
 	bool keep = !W.pending || W.r_week != W.week || better(depth, won, minutes, &W);
 	if (keep) {
 		int act = weekly_act(depth);

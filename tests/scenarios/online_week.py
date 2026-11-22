@@ -4,7 +4,8 @@ diver seen there and his dot on the map (issue #728), a crew by standing
 together (issue #714), formed and
 split by walking together and apart, four at most, and a battle of one
 fought by both unasked (issue #715) and through a dropped link (issue
-#180), a crew formed again after one diver's link came back (#180), the Board's posts of the week,
+#180), a crew formed again after one diver's link came back (#180) and
+however long it was away (#751), the Board's posts of the week,
 a dive left by a quit (CONTINUE is the normal run's, as it was, and the
 portal offers the dive again), a game without the DeepNet stamp, which
 the portal offers nothing, and the server gone on a dive, which goes on
@@ -51,25 +52,6 @@ MANY = {
         ('sleep', 1.5),
         soon('crew=2: Alpha Beta', '', 600),
         soon('crew=2: Alpha Beta', 'beta', 600),
-    )),
-    'dive-kept-apart': dict(CAST, STEPS=online.course(
-        online.paged(),
-        ('keep', 'hp zenny bugfrags place spares'),
-        online.into_square(),
-        dive(),
-        ('expect', 'dive=on'),
-        ('restart', online.HOME.replace('--scene home', '--scene title')),   # the game closed on the dive
-        ('repeat', 'press START; wait 40', 'title=menu'),
-        ('expect', 'cursor=continue'),
-        ('repeat', 'press A; wait 40', 'scene=emu'),
-        ('until', 'where=town', 1200),             # CONTINUE is the normal run's, at the gate
-        ('repeat', 'mash A 60; wait 30', 'chat=closed'),
-        ('expect', 'dive=none'),
-        ('same', 'hp zenny bugfrags place spares'),
-        ('do', 'place -40 -8 7; wait 20; place 16 72 3; wait 10'),   # off the gate and on: the Square again
-        soon('visit=square', '', 900),
-        soon('held=none', '', 600),
-        ('expect', 'weekoffer=again'),             # the unfinished dive, offered again
     )),
     'board-lists-the-week': dict(CAST, SERVER=dict(weeks=[('Mira', 7, False, 31), ('Dex', 4, False, 12)]), STEPS=online.course(
         online.into_square(),
@@ -163,6 +145,43 @@ MANY['crew-again-after-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, S
     soon('join=fighting', 'beta', 900),             # and a battle of Alpha's joined by both
     soon('join=fighting', '', 900),
 ))
+
+
+
+def link_down(seconds):
+    """Beta's own link cut `seconds` on the layer (issue #751): the band says it is down at once (and that he dives
+    alone, past the transport's 30 seconds), then back; the room entered again, each sees the other, the crew again.
+    Pictures of Beta's game kept (shot): down, away where it goes so long, back."""
+    away = seconds > 30
+    return online.course(
+        ('@beta', 'do', f'reconnect cut {seconds}'),
+        soon('divestate=down', 'beta', 120),
+        ('sleep', 1.5),
+        ('@beta', 'do', 'wait 1; shot'),
+        # (the cut and the tries are the clock's: a dive's layer outruns it)
+        *([('sleep', 34.0), soon('divestate=away', 'beta', 600), ('@beta', 'do', 'wait 1; shot')] if away else []),
+        # (past the transport's 30 seconds the dive starts the link again every 15 seconds at most: one more such wait)
+        ('sleep', max(1.0, seconds - (35.5 if away else 1.5)) + (16.0 if away else 0.0)),
+        soon('divestate=up', 'beta', 3600),
+        ('@beta', 'do', 'wait 20; shot'),
+        soon('divers~Alpha', 'beta', 600),
+        soon('divers~Beta', '', 600),
+        ('sleep', 1.5),
+        soon('crew=2: Alpha Beta', 'beta', 600),
+        soon('crew=2: Alpha Beta', '', 600),
+    )
+
+
+# A dropped link on a layer (issue #751): 5, 30 and 120 seconds; the dive taken up again however long it was away,
+# a crewmate's battle joined after it as before
+for cut in (5, 30, 120):
+    MANY[f'link-down-{cut}s'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+        MANY['dive-together']['STEPS'],
+        link_down(cut),
+        ('do', 'battle; wait 10'),
+        soon('join=fighting', 'beta', 900),
+        soon('join=fighting', '', 900),
+    ))
 
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
 # back; between crew_near (128) and crew_far (192) a crew stays as it was, looked at again and again. MegaMan is put
@@ -388,13 +407,10 @@ MANY['crew-lost-ends-both'] = dict(crew_fight(pulled(3)), STEPS=online.course(
 # A quit after the pull-back, and the dive taken up again from the portal: still spent.
 MANY['crew-pull-back-kept'] = dict(crew_fight(BETA), STEPS=online.course(
     MANY['crew-pulls-back']['STEPS'],
-    ('@beta', 'restart', BETA),               # (the game closed on the dive, back at Lan's HP)
-    online.into_square('beta'),
-    soon('weekoffer=again', 'beta', 600),
-    online.at('beta', ('do', PORTAL), ('repeat', 'press A; wait 10', 'choice~/', 20)),
-    ('@beta', 'repeat', 'wait 4', 'choice=1/3', 90),   # ("Keep diving", "Start over", "Not now": the first)
-    ('@beta', 'do', 'press A; wait 6'),
-    online.at('beta', ('repeat', 'press A; wait 10', 'dive=on', 30), ('until', 'where=layer', 1200)),
+    ('@beta', 'restart', BETA.replace('--scene home', '--scene title')),   # (the game closed on the dive)
+    ('@beta', 'repeat', 'press START; wait 40', 'title=menu'),
+    ('@beta', 'repeat', 'press A; wait 40', 'scene=emu'),
+    ('@beta', 'until', 'where=layer', 1200),
     ('@beta', 'expect', 'pullback=spent'),
 ))
 
@@ -424,4 +440,131 @@ MANY['comings-and-goings'] = dict(CAST, GAMES={'beta': online.HOME, 'gamma': onl
     ('sleep', 1.5),
     soon("comings=Gamma's signal is back!", '', 600),
     soon('crew=3: Alpha Beta Gamma', '', 600),
+))
+
+# A full guardian's door (issue #753): five divers on the guardian's layer, four into the door's queue and the
+# fifth after them. The four see the party by name on their plates, the leader first; the fifth is told the party
+# is full and keeps his keys (START opens his PET); once one of the four goes alone, a place is open and the fifth,
+# asking again, is in. MegaMan's words on the way in are paged before the door is taken, where A is not yet the
+# leader's "Go in" (#752).
+DOOR = ('alpha', 'beta', 'gamma', 'delta', 'echo')
+
+
+def to_layer(game):
+    """On to the guardian's layer (the dev menu's Next guardian), its words paged."""
+    return online.at(game,
+                     ('do', 'guardian; wait 60'),
+                     ('until', 'screen=map', 900),
+                     ('repeat', 'press B; wait 15', 'chat=closed', 30))
+
+
+def to_door(game):
+    """In at the arena's door: his words on the way in paged with A, before the door is taken (B is "not yet")."""
+    return online.at(game,
+                     ('do', 'by arena; wait 60'),
+                     ('repeat', 'press A; wait 30', 'chat=closed', 30),
+                     ('do', 'by arena; wait 5; hold AHEAD 90; wait 30'))
+
+
+def at_a_full_door():
+    names = {g: g.capitalize() for g in DOOR}
+    steps = online.course(online.into_square(), dive())
+    for g in DOOR[1:]:
+        steps += online.course(online.into_square(g), dive(g))
+    for g in DOOR:
+        steps += to_layer('' if g == 'alpha' else g)
+    steps += online.course(soon('divers~Echo', '', 600), to_door(''), soon('door=queued: Alpha', '', 300))
+    for k, g in enumerate(DOOR[1:4], 2):
+        steps += online.course(to_door(g), soon('door=queued: ' + ' '.join(names[d] for d in DOOR[:k]), g, 300))
+    steps += online.course(
+        soon('door=queued: Alpha Beta Gamma Delta', '', 300),
+        ('expect', 'crewview=3 party'),                   # the leader's plates: the other three, by name
+        ('expect', 'mate0~Beta'),
+        soon('crewview=3 party', 'beta', 300),
+        ('@beta', 'expect', 'mate0~Alpha'),               # ... and a member's: the leader first
+        to_door('echo'),
+        soon('door=full', 'echo', 300))
+    return steps
+
+
+GAMES5 = {g: online.HOME for g in DOOR[1:]}
+MANY['door-full'] = dict(CAST, GAMES=GAMES5, STEPS=online.course(
+    at_a_full_door(),
+    ('@echo', 'do', 'press START; wait 40'),              # his keys his own: START opens the PET
+    ('@echo', 'expect', 'screen=pet'),
+    ('@echo', 'repeat', 'press B; wait 20', 'screen=map', 10),
+    ('@echo', 'expect', 'door=full'),
+    ('@delta', 'do', 'press B; wait 10'),                 # Delta goes alone: a place opens
+    ('sleep', 3.5),
+    soon('door=queued: Alpha Beta Gamma Echo', 'echo', 600),
+))
+MANY['door-full-alone'] = dict(CAST, GAMES=GAMES5, STEPS=online.course(
+    at_a_full_door(),
+    ('@echo', 'do', 'press A; wait 10'),                  # A: in alone, the arena closing round him
+    soon('card=title', 'echo', 600),
+    ('expect', 'door=queued: Alpha Beta Gamma Delta'),    # the four's party as it was
+))
+
+# The Board without a visit (issue #759): Alpha deleted on the dive's first layer (fragile: the first hit deletes),
+# his game never back in the Square; Beta, in the Square, reads him on the Board, the server's post from his end.
+FRAGILE = online.HOME.replace('quiet,', 'fragile,')
+MANY['dive-end-on-the-board'] = dict(CAST, START=FRAGILE, GAMES={'beta': online.HOME}, STEPS=online.course(
+    online.into_square(),
+    dive(),
+    ('expect', 'divelink=on'),
+    online.into_square('beta'),
+    ('do', 'foes 01@42 mm@22; wait 10'),               # (a Mettaur in MegaMan's row: its wave the first hit)
+    ('repeat', 'press START; wait 10; press A; wait 90', 'dive=none', 60),   # (the Custom screen's OK, no chip: the first hit deletes)
+    soon('weekboard~Alpha:1', 'beta', 600),
+))
+
+
+# CONTINUE on an unfinished dive goes straight back in (issue #759, the owner's call of 22 November 2026): the game
+# closed on the dive's first layer, the title's CONTINUE says the dive and takes it up at its checkpoint, the link
+# taken up with it; deleted there, the dive over, CONTINUE is the normal run's again, as it was before the dive.
+TITLE = online.HOME.replace('--scene home', '--scene title')
+
+
+def back_in(game=''):
+    """The game closed and started at its title, CONTINUE: on the dive's layer again."""
+    return online.at(game, ('restart', TITLE), ('repeat', 'press START; wait 40', 'title=menu'), ('expect', 'cursor=continue'),
+                     ('expect', 'divesaved=1'), ('repeat', 'press A; wait 40', 'scene=emu'), ('until', 'where=layer', 1200))
+
+
+MANY['dive-kept-apart'] = dict(CAST, STEPS=online.course(
+    online.paged(),
+    ('keep', 'hp zenny bugfrags place spares'),
+    online.into_square(),
+    dive(),
+    ('expect', 'dive=on'),
+    back_in(),
+    ('expect', 'dive=on'),
+    ('expect', 'layer=1'),
+    soon('divelink=on', '', 900),
+    soon('divestate=up', '', 900),             # (the Square answered: the dive's room entered again)
+    ('restart', FRAGILE.replace('--scene home', '--scene title')),   # (closed again; fragile: the next hit deletes)
+    ('repeat', 'press START; wait 40', 'title=menu'),
+    ('repeat', 'press A; wait 40', 'scene=emu'),
+    ('until', 'where=layer', 1200),
+    ('do', 'foes 01@42 mm@22; wait 10'),               # (a Mettaur in MegaMan's row: its wave the first hit)
+    ('repeat', 'press START; wait 10; press A; wait 90', 'dive=none', 60),
+    ('restart', TITLE),
+    ('repeat', 'press START; wait 40', 'title=menu'),
+    ('expect', 'divesaved=0'),
+    ('expect', 'cursor=continue'),
+    ('repeat', 'press A; wait 40', 'scene=emu'),
+    ('until', 'where=town', 1200),             # the normal run's CONTINUE, at the gate
+    ('repeat', 'mash A 60; wait 30', 'chat=closed'),
+    ('same', 'hp zenny bugfrags place spares'),
+))
+
+# ... with a crew: Beta's game closed on the layer, CONTINUE puts him back there, Alpha sees him again, the crew forms.
+MANY['dive-continue-crew'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    back_in('beta'),
+    soon('divelink=on', 'beta', 900),
+    ('sleep', 2),                                     # (the server's crew_form_ms, on its clock)
+    soon('divers~Beta', '', 900),
+    soon('crew=2: Alpha Beta', 'beta', 900),
+    soon('crew=2: Alpha Beta', '', 600),
 ))

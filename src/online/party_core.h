@@ -82,6 +82,17 @@ void party_core_leave(PartyCore *pc, unsigned seat);
 unsigned party_core_phase(PartyCore *pc);
 /* Each seat's MegaMan's HP as the field last saw it (0 deleted) */
 unsigned party_core_hp(const PartyCore *pc, unsigned seat);
+/* The battle over, BN6's results to come on this game's own pad (the
+ * hashes stopped): seat's HP and max HP where they show the lead's, his
+ * battle object and the Navi's HP, so that BN6's results show a
+ * partner his own (issue #757); seat 0 nothing */
+void party_core_results_as(PartyCore *pc, unsigned seat);
+/* A seat's HP and max HP as the field means them: his going in before
+ * the battle's first iteration (his object holds his lead's till then),
+ * else his object's; 0 0 none */
+void party_core_seat_hp(PartyCore *pc, unsigned seat, unsigned *hp, unsigned *max);
+/* ... the Navi's HP there, as BN6's results show it */
+unsigned party_core_navi_hp(PartyCore *pc);
 /* The guardian's HP and max (side 1's first actor), 0 none */
 unsigned party_core_foe_hp(PartyCore *pc);
 /* The reward BN6's results picked as the battle ended (BN6_BATTLE_REWARD:

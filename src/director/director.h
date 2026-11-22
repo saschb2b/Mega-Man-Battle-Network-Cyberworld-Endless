@@ -3,9 +3,15 @@
 #define CW_DIRECTOR_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
 
+/* The Net Square the gate leads to, as it calls it (--dev online's, else
+ * the one picked in network.ini), the player's name and his identity there
+ * (16 bytes, NETWORK_ID_BYTES): false where no name or identity is kept
+ * yet. CONTINUE into a dive calls it so (issue #759). */
+bool director_gate_address(char *url, size_t url_n, char *name, size_t name_n, uint8_t *identity);
 /* Builds the run's current layer in its area's map and warps MegaMan in. */
 bool director_start_layer(void);
 /* The saved run (seed and depth, peek_run's) was saved at home, in the

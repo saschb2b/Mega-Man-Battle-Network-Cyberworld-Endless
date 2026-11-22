@@ -22,6 +22,7 @@ typedef struct {
 	unsigned queued, sent;
 	uint32_t t;                     /* ... his screen's frames */
 	unsigned opened, oks, at_limit, closed_first, pas, failed;
+	unsigned seen_hp;               /* the HP his screen's HP box last showed (the state's, issue #757) */
 } Turn;
 
 /* by seat (1-3): one on a partner's game, each stood-in partner's under the dev's partycore */
@@ -81,7 +82,9 @@ static void turn_open(Turn *t, PartyCore *field, const uint8_t *rom, unsigned se
 		return;
 	}
 	unsigned n = t->dealt = party_core_deck(field, seat, t->deck);
-	t->turn = n && team_screen_open_one(t->screen, party_core_gba(field), seat - 1, t->deck, n);
+	unsigned hp, max;
+	party_core_seat_hp(field, seat, &hp, &max);
+	t->turn = n && team_screen_open_one(t->screen, party_core_gba(field), seat - 1, t->deck, n, hp, max);
 	t->queued = t->sent = 0;
 	t->t = 0;
 	t->opened += t->turn;
@@ -113,6 +116,7 @@ uint16_t party_turn_word(PartyCore *field, const uint8_t *rom, unsigned seat, ui
 	}
 	uint16_t keys = bot ? bot_keys(t->t) : (uint16_t)(pad & ARENA_KEYS_MASK);
 	++t->t;
+	t->seen_hp = team_screen_one_hp(t->screen);
 	if (team_screen_frame(t->screen, keys, picks, &n)) {
 		++t->oks;
 		say(t, seat, picks, n);
@@ -125,6 +129,8 @@ const uint32_t *party_turn_video(unsigned seat) {
 	const Turn *t = seat && seat < PARTY_MOST ? &T[seat] : NULL;
 	return t && t->turn && team_screen_open_now(t->screen) ? team_screen_video(t->screen) : NULL;
 }
+
+unsigned party_turn_hp(unsigned seat) { return seat && seat < PARTY_MOST ? T[seat].seen_hp : 0; }
 
 void party_turn_report(unsigned seat) {
 	const Turn *t = seat && seat < PARTY_MOST ? &T[seat] : NULL;

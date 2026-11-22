@@ -3,7 +3,7 @@ type: Tool
 title: "Scenarios: the game played through a course, its state checked"
 description: "`python3 build.py scenarios` plays each file of `tests/scenarios/` headless (`tools/scenarios.py`, on `tools/cw.py`'s games): a scripted course with the state in words checked on the way, so a bug that only a sequence of play shows stays fixed."
 tags: [devtools, tests]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T20:20:05Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T23:08:38Z }
 ---
 
 # Scenarios: the game played through a course, its state checked
@@ -298,7 +298,8 @@ a dive with its link `divers N: NAMES`, `diver NAME at X Y`, `tags N:
 NAMES` (the names shown over the divers' heads, `NAME+K` where K more
 stand under one, `NAME*` a crewmate's; `dive_people_describe`), `rings
 N: NAMES` (the crew's rings under the divers shown, `NAME(forming)` a
-dotted one, about to be), `crew N: NAMES`
+dotted one, about to be), `door none|alone|queued: NAMES|full|started` (a
+guardian's door, its party leader first; `dive_party_describe`), `crew N: NAMES`
 (`dive_crew_describe`), `join none|calling|joined|fighting` (a crew's
 battle: MegaMan's own held and offered, a crewmate's joined, the one
 field fought; `dive_join_describe`).
