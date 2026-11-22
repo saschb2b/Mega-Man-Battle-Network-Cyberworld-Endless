@@ -303,6 +303,7 @@
 0800F660 chaos_unison_power_attacks
 0800F68E family_0x3b
 0800F6A6 family_0x3c
+0800F720 family_0x3e
 0800F7FC family_0x42
 0800F840 family_0x44
 0800F9A0 his_b_left_0x25
@@ -987,6 +988,7 @@
 080EE7E5 battle_0x32_bit_4
 080EE93C scope_gun_hit_effect_0x68
 080EEA40 flash_image_object_kind_0x22_sprite
+080EEB40 capsule_bomb
 080EEC86 magnetsoul_charged_shot_0x15_0x0800f7fc_family
 080EEE82 his_charged_shot_power_attack_0x19
 080EF270 bn5_darkinvs_bn6_5
