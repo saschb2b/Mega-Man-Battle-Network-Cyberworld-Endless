@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T00:12:37Z
-* **Update**: online/shared-dive.md (comings and goings, issue #758: the owner's call of band lines and plate marks; a crewmate's signal gone and back, a full crew told, busy, fighting and home as PET tags, the arrival's cursor, the band's most lines a minute), code/online.md (dive_comings.c).
