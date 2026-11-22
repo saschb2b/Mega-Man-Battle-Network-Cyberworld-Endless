@@ -28,6 +28,8 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader) {
 	return s;
 }
 
+const char *dive_door_full_words(void) { return "The party's full!  A:Go in alone"; }
+
 
 const char *dive_join_joined_words(void) { return "Jumping in!"; }
 

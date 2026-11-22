@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <SDL.h>
+
 #include "boss.h"
 #include "bn6.h"
 #include "bytes.h"
@@ -16,14 +18,17 @@
 
 #define SEND_EVERY 6          /* frames between the fight's messages, each sent only on a change */
 #define ARENA_START 3         /* ARENA_STATE's stage START (shared/online/README.md) */
+#define ASK_AGAIN_MS 3000     /* a full door's queue asked again for a place (issue #753) */
 
-enum { DOOR_NONE, DOOR_ALONE, DOOR_QUEUED, DOOR_STARTED };
+enum { DOOR_NONE, DOOR_ALONE, DOOR_QUEUED, DOOR_FULL, DOOR_STARTED };
 
 static struct {
 	int door;                 /* DOOR_* */
 	DiveWay at;               /* the door's layer */
 	QueueState q;
 	uint32_t keys;            /* the pad's last frame, for a press */
+	uint32_t notices;         /* the NOTICEs counted as the join was sent (a refusal is the next) */
+	uint32_t asked_at;        /* the join's last ask (ms) */
 	/* the fight */
 	PartyState party;         /* its START: battle, seat, seats, format */
 	bool fighting;
@@ -48,15 +53,29 @@ static void reset(void) {
 	boss_party_set(1);
 }
 
-static bool hold(void) { return Q.door == DOOR_QUEUED; }
+/* (a full door holds MegaMan too: he waits there for a place, or goes in alone with A) */
+static bool hold(void) { return Q.door == DOOR_QUEUED || Q.door == DOOR_FULL; }
 
 void dive_party_on(int on) {
 	boss_door_hold = on ? hold : NULL;
 	reset();
 }
 
+static void join(const OnlineSnapshot *s) {
+	queue(ONLINE_QUEUE_JOIN);
+	Q.notices = s->notice_serial;
+	Q.asked_at = SDL_GetTicks();
+}
+
+/* a join the server refused: the door's queue holds its four already (its
+ * NOTICE before any QUEUE_STATE; issue #753) */
+static bool refused(const OnlineSnapshot *s) {
+	return Q.door == DOOR_QUEUED && Q.q.count == 0 && s->notice_serial != Q.notices && s->notice_code == ONLINE_NOTICE_QUEUE;
+}
+
 /* the door: others on the layer and MegaMan saved at it joins its queue;
- * alone, he goes in as ever; out of the arena's mouth, he leaves it */
+ * alone, he goes in as ever; out of the arena's mouth, he leaves it; a
+ * full queue told so, and asked again for a place now and then */
 static void door(const OnlineSnapshot *s, DiveWay room) {
 	bool at = boss_at_door();
 	if (!at) {
@@ -64,10 +83,15 @@ static void door(const OnlineSnapshot *s, DiveWay room) {
 		if (Q.door != DOOR_STARTED) Q.door = DOOR_NONE;
 		return;
 	}
+	if (refused(s)) {
+		Q.door = DOOR_FULL;
+		fprintf(stderr, "dive: the door's party is full\n");
+	}
+	if (Q.door == DOOR_FULL && SDL_GetTicks() - Q.asked_at > ASK_AGAIN_MS) join(s);
 	if (Q.door != DOOR_NONE) return;
 	Q.at = room;
 	if (!s->connected || s->peer_count == 0) { Q.door = DOOR_ALONE; boss_party_set(1); return; }
-	queue(ONLINE_QUEUE_JOIN);
+	join(s);
 	Q.door = DOOR_QUEUED;
 	Q.q.count = 0;
 }
@@ -129,6 +153,15 @@ void dive_party_frame(const OnlineSnapshot *s, DiveWay room) {
 uint32_t dive_party_keys(uint32_t keys) {
 	uint32_t pressed = keys & ~Q.keys;
 	Q.keys = keys;
+	/* (a full door: A goes in alone, every other key MegaMan's own) */
+	if (Q.door == DOOR_FULL) {
+		if (pressed & KEY_A) {
+			Q.door = DOOR_ALONE;
+			boss_party_set(1);
+			fprintf(stderr, "dive: in alone, the party full\n");
+		}
+		return keys & ~(uint32_t)KEY_A;
+	}
 	if (Q.door != DOOR_QUEUED) return keys;
 	if ((pressed & KEY_A) && Q.q.place == 1) queue(ONLINE_QUEUE_START);
 	if (pressed & KEY_B) {
@@ -153,6 +186,10 @@ static void queue_state(const QueueState *q) {
 		break;
 	case ONLINE_QUEUE_OUT:
 		if (Q.door == DOOR_QUEUED) Q.door = DOOR_ALONE;
+		break;
+	case ONLINE_QUEUE_WAITING:
+		/* (a place opened at a full door: asked again, he is in) */
+		if (Q.door == DOOR_FULL) Q.door = DOOR_QUEUED;
 		break;
 	default: break;
 	}
@@ -200,7 +237,21 @@ void dive_party_mail(const uint8_t *m, size_t n) {
 }
 
 void dive_party_draw(int x, int y) {
+	if (Q.door == DOOR_FULL) { look_band(x, y + 160 - LOOK_BAND_H - 1, 240, dive_door_full_words()); return; }
 	if (Q.door != DOOR_QUEUED) return;
 	const char *leader = Q.q.count ? Q.q.e[0].name : "";
 	look_band(x, y + 160 - LOOK_BAND_H - 1, 240, dive_door_words(Q.q.count, Q.q.place == 1, leader));
+}
+
+int dive_party_members(const QueueEntry **out) {
+	*out = Q.q.e;
+	return Q.door == DOOR_QUEUED && Q.q.count > 1 ? Q.q.count : 0;
+}
+
+void dive_party_describe(FILE *f) {
+	static const char *const doors[] = { "none", "alone", "queued", "full", "started" };
+	fprintf(f, "door %s", doors[Q.door]);
+	if (Q.door == DOOR_QUEUED)
+		for (unsigned k = 0; k < Q.q.count; ++k) fprintf(f, "%s%s", k ? " " : ": ", Q.q.e[k].name);
+	fputc('\n', f);
 }

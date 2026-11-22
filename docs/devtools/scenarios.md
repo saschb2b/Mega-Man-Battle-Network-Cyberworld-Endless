@@ -298,7 +298,8 @@ a dive with its link `divers N: NAMES`, `diver NAME at X Y`, `tags N:
 NAMES` (the names shown over the divers' heads, `NAME+K` where K more
 stand under one, `NAME*` a crewmate's; `dive_people_describe`), `rings
 N: NAMES` (the crew's rings under the divers shown, `NAME(forming)` a
-dotted one, about to be), `crew N: NAMES`
+dotted one, about to be), `door none|alone|queued: NAMES|full|started` (a
+guardian's door, its party leader first; `dive_party_describe`), `crew N: NAMES`
 (`dive_crew_describe`), `join none|calling|joined|fighting` (a crew's
 battle: MegaMan's own held and offered, a crewmate's joined, the one
 field fought; `dive_join_describe`).
