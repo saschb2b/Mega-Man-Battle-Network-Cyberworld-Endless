@@ -114,6 +114,7 @@ TYPE_MORE = {3: (0xCC, TYPE_0)}
 LATE_FROM = 8
 LATE_TYPES, LATE_LIST4 = {3: (0xDF, TYPE_MORE[3][0])}, (0xBF, 0xBB)
 LATE_EFFECTS, LATE_LIST5 = (0x8F, 0x78), (0x97, 0x83)
+LATE_SKIP = ()   # (ids inside a late range another installer takes, passed over: the chips' run sets the Souls', tools/xchiprecipe_bn4.py)
 # ... and their art in a room of their own, the families' second room holding its sounds' copies to its end (ART0): the
 # free space plan's (src/emu/free_space.plan FREE_LATE_FAMILIES, src/emu/xvirus_recipe.h XV_LATE_ART) past BN5's lava and
 # sea; their code in the second room while it has room (CODE0), then in a code room of their own (FREE_LATE_CODE,
@@ -1129,6 +1130,8 @@ def move_effect(b4, f, alloc, e4):
         f.notes.append(f'its effect {e4:#x}: {e6:#x}, as {alloc.effect_owner[e4]} moved it')
     if e6 is None and getattr(f, 'late', False):
         # (a late family's from the top of its own range down: LATE_EFFECTS)
+        while alloc.late_effect in LATE_SKIP:
+            alloc.late_effect -= 1
         if alloc.late_effect < LATE_EFFECTS[1]:
             f.decide('effect', f'its effect {e4:#x}: the late families\' effect ids ({LATE_EFFECTS[1]:#x}-{LATE_EFFECTS[0]:#x}) all taken')
             return None

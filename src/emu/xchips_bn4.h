@@ -13,6 +13,7 @@
 #ifndef CW_XCHIPS_BN4_H
 #define CW_XCHIPS_BN4_H
 
+#include "bn6_forms.h"
 #include "free_space.h"
 #include "xattack_grow.h"
 #include "xchips_bn5.h"
@@ -55,6 +56,10 @@
                                        * +8 to +0xB (its panel's column and row, BN4_COLL_PANEL_BYTE, its counter time), from BN6's
                                        * +0xA to +0xD, the same fields in the same order but off a word's alignment: two halfwords
                                        * joined in r0, r1 kept (AirHoc's puck's move test, 0x080D288C: XvCallIn) */
+#define XC4_SOULS_SIDE (FREE_BN4_CHIP_STUBS + 0x30u) /* r5 a MegaMan: r3 his side's Souls block (BN6_SOULS + side *
+                                       * BN6_SOULS_SIDE, by his +0x16), r0 0, where BN4's code clears fields of his AI data that
+                                       * BN6 keeps there (GutsSoul's rapid buster's count, 0x080EBE82: XvCallIn; soulrapid.h) */
+#define XC4_SOULS_BASE BN6_SOULS          /* ... its literal */
 #define XC4_MISC      (FREE_BN4_CHIPS_END - 0x400u)   /* BN6's misc family's routines grown, 256 (BN6's own 23, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
 #define XC4_FIRST_SUPPORT 0x80             /* BN4's subfamily 0 in BN6's grown support routines (BN6's 0-0x29, BN5's from 0x2A) */
 /* An attack family of BN4's (a state of its MegaMan's, BN4_PLAYER_STATES by a chip's record's +0xB: the spread chips' 0x1E)

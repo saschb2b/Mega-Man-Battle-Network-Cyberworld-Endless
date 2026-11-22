@@ -18,5 +18,17 @@
 #define BN4_GUTS_PASS_KIND 0x0800E1F0u /* ... cmp r1,#0xc: of the kind none (BN4_CHIP_KIND), */
 #define BN4_GUTS_PASS_KIND2 0x0800E1F6u /* ... cmp r1,#8: or panel-cracking, */
 #define BN4_GUTS_PASS_ADD 0x0800E1FEu /* ... adds r1,#0x1e: 30 */
+/* GutsSoul's rapid buster: B pressed six times in his form (the key handler 0x0800BDE0, r4 his AI data, r6 his requests at
+ * its start) asks his state 0x10, eight shots of his buster (soulrapid.c) */
+#define BN4_GUTS_RAPID_FORM 0x0800BE50u /* cmp r7,#2: his form (NaviStats +0x24) GutsSoul's, and his request 0x20 not standing
+                                         * (tst r6, #0x20): then each B pressed (AI +0x1E bit 2) counts at his AI +0x12, */
+#define BN4_GUTS_RAPID_WINDOW 0x0800BE68u /* ... movs r0,#0xa: its window at his AI +0x11, ten frames from a press, the count
+                                           * 0 as it runs out (0x0800BE6C-0x0800BE7A), */
+#define BN4_GUTS_RAPID_AT 0x0800BE7Eu /* ... cmp r0,#6: at six or more the window the count (0x0800BE84), request 0x20 asked
+                                       * (0x0800BE8A), his kept charge levels set as B let go sets them (+0x14, +0x15), */
+#define BN4_GUTS_RAPID_ASK 0x080EEC04u /* ... movs r0,#0x10: which his ready state's requests (0x080EEBEE, before a plain or charged
+                                        * B's) answer with his state 0x10, */
+#define BN4_GUTS_RAPID 0x080EBDC0u     /* ... its routine (BN4_PLAYER_STATES' 0x10): eight buster shots (0x0800B590) with sound
+                                        * 0xA7, the count and window cleared at its end (0x080EBE84-0x080EBE88) */
 
 #endif

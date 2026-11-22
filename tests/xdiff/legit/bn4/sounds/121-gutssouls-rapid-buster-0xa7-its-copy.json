@@ -1,0 +1,10 @@
+{
+ "bn4": "0xA7",
+ "bn6": "0x301",
+ "clock": "state",
+ "souls": [
+  "2"
+ ],
+ "what": "GutsSoul's rapid buster's shot 0xA7, its copy",
+ "why": "Played by GutsSoul's rapid buster as each of its eight shots is fired (BN4's state 0x10, moved as BN6's grown 0xD9: movs r0,#0xa7 at 0x080EBE32, its bl to PlaySoundEffect at 0x080EBE34; BN6: the copy's bl aimed at the unit's shim that makes r0 0x301, tools/xchiprecipe_bn4.py SOUND_SLOTS): BN4's song 0xA7 copied into slot 0x301 of BN6's grown song table, BN6 having another song at 0xA7. bn4_soul_guts_rapid at t169, then every seven frames"
+}

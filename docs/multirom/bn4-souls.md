@@ -311,21 +311,27 @@ battle's, so a charge begun after a chip reads a frame early. Its four
 mutations: the charge 10 frames longer, the punch's damage another, the pass
 left out (the passives' `SOULPASSIVE_BREAK_PLUS`), another Soul's sprite.
 
-**Not yet moved: his rapid buster.** BN4's key handler in form 2 counts B's
-presses (AI data +0x12, a window of 10 frames at +0x11, 0x0800BE5A to
-0x0800BE7A) and at six asks request 0x20, which his ready state answers
-with his state 0x10: eight shots, sound 0xA7, each BN4's buster shot
-(0x0800B590, BN6's twin 0x0800FAAC, each reading its own game's buster
-attack from the NaviStats), then the count cleared (0x080EBE84 to
-0x080EBE88). The comparator reads the count of one to five presses as the
-same state (`presses`); a sixth parts the battles. To move it: the state
-as an attack unit (`('attack', 0x10, ...)` at 0xD9; its sound to slot 0x301;
-the twin above), a place for the two bytes (BN6's AI data's spare past
-+0xF0 is BN5's chip AI's where BN5's ROM is read, so the Souls block's
-side bytes from 0x18, which the unit's clear then needs aimed there), a hook
-after BN6's charge requests (0x08013130, r4 his AI data) that counts, and
-one on the charged B's request (0x080F17F2, its power attack's call) that
-gives family 0xD9 in place of the charged shot's.
+**His rapid buster.** BN4's key handler in form 2 counts B's presses (AI
+data +0x12, a window of 10 frames at +0x11, 0x0800BE5A to 0x0800BE7A) and at
+six asks request 0x20, which his ready state answers first with his state
+0x10: eight shots, sound 0xA7, each BN4's buster shot (0x0800B590, BN6's
+twin 0x0800FAAC, each reading its own game's buster attack from the
+NaviStats), then the count cleared (0x080EBE84 to 0x080EBE88). In BN6's
+engine (`src/emu/soulrapid.c`):
+
+| Part | Its place |
+| --- | --- |
+| The state | the chips' unit `GutsRapid` (BN4's state 0x10 whole, moved as BN6's grown family 0xD9), its sound 0xA7 at slot 0x301, its shots BN6's twin of the buster shot (audited), the arm's flash BN4's effect 5 moved as BN6's 0xC1 |
+| The count | in his side's Souls block (`BN6_SOUL_PRESSES` +0x18, `BN6_SOUL_WINDOW` +0x19), since BN6's AI data holds his chaos power at BN4's +0x11; the unit's end clears it there through a stub (`XC4_SOULS_SIDE`, the generator's `UNIT_CALLS_IN`, its two stores' offsets moved) |
+| The counting | a hook where BN6's key handler's paths join before a B press's charge (`BN6_RAPID_COUNT`, BN4's twin place), BN4's rule line for line, its ten and six read from BN4's code |
+| The request | BN6's charged B's (2), whose answer in BN6's requests makes the calls BN4's answer to 0x20 makes; a hook on its power attack's call (`BN6_RAPID_POWER`) gives the unit's family while the count stands at six, as BN4 answers 0x20 before a charged B |
+
+The proof is `bn4_soul_guts_rapid` (with its control): united as
+`bn4_soul_guts` unites, B pressed six times six frames apart, the first five
+each a plain shot as it is let go, the sixth the rapid buster, B once more
+after it, counted from 0. Its three mutations: asked at seven presses
+(`SOULRAPID_BREAK_SEVEN`, `soulbreak` bit 30), seven shots, the count left
+standing at its end.
 
 ## Two Souls of one kind
 

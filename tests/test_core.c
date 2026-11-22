@@ -5843,6 +5843,10 @@ static void test_chip_art_room(void) {
 	CHECK(BN4_COLL_PANEL_X == 8 && BN6_COLL_PANEL_X == 0xA && BN6_COLL_PANEL_Y == 0xB && BN4_COLL_PANEL_BYTE == 0xA && BN6_COLL_PANEL_BYTE == 0xC &&
 		BN4_COLL_COUNTER == 0xB && BN6_COLL_COUNTER == 0xD && XC4_COLL_PANEL_WORD >= XC4_FIRST_ACTOR + 0x1C,
 		"chips' code: the panel word's routine reads BN6's collision data's fields as BN4's word lays them out");
+	/* (XC4_SOULS_SIDE's: a side's block 0x20 bytes, by the object's +0x16, after the panel word's routine) */
+	CHECK(BN6_SOULS_SIDE == 1 << 5 && BN6_T1_ALLIANCE == 0x16 && XC4_SOULS_SIDE >= XC4_COLL_PANEL_WORD + 0x10 && XC4_SOULS_BASE == BN6_SOULS &&
+		BN6_SOUL_PRESSES + 1 < BN6_SOULS_SIDE && BN6_SOUL_WINDOW < 32 && BN6_SOUL_PRESSES < 32,
+		"chips' code: the Souls block's routine finds a side's block as BN6_SOULS lays them out, its fields within a strb's reach");
 	char why[160] = "";
 	int rows = 0;
 	for (int u = 0; u < xchips_bn4_count; ++u) {

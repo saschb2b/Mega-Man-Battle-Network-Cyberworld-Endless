@@ -88,6 +88,9 @@
 #define BN6_SOUL_CYCLE        0x16        /* u8 the Chaos Unison's charge's frame in its phases' cycle (BN5's AIData +0x1C; S6) */
 #define BN6_SOUL_REQUEST      0x17        /* u8 1 while its release's request (AIData +0x44's 0x8000 or 0x10000) is the Souls': the attack's end
                                              clears it as BN5's does (0x0800F2D0's 0x1803F) */
+#define BN6_SOUL_PRESSES      0x18        /* u8 GutsSoul's B presses counted toward his rapid buster (BN4's AIData +0x12, BN4_GUTS_RAPID_FORM;
+                                             soulrapid.c), which BN6's AI data holds others at */
+#define BN6_SOUL_WINDOW       0x19        /* u8 ... the frames left to press again (BN4's AIData +0x11: BN6's there is BN6_AI_POWER_CHAOS) */
 #define BN6_SLOT_EMBLEM       0           /* BN6_SOUL_SLOT: BN6's Beast Out emblem, its own rule */
 #define BN6_SLOT_UNITE        1           /* BN6_SOUL_SLOT: BN5's UNITE, its rule (the last chip picked of a held Soul's kind) */
 #define BN6_STANDS_UNITE      1           /* BN6_SOUL_STANDS: UNITE could stand (Souls held, he neither worried nor dark nor beasted out) */
@@ -373,6 +376,12 @@
 #define BN6_CHAOS_PHASE       0x08012E8Eu /* ... after it, pop {r4,r6,pc}: the chaos phase's step (BN6 has none) */
 #define BN6_CHAOS_RELEASE     0x080131D4u /* bl 0x0800FFE4: the release's request, r0 1 or 2 (a charged B), r4 his AI data (BN5's 0x08010870,
                                              0x8000 or 0x10000 there for a chaos B) */
+#define BN6_RAPID_COUNT       0x08013130u /* ldrb r0,[r4,#8] in his key handler (r4 his AI data, r5 him), its paths joined past the A
+                                             button's and before a B press's charge (BN4's 0x0800BE96, the counter's place before it in
+                                             BN4: BN4_GUTS_RAPID_FORM): GutsSoul's presses counted (soulrapid.c) */
+#define BN6_RAPID_POWER       0x080F17F2u /* bl 0x080117A4 in the player's requests' charged B (request 2, 0x080F17D6): the charged shot's
+                                             family in r0 from his AI +7; GutsSoul's rapid buster's family there where its count stands */
+#define BN6_RAPID_SET         0x080F17F6u /* ... after it: ldrb r1,[r6,#7], then the family set as his attack (0x08011684) */
 #define BN6_CHAOS_CONSUME     0x080F180Eu /* bl 0x0800FFFE in the player's requests (0x080F1694, push {r4,r6,r7,lr}) past the charged B's 2, r0 the
                                              requests (BN5's 0x080F0436: 0x8000 and 0x10000 here) */
 #define BN6_COUNTER_TEST      0x080EBA84u /* tst r0,r1 in the player's update (0x080EA734), r1 0x8600: BN6's counter requests, its 0x8000 one BN5 has

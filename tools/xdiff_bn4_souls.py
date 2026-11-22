@@ -59,7 +59,8 @@ TIME4 = 0xFE                              # (BN4's charged shot's charge time, i
 COUNT6, LEVEL6, BUTTON6, REQUEST6 = 0x1B, 0x1D, 0x1E, 0x46
 LEVEL_AS6 = {0: 0, 1: 1, 3: 2}
 WINDOW4, PRESSES4 = 0x11, 0x12            # (BN4's rapid buster's count, 0x0800BE5A-0x0800BE7A: a press sets the window to 10)
-WINDOW_TOP, RAPID_AT = 10, 6              # (... and at six presses it asks the rapid buster, 0x0800BE7E)
+WINDOW6, PRESSES6 = 0x19, 0x18            # (... BN6's in his side's Souls block: BN6_SOUL_WINDOW, BN6_SOUL_PRESSES, soulrapid.c)
+REQUESTS, RAPID4, CHARGED6, RAPID_AT = 0x44, 0x20, 0x02, 6   # (... at six asked: BN4's request 0x20, BN6's its charged B's 2)
 CHAOS6_NONE = 0xFF                        # (BN6's +0x11, its chip's chaos power, 0xFF none: BN6_AI_POWER_CHIP's note)
 GLOW4, GLOW6, GLOW_SLOT = ('T4', 0x05), ('T4', 0x08), 0x58
 
@@ -283,11 +284,17 @@ class Souls4:
 
     def presses(self, d, fa, fb):
         ai = self.ai_bytes(d, fa, fb)
-        if ai is None or d.off not in (WINDOW4, PRESSES4) or not self.united(fa, fb):
+        if ai is None or d.off not in (WINDOW4, PRESSES4, REQUESTS) or not self.united(fa, fb):
             return False
         a, b = ai
-        counting = 0 < a[PRESSES4] < RAPID_AT and 0 < a[WINDOW4] <= WINDOW_TOP
-        return counting and (b[WINDOW4] == CHAOS6_NONE if d.off == WINDOW4 else b[PRESSES4] == 0)
+        p6 = fb.fr.get('player', b'')
+        if len(p6) <= PLAYER_SOULS + WINDOW6:
+            return False
+        if d.off == REQUESTS:   # (the rapid buster asked: BN4's 0x20, BN6's 2 beside what else each holds, his count at six)
+            return bool(a[REQUESTS] & RAPID4) and p6[PLAYER_SOULS + PRESSES6] >= RAPID_AT and \
+                (a[REQUESTS] & ~RAPID4) | CHARGED6 == b[REQUESTS]
+        kept = p6[PLAYER_SOULS + (WINDOW6 if d.off == WINDOW4 else PRESSES6)]
+        return a[d.off] == kept and b[d.off] == (CHAOS6_NONE if d.off == WINDOW4 else 0)
 
     def charge_byte(self, k, a, b):
         """a byte of MegaMan's AI data where the engines keep the charge apart, each reading as the other"""
