@@ -473,7 +473,7 @@ where BN6's conveyors move 6. It looks as in BN5: its 54 tiles after the
 sea's, its own colours 10-13 of the holy panel's palettes 4 and 8 by BN5's
 animation, shown where no holy panel is. No field of BN5's is translated
 with it yet (`xfields.c`); MagnetSoul's exemption (BN5's NaviStats byte
-0x2C 5) waits for the Souls ([Team ProtoMan: foes and Souls](../game/team-protoman.md)).
+0x2C 5) is in place with his Soul (`soulpassive_magnet_spared`; [Team ProtoMan: foes and Souls](../game/team-protoman.md)).
 
 **The sea's submerge and hold (in place):** BN5's sea does two more
 things, which BN6's engine dropped with it (`src/emu/xsea.c`;

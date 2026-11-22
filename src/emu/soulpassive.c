@@ -16,6 +16,7 @@
 #include "soulkinds.h"
 #include "soullife.h"
 #include "soulproxy.h"
+#include "soulteam.h"
 
 #define BUS 0x08000000u
 #define SOUL_FIRST 1          /* BN5's Souls by number: Team ProtoMan's 1-6 (soulteam.h), Team Colonel's 7-12 */
@@ -26,7 +27,8 @@
 #define NUMBER_HAND 10       /* BN5's hand with NumberSoul (0x08025C24) */
 #define NUMBER_PLUS 10       /* ... and its bonus to an attack chip of no kind (0x0800D0CA) */
 #define NUMBER_LOOK 1        /* ... the bonus's mark (r7 there: 0x0800D0C8) */
-#define SOUL_NAPALM 4
+#define AI_KIND 0x00         /* an AI data's first byte, */
+#define AI_PLAYER 2          /* ... a player's Navi's (BN5 0x08017222: MegaMan's 2 in both games' traces) */
 #define NAPALM_PLUS 40       /* NapalmSoul's bonus to a Fire attack chip (0x0800D0FC), */
 #define NAPALM_LOOK 2        /* ... its mark (0x0800D0FA) */
 #define KIND_FIRE 0          /* BN5_CHIP_KIND's Fire */
@@ -58,7 +60,7 @@ bool soulpassive_bonus(uint32_t obj, int chip, bool charged, int *bonus, int *lo
 	/* (BN5's 0x0800D0CE: a Fire attack chip used uncharged, unless his A is held to a full charge, AI data +0x1E 1 and +0x1D 2) */
 	uint32_t ai = hook_read32(obj + BN6_T1_AI_DATA);
 	bool full_a = ai && hook_read8(ai + BN6_AI_CHARGE_BUTTON) == CHARGE_A && hook_read8(ai + BN6_AI_CHARGE) >= CHARGE_FULL;
-	if (soul == SOUL_NAPALM && !(breaks & SOULPASSIVE_BREAK_NAPALM) && attack_chip(chip) && soulkinds_of(chip) == KIND_FIRE &&
+	if (soul == SOUL_NAPALM && !(breaks & SOULPASSIVE_BREAK_PLUS) && attack_chip(chip) && soulkinds_of(chip) == KIND_FIRE &&
 		!charged && !full_a) {
 		*bonus = NAPALM_PLUS;
 		*look = NAPALM_LOOK;
@@ -125,6 +127,11 @@ static HookAct hand(HookRegs *r, void *user) {
 	if (soul_on(hook_read8(BN6_BATTLE_SIDE) & 1) != SOUL_NUMBER) return HOOK_CONTINUE;
 	r->r[0] = (breaks & SOULPASSIVE_BREAK_HAND) ? NUMBER_HAND - 1 : NUMBER_HAND;
 	return HOOK_CONTINUE;
+}
+
+bool soulpassive_magnet_spared(uint32_t obj) {
+	uint32_t ai = hook_read32(obj + BN6_T1_AI_DATA);
+	return !(breaks & SOULPASSIVE_BREAK_READY) && ai && hook_read8(ai + AI_KIND) == AI_PLAYER && soul_id_of(obj) == SOUL_MAGNET;
 }
 
 int soulpassive_breaks(void) { return breaks; }

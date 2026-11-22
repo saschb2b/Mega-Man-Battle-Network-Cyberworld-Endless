@@ -329,6 +329,23 @@ the next.
   `soul_gyro_double`, BN6's battle alone held to BN5's course (the same to
   the frame: the second AirShot's 0x8014 from t142, the sound 0x87 at
   t143); their mutations FAIL.
+  **MagnetSoul** (5): UNITE by an Elec chip, his look, his element Elec,
+  his charged shot (0x15, family 0x42 as 0xCB: a bolt, BN5's third-kind
+  0x75, moved with the Souls as BN6's 0x75 is another body, its sound
+  BN5's 0xBA at slot 0x60), his A's chip charge of an Elec chip, doubled
+  (BN5's 0x08010902 and 0x080103C8), his B+Left (0x25: BN5's misc family
+  0x1A with its sub-family 0xA, 0x080124C8, which strikes and holds each
+  foe of his row by BN5's third-kind 0x3F, moved too; the chips' copy of
+  the misc family names a stub for 0xA, so the Souls run a copy of its
+  dispatcher of their own as 0xCC, tools/xsoul.py's SUB_TABLES), and the
+  magnet panel's push spared him (BN5's 0x08017222: a player's Navi in
+  form 5; `soulpassive_magnet_spared`, which `src/emu/xpanels.c`'s magnet
+  port asks): `soul_magnet`, `soul_magnet_shot`, `soul_magnet_left`,
+  `soul_magnet_charge` (to t233, the chip's use: from t234 each game's own
+  Thunder ball differs) and `soul_magnet_panel` (on MagnetMan's magnet
+  panels from t525 to the end, never pushed) PASS against BN5's battle;
+  `soul_magnet_double` is BN6's battle alone held to BN5's course (CanGard
+  60 to 0 at t383 in both); their mutations FAIL.
   Open: `soul_napalm_charge` ends at t320, before CanGard's last frames,
   where the games part on a fourth-kind object of his (BN5's let go at
   t321, BN6's 0x11 still in play): not traced yet. His Chaos Unison

@@ -135,9 +135,12 @@ typedef struct {
 
 static bool in5(uint32_t a, uint32_t n) { return a >= BUS && a - BUS + n <= ROM_SIZE; }
 
-static const XvData *data_at(const SoulCode *c, uint32_t a) {
+/* the range of block b's that holds BN5's address a, if it is no code: one of b's own (two teams' blocks may hold the same
+ * bytes, each with its ranges: MagnetSoul's 0x080124C8 reads a number in the pool Team Colonel's 0x08012654 ends in) */
+static const XvData *data_at(const SoulCode *c, const XvBlock *b, uint32_t a) {
 	for (int i = 0; i < c->ndata; ++i)
-		if (a >= c->data[i].start && a < c->data[i].end) return &c->data[i];
+		if (a >= c->data[i].start && a < c->data[i].end && c->data[i].start >= b->start && c->data[i].end <= b->end)
+			return &c->data[i];
 	return NULL;
 }
 
@@ -215,14 +218,14 @@ static void block_move(Mover *m, const XvBlock *b, const uint8_t *rom5) {
 	if (!p) return;
 	memcpy(p, rom5 + (b->start - BUS), len);
 	for (uint32_t a = b->start; a < b->end && !xv_failed();) {
-		const XvData *d = data_at(c, a);
+		const XvData *d = data_at(c, b, a);
 		if (d) {
 			block_pool(c, b, p, d);
 			a = d->end;
 			continue;
 		}
 		uint32_t run = a;
-		while (a < b->end && !data_at(c, a)) a += 2;
+		while (a < b->end && !data_at(c, b, a)) a += 2;
 		block_calls(m, b, p, run, a);
 	}
 	block_numbers(c, b, p);

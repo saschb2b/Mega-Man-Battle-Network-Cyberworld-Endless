@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T17:16:29Z
+* **Update**: multirom/souls.md (MagnetSoul in BN6's engine: UNITE, element, charged shot, B+Left by the Souls' own copy of BN5's misc family, Elec chip charge doubled, the magnet panel's push spared), rom/souls.md (MagnetSoul's addresses, BN5's third-kind 0x3F and 0x75, the magnet panel's exemption), game/team-protoman.md (unit 8: MagnetSoul built), multirom/one-net.md (MagnetSoul's exemption in place).

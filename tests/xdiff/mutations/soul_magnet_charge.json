@@ -1,0 +1,8 @@
+[
+ {
+  "name": "MagnetSoul's Elec chip not charged",
+  "spec": "soul_magnet_charge",
+  "soulbreak": 65536,
+  "what": "the chip charge's test refuses his Thunder where BN5's 0x08010902 takes an Elec chip for form 5: A held charges nothing, the chip used at once"
+ }
+]

@@ -8,7 +8,7 @@
  {
   "name": "NapalmSoul's +40 to Fire chips left out",
   "spec": "soul_napalm_lava",
-  "soulbreak": 2048,
+  "soulbreak": 512,
   "what": "the chips' bonus by form gives NapalmSoul none where BN5's 0x0800D0CE adds 40 to a Fire attack chip used uncharged: the FireHit1's damage 40 under BN5's"
  }
 ]

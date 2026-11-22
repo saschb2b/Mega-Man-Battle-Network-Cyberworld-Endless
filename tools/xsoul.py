@@ -78,10 +78,14 @@ UNITS = (
     # (GyroSoul: his charged shot's power attack and family, his way into the proxy and out (his propeller, the companion
     # overlay of BN5's kind 2), his passives as he unites and as his form's state is set again (Air and Float shoes))
     ('gyro', 2, (0x0800F6A6, 0x080EEA40, 0x0800F064, 0x0800F0C8, 0x08011BDC, 0x08011D04)),
+    # (MagnetSoul: his charged shot's power attack and family, his B+Left's and the misc family it runs, BN5's 0x1A as a
+    # family of the Souls' own (BN6's 0xCC), its sub-family 0xA's routine (0x080124C8: the magnet panels of his row, effect 0x1B)
+    # by SUB_TABLES)
+    ('magnet', 5, (0x0800F7FC, 0x080EEC86, 0x0800F9A0, 0x080EC7DE)),
 )
 # Team ProtoMan's units: their blocks in a room of their own (soul_room.h's SOULS_TEAM_CODE), their sprites too
 # (SOULS_TEAM_ART, list 0 from TEAM_ART_FIRST), so that Team Colonel's code and numbers stay where they were
-TEAM_UNITS = ('napalm', 'gyro')
+TEAM_UNITS = ('napalm', 'gyro', 'magnet')
 TEAM_CODE_ROOM = 0x8000     # SOULS_TEAM_CODE's bytes
 TEAM_ART_ROOM = 0x18000     # SOULS_TEAM_ART's
 TEAM_ART_FIRST, TEAM_ART_LAST = 0x66, 0x7F   # (list 0's numbers past Team ProtoMan's Souls' own 0x60-0x65: soul_room.h)
@@ -95,7 +99,7 @@ TEAM_OVERLAY_KINDS = {2: 63}
 FAMILIES = ((0x43, 0xC0, 0x080EED92), (0x3A, 0xC1, 0x080EE864), (0x40, 0xC2, 0x080EEBDE), (0x50, 0xC3, 0x080EF68A),
             (0x3D, 0xC4, 0x080EEADC), (0x45, 0xC5, 0x080EEF6C), (0x13, 0xC6, 0x080EBDC6),
             # (Team ProtoMan's, past Chaos Unison's failure 0xC7: NapalmSoul's charged shot, its vulcan of fire)
-            (0x44, 0xC8, 0x080EEE82), (0x4B, 0xC9, 0x080EF38A), (0x3C, 0xCA, 0x080EEA40))
+            (0x44, 0xC8, 0x080EEE82), (0x4B, 0xC9, 0x080EF38A), (0x3C, 0xCA, 0x080EEA40), (0x42, 0xCB, 0x080EEC86), (0x1A, 0xCC, 0x080EC7DE))
 
 # The power attacks moved: BN5's id, its entry, and the Soul's role for it (its loadout row's byte); BN6's id is
 # soul_room.h's SOUL_POWER_FIRST on in this order
@@ -103,7 +107,8 @@ POWERS = ((0x14, 0x0800F7DC, 'ColonelSoul\'s charged shot'), (0x13, 0x0800F7D0, 
           (0x17, 0x0800F818, 'ShadowSoul\'s charged shot'), (0x45, 0x0800FBE6, 'ShadowSoul\'s B+Left'),
           (0x07, 0x0800F66A, 'NumberSoul\'s charged shot'), (0x1A, 0x0800F864, 'TomahawkSoul\'s charged shot'),
           (0x11, 0x0800F79E, 'KnightSoul\'s charged shot'), (0x2D, 0x0800F9E6, 'ToadSoul\'s charged shot'),
-          (0x19, 0x0800F840, 'NapalmSoul\'s charged shot'), (0x09, 0x0800F6A6, 'GyroSoul\'s charged shot'))
+          (0x19, 0x0800F840, 'NapalmSoul\'s charged shot'), (0x09, 0x0800F6A6, 'GyroSoul\'s charged shot'),
+          (0x15, 0x0800F7FC, 'MagnetSoul\'s charged shot'), (0x25, 0x0800F9A0, 'MagnetSoul\'s B+Left'))
 POWERS_COLONEL = 8   # (Team Colonel's, the first; Team ProtoMan's after: src/emu/soulpower.c numbers them past BN4's)
 
 # BN5's routines a moved routine calls that BN6 answers otherwise, aimed at the Souls' stubs (soul_room.h: SOUL_STUB_*),
@@ -207,7 +212,8 @@ EFFECT_FIRST, EFFECT_LAST = 0xC0, 0xCF
 # 0x115 another sound), each at the BN6 slot the allocations' amendment gives that sound whatever track copies it (the
 # first install copies it, the others find it there: xsong.c's xsong_install_at); 0x129 (the Dark Soul's) at 0x5D and 0x16B (the
 # chaos pick's) at 0x5C are Chaos Unison's, the Souls track's S6
-SONG_SLOTS = {0x70: 0x5F, 0x117: 0x5E, 0x115: 0x5A, 0x129: 0x5D, 0x16B: 0x5C}
+SONG_SLOTS = {0x70: 0x5F, 0x117: 0x5E, 0x115: 0x5A, 0x129: 0x5D, 0x16B: 0x5C,
+              0xBA: 0x60}   # (MagnetSoul's charged shot's, 0x080EECF8 and 0x080EED18: xsong.c's slot for it, whichever track copies it)
 
 # Effects a moved routine makes of a base and a number: the instruction adding the base, and how many ids from it its
 # callers use (ColonelSoul's family 0x43: 0x48 + its sub-family, AttackVars +3, 0-2 as BN5's power attacks set it)
@@ -249,7 +255,10 @@ UNTWINNED = {0x080C33CC: 'NumberSoul\'s companion\'s set-up (the object NumberSo
                          'moved, its spawn goes through the dispatch to BN5\'s object)',
              0x080B9CE0: 'a flash kind\'s sprite, its list and number (BN6\'s twin 0x080BA6D2 reads BN6\'s kinds table)',
              0x080C6E0E: 'the obstacle strike\'s shot\'s spawner (BN6\'s twin 0x080C834A spawns BN6\'s type 0x12, whose numbers by '
-                         'its parameter are its own table\'s: moved, its spawn goes through the dispatch to BN5\'s object)'}
+                         'its parameter are its own table\'s: moved, its spawn goes through the dispatch to BN5\'s object)',
+             0x080CD466: 'the spawner of the third kind\'s 0x3F (MagnetSoul\'s B+Left, 0x08012512): BN6\'s twin 0x080CD922 spawns '
+                         'BN6\'s 0x3F, another body (its first state 0x080CD8D5 sets no sprite where BN5\'s 0x080CD3E1 loads list '
+                         '0x20\'s 0x2D): moved, its spawn goes through the dispatch to BN5\'s object'}
 # BN5's routines the Souls' C reaches in another track's copy, its routes (src/emu/soulcode.c's soulcode_moved): the image
 # object's spawner, which MegaMan's buster's flash in a Soul is sent to (src/emu/soullook.c)
 ROUTED = (0x080B9CAE,)
@@ -308,6 +317,14 @@ def before_tracks():
             for l5, i5, l6, i6 in re.findall(r'\{ (\d), 0x([0-9A-F]{2}), (\d), 0x([0-9A-F]{2}), ', body):
                 sprites.setdefault((int(l5), int(i5, 16)), (int(l6), int(i6, 16)))
     return blocks, effects, sprites
+
+
+# Tables of routines by sub-family a moved dispatcher reads (BN5's misc family 0x1A's, 0x080EC818: BN6's grown family 0xCC
+# runs MagnetSoul's B+Left through a copy of its own, the chips' copy, BN6's 0x6A, naming a stub for his sub-family): each
+# copied whole, its length, the sub-families the Souls play (their routines walked and moved), and why; the others' entries
+# SOUL_STUB_NONE, never run (only his power attack sets this family, with sub-family 0xA)
+SUB_TABLES = {0x080EC818: (27, (0xA,), "the misc family's routines by sub-family: MagnetSoul's B+Left plays 0xA, 0x080124C8, "
+                                       "the magnet panels of his row")}
 
 
 def shared_blocks(b5, blocks):
@@ -393,6 +410,9 @@ class Deriv:
                 continue
             if not (min(w.insns) - 0x40 <= v <= max(w.insns) + 0x400):
                 continue
+            if v in SUB_TABLES:
+                out[v] = [self.b5.u32(v + 4 * k) for k in range(SUB_TABLES[v][0])]
+                continue
             ents = []
             for k in range(48):
                 x = self.b5.u32(v + 4 * k)
@@ -423,8 +443,9 @@ class Deriv:
             w.tables = self.find_tables(w)
             for tab, ents in w.tables.items():
                 self.tables[tab] = ents
-                for x in ents:
-                    todo.append((x, False))
+                for k, x in enumerate(ents):
+                    if tab not in SUB_TABLES or k in SUB_TABLES[tab][1]:
+                        todo.append((x, False))
             for lit, v in w.lits.items():
                 if v is not None and v not in w.tables and T.is_code_ptr(v, self.b5):
                     todo.append((v, False))
@@ -502,7 +523,9 @@ class Deriv:
         for tab, ents in self.tables.items():
             for k, x in enumerate(ents):
                 at = tab + 4 * k
-                if (x & ~1) in self.walks:
+                if tab in SUB_TABLES and k not in SUB_TABLES[tab][1]:
+                    self.words[at] = (x, 'SOUL_STUB_NONE | 1u', 'a sub-family the Souls play none of (SUB_TABLES): never run')
+                elif (x & ~1) in self.walks:
                     self.words[at] = (x, None, 'a jump table\'s entry, moved')
                 else:
                     tw = self.twin(x)
@@ -579,6 +602,12 @@ class Deriv:
         # (a byte in both teams' blocks would be moved twice, and a reference of Team ProtoMan's code into Team Colonel's
         # bytes that is no call would read BN5's address: neither may be)
         both = self.cov_of['colonel'] & self.cov_of['team']
+        # (but a literal both teams' code reads that is a number, no address: its bytes the same in either copy, fixed in
+        # neither; MagnetSoul's 0x080124C8 reads 0x141B at 0x080126F8, beside Team Colonel's 0x08012654)
+        for w in self.walks.values():
+            for lit, v in w.lits.items():
+                if v is not None and v < 0x02000000:
+                    both -= set(range(lit, lit + 4))
         if both:
             self.decide(f'{min(both):08X}: {len(both)} bytes in both teams\' blocks')
         for a, w in self.walks.items():
@@ -1148,6 +1177,8 @@ def derive(b5, b6, pairs):
                 break
         if last and last[1] in fam6:
             families[last[0]] = (last[1], fam6[last[1]])
+        elif last:
+            d.decide(f'{entry:08X}: {why} returns family {last[1]:#x}, which is not moved (FAMILIES)')
     d.resolve_calls()
     for a in ROUTED:
         if d.shared_at(a):

@@ -1,6 +1,6 @@
 {
   "branch": "team-protoman-souls",
-  "what": "Team ProtoMan's six Souls in BN6's engine and their Navis as guardians (docs/game/team-protoman.md units 7-10, for #774's SOUL BN5): NapalmSoul, GyroSoul, MagnetSoul, SearchSoul, MeddySoul, ProtoSoul, each held to BN5's battle; the partner coin, bodies, faces and intro lines; the board. What a guardian gives is run-forms'. 0xC7 is Chaos Unison's failure already, so the families start at 0xC8; the Souls' effects past Team Colonel's (0xC2 on), the held mask's bits 18-23 past BN4's twelve (src/emu/soulteam.h); the companion overlay's kinds 62-63, past the Navis' (GyroSoul's propeller 63)",
+  "what": "Team ProtoMan's six Souls in BN6's engine and their Navis as guardians (docs/game/team-protoman.md units 7-10, for #774's SOUL BN5): NapalmSoul, GyroSoul, MagnetSoul, SearchSoul, MeddySoul, ProtoSoul, each held to BN5's battle; the partner coin, bodies, faces and intro lines; the board. What a guardian gives is run-forms'. 0xC7 is Chaos Unison's failure already, so the families start at 0xC8; the Souls' effects past Team Colonel's (0xC2 on), the held mask's bits 18-23 past BN4's twelve (src/emu/soulteam.h); the companion overlay's kinds 62-63, past the Navis' (GyroSoul's propeller 63); BN5's third-kind 0x3F and 0x75 as the Souls' own types (MagnetSoul's B+Left's and charged shot's objects, tools/bn5_twins.py's TYPES), out of BN4's Navis' spare numbers",
   "takes": {
     "free_rom": [
       [
@@ -42,6 +42,16 @@
       [
         "62",
         "63"
+      ]
+    ],
+    "dispatch3": [
+      [
+        "0x3F",
+        "0x3F"
+      ],
+      [
+        "0x75",
+        "0x75"
       ]
     ]
   },
