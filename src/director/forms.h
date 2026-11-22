@@ -33,7 +33,8 @@ const char *forms_power_name(int form, int p);
 int forms_power_kind(int form, int p);
 /* Whether a new run may take `form` as far as the ROMs go (the setup's,
  * before any core has its Souls in): CROSS always, a Soul form where its
- * game's ROM is read */
+ * game's ROM is read, SOUL BN4 with BN5's too (the Souls' engine is built
+ * from BN5's) */
 bool forms_offered(int form);
 /* The power guardian `navi` pays a run of `form` holding `held` (bit p -
  * 1), at the layer seed `seed`; 0 none (every power held). Only the powers

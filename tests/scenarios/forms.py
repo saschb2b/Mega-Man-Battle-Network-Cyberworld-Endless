@@ -70,5 +70,6 @@ MANY = {
     'soul-bn5-helper-turn': dict(START='layer --seed 15 --net-biome 0 --setup short,0,0,16,0 --dev god,quiet,hp=2000,form=2,souls=0x20,folder=181',
                                  NEEDS=('bn5',), STEPS=[('expect', 'runform=SOUL BN5'), ('expect', 'runsoulturn=1'),
                                                         ('do', 'foes 205@52'), *unite(12, 181, 4)]),
-    'soul-bn4-bn6-guardian': dict(START=BASE + 'form=3 --guardian 1', NEEDS=('bn4',), STEPS=course('SOUL BN4', 'ThunSoul')),
+    # (BN4's Souls unite in the Souls' engine BN5's ROM builds: both ROMs)
+    'soul-bn4-bn6-guardian': dict(START=BASE + 'form=3 --guardian 1', NEEDS=('bn5', 'bn4'), STEPS=course('SOUL BN4', 'ThunSoul')),
 }

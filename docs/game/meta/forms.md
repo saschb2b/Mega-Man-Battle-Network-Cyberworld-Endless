@@ -68,10 +68,14 @@ in CROSS. The mix keeps today's rule
 ## What a run brings
 
 - **A new profile plays CROSS**, pure BN6; the Soul forms open in later
-  runs. The setup's FORM row offers each opened form whose powers stand
-  (`meta_form_open`): SOUL BN5 once a BN5 Navi fell as a guardian in any
-  run (or a Soul was won before forms, `profile.soul_taught`), SOUL BN4
-  once a BN4 Navi did (`profile.forms_open`). Its note names the best
+  runs. The setup's FORM row offers each opened form whose game's ROM is
+  read (`meta_form_open`, `forms_offered`): SOUL BN5 once a BN5 Navi fell
+  as a guardian in any run (or a Soul was won before forms,
+  `profile.soul_taught`), SOUL BN4 once a BN4 Navi did
+  (`profile.forms_open`), with BN5's ROM beside BN4's, since the Souls'
+  engine BN4's Souls unite in is built from BN5's. A BN4 Soul counts as
+  standing once its power attack is placed (`soulpower_bn4`), what UNITE
+  asks. Its note names the best
   threat rung won with that form (`profile.form_best`): a record, never a
   key, and no title mark.
 - **One opened power brought** (the Cross start widened): in CROSS a

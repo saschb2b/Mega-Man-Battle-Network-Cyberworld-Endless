@@ -107,7 +107,8 @@ static bool forms_ready(int form, int p) {
 bool forms_offered(int form) {
 	if (form == RUN_FORM_CROSS) return true;
 	if (form == RUN_FORM_SOUL_BN5) return XR[XROM_BN5_COLONEL_US].data != NULL;
-	return form == RUN_FORM_SOUL_BN4 && XR[XROM_BN4_RED_SUN_US].data != NULL && SOULS_BN4 > 0;
+	/* (BN4's Souls unite in the Souls' engine BN5's ROM builds: soulunite.h) */
+	return form == RUN_FORM_SOUL_BN4 && XR[XROM_BN4_RED_SUN_US].data != NULL && XR[XROM_BN5_COLONEL_US].data != NULL && SOULS_BN4 > 0;
 }
 
 /* (a seeded pick that leaves the run's generator alone) */
