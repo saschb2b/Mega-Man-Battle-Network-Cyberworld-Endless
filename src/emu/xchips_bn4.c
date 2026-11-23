@@ -3525,6 +3525,61 @@ static const XcSong numsoul_songs[] = { { 0x90, 0x206 }, { 0xAC, 0x302 }, { 0xBC
 	.types = numsoul_types, .ntypes = (int)(sizeof numsoul_types / sizeof *numsoul_types), \
 	.sound_calls = numsoul_sound_calls, .nsound_calls = (int)(sizeof numsoul_sound_calls / sizeof *numsoul_sound_calls), \
 	.sprites = numsoul_sprites, .nsprites = (int)(sizeof numsoul_sprites / sizeof *numsoul_sprites) }
+/* ---- FireSoul: BN4's attack 0x19 (080EC44B) as BN6's 0xdc; its chips  ---- */
+/* MegaMan's state 0x19 (080EC44A-080EC53E), the family of its chips' records: moved */
+/* FireSoul's power attack 0xc (0800CCAE), which returns the family: copied with it */
+/* its third-kind 0x2: Spreads's copy, the dispatch's 0x2, shared (its spawner copied) */
+/* its third-kind 0x9: Elem's copy, the dispatch's 0x9, shared (its spawner copied) */
+/* its sound 0xa8 (080EC4E2): BN4's song copied into the grown song table's slot 0x285, on BN4's player 9 */
+
+static const XvBlock firesoul_blocks[] = {
+	{ 0x080EC44A, 0x080EC53E, XC4_CODE + 0x7592, 0xFCB479E8u },
+	{ 0x0800CCAE, 0x0800CCD0, XC4_CODE + 0x7692, 0x1672BCE6u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x76C0, 0x6FFE1431u },
+	{ 0x080CE49C, 0x080CE4D0, XC4_CODE + 0x76F0, 0xD528564Du },
+};
+static const XvData firesoul_data[] = {
+	{ 0x080EC45C, 0x080EC460, XV_POOL },
+	{ 0x080EC460, 0x080EC468, XV_TABLE },
+	{ 0x080EC4F6, 0x080EC4FC, XV_RAW },
+	{ 0x080EC4FC, 0x080EC500, XV_POOL },
+	{ 0x080EC500, 0x080EC51C, XV_RAW },
+	{ 0x0800CCCC, 0x0800CCD0, XV_POOL },
+};
+static const XvPair firesoul_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN4_3 },   /* the dispatch's spawner */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800D7CA, 0x08013774 },   /* project:project:chips, SAME */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+};
+static const XvPair firesoul_words[] = {
+};
+static const XvImm firesoul_imms[] = {
+	{ 0x0800CCC8, THUMB_MOVS, 0, 0, 0x19, 0xDC },   /* FireSoul's power attack 0xc: the family it returns, BN4's 0x19, BN6's grown 0xdc */
+	{ 0x080CE4B0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080EC44E, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+};
+static const XvType firesoul_types[] = {
+	{ 3, 0x02, XV_TYPE_SHARED4, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy */
+	{ 3, 0x09, XV_TYPE_SHARED4, 0x09 },   /* BN4's third-kind 0x9, Elem's copy */
+};
+static const XvSoundCall firesoul_sound_calls[] = {
+	{ 0x080EC4E2, 0x285 },   /* its sound 0xa8: BN4's song at the grown table's slot 0x285 */
+};
+static const XcSong firesoul_songs[] = { { 0xA8, 0x285 } };
+
+#define FIRESOUL_CODE { .name = "FireSoul (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x9C00), \
+	.blocks = firesoul_blocks, .nblocks = (int)(sizeof firesoul_blocks / sizeof *firesoul_blocks), \
+	.data = firesoul_data, .ndata = (int)(sizeof firesoul_data / sizeof *firesoul_data), \
+	.calls = firesoul_calls, .ncalls = (int)(sizeof firesoul_calls / sizeof *firesoul_calls), \
+	.words = firesoul_words, .nwords = (int)(sizeof firesoul_words / sizeof *firesoul_words), \
+	.imms = firesoul_imms, .nimms = (int)(sizeof firesoul_imms / sizeof *firesoul_imms), \
+	.types = firesoul_types, .ntypes = (int)(sizeof firesoul_types / sizeof *firesoul_types), \
+	.sound_calls = firesoul_sound_calls, .nsound_calls = (int)(sizeof firesoul_sound_calls / sizeof *firesoul_sound_calls) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -3565,6 +3620,7 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_ATTACK, 0x10, 0xD9, 0x080EBDC1, XC4_HOMES + 0x9000, GUTSRAPID_CODE, gutsrapid_songs, (int)(sizeof gutsrapid_songs / sizeof *gutsrapid_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x3E, 0xDA, 0x080EDB5D, XC4_HOMES + 0x9400, SRCHSOUL_CODE, srchsoul_songs, (int)(sizeof srchsoul_songs / sizeof *srchsoul_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x15, 0xDB, 0x080EC165, XC4_HOMES + 0x9800, NUMSOUL_CODE, numsoul_songs, (int)(sizeof numsoul_songs / sizeof *numsoul_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x19, 0xDC, 0x080EC44B, XC4_HOMES + 0x9C00, FIRESOUL_CODE, firesoul_songs, (int)(sizeof firesoul_songs / sizeof *firesoul_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
 

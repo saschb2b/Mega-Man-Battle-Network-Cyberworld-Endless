@@ -69,6 +69,7 @@ ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x
                   0x10: 0xD9,   # (GutsSoul's rapid buster, his state 0x10: no chip's, asked by B pressed six times, soulrapid.c)
                   0x3E: 0xDA,   # (SrchSoul's charged shot)
                   0x15: 0xDB,   # (NumSoul's charged shot)
+                  0x19: 0xDC,   # (FireSoul's charged shot)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -92,7 +93,9 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
            0x56: (0x080D877C, "the star's spawner with its panel, element and power handed on (BN4_T3_STAR): ShotStar's unit "
                               "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)"),
            0x32: (0x080D3430, "the boomerang's spawner (BN4_BOOMER_SPAWN): Boomer's unit moved the boomerang; PitRng's launcher "
-                              "throws three (0x080E9A24)")}
+                              "throws three (0x080E9A24)"),
+           0x09: (0x080CE49C, "the flame's spawner (r0 9 to BN4's spawn, then its panel, element and power handed on): Elem's unit "
+                              "moved the flame; FireSoul's charged shot spawns it (bl at 0x080EC49C)")}
 # A chip of a written unit that still sits out (its row XREG_PENDING), by BN4's id, each its reason
 # A call of a unit's code aimed by hand, at a stub of the chips' (XC_STUBS, src/emu/xchips_code.h): BN4's routine has no twin
 # and the unit needs none of what it gives
@@ -125,7 +128,7 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 # attacks (src/emu/soulbn4.c, xchips_bn4_moved_at). By BN4's family: (the power attack's id, its Soul)
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
 SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),), 0x3E: ((0x0A, 'SrchSoul'),),
-               0x15: ((0x11, 'NumSoul'),)}
+               0x15: ((0x11, 'NumSoul'),), 0x19: ((0x0C, 'FireSoul'),)}
 # ... and a Soul's taking of the form that spawns an object of its own (BN4_FORM_ENTERS by its form), copied with the unit of
 # its charged shot's family, which the Souls' engine runs as he enters the proxy form (src/emu/soullife.c, xchips_bn4_moved_at).
 # By BN4's family: (the form, its Soul)
@@ -356,6 +359,7 @@ UNITS = (
     ('attack', 0x10, 'GutsRapid'),
     ('attack', 0x3E, 'SrchSoul'),
     ('attack', 0x15, 'NumSoul'),
+    ('attack', 0x19, 'FireSoul'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -697,6 +701,9 @@ UNIT_COPIED = {
     'NumSoul': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's and the Elem chips': "
                             "NumSoul's charged shot's object (the third kind's 0x05) steps its sprite by it; BN6's nearest a frame "
                             "ahead; copied, its pause test BN6's"},
+    'FireSoul': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as NumSoul's: FireSoul's charged "
+                             "shot's flame (the third kind's 0x09, Elem's copy) steps its sprite by it; BN6's nearest a frame ahead; "
+                             "copied, its pause test BN6's"},
     'Elem': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's: the shot of a chip whose "
                          "params' +7 is set (ElemDark's 8) takes it at 0x080CE2F0 where the others take 0x080143FC, and BN6's "
                          "nearest updates the sprite a frame ahead of BN4's (the shot's count at its +0x91 2 in BN4 and 1 in BN6 "
