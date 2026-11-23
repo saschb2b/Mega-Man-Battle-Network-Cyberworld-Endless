@@ -3,7 +3,7 @@ type: Feature
 title: "The partner's seat: his HP box and the four told apart"
 description: "The partner's seat (`arena_team_view.c`, `teamseat=N`): his own HP box over BN6's, the P1 to P4 marks at each MegaMan's feet, and the HP of the ally BN6 leaves unlabelled."
 tags: [online, arena]
-generated: { by: claude-code/unrecorded, at: 2026-10-21T21:44:08Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T17:28:20Z }
 ---
 
 # The partner's seat: his HP box and the four told apart

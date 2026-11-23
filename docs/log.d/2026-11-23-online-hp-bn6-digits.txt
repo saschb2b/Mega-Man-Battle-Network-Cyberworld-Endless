@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-23T17:28:20Z
-* **Update**: rom/graphics.md (The HP under an enemy: BN6's battle HP digits, their three colours' tables, palette and the routines that count and draw them, found and verified), online/shared-dive.md (a partner's HP on a party's field in BN6's own digits, counted as an enemy's; the bottom row's pair over his head clear of the mark two rows up), online/arena/two-a-side/seat.md (the ally's HP where and as BN6 writes an enemy's), code/online.md (`hp_plate.c`).

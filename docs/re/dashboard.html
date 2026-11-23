@@ -301,6 +301,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   ],
   "experiments": [
     {
+      "feature": "Shared dive",
+      "date": "2026-11-23",
+      "name": "BN6's HP under an enemy: its digits, colours and count",
+      "result": "In a battle against a Mettaur (tools/play.py's dump, tools/romlab/labtrace.py), its \"40\" was one 32x16 OBJ, tile 816, OBJ palette 14, priority 2; the 4's tiles were at 0x086DEB3C and 0x086DEB5C, the 0's at 0x086DEA3C and 0x086DEA5C: ten 8x16 digits 0x40 apart from 0x086DEA3C, whose only pointer is the table at 0x0801D854 (eleven, the last the blank 0x086B5A2C), one of three (white, orange 0x0801D880, green 0x0801D8AC) at 0x0801C34C, read by 0x0801C304 by the plate's +8. Palette 14 is 0x086B5A0C, the battle's copy list's entry at 0x0801ECB4 (to 0x03001710, the OBJ palette buffer's 14th). 0x0801C168 steps each plate's shown HP toward its object's by the gap >> 3 plus 2, orange down, green up and ten frames after, orange while its collision data's poison timer (+8) runs; 0x0801C202 places the OBJ so the number is centred on the object's place on the screen, its top there. Drawn by hp_plate.c beside BN6's own in the Arena's two a side (frame 521, P1's 100 as the enemy on seat 3's picture and as the ally on seat 2's): every lit pixel and colour alike about his panel's middle; the ally's count went 34, 30, 18 in orange, 14 in white over a hit of 20, as an enemy's does.",
+      "meaning": "Online play can write a partner's HP as BN6 writes an enemy's, in its own digits from the player's ROM, where and as BN6 counts it (src/emu/bn6_navis.h BN6_HP_*; docs/rom/graphics.md, The HP under an enemy).",
+      "link": "../rom/graphics.md"
+    },
+    {
       "feature": "BN5's Liberation Missions",
       "date": "2026-11-22",
       "name": "A liberation's time up pauses the battle",
