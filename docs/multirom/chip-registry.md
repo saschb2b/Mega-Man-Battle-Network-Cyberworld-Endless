@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chip registry"
 description: "BN5's 283 chips in BN6's chip tables grown to 1024 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T16:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:20:00Z }
 ---
 
 # The chip registry
