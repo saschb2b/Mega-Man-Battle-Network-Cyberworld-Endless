@@ -22,8 +22,14 @@ BN4 = {34: 'Roll', 35: 'GutsMan', 36: 'WindMan', 37: 'SearchMan', 38: 'FireMan',
        45: 'WoodMan', 46: 'TopMan', 48: 'BurnerMan', 50: 'SparkMan'}
 
 
-def start(biome, navi, seed, depth=3):
-    return f'CYBERWORLD_AUTOPILOT=1 --scene emu --seed {seed} --run-depth {depth} --net-biome {biome} --guardian {navi} --dev onehit,god,quiet'
+def start(biome, navi, seed, depth=3, hp=None):
+    return (f'CYBERWORLD_AUTOPILOT=1 --scene emu --seed {seed} --run-depth {depth} --net-biome {biome} --guardian {navi} '
+            f'--dev onehit,god,quiet' + (f',hp={hp}' if hp else ''))
+
+
+# (MegaMan's max HP where a guardian's one hit takes more than a new run's 100, which god mode's refill after the frame
+# cannot answer: DarkProto's slash)
+HP = {'DarkProto': 600}
 
 
 def fight(game, biome, navi, name, depth=3, shown=None):
@@ -32,8 +38,9 @@ def fight(game, biome, navi, name, depth=3, shown=None):
     # ProtoSoul's in all BN5's Souls (souls_held_bn5), apart from the six's; Nebula's two and BN4's have none to give)
     soul = 1 << (navi - 24) if navi in BN5 else 0
     team = 1 << (navi - 59) if navi in TEAM else 0
+    hp = HP.get(name)
     return dict(
-        START=start(biome, navi, 3, depth), NEEDS=(game,),
+        START=start(biome, navi, 3, depth, hp), NEEDS=(game,),
         GUARDS=f"{game.upper()}'s {name} guarding an act: fought in BN6's engine, deleted, his Guardian Data taken",
         STEPS=[
             ('expect', f'guardianfrom={game}'),
@@ -48,7 +55,7 @@ def fight(game, biome, navi, name, depth=3, shown=None):
             ('expect', f'guardian={name} beaten'),
             ('until', 'guardian~done', 6000),         # his Guardian Data taken
             ('expect', 'data=taken'),
-            ('expect', 'hp=200/200'),                 # its five HPMemory, and the full heal
+            ('expect', f'hp={hp}/{hp}' if hp else 'hp=200/200'),   # its five HPMemory (held at --dev hp's), and the full heal
             ('expect', f'soulsheld={soul:02x}'),      # ... and his Soul, where he has one
             ('expect', f'soulsbn5~{(team | soul << 6):03x} '),
         ])
