@@ -142,6 +142,7 @@
                                            * BATTLE_ACTORS_PER_SIDE), its MegaMan first on his side */
 #define BN6_BATTLE_SETTINGS   (BN6_BATTLE_STATE + 0x3C) /* u32 the battle's BattleSettings; its +3 the mode (0x0802D234), BN6_BATTLE_LINK a link */
 #define BN6_SETTINGS_MODE     0x03        /* a BattleSettings' +3: the battle's mode (0x0802D242), BN6_BATTLE_LINK a link */
+#define BN6_SETTINGS_SIDES    0x06        /* a BattleSettings' +6: its column pattern (bn6_panels.h's BN6_SIDES_PLAIN and the rest; BN6_SIDES_OF reads it) */
 #define BN6_BATTLE_LINK       1           /* BN6_SETTINGS_MODE: a link battle (where neither game offers UNITE) */
 #define BN6_NAVI_MOOD         0x0E        /* a battle NaviStats' +0x0E: its side's mood (BN6_BATTLE_MOOD's), read by BN5's thresholds (BN5_MOOD_WORRIED) */
 #define BN6_NAVI_FORM         0x2C        /* a battle NaviStats' +0x2C: its side's form (BN6_BATTLE_FORM's) */

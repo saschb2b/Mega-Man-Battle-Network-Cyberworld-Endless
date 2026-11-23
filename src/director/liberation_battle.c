@@ -43,6 +43,7 @@
 #include "pet_look.h"
 #include "platform.h"
 #include "soulproxy.h"
+#include "turned_aim.h"
 
 /* What the director armed: the battle's turns (0: none to count), and
  * whether it is a liberation's at all */
@@ -196,6 +197,8 @@ void lib_battle_install(void) {
 	if (!ok) fprintf(stderr, "liberation: the battle loop's hooks did not fit\n");
 	/* (AreaGrab on a Surrounded field: BN6's search for its column, ended where it ran on for good) */
 	grab_search_install();
+	/* (MegaMan's side's aim turned round between a Surrounded field's two sides: GolmHit's fist, BN4's moved chips) */
+	turned_aim_install();
 }
 
 /* ---- the director's ---- */

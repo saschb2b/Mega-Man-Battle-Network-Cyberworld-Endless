@@ -14,6 +14,7 @@
 #include "loot_souls.h"
 #include "soulbn4.h"
 #include "soulpower.h"
+#include "turned_aim.h"
 #include "soulunite.h"
 #include "data.h"
 #include "game.h"
@@ -8699,6 +8700,12 @@ int main(int argc, char **argv) {
 	CHECK(!grab_search_lost(1, 1, 0) && grab_search_lost(-1, 1, 0), "grab: an enemy's search, lost once it has walked its own way off the field");
 	CHECK(!grab_search_lost(1, 0, 1) && grab_search_lost(-1, 0, 1) && !grab_search_lost(-1, 1, 1) && grab_search_lost(1, 1, 1),
 		"grab: a search by one turned round (Surrounded's L or R)");
+	/* MegaMan's side's aim turned round (turned_aim.h, issue #838): a row's search from its own column and the way toward
+	 * the enemy as it faces, where the field is none of BN6's three plain ones; a plain field's, and every foe's, as BN6's */
+	CHECK(turned_aim_mends(BN6_SIDES_SURROUNDED, 0) && turned_aim_mends(0x31, 0), "turned aim: MegaMan's between two enemy sides, from his column");
+	CHECK(!turned_aim_mends(BN6_SIDES_SURROUNDED, 1), "turned aim: a foe's on a Surrounded field, from the edge behind it as BN6's");
+	CHECK(!turned_aim_mends(BN6_SIDES_PLAIN, 0) && !turned_aim_mends(BN6_SIDES_WIDE, 0) && !turned_aim_mends(BN6_SIDES_NARROW, 0),
+		"turned aim: BN6's own fields, as BN6's");
 	/* The player's chips' look-ups (chip_targets.h, issue #523): a moved family read as BN6's first virus, inside every
 	 * viruses' range BN6's chips ask for and no Navis'; a moved Navi, BN5's or BN4's, as its first Navi; BN6's own as they are */
 	CHECK(chip_targets_name(XV_FIRST_ID) == CHIP_TARGETS_VIRUS && chip_targets_name(XV_FIRST_ID + XV_FAMILIES * XV_VERSIONS - 1) == CHIP_TARGETS_VIRUS &&

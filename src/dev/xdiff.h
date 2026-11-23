@@ -14,7 +14,8 @@
  *
  * SPEC, items apart by ';':
  *   foes=4F@62,01@51   BN5's enemy ids (hex) at their panels, column then row
- *   mm=22              MegaMan's panel (column, row; 22 where none)
+ *   mm=22              MegaMan's panel (column, row; 22 where none; column
+ *                      4 where sides= gives him four or Surrounded)
  *   hp=100             MegaMan's HP and max HP in both
  *   frames=1200        the fight frames traced
  *   keys=150:UP:5,...  buttons held while the timer reads T to T+N-1 (A, B,

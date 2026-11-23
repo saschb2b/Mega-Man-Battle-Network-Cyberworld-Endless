@@ -250,6 +250,20 @@
                                           /* ... no test that it had turned already, so with no such column on the field it never ends (grab_search.h) */
 #define BN6_GRAB_FOUND        0x0800D5E0u /* ... its end: adds r0,r6,#0; pop {r4,r6,r7,pc} */
 
+/* The first panel of a row that a filter takes, searched from the field's edge behind the object (bn6f
+ * object_getClosestPanelMatchingRowFiltered, from its r0: 1 the search runs right from column 1, 0 left from
+ * column 6; GolmHit's fist, the fourth kind's 0x3F, passes its alliance ^ flip ^ 1, so the edge behind it).
+ * Behind MegaMan between a Surrounded field's two sides lies the enemy's, so it found his back: issue #838 */
+#define BN6_ROW_SEARCH        0x0800D086u /* ... the routine: r0 the way, r1 the row, r2 and r3 the flags wanted set and clear */
+#define BN6_ROW_SEARCH_START  0x0800D09Cu /* ... adds r0,#6: the start column made (6 - 5 x r0), r5 the step, the object at [sp+4] */
+#define BN6_ROW_SEARCH_LOOP   0x0800D09Eu /* ... the loop from r0's column (push {r0-r3}; bl object_checkPanelParameters) */
+#define BN6_GOLMHIT_FIST      0x080E60F0u /* GolmHit's fist (the fourth kind's 0x3F; the misc family 0x1C's 0x15 spawns it, 0x080E630A,
+                                           * at its user's panel with its alliance and flip): its init 0x080E6110, the search 0x080E6144 */
+
+/* The way toward the enemy's side by an object's alliance alone (bn6f object_getEnemyDirection: +1 MegaMan's, -1 the
+ * enemy's), where object_getFrontDirection (0x0800E2CA) takes its flip too; 53 calls in Gregar's code */
+#define BN6_ENEMY_DIRECTION   0x0800E2C0u /* ... ldrb r0,[r5,#0x16], then object_getAllianceDirection's three (0x0800E2C2) and mov pc,lr */
+
 /* A panel flag (bn6.h's BN6_PANEL_FLAGS) */
 #define BN6_PANEL_SIDE_0      0x00010000u /* BN6_PANEL_FLAGS: an object of side 0 stands on it, what side 1's panel scans want: the Gunner's
                                            * attack step (0x081140F0) asks object_getFirstPanelInDirectionFiltered (0x0800D0BC) for the first

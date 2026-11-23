@@ -29,6 +29,12 @@
   one its own game shows for a Navi you never deleted against the clock:
   80 for CosmoMan SP. Thanks to Agergo100 for the report (issue #835).
 
+- **Fixed: GolmHit struck behind MegaMan in a liberation's Surrounded
+  battle (issue #838).** Turned to the left, its fist came down on the
+  far right of the field; facing right, on the far left behind him. It
+  now strikes the first of the enemy's columns ahead of him, whichever
+  way he faces. Thanks to Agergo100 for the report.
+
 ## 0.23.0 (2026-11-19)
 
 - **New: your friends on Discord see you play, and how far the run
