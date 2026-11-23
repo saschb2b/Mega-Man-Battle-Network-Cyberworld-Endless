@@ -1,0 +1,42 @@
+[
+ {
+  "name": "DarkProto's state not renumbered",
+  "spec": "darkproto_v1",
+  "poke": [
+   "08893164:2008:2"
+  ],
+  "what": "his CurAction 8 (BN5 0x080F2AFC: movs r0,#8 before setAttack0, its copy at XN_TEAM_CODE + 0x164) left at BN5's 8 where the recipe makes it BN6's 0xA, past BN6's two status states (caught at t513)"
+ },
+ {
+  "name": "DarkProto's effect not renumbered",
+  "spec": "darkproto_v1",
+  "poke": [
+   "08893C0A:3416:2"
+  ],
+  "what": "his effect 0x16 (BN5 0x080F35A2: adds r4,#0x16, its copy at XN_TEAM_CODE + 0xC0A) left at BN5's number where the recipe makes it the Navis' 0xB2 (caught at t557)"
+ },
+ {
+  "name": "DarkProto's other effect not renumbered",
+  "spec": "darkproto_v1",
+  "poke": [
+   "08893C52:342E:2"
+  ],
+  "what": "his effect 0x2E (BN5 0x080F35EA: adds r4,#0x2E, its copy at XN_TEAM_CODE + 0xC52) left at BN5's number where the recipe makes it the Navis' 0xB5"
+ },
+ {
+  "name": "DarkProto's object spawned as another",
+  "spec": "darkproto_v1",
+  "poke": [
+   "08894CB4:202F:2"
+  ],
+  "what": "the third kind's 0x6B's spawner (BN5 0x080D3624: movs r0,#0x6B, its copy at XN_TEAM_CODE + 0x1C00 + 0xB4) spawning BN5's 0x2F instead (BlizzardMan's slide's hit, moved too), where his recipe moves his own 0x6B"
+ },
+ {
+  "name": "DarkProto's object's count not its own",
+  "spec": "darkproto_v1",
+  "poke": [
+   "08894CCA:7101:2"
+  ],
+  "what": "the 0x6B's spawner's count (BN5 0x080D363A: strb r2,[r0,#4], its copy at XN_TEAM_CODE + 0x1C00 + 0xCA) written from r1 instead: the byte layouts' spawn_leftovers rule compares at +4 (its upper three bytes each copy's leftover)"
+ }
+]

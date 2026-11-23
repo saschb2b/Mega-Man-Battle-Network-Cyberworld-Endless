@@ -93,6 +93,10 @@
  * tools/xnavirecipe.py XN_SHARED_FOUR) */
 #define XN_SHARED_FOUR     FREE_NAVI_SHARED_FOUR
 #define XN_SHARED_FOUR_END FREE_NAVI_SHARED_FOUR_END
+/* ... and its fifth, Team ProtoMan's sprites' room's tail past DarkProto's battle sprite (DarkProto's effect 3's sprite,
+ * BN5's list 5 0x3, first; tools/xnavirecipe.py XN_SHARED_FIVE) */
+#define XN_SHARED_FIVE     FREE_TEAM_SHARED_FIVE
+#define XN_SHARED_FIVE_END FREE_TEAM_SHARED_FIVE_END
 /* LarkMan's and GridMan's (seats 17-18, slots 18-19: tools/xnavirecipe.py NEBULA) in a room of their own in code-low
  * (FREE_NEBULA_NAVIS): a home, a code room (XN_NEBULA_SLOT_CODE: GridMan's walk, 8590 bytes) and an art room each, then
  * GridMan's battle sprite (LarkMan's in FREE_NAVI_SPRITES' tail, xnavi_sprites.c) */
@@ -259,6 +263,8 @@ typedef struct {
 	                               gives r4 its AI data: BN4's JunkMan's, whose state's spawn keeps r4 at the object's +4 */
 	uint8_t record_list;        /* the list its BN4 records name its battle sprite in where it is not the list its init loads it from
 	                               (JunkMan's 1: read by BN4's preload alone, which passes a raw sprite over), 0 that list */
+	bool after_chips;           /* installed after BN5's chips' code (xnavi_install_after_chips, xinstall.c): its spawns of the types the
+	                               chips' copy holds are XV_TYPE_SHARED, that copy run (DarkProto's shield and MoonBld's blade) */
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in

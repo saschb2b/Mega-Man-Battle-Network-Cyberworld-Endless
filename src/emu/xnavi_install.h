@@ -27,6 +27,9 @@ enum {
  * their ids then spawn them (the foes step), and data.c reads those ids as
  * the engine does (EnemyMoved). */
 void xnavi_install_all(int which);
+/* ... and the Navis installed after BN5's chips' code (XNavi.after_chips: DarkProto, whose shield and blade are the chips'
+ * copies), once a core, where xnavi_install_all put BN5's in */
+void xnavi_install_after_chips(void);
 /* One Navi into the core's ROM copy (the rooms grown first): true once it
  * is there (now or before); false, nothing of it written, where any check
  * failed (the log says which). */

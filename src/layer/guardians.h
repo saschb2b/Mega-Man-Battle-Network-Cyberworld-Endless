@@ -56,7 +56,7 @@ static inline bool guardian_nebula(int navi) { return navi >= GUARDIAN_NEBULA_FI
 /* BN5's Team ProtoMan (docs/game/team-protoman.md): BN5's AI 1-6 (bn5.h BN5_NAVI_PROTOMAN .. BN5_NAVI_MEDDY) as navis 59-64
  * here, a rival record each (rivals.sav's fourth version), each Soul held by its form (souls.h, souls_team_held); each his
  * Team Colonel partner's second guardian by a coin from act 2, and in the deep's pool (xguardian.h, xguardian_partner),
- * once moved into BN6's engine (ProtoMan's own, DarkProto, not yet) */
+ * once moved into BN6's engine (ProtoMan's own as DarkProto, Colonel's partner) */
 #define GUARDIAN_TEAM_FIRST 59
 #define GUARDIAN_TEAM_LAST  64
 static inline bool guardian_team(int navi) { return navi >= GUARDIAN_TEAM_FIRST && navi <= GUARDIAN_TEAM_LAST; }
