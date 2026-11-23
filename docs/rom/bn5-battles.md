@@ -3,7 +3,7 @@ type: ROM Map
 title: "BN5's battles, records and rewards"
 description: "Addresses for BN5's battles: the guest battles (the differential's reference), results and rewards, random numbers, BN5's DarkChips, the run's buster there, BN5's Navis as guardians, its Souls and its records in BN6's engine."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:35:13Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"

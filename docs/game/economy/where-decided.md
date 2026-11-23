@@ -3,7 +3,7 @@ type: Code Map
 title: "Where it is decided"
 description: "Where the economy is decided in code: plans and bands in `src/core/economy.c`, Mystery Data and chip rolls in `src/core/loot.c`, data placement, battle rewards, dealers, traders, dark-layer prizes, requests' pay, the report, run counts."
 tags: [game, economy]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:35:13Z }
 ---
 
 # Where it is decided

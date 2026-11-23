@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-23
+* **Update**: game/bosses/bn5-navis.md (Team ProtoMan's five as their Team Colonel partners' second guardians from act 2 by a coin of the seed, no tournament's entrant; the deep's pool of eleven and Nebula's two; their versions and bands; a HeelNavi's body and no face, Team Colonel's ROM drawing none of them; Guardian Data their Soul and a chip of its kind), game/team-protoman.md (Where it stands; unit 7 built but DarkProto's row), rom/bn5-battles.md (BN5's lists 6 and 8 at 64-68 a placeholder and the black face), game/bosses/index.md (bn5-navis.md's line), game/navicust.md, game/meta/souls.md, game/economy/held-soul-kind.md, game/economy/where-decided.md (`souls_layer` is `souls_layer_bn5`, which holds every BN5 Soul).
 * **Update**: game/team-protoman.md (On a dark board: ProtoMan built for a held ProtoSoul, the other five without a body and the owner's question; unit 10's row), game/liberation/building/cross-navis-team.md (Team ProtoMan's own Navis: ids, commands, HP, ProtoMan in BN6's body, the scenarios; its description), game/liberation/building/index.md (its line), rom/liberation.md (Team ProtoMan's bodies and board HP in Team Colonel's ROM), devtools/dev-menu.md (`souls=MASK`'s Team ProtoMan bits).
 * **Update**: multirom/souls.md (SearchSoul's reveal seen at last: soul_search_hide, a foe flashing as the Invis chip leaves him, found and cleared at t1 in both games), devtools/differential.md (the spec's `hide`).
 

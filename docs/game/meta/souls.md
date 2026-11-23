@@ -3,7 +3,7 @@ type: Feature
 title: "Souls"
 description: "BN5's Souls (issue #69): a beaten BN5 Navi's Soul serves every battle of the run, UNITE on BN6's Custom screen giving up a chip of its kind, Chaos Unison with a DarkChip, kept in `run.souls`."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:04:04Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:35:13Z }
 ---
 
 # Souls (4 October 2026, issue #69; in every battle since issue #82)

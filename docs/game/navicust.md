@@ -3,7 +3,7 @@ type: Design
 title: "The NaviCust"
 description: "The NaviCust as a run's second build axis: fit it or force it, the board grown by ExpMemry at acts 2 and 4, guardian drafts from 34 programs and BN5's SoulT+1 while the run holds a Soul, readable bugs, and what is built (`src/layer/navicust.c`)."
 tags: [game, navicust]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:35:13Z }
 ---
 
 # The NaviCust
