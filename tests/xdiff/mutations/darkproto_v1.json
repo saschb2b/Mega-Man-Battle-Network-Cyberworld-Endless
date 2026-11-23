@@ -1,0 +1,42 @@
+[
+ {
+  "name": "DarkProto's state not renumbered",
+  "spec": "darkproto_v1",
+  "poke": [
+   "08893164:2008:2"
+  ],
+  "what": "his CurAction 8 (BN5 0x080F2AFC: movs r0,#8 before setAttack0, its copy at XN_TEAM_CODE + 0x164) left at BN5's 8 where the recipe makes it BN6's 0xA, past BN6's two status states"
+ },
+ {
+  "name": "DarkProto's effect not renumbered",
+  "spec": "darkproto_v1",
+  "poke": [
+   "08893C0A:3416:2"
+  ],
+  "what": "his effect 0x16 (BN5 0x080F35A2: adds r4,#0x16, its copy at XN_TEAM_CODE + 0xC0A) left at BN5's number where the recipe makes it the Navis' 0xB2"
+ },
+ {
+  "name": "DarkProto's slash not renumbered",
+  "spec": "darkproto_v1",
+  "poke": [
+   "08893CC2:2403:2"
+  ],
+  "what": "his effect 3, the slash drawing BN5's 5:0x3 (BN5 0x080F365A: movs r4,#3, its copy at XN_TEAM_CODE + 0xCC2), left at BN5's 3 where the recipe makes it the Navis' 0xB4 (its sprite list 5's 0xA9 in the shared art's fifth room)"
+ },
+ {
+  "name": "DarkProto's afterimage's sprite not his place",
+  "spec": "darkproto_v1",
+  "poke": [
+   "088938BC:2201:2"
+  ],
+  "what": "his afterimage's sprite number (BN5 0x080F3254: movs r2,#1, BN5_PROTO_AFTERIMAGE's word, its copy at XN_TEAM_CODE + 0x8BC) left at BN5's 0x1 where the recipe makes it his place, list 2's 0x2B: BN6's list 2 0x1 another Navi's"
+ },
+ {
+  "name": "DarkProto's collision offset not BN6's",
+  "spec": "darkproto_v1",
+  "poke": [
+   "088942C2:6E81:2"
+  ],
+  "what": "his read of the collision data's +0x68 (BN5 0x080F3C5A: ldr r1,[r0,#0x68], its copy at XN_TEAM_CODE + 0x12C2) left at BN5's offset where the recipe makes it BN6's +0x70"
+ }
+]

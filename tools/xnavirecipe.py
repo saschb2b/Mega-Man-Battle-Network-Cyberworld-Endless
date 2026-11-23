@@ -45,7 +45,8 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (15, 'CloudMan'), (5, 'MagnetMan'), (17, 'LarkMan'), (18, 'GridMan'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (15, 'CloudMan'), (5, 'MagnetMan'), (17, 'LarkMan'), (18, 'GridMan'),
+         (1, 'DarkProto'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -56,6 +57,15 @@ TEAM = (1, 2, 3, 4, 5, 6)
 # Nebula's two of the story's (docs/game/bosses/bn5-navis.md, LarkMan and GridMan): LarkMan, GridMan
 NEBULA = (17, 18)
 MOVED = SIX + (DARK_SOUL,) + DARKLOIDS + TEAM + NEBULA
+# The Navis installed after BN5's chips' code (src/emu/xinstall.c, xnavi_install_after_chips), each with the types its code
+# spawns that the chips' copy holds (tools/bn5_twins.py's TYPES: the chips' track): its spawns of them go through the
+# dispatch to that copy (XV_TYPE_SHARED), none copied again, so the chips' layout and numbers, and the Souls' calls into
+# them, stay. DarkProto (BN5's ProtoMan, AI 1; docs/game/team-protoman.md, The owner's questions), the last moved, derived
+# after Nebula's too, so no other Navi's numbers or places move
+AFTER_CHIPS = {1: {(3, 0x2B): "the chips (Guard's and CrsShld's shield, its kinds' sprites fixed there: his own at row 3, BN5's "
+                              "list 2 0x1 at the chips' list 2 0xFF)",
+                   (3, 0x69): "the chips (MoonBld's blade)",
+                   (4, 0x28): "LarkMan (the swords' afterimage, the Navis' copy; its sprite the spawner's word)"}}
 
 
 def seat(ai):
@@ -108,6 +118,9 @@ XN_TEAM_MORE, XN_TEAM_MORE_END = EMU_FREE + 0x141000, EMU_FREE + 0x150000
 # ... and its fourth, the art zone's tail (src/emu/free_space.plan FREE_NAVI_SHARED_FOUR, xnavi_recipe.h XN_SHARED_FOUR: Meddy's
 # last two sprites first, CloudMan's 16 KB before hers in the rooms before it)
 XN_SHARED_FOUR, XN_SHARED_FOUR_END = EMU_FREE + 0x7FA000, EMU_FREE + 0x800000
+# ... and its fifth, Team ProtoMan's sprites' room's tail past DarkProto's battle sprite (src/emu/free_space.plan
+# FREE_TEAM_SHARED_FIVE, xnavi_recipe.h XN_SHARED_FIVE: DarkProto's effect 3's sprite, BN5's list 5 0x3, first)
+XN_SHARED_FIVE, XN_SHARED_FIVE_END = EMU_FREE + 0x0EB800, EMU_FREE + 0x0EF000
 # Nebula's room in code-low (slots 18-19: src/emu/free_space.plan FREE_NEBULA_NAVIS, xnavi_recipe.h XN_NEBULA_*): a home, a code
 # room (XN_NEBULA_SLOT_CODE: GridMan's walk, 8590 bytes) and an art room each; AI 43-44 (XN_NEBULA_FIRST_AI)
 NEBULA_SLOT = 18
@@ -197,7 +210,7 @@ NAVI_SPRITE_PLACES = {18: (NEBULA_SPRITES, 0x8800)}   # GridMan: FREE_NEBULA_SPR
 NAVI_LIST_MOVES = {3: 4}
 # its ice block's size (BN6_ICE_SIZES' 0-2): BN5 freezes none, so each takes BN6's of a Navi its size (BN6's TomahawkMan
 # 1, its Colonel 2, its big Navis 2, MegaMan's 1)
-ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1, 3: 1, 6: 1, 5: 2}
+ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1, 3: 1, 6: 1, 5: 2, 1: 1}
 
 # each game's Navi tables: their first, step, entries, BN6's table k at its game's index (None: BN6's alone)
 NAVI5 = dict(tables=0x080F2374, step=0x5C, count=23, of=(0, 1, None, 2, 3, 4, 5, 6, 7, None, None, 8, 9), held=0x08113C78,
@@ -426,6 +439,8 @@ def ids_of(rom, ai, kind):
 def derive(src, b6, pairs, ai, slot, alloc, control=False):
     game = NAVI6 if control else NAVI5
     d = NaviDeriver(src, b6, pairs, game, control)
+    # (a Navi installed after the chips' code: the types their copy holds spawned through the dispatch to it, AFTER_CHIPS)
+    d.moved_before = {} if control else dict(AFTER_CHIPS.get(ai, {}))
     f = Family(ai)
     f.st, f.s1, f.s2 = d.table(ai, STATES), d.table(ai, STRUCT1), d.table(ai, STRUCT2)
     nxt = [x for x in d.s1s if x > f.s1]
@@ -806,6 +821,12 @@ def types_decided(r):
     track's), else a decision"""
     for kind, t5, t6, why in r.types:
         d = bn5_twins.TYPES.get((kind, t5))
+        if t6 == 'SHARED':
+            # (a Navi installed after the chips' code: the chips' copy, AFTER_CHIPS)
+            if (kind, t5) not in AFTER_CHIPS.get(r.ai5, {}) or d is None or d[0] != 'moved' or d[2] not in ('chips', 'navis'):
+                r.f.decide('type', f'the {kind} kind\'s type {t5:#x}: spawned as another track\'s copy, which tools/bn5_twins.py '
+                                   f'does not give the chips or the Navis ({d[0] if d else "undecided"})')
+            continue
         want = 'moved' if t6 is None else 'twin'
         if d is None or d[0] != want or (want == 'twin' and d[1] != t6):
             r.f.decide('type', f'the {kind} kind\'s type {t5:#x}: {want}{"" if t6 is None else f" {t6:#x}"} here ({why}), '
@@ -907,6 +928,10 @@ def packed_sprites(r):
 # its spawner wrote ([r5+4] its list x 4, [r5+5] its number, 0x080E3648), the spawner 0x080E36DC taking that word in r4
 # (xchiprecipe.py AFTERIMAGE_SPAWN), so the load is the spawner's word and each spawn's word is set to BN6's
 AFTERIMAGE_LOAD = 0x080E3648
+# A spawn of the afterimage whose word's two low bytes are made by movs (BN5's spawn: the list offset's movs, the number's
+# movs; then added and shifted into r4 with others): DarkProto's own battle sprite (BN5_PROTO_AFTERIMAGE: list 2's 0x1,
+# movs r1,#8 and movs r2,#1), each immediate set to his place
+AFTERIMAGE_MOVS = {0x080F3266: (0x080F3252, 0x080F3254)}
 
 
 def afterimage_sprites(r):
@@ -917,7 +942,7 @@ def afterimage_sprites(r):
     f, out = r.f, set()
     for w in f.walks.values():
         for a, t in w.bls.items():
-            if t != XC.AFTERIMAGE_SPAWN:
+            if t != XC.AFTERIMAGE_SPAWN or a in AFTERIMAGE_MOVS:
                 continue
             lit = None
             for b in sorted((x for x in w.insns if x < a), reverse=True)[:14]:
@@ -1277,6 +1302,12 @@ def chips_of(r, src, b6):
             continue
         name = bn5.get(v, '') if v is not None else ''
         to = by_name.get(name)
+        if v is not None and len(chain) == 1 and chain[0][1] == 'ldr_lit' and to is not None:
+            # (its id a pool word, ldr r0,=id: the word BN6's; DarkProto's AreaGrab, BN5_PROTO_AREAGRAB)
+            if to != v:
+                f.numbers[w.insns[chain[0][0]].lit] = (v, to, f'the chip it writes for its attack: BN5\'s {v:#x}, BN6\'s {to:#x} '
+                                                               f'({name}, a pool word)')
+            continue
         if v is None or len(chain) != 1 or chain[0][1] != 'movs' or to is None or to > 0xFF:
             f.decide('chips', f'{a:08X}: the chip it writes ({v}, {name or "?"}) made by {chain}, BN6\'s {to}')
             continue
@@ -1420,6 +1451,23 @@ def art_of(r, b5, b6, alloc):
             f.numbers[lit] = (v, v & ~0xFFFF | to[1] << 8 | 4 * to[0],
                               f'its afterimage\'s sprite: list {lst} {idx:#x} in BN5, list {to[0]} {to[1]:#x} in BN6 (the word '
                               f'the afterimage loads, 0x080E36DC\'s r4)')
+    for site, (lsite, nsite) in sorted(AFTERIMAGE_MOVS.items()):
+        w = next((w for w in f.walks.values() if site in w.insns), None)
+        if w is None:
+            continue
+        li, ni = w.insns.get(lsite), w.insns.get(nsite)
+        if not li or not ni or li.form != 'movs' or ni.form != 'movs':
+            f.decide('sprite', f'{site:08X}: the afterimage\'s word not made by its two movs ({lsite:08X}, {nsite:08X})')
+            continue
+        lst, idx = li.f[1] // 4, ni.f[1]
+        to = bn6_place(lst, idx, 'load')
+        if to is None:
+            continue
+        why = f'its afterimage\'s sprite: list {lst} {idx:#x} in BN5, list {to[0]} {to[1]:#x} in BN6 (the word 0x080E36DC\'s r4)'
+        if to[1] != idx:
+            r.more_imms.append(dict(at=nsite, form='THUMB_MOVS', rd=ni.f[0], rn=0, was=idx, now=to[1], why=why))
+        if to[0] != lst:
+            r.more_imms.append(dict(at=lsite, form='THUMB_MOVS', rd=li.f[0], rn=0, was=li.f[1], now=4 * to[0], why=why + ' (its list)'))
     tables = sprite_tables(r, f)
     kinds = chip_tables()[0]
     for (l, v), sites in sorted(f.loads.items(), key=lambda x: str(x[0])):
@@ -1522,6 +1570,7 @@ class Alloc(X.Alloc):
             if track == 'navis' and num in self.lists.get(lst, ()):
                 self.lists[lst].remove(num)
         self.shared_at, self.team_at, self.more_at, self.four_at = XN_SHARED_ART, XN_TEAM_SHARED, XN_TEAM_MORE, XN_SHARED_FOUR
+        self.five_at = XN_SHARED_FIVE
         self.effect = NAVI_FIRST_EFFECT
 
     def shared(self, b5, lst, idx, fixed=None):
@@ -1539,7 +1588,7 @@ class Alloc(X.Alloc):
                 return None, None
             room = X.rounded(len(b), X.ROOM['load'])
             # (the first room while it holds the sprite, else the second, Team ProtoMan's: XN_TEAM_SHARED, else the third,
-            # XN_TEAM_MORE, else the fourth, XN_SHARED_FOUR)
+            # XN_TEAM_MORE, else the fourth, XN_SHARED_FOUR, else the fifth, XN_SHARED_FIVE)
             if self.shared_at + room <= XN_END:
                 at, self.shared_at = self.shared_at, self.shared_at + room
             elif self.team_at + room <= XN_TEAM_END:
@@ -1548,6 +1597,8 @@ class Alloc(X.Alloc):
                 at, self.more_at = self.more_at, self.more_at + room
             elif self.four_at + room <= XN_SHARED_FOUR_END:
                 at, self.four_at = self.four_at, self.four_at + room
+            elif self.five_at + room <= XN_SHARED_FIVE_END:
+                at, self.five_at = self.five_at, self.five_at + room
             else:
                 return None, None
             self.memo[key] = dict(list=lst, index=idx, to_list=to_list, to_index=fixed[1] if fixed else self.lists[to_list].pop(0),
@@ -1627,6 +1678,7 @@ def c_art(r, n):
             base, name = (XN_TEAM_SHARED, 'XN_TEAM_SHARED') if XN_TEAM_SHARED <= x['at'] < XN_TEAM_END else \
                 (XN_TEAM_MORE, 'XN_TEAM_MORE') if XN_TEAM_MORE <= x['at'] < XN_TEAM_MORE_END else \
                 (XN_SHARED_FOUR, 'XN_SHARED_FOUR') if XN_SHARED_FOUR <= x['at'] < XN_SHARED_FOUR_END else \
+                (XN_SHARED_FIVE, 'XN_SHARED_FIVE') if XN_SHARED_FIVE <= x['at'] < XN_SHARED_FIVE_END else \
                 (NEBULA_SPRITES, 'FREE_NEBULA_SPRITES') if NEBULA_SPRITES <= x['at'] < NEBULA_SPRITES_END else (XN_SHARED_ART, 'XN_SHARED_ART')
             L.append(f'\t{{ {x["list"]}, 0x{x["index"]:02X}, {x["to_list"]}, 0x{x["to_index"]:02X}, {name} + 0x{x["at"] - base:X}, '
                      f'0x{x["room"]:X} }},' + ('   /* (LZ77 in BN5) */' if x['lz'] else ''))
@@ -1635,7 +1687,8 @@ def c_art(r, n):
         L.append(f'static const XvId {n}_effects[] = {{ ' + ', '.join(f'{{ 0x{a:02X}, 0x{b:02X} }}' for a, b in r.effects) + ' };')
     if r.types:
         L.append(f'static const XvType {n}_types[] = {{ ' + ', '.join(
-            f'{{ {k}, 0x{t5:02X}, {"XV_TYPE_MOVED" if t6 is None else f"0x{t6:02X}"} }}' for k, t5, t6, _ in r.types) + ' };')
+            f'{{ {k}, 0x{t5:02X}, {"XV_TYPE_MOVED" if t6 is None else "XV_TYPE_SHARED" if t6 == "SHARED" else f"0x{t6:02X}"} }}'
+            for k, t5, t6, _ in r.types) + ' };')
     return L
 
 
@@ -1699,6 +1752,8 @@ def c_recipe(r, label):
     L.append(f'\t.prestep = {ref_text(r.prestep)}, .hook_a = {ref_text(r.hook_a)},')
     L.append(f'\t.companion = {ref_text(r.companion[0])}, .companion_end = {ref_text(r.companion[1])}, .hide = {ref_text(r.hide)},')
     L.append(f'\t.sprite_of = {r.sprite_of},')
+    if r.ai5 in AFTER_CHIPS and not r.control:
+        L.append('\t.after_chips = true,')
     if r.overlay:
         L.append(f'\t.overlay = &{n}_overlay,')
     if any(r.shown):
@@ -1826,11 +1881,15 @@ def main():
     # (the moved objects' numbers taken before Team ProtoMan's: theirs as they were before them, the sea's splash 0xAC)
     objects = derive_objects(b5, b6, pairs, alloc)
     for ai, label in NAVIS:
-        if ai in TEAM:
+        if ai in TEAM and ai not in AFTER_CHIPS:
             recipes.append((derive(b5, b6, pairs, ai, slot_of(ai), alloc), label))
     # (Nebula's after Team ProtoMan's: their numbers and places past every other Navi's, none of theirs moved)
     for ai, label in NAVIS:
         if ai in NEBULA:
+            recipes.append((derive(b5, b6, pairs, ai, slot_of(ai), alloc), label))
+    # (DarkProto after Nebula's, installed after the chips' code: his numbers and places past every other Navi's, AFTER_CHIPS)
+    for ai, label in NAVIS:
+        if ai in AFTER_CHIPS:
             recipes.append((derive(b5, b6, pairs, ai, slot_of(ai), alloc), label))
     shared_rows([r for r, _ in recipes[1:]] + [objects], b5)
     if a.report:

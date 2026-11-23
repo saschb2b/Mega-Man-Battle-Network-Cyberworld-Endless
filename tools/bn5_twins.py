@@ -417,6 +417,8 @@ TYPES = {
     (3, 0xC6): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
     (3, 0xC8): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
     (3, 0xB0): ('moved', None, 'navis', "LarkMan's: " + NO_TWIN),
+    (1, 0x10): ('moved', None, 'navis', "DarkProto's (BN5's ProtoMan): " + NO_TWIN),
+    (3, 0x6B): ('moved', None, 'navis', "DarkProto's (BN5's ProtoMan): " + NO_TWIN),
     (3, 0xBB): ('moved', None, 'navis', "LarkMan's: " + NO_TWIN),
     (3, 0x36): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x37): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),

@@ -216,8 +216,12 @@ into the battle engine).
   SearchMan, MagnetMan and Meddy fill; a sprite past the Navis' numbers
   of its list goes to list 2's 0x80-0x9F (`NAVI_LIST_SPILL`, skipped by
   the families' `LIST_NUMBERS`), its load's list offset made list 2's.
-  DarkProto's art (some 290 KB, lists 0-2 and 5) fits no room left
-  (open).
+  DarkProto's art, once counted at some 290 KB of lists 0-2 and 5, was
+  the shield's kinds table read as two-byte pairs where its rows are six
+  bytes: what he draws of his own is his battle sprite (38,370 bytes, the
+  last place in `FREE_TEAM_SPRITES`) and his effect 3's (12,211 bytes,
+  the shared art's fifth room past it, `FREE_TEAM_SHARED_FIVE`), both
+  inside the team's region (DarkProto, below).
 - **NapalmMan** (AI 4, Navi AI 29, ids 0x1FC-0x1FF; `napalmman_v1`,
   `napalmman_v1_keys`, `napalmman_sp`: PASS): his five object types moved
   (the third kind's 0x33, 0x38, 0x39, 0x3A, the fourth's 0x12), his
@@ -291,6 +295,30 @@ into the battle engine).
   offset); the pull's own breaks show in MegaMan's state alone, where the
   comparator stops without a verdict, and his count and check of his
   magnet panels decide in no spec.
+- **DarkProto**, BN5's ProtoMan (AI 1, Navi AI 26, ids 0x1F0-0x1F3;
+  `darkproto_v1`, `darkproto_v1_keys`, `darkproto_sp`: STATUS), the
+  owner's call of 9 November ([Team ProtoMan: foes and
+  Souls](../game/team-protoman.md), The owner's questions), named for his
+  V2 (BN5's names archive: DarkProt). *His types:* the first kind's 0x10
+  and the third's 0x6B moved as his; the third kind's 0x2B (the shield,
+  Guard's and CrsShld's) and 0x69 (MoonBld's blade) are the chips' copies
+  and the fourth's 0x28 (the swords' afterimage) LarkMan's, which his
+  spawns run (`XV_TYPE_SHARED`): the generator's `AFTER_CHIPS` gives them
+  him so, the chips' layout and numbers and the Souls' calls into them
+  unmoved, and he installs after BN5's chips' code
+  (`xnavi_install_after_chips`, the recipe's `.after_chips`), where a
+  shared type must already be in the dispatch. The shield's kinds table
+  has rows of six bytes, row 3 his own battle sprite (BN5's 2:0x1), which
+  the chips' copy draws from its own copy of the same bytes (list 2's
+  0xFF). *His numbers:* the chip his attack writes, AreaGrab, is a pool
+  word (`BN5_PROTO_AREAGRAB`), BN6's 0xA3 by its name; his afterimage's
+  word is made by two `movs` (`BN5_PROTO_AFTERIMAGE`: list 2, 0x1), the
+  number set to his place, list 2's 0x2B (`AFTERIMAGE_MOVS`); his effects
+  0x16, 0x1C, 0x03 and 0x2E the Navis' 0xB2-0xB5, effect 3's sprite (BN5's
+  5:0x3, his WideSword's slash, 12,211 bytes) list 5's 0xA9 in the
+  shared art's fifth room, `FREE_TEAM_SHARED_FIVE` (14 KB, the tail of
+  Team ProtoMan's sprites' room past his battle sprite, 38,370 bytes at
+  `FREE_TEAM_SPRITES` + 0x37000). His sounds are all BN6's.
 - **GridMan** (AI 18, Navi AI 44, ids 0x3F0-0x3F3; `gridman_v1`,
   `gridman_v1_keys`, `gridman_sp`: PASS since 12 November), the first of
   Nebula's two of the story. *Their seats:* LarkMan's and GridMan's AI 17

@@ -62,8 +62,10 @@
 #define FREE_TEAM_NAVI_CODE  (EMU_FREE + 0x093000u)  /* their code, a room of XN_TEAM_SLOT_CODE each (the largest walk, ProtoMan's, 8648 bytes) (xnavi_install.c) */
 #define FREE_TEAM_NAVI_ART   (EMU_FREE + 0x0A2000u)  /* what their attacks draw, a room each (xnavi_install.c) */
 #define FREE_TEAM_SHARED     (EMU_FREE + 0x0A3800u)  /* the Navis' shared art's second room (a sprite of any Navi's once XN_SHARED_ART's is full) (xnavi_install.c) */
-#define FREE_TEAM_SPRITES    (EMU_FREE + 0x0AB000u)  /* their battle sprites, a place each, room for all six (the largest, MagnetMan's, 49,776 bytes) (xnavi_sprites.c) */
-#define FREE_TEAM_SPRITES_END (EMU_FREE + 0x0EF000u)
+#define FREE_TEAM_SPRITES    (EMU_FREE + 0x0AB000u)  /* their battle sprites, a place each, room for all six (the largest, MagnetMan's, 49,776 bytes; DarkProto's the last, 38,370) (xnavi_sprites.c) */
+#define FREE_TEAM_SPRITES_END (EMU_FREE + 0x0EB800u)
+#define FREE_TEAM_SHARED_FIVE (EMU_FREE + 0x0EB800u) /* the Navis' shared art's fifth room, the sprites' room's tail past DarkProto's (a sprite of any Navi's once FREE_NAVI_SHARED_FOUR is full: DarkProto's effect 3's first) (xnavi_install.c) */
+#define FREE_TEAM_SHARED_FIVE_END (EMU_FREE + 0x0EF000u)
 #define FREE_BN4_CHIPS       (EMU_FREE + 0x0EF000u)  /* the code of BN4's chips (xchips_bn4.h XC4_*): their units' homes and code, and the room their art is put into as an object loads a sprite (xchips_bn4_art.h); at its end their page of the second-level dispatch (xvirus_dispatch.h) and BN6's misc routines grown (xchips_code.c, xchips_bn4.c, xchips_bn4_art.c) */
 #define FREE_BN4_CHIPS_END   (EMU_FREE + 0x13F000u)
 #define FREE_SONG_TABLE      (EMU_FREE + 0x13F000u)  /* BN6's song table grown: its 474 entries, then SONG_GROWN_SLOTS more for other games' sounds (song_table.c) */
@@ -231,7 +233,8 @@
 	X("FREE_TEAM_NAVI_CODE", (EMU_FREE + 0x093000u), (EMU_FREE + 0x0A2000u), "FREE_TEAM_NAVIS", "code-low") \
 	X("FREE_TEAM_NAVI_ART", (EMU_FREE + 0x0A2000u), (EMU_FREE + 0x0A3800u), "FREE_TEAM_NAVIS", "code-low") \
 	X("FREE_TEAM_SHARED", (EMU_FREE + 0x0A3800u), (EMU_FREE + 0x0AB000u), "FREE_TEAM_NAVIS", "code-low") \
-	X("FREE_TEAM_SPRITES", (EMU_FREE + 0x0AB000u), (EMU_FREE + 0x0EF000u), "FREE_TEAM_NAVIS", "code-low") \
+	X("FREE_TEAM_SPRITES", (EMU_FREE + 0x0AB000u), (EMU_FREE + 0x0EB800u), "FREE_TEAM_NAVIS", "code-low") \
+	X("FREE_TEAM_SHARED_FIVE", (EMU_FREE + 0x0EB800u), (EMU_FREE + 0x0EF000u), "FREE_TEAM_NAVIS", "code-low") \
 	X("FREE_BN4_CHIPS", (EMU_FREE + 0x0EF000u), (EMU_FREE + 0x13F000u), "", "code-low") \
 	X("FREE_SONG_TABLE", (EMU_FREE + 0x13F000u), (EMU_FREE + 0x141000u), "", "code-low") \
 	X("FREE_TEAM_SHARED_MORE", (EMU_FREE + 0x141000u), (EMU_FREE + 0x150000u), "", "code-low") \
