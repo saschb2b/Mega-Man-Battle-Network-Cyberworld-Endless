@@ -11,8 +11,6 @@
 #include "bn5.h"
 #include "bn6.h"
 #include "bn6_families.h"
-#include "bn6_navis.h"
-#include "bn6_forms.h"
 #include "bytes.h"
 #include "claims.h"
 #include "emu.h"
@@ -470,8 +468,7 @@ static bool a_t1(uint32_t obj) {
 static HookAct anim_set(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t obj = r->r[5];
-	if (a_t1(obj) && hook_read8(obj + BN6_T1_TYPE) == BN6_OVERLAY_TYPE && hook_read8(obj + BN6_T1_PARAM) == SOUL_OVERLAY_BN4)
-		obj = hook_read32(obj + BN6_T1_PARENT);   /* (the companion: its parent's family and Soul) */
+	obj = soulcompanion_owner(obj);   /* (a BN4 Soul's companion: its parent's family and Soul) */
 	if (!a_t1(obj) || soulbn4_k(soul_id_of(obj)) < 0)
 		return HOOK_CONTINUE;
 	uint8_t family = hook_read8(obj + BN6_T1_ACTION);

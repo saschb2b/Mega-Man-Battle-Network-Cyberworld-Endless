@@ -6,11 +6,13 @@
 
 #include "bn4.h"
 #include "bn4_souls.h"
+#include "bn6.h"
 #include "bn6_forms.h"
 #include "bn6_navis.h"
 #include "bytes.h"
 #include "claims.h"
 #include "emu.h"
+#include "hook.h"
 #include "rom.h"
 #include "soul_room.h"
 #include "soulbn4.h"
@@ -74,6 +76,11 @@ bool soulcompanion_install(void) {
 bool soulcompanion_enter(int k, uint32_t *word) {
 	*word = SOUL_OVERLAY_BN4;   /* (its +4 the kind, +5 0: his palette its own, as BN4's companion's init takes it, 0x080CC40C) */
 	return done && word_of(k);
+}
+
+uint32_t soulcompanion_owner(uint32_t obj) {
+	return hook_read8(obj + BN6_T1_TYPE) == BN6_OVERLAY_TYPE && hook_read8(obj + BN6_T1_PARAM) == SOUL_OVERLAY_BN4 ?
+		hook_read32(obj + BN6_T1_PARENT) : obj;
 }
 
 uint32_t soulcompanion_leave(int k) { return done && word_of(k) ? BN6_FORM_OVERLAY_TAKE : 0; }

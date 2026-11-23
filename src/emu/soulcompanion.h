@@ -26,6 +26,10 @@ bool soulcompanion_sprite(int k, int *list, int *number);
  * Soul (BN6_FORM_OVERLAY_SPAWN), its word at *word; false where he has none
  * or it is not installed */
 bool soulcompanion_enter(int k, uint32_t *word);
+/* The MegaMan whose companion `obj` is (a first-kind object, read in a
+ * hook): its parent where it is BN6's companion overlay of BN4's Souls'
+ * kind, else `obj` itself */
+uint32_t soulcompanion_owner(uint32_t obj);
 /* ... and its leave: BN6's own removal of the overlay, 0 where he has none */
 uint32_t soulcompanion_leave(int k);
 
