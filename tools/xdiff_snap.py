@@ -316,6 +316,10 @@ class Canon:
         self.virus_support = int(m['chip_id']['virus_support'], 0) if 'virus_support' in m.get('chip_id', {}) else None
         fl = m.get('green_flash', {})
         self.green_flash = dict(bn5_ai=int(fl.get('bn5_ai', '0x3C'), 0), size=int(fl.get('size', 2)))
+        # (a deleted virus's last frame as BN6's plain deletion ends it: its emitter let go a frame after BN5's, legit.json's
+        # maps, deletion_end, deletion_end below)
+        de = m.get('deletion_end')
+        self.deletion_end = {k: de[k] if k == 'kind' else int(de[k], 0) for k in ('kind', 'type', 'state', 'slot', 'ai')} if de else None
         # (BN5's chip ids as BN6's: the registry's rows, legit.json's maps, chip_id; the places they are kept, an AI data's and
         # an object's of a type of the third or fourth kind)
         self.chip_rows = registry_rows(m['chip_id']['registry']) if 'chip_id' in m else {}
@@ -895,6 +899,36 @@ class Frame:
                 if base <= (v & ~1) < base + ln:
                     return ('rom', v - base + frm)
         return ('raw', v)
+
+    def drop(self, o):
+        """the object read as let go this frame: out of the frame's objects and of what its pointers name (deletion_end)"""
+        self.fr['objs'] = [x for x in self.fr['objs'] if x is not o]
+        self.spans = [s for s in self.spans if s[2] != o.role]
+        self.by_role.pop(o.role, None)
+
+
+def deletion_end(fa, fb):
+    """A deleted virus's last frames, BN5's read as BN6's (legit.json, maps, deletion_end): a virus in its last state (+8 the
+    rule's state) in both games, the word of its AI data that kept its sparks (the rule's ai) BN6's 0 and BN5's naming the
+    fourth kind's slot they left (a stale pointer): BN5's word read as BN6's 0; and BN6's sparks that word named, in their
+    own last state (the rule's kind, type and +8) where BN5's are let go already (no object of their role), read as let go.
+    Each game's frame changed in place; how many viruses were read so"""
+    rule, n = fa.canon.deletion_end, 0
+    if not rule:
+        return 0
+    for v6 in [o for o in fb.fr['objs'] if o.kind == 'T1' and o.ai is not None and o.o8(8) == rule['state'] and not u32(o.ai, rule['ai'])]:
+        v5 = fa.by_role.get(v6.role)
+        if v5 is None or v5.ai is None or v5.o8(8) != rule['state'] or not u32(v5.ai, rule['ai']):
+            continue
+        p5 = stale(fa, v5, fa.ptr(u32(v5.ai, rule['ai'])))
+        if not (len(p5) == 4 and p5[0] == 'stale' and p5[1].startswith(f"{rule['kind']} slot ") and p5[2] == 'obj'):
+            continue
+        v5.ai = bytes(v5.ai[:rule['ai']]) + bytes(4) + bytes(v5.ai[rule['ai'] + 4:])
+        for o6 in [o for o in fb.fr['objs'] if o.kind == rule['kind'] and o.o8(OBJ_TYPE) == rule['type'] and o.o8(8) == rule['state']
+                   and o.role not in fa.by_role and fb.ptr(o.o32(rule['slot'])) == (role_name(v6.role), 'ai', rule['ai'])]:
+            fb.drop(o6)
+        n += 1
+    return n
 
 
 def coll_off(canon, game, off):

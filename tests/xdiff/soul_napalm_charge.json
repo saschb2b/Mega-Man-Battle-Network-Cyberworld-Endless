@@ -1,11 +1,11 @@
 {
- "about": "BN5's NapalmSoul's chip charge in both engines (docs/game/team-protoman.md, unit 8): NapalmSoul united (souls5 8, souls6 bit 21) with a deck of FireHit1 (BN5's 151 O, BN6's 107 D: Fire, NapalmSoul's kind), two picked, the last given up for UNITE; A held from t100 for 130 frames: the chip charged by BN5's rule (BN5 0x08010902: a Fire chip for NapalmSoul), its charge time BN5's (0x27's row), released as the chip used charged and doubled (0x080103C8), its family BN5's Napalm Bomb (0x0801043A: 0x4B, BN6's 0xC9), thrown at CanGard V1 at (6,2); MegaMan at (2,2) with 2000 HP, kept from harm. The spec ends at t320: CanGard falls to the bomb at t323, and at t321 the two games part on an object of his (BN5's CanGard's AI data +0x74 names a fourth-kind object let go, BN6's names none while a fourth-kind 0x11 is still in play), a difference not yet traced, of the foe's last frames, not of the Soul's (docs/multirom/souls.md, Team ProtoMan's Souls).",
+ "about": "BN5's NapalmSoul's chip charge in both engines (docs/game/team-protoman.md, unit 8): NapalmSoul united (souls5 8, souls6 bit 21) with a deck of FireHit1 (BN5's 151 O, BN6's 107 D: Fire, NapalmSoul's kind), two picked, the last given up for UNITE; A held from t100 for 130 frames: the chip charged by BN5's rule (BN5 0x08010902: a Fire chip for NapalmSoul), its charge time BN5's (0x27's row), released as the chip used charged and doubled (0x080103C8), its family BN5's Napalm Bomb (0x0801043A: 0x4B, BN6's 0xC9), thrown at CanGard V1 at (6,2); MegaMan at (2,2) with 2000 HP, kept from harm. The bomb deletes CanGard at t288 and both games' plain deletion runs its 0x20 frames from t289 to t321, its sparks (the fourth kind's 0x11) kept in his AI data +0x74; at t321 BN5's ends them and lets them go while BN6's clears the word and lets them go a frame later, BN6's own deletion's way, read in BN6's terms (legit.json's maps, deletion_end); the battle ends at t323 with him, its last frame compared (docs/multirom/souls.md, Team ProtoMan's Souls).",
  "kind": "differential",
  "subject": "megaman",
  "foes": "4F@62",
  "mm": "22",
  "hp": 2000,
- "frames": 320,
+ "frames": 400,
  "seed": "12345678:9ABCDEF0",
  "rng": "follow",
  "safe": true,

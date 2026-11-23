@@ -1,10 +1,10 @@
 {
  "name": "the engine's per-frame draws while the battle's clock holds, replayed",
  "part": "draw",
- "when": "per-frame draw",
- "why": "Mask 039's hold seen by the replay: both games draw three numbers each frame whatever the battle does (rng, per_frame: the game state's GetRNG and GetRNGSecondary, the main loop's GetRNGSecondary), and a turn's change opened with L takes BN6 four frames more than BN5. rng=follow sees that as the words apart (039); rng=replay keys each draw and finds no twin in BN5's frame for BN6's extra frames' draws, so it reports each. Only a draw of those per-frame routines one game alone made is taken in; any other unmatched draw is still a difference. Specs that take a second Custom screen under the replay (MeddySoul's capsules, drawn by BN5's set-up moved and keyed as BN5's) meet it.",
+ "when": "held draw",
+ "why": "The mask \"the engine's draws while the battle's clock holds\" under rng=replay: both games draw three random numbers each frame whatever the battle does (rng, per_frame: the game state's GetRNG and GetRNGSecondary, the main loop's GetRNGSecondary), and where the battle's clock holds for a number of frames each game's own (a Soul's unison, BN5's own crossing, against BN6's proxy crossing made before the fight), the first traced frame after holds the per-frame draws of the frames one game had more, which the replay finds no twin for in the other's frame. Each such draw is the engine's, not the Soul's or the family's: held only where its caller is a per-frame routine and the frame's words are apart as the rng mask reads them, every other draw since the last traced frame the same in number in both and each word the other's stepped by exactly the per-frame draws one game made more.",
  "evidence": [
-  "soul_meddy_capsules and soul_meddy_capsule_used (rng=replay, L at t520): at t524 BN6's draws with no twin are twelve, four frames of 0x08005100 and 0x08005104 (the game state's: per_frame's twin 0x080050EC of BN5's 0x08004C98) and 0x08000320 (the main loop's, the same place in BN5); the cores' frames from t523 to t524 247 in BN5 and 251 in BN6; every other draw matched (the capsules' draw BN5's, 0 unmapped)",
-  "mask 039's evidence: BN6 0x0800840C runs the turn's form check before its Custom screen, which BN5's 0x0800773C skips in a battle not linked"
+  "the per-frame routines: BN5's game state's 0x08004C98 (its GetRNG and GetRNGSecondary returning to 0x08004CAD and 0x08004CB1) and main loop's 0x08000300 (its GetRNGSecondary returning to 0x08000321), BN6's twins 0x080050EC and 0x08000300 (rng, per_frame and twins)",
+  "chaos_napalm_75 (NapalmSoul's Chaos Unison united at the fight's start, rng=replay for DarkMetr's meteors' shake): at t1 BN5's trace holds 10 draws by 0x08004CAD, 10 by 0x08004CB1 and 10 by 0x08000321 that BN6's lacks, its frame's words apart by those 30 steps (the rng mask's held clock explaining them); no other draw of the battle unmatched to t239"
  ]
 }
