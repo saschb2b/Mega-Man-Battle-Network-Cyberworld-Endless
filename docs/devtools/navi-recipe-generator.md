@@ -50,7 +50,8 @@ DarkProto after them and after BN5's chips' code (`AFTER_CHIPS`: the
 types his code spawns whose copy `TYPES` gives the chips, his shield and
 blade, or a Navi before him, LarkMan's afterimage, are that copy's,
 `XV_TYPE_SHARED`, none copied again, so the chips' layout and numbers stay;
-the recipe's `.after_chips`, installed by `xnavi_install_after_chips`);
+the recipe's `.after_chips`, installed by `xnavi_install_after_chips`;
+every version of his named by his V2's entry, `SHOWN_AS`);
 a sprite past the fourth room's end in the fifth, Team ProtoMan's sprites'
 room's tail (`XN_SHARED_FIVE`); the image object's kinds it spawns each one
 `tools/bn5_objects.py` fixes, and the moved objects' recipe itself

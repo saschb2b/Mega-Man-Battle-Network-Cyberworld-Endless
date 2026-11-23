@@ -5785,7 +5785,7 @@ static const XNavi bn5_darkproto = {
 	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
 	.sprite_of = 1,
 	.after_chips = true,
-	.shown = { 0x000, 0x000, 0x101, 0x000, 0x000, 0x000 },
+	.shown = { 0x102, 0x102, 0x102, 0x102, 0x000, 0x000 },
 	.needs = darkproto_needs, .nneeds = (int)(sizeof darkproto_needs / sizeof *darkproto_needs),
 };
 const XNavi *const xnavi_bn5[] = { &bn5_toadman, &bn5_knightman, &bn5_shadowman, &bn5_numberman, &bn5_tomahawkman, &bn5_colonel, &bn5_thedarksoul, &bn5_blizzardman, &bn5_shademan, &bn5_cosmoman, &bn5_cloudman, &bn5_napalmman, &bn5_gyroman, &bn5_searchman, &bn5_meddy, &bn5_magnetman, &bn5_larkman, &bn5_gridman, &bn5_darkproto };

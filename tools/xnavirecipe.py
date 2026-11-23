@@ -62,6 +62,9 @@ MOVED = SIX + (DARK_SOUL,) + DARKLOIDS + TEAM + NEBULA
 # dispatch to that copy (XV_TYPE_SHARED), none copied again, so the chips' layout and numbers, and the Souls' calls into
 # them, stay. DarkProto (BN5's ProtoMan, AI 1; docs/game/team-protoman.md, The owner's questions), the last moved, derived
 # after Nebula's too, so no other Navi's numbers or places move
+# A Navi every version of whom shows one name of his game's archive (its entry): BN5's ProtoMan as DarkProto, his V2's
+# own name (DarkProt, the owner's call of 9 November 2026: docs/game/team-protoman.md), told from the rival's ProtoMan
+SHOWN_AS = {1: 0x102}
 AFTER_CHIPS = {1: {(3, 0x2B): "the chips (Guard's and CrsShld's shield, its kinds' sprites fixed there: his own at row 3, BN5's "
                               "list 2 0x1 at the chips' list 2 0xFF)",
                    (3, 0x69): "the chips (MoonBld's blade)",
@@ -526,6 +529,8 @@ def derive(src, b6, pairs, ai, slot, alloc, control=False):
     r.names = [x if x is not None else 0 for x in f.ids5]
     # (BN5's name plates show ProtoMan V3 and Colonel V3 by their V1's names: 0x08026CC2)
     r.shown = [r.names[0] if (not control and r.names[v] in (0x103, 0x127)) else 0 for v in range(6)]
+    if not control and ai in SHOWN_AS:
+        r.shown = [SHOWN_AS[ai] if v < r.versions else 0 for v in range(6)]
     s1 = src.bytes(f.s1, 8)
     r.traits = None if control else dict(mode=s1[4], shadow=bool(s1[5]))
     r.ice = src.u8(NAVI6['ice'] + ai) if control else ICE.get(ai, 1)

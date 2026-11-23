@@ -51,7 +51,7 @@ sets him in:
 | End Area (Seaside Area) | End Area 3, 4 | NumberMan or ToadMan (the run's seed) | SearchMan (NumberMan's), Meddy (ToadMan's) | Plus, Aqua; Cursor, Recovery |
 | Oran Area (Green Area) | Oran Area 1 | ShadowMan | GyroMan | Invisible; Wind |
 | SciLab (Sky Area) | SciLab 4 | TomahawkMan | NapalmMan | Wood; Fire |
-| Undernet (Undernet) | Undernet 3 | Colonel | (ProtoMan: DarkProto, not yet) | Obstacle |
+| Undernet (Undernet) | Undernet 3 | Colonel | DarkProto (BN5's ProtoMan) | Obstacle; Sword |
 | Nebula Area (Graveyard) | (Bass) | the deep's pool | | |
 | (the deep's pool) | LarkMan on Undernet 2, GridMan on Oran Area 2 | LarkMan or GridMan, the deep's acts alone | | (no Soul: his Navi chips) |
 
@@ -66,8 +66,10 @@ tournament's entrant, as the six are in its pool ([The tournament](../tournament
 where a bracket stands in an act a partner guards, he is its final, as
 the act's guardian is. Beaten, he gives his own Soul as the six give
 theirs. Colonel's
-partner in the Undernet, BN5's ProtoMan as DarkProto, is one row of the
-partners' table (`src/layer/xguardian.c`) once he is moved.
+partner in the Undernet is BN5's ProtoMan as DarkProto, his V2's name for
+every version (DarkProt in battle, as BN5 names it), moved last
+([Team ProtoMan: foes and Souls](../team-protoman.md), unit 11); his
+Guardian Data gives ProtoSoul.
 
 **How often**: on the guardian layer of a surface act whose area BN5
 dresses, in half the runs (a coin of the run's seed for each area, of its
