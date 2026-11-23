@@ -44,7 +44,7 @@ void lib_battle_disarm(void);
  * left armed (it ended the run, and never came back to the board). */
 void lib_battle_stray(void);
 /* The next battle armed is a teammate's (docs/game/liberation/decision.md, The team):
- * MegaMan in BN5's Soul `soul` (7-12, the teammate's id) from the first
+ * MegaMan in BN5's Soul `soul` (1-12, the teammate's id: Team ProtoMan's 1-6, Team Colonel's 7-12) from the first
  * turn, for the whole battle, committed at the first Custom screen's OK as
  * BN5's UNITE commits a Soul, no chip given for it; a blow that would delete
  * him leaves him 1 HP and ends the battle LIBERATE FAILED! (the teammate

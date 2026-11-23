@@ -3,7 +3,7 @@ type: Design
 title: "The NaviCust"
 description: "The NaviCust as a run's second build axis: fit it or force it, the board grown by ExpMemry at acts 2 and 4, guardian drafts from 34 programs and BN5's SoulT+1 while the run holds a Soul, readable bugs, and what is built (`src/layer/navicust.c`)."
 tags: [game, navicust]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:35:13Z }
 ---
 
 # The NaviCust
@@ -332,7 +332,7 @@ skill (10 November 2026):
 Built (10 November 2026): `src/emu/xncp.c` (the program in BN6's tables),
 `src/core/xprograms.c` (BN5's record, name and lines), `navicust.c`'s pool
 entry behind `navicust_set_soul`, which `director_board.c`'s `soult_sync`
-sets as each layer is made from the Souls held then (`souls_layer`, the
+sets as each layer is made from the Souls held then (`souls_layer_bn5`, the
 same on a CONTINUE's rebuild) and the layer's guardian. MegaMan's word for
 it: "SoulT+1: a Soul stays one more turn." Proved in both games by each
 game's own compile and battle (`build.py xdiff soul_soult`).

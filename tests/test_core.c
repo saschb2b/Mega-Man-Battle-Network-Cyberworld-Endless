@@ -1628,6 +1628,9 @@ static void test_pacing(void) {
 	CHECK(pacing_xguardian_version(junk, 4, 0, false) == 1 && pacing_xguardian_version(junk, 5, 0, false) == 2, "JunkMan V2 then V3 in the deep");
 	CHECK(guardian_moved(GUARDIAN_OLDER_FIRST) && guardian_moved(GUARDIAN_BN4_FIRST + 1) && !guardian_moved(1) && !guardian_moved(GUARDIAN_DARKLOID_FIRST),
 		"BN5's six and BN4's Navis the older net's moved guardians, BN6's and the Darkloids not");
+	/* (Team ProtoMan's, their Team Colonel partners' second guardians: docs/game/team-protoman.md, Where they stand) */
+	CHECK(guardian_moved(GUARDIAN_TEAM_FIRST + 1) && guardian_moved(GUARDIAN_TEAM_LAST) && guardian_bn5_ai(GUARDIAN_TEAM_LAST) == BN5_NAVI_MEDDY,
+		"Team ProtoMan's the older net's moved guardians, Meddy BN5's AI 6");
 	/* heals: the middle layer of each act on the first two cycles, and the
 	 * run's first layer */
 	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&

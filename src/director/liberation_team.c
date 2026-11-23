@@ -38,6 +38,7 @@
 #include "xnavi.h"
 
 #define MATE_FACE   3      /* the eighth the team faces as the board begins (MegaMan's, down-right) */
+#define PROTOMAN_NAVI 11   /* the real ProtoMan's guardian index (guardians.c: BN6's own sprite and face, 0x3B), the rival's */
 #define SPAWN_WAIT  2      /* frames the player's spawn takes in its new body, then his interaction let go */
 
 /* BN5's teams by the stage an act stands for (docs/game/liberation/generator.md, What a
@@ -56,16 +57,36 @@ static int bn5_hp(int navi, int mission) {
 	const XRom *x = &XR[XROM_BN5_COLONEL_US];
 	if (!x->data) return 0;
 	const uint8_t *t = x->data + (BN5_LIB_NAVI_HP - 0x08000000u);
-	for (int i = 0; i < SOULS; ++i, t += 20)
+	for (int i = 0; i < BN5_LIB_NAVI_HP_ROWS; ++i, t += 20)
 		if ((t[0] | t[1] << 8) == navi) return t[2 * mission] | t[2 * mission + 1] << 8;
 	return 0;
 }
+
+/* A Navi who stands on the board in BN6's own body, as BN6's guardians
+ * stand on layers: his guardian index (a Cross Navi's 1-5, the real
+ * ProtoMan's), 0 another */
+int lib_navi_bn6(int navi) {
+	int c = lib_mate_cross(navi);
+	return c ? c : navi == MATE_PROTOMAN ? PROTOMAN_NAVI : 0;
+}
+
+/* (Team ProtoMan's Navi of Soul `navi`: a body to stand in. ProtoSoul is
+ * the real ProtoMan's, given by the rival's netbattle (docs/game/team-protoman.md,
+ * ProtoMan), who stands in BN6's own sprite; Team Colonel's ROM has none of
+ * the other five's, its lists 6 and 8 at 0x40-0x44 the one placeholder
+ * each: docs/rom/liberation.md) */
+static bool team_body(int navi) { return lib_navi_bn6(navi) != 0; }
 
 int lib_team_held(uint8_t navi[LIB_HELD]) {
 	int n = 0;
 	if (XR[XROM_BN5_COLONEL_US].data && soulunite_ready())
 		for (int k = 0; k < SOULS; ++k)
 			if (souls_held() >> k & 1) navi[n++] = (uint8_t)(MATE_COLONEL + k);
+	/* (a held Team ProtoMan Soul brings its Navi, where the Soul stands in
+	 * BN6's engine and he has a body) */
+	if (XR[XROM_BN5_COLONEL_US].data)
+		for (int s = MATE_PROTOMAN; s <= MATE_MEDDY; ++s)
+			if ((souls_held_bn5() >> (s - 1) & 1) && soulunite_has_bn5(s) && team_body(s)) navi[n++] = (uint8_t)s;
 	for (int c = 1; c <= MATE_CHARGEMAN - MATE_HEATMAN + 1; ++c)
 		if (powers_cross_held(c)) navi[n++] = (uint8_t)(MATE_HEATMAN + c - 1);
 	return n;
@@ -74,16 +95,18 @@ int lib_team_held(uint8_t navi[LIB_HELD]) {
 static bool soul_navi(int navi) { return navi >= MATE_COLONEL && navi <= MATE_TOADMAN; }
 
 const char *lib_navi_name(int navi) {
-	int c = lib_mate_cross(navi);
-	if (c) return guardian(c)->name;
+	int g = lib_navi_bn6(navi);
+	if (g) return guardian(g)->name;
+	if (lib_mate_team(navi)) return guardian(GUARDIAN_TEAM_FIRST + navi - MATE_PROTOMAN)->name;
 	return soul_navi(navi) ? guardian(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL)->name : "MegaMan";
 }
 
 int lib_navi_hp(int navi, int act) {
 	int m = mission_of[clamp_act(act)];
-	if (!lib_mate_cross(navi)) return bn5_hp(navi, m);
-	/* (a Cross Navi, whom BN5 never sends: the median of its six at the
-	 * stage, the mean of the middle two) */
+	if (!lib_mate_cross(navi) && !lib_mate_team(navi)) return bn5_hp(navi, m);
+	/* (a Cross Navi or one of Team ProtoMan's, whom Team Colonel's BN5
+	 * never sends (its table holds its own six alone): the median of its
+	 * six at the stage, the mean of the middle two) */
 	int hp[SOULS], n = 0;
 	for (int k = 0; k < SOULS; ++k) {
 		int h = bn5_hp(MATE_COLONEL + k, m), j = n++;
@@ -95,23 +118,32 @@ int lib_navi_hp(int navi, int act) {
 
 const char *lib_navi_form(int navi) {
 	int c = lib_mate_cross(navi);
-	return c ? powers_cross_name(c) : soul_navi(navi) ? lib_soul_form_name(navi) : "MegaMan";
+	return c ? powers_cross_name(c) : soul_navi(navi) || lib_mate_team(navi) ? lib_soul_form_name(navi) : "MegaMan";
 }
 
 const char *lib_navi_weakness(int navi) {
 	int c = lib_mate_cross(navi);
 	/* (a Soul's element its Navi's in BN5: TomahawkSoul's Wood, ToadSoul's
-	 * Aqua, docs/multirom/; the others none) */
-	if (!c) return navi == MATE_TOMAHAWKMAN ? "Fire" : navi == MATE_TOADMAN ? "Elec" : NULL;
-	return powers_cross_weakness(c);
+	 * Aqua, NapalmSoul's Fire, MagnetSoul's Elec, docs/multirom/; the others
+	 * none) */
+	if (c) return powers_cross_weakness(c);
+	switch (navi) {
+	case MATE_TOMAHAWKMAN: return "Fire";
+	case MATE_TOADMAN: return "Elec";
+	case MATE_NAPALMMAN: return "Aqua";
+	case MATE_MAGNETMAN: return "Wood";
+	default: return NULL;
+	}
 }
 
 /* Navi `navi`'s body as place k of the team stands on the board: a Cross
- * Navi's BN6's own overworld sprite (as BN6's guardians stand on layers),
- * a Soul Navi's BN5's copied into the teammates' k-th list-6 number */
+ * Navi's or ProtoMan's BN6's own overworld sprite (as BN6's guardians
+ * stand on layers), a Team Colonel Soul Navi's BN5's copied into the
+ * teammates' k-th list-6 number; -1 none */
 static int body_of(int navi, int k) {
-	int c = lib_mate_cross(navi);
-	if (c) return guardian_sprite(c);
+	int g = lib_navi_bn6(navi);
+	if (g) return guardian_sprite(g);
+	if (!soul_navi(navi)) return -1;
 	return xnavi_mate(k - 1, guardian_older_sprite(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL));
 }
 
@@ -217,10 +249,10 @@ int lib_in_play(void) { return LB.in_play; }
 const char *lib_mate_name(int k) { return lib_navi_name(k > 0 && k < LB.b.team.n ? LB.b.team.navi[k] : MATE_MEGAMAN); }
 
 /* (a Soul Navi's mugshot is at his list-6 number, as BN6_OW_MEGAMAN is
- * MegaMan's face too; a Cross Navi's his own of BN6's) */
+ * MegaMan's face too; a Cross Navi's and ProtoMan's his own of BN6's) */
 int lib_mate_face(int k) {
-	int c = k > 0 && k < LB.b.team.n ? lib_mate_cross(LB.b.team.navi[k]) : 0;
-	return c ? guardian_face(c) : k > 0 && k < LB.b.team.n ? LB.mate[k].sprite : BN6_OW_MEGAMAN;
+	int g = k > 0 && k < LB.b.team.n ? lib_navi_bn6(LB.b.team.navi[k]) : 0;
+	return g ? guardian_face(g) : k > 0 && k < LB.b.team.n ? LB.mate[k].sprite : BN6_OW_MEGAMAN;
 }
 
 const char *lib_mate_says(int k, int what, int n) {

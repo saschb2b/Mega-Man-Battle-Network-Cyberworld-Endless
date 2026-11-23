@@ -150,7 +150,7 @@ bool powers_after_boss(int navi) {
 		if (crosses[i].navi == navi && !run.cross) flag_set(crosses[i].flag);
 	/* BN5's guardians their Soul, for every battle of the run (docs/game/meta/souls.md,
 	 * Souls) */
-	bool soul = guardian_older(navi) && !soul_held(navi);
+	bool soul = (guardian_older(navi) || guardian_team(navi)) && !soul_held(navi);
 	soul_give(navi);
 	/* the Cybeast's fall gives BeastOut for the rest of the run (issue
 	 * #109: beat the beast, then its power), as Dad says in his call
