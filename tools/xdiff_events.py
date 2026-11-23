@@ -6,7 +6,7 @@ records: a panel reserved (BN6 marks the object, BN5 does not) and the blink's p
 opposite frames). Each translation is the family's own record read as BN6 has it, never a mask (docs/devtools/differential.md, The
 differential)."""
 from xdiff_snap import (BLINK, DRAW, KEPT, MOOD, NODE, PLAYER_NAVI, REPLAYED, RESERVE, SPAWN, SPRITE_SET, SOUND, EFFECT, ATTACK, UNMAPPED,
-                        UNMATCHED, Diff)
+                        UNMATCHED, Diff, deletion_end)
 
 OBJ_RESERVED = 0x20   # an object's +0: BN6 sets it as the object first reserves a panel (BN6_OBJ_RESERVED)
 OBJ_VISIBLE = 0x02    # ... drawn this frame: the blink hides a flashing object (BN5_BLINK_FLASHING, BN6_BLINK_FLASHING)
@@ -64,7 +64,8 @@ class Translations:
             for o in f.fr['objs']:
                 o.leftover = o.role in self.spawned[f.game] and o.role not in self.drawn[f.game]
                 o.sprite = self.sprite[f.game].get(o.role)
-        n = {'reservation': 0, 'blink': 0, 'mood': 0}
+        # (a deleted virus's last frame, BN6's emitter let go a frame after BN5's: legit.json, maps, deletion_end)
+        n = {'reservation': 0, 'blink': 0, 'mood': 0, 'deletion end': deletion_end(fa, fb)}
         blinked = set()
         for e in fa.fr['events']:
             role = object_role(fa.fr, e.object)

@@ -77,6 +77,7 @@ static struct {
 	/* this game's own link through a drop (issue #180): down since (SDL ticks, 0 up), the resumes seen, my session, the leave said */
 	uint32_t down_since, resumes, me;
 	bool leave_said;
+	uint16_t owed;                /* a message of my turn that has not gone yet (party_turn.h), offered first */
 	bool custom_seen;             /* the field's first Custom screen has opened */
 	uint32_t field_at;            /* ... and when it first closed (SDL ticks, 0 not yet) */
 } PP;
@@ -517,8 +518,10 @@ static void alone(const char *why) {
 
 /* my keys for the frame a delay on, as the wall clock gives a 60th of a
  * second (a game run faster than the GBA, headless, keeps to it: the
- * server's relay holds 120 a second), at most AHEAD_MOST past the field */
-static void send_mine(uint16_t mine) {
+ * server's relay holds 120 a second), at most AHEAD_MOST past the field;
+ * whether it went (`early` a frame early on the clock: none goes) */
+static bool send_mine(uint16_t mine, bool early) {
+	bool sent = false;
 	uint32_t now = SDL_GetTicks();
 	if (!PP.started_ms) PP.started_ms = now ? now : 1;
 	uint32_t due = PP.delay + (uint32_t)((uint64_t)(now - PP.started_ms) * 60u / 1000u) + 1u;
@@ -528,8 +531,10 @@ static void send_mine(uint16_t mine) {
 		PP.started_ms += (due - PP.tick - BURST_MOST) * 1000u / 60u;
 		due = PP.tick + BURST_MOST;
 	}
-	if (PP.tick < due && PP.tick < party_core_frames(PP.core) + AHEAD_MOST && PP.link.link.send(&PP.link.link, PP.tick, mine))
+	if (!early && PP.tick < due && PP.tick < party_core_frames(PP.core) + AHEAD_MOST && PP.link.link.send(&PP.link.link, PP.tick, mine)) {
 		PP.real[PP.seat][PP.tick++ % RING] = mine;
+		sent = true;
+	}
 	PP.link.link.tick(&PP.link.link);
 	arena_link_net_flush(&PP.link);
 	if (now - PP.said_ms >= 2000) {
@@ -537,6 +542,7 @@ static void send_mine(uint16_t mine) {
 		fprintf(stderr, "party: frame %u, my keys sent to %u (the clock's %u), every seat's come to %u; %u frames run on a guess, %u rollbacks\n",
 			(unsigned)party_core_frames(PP.core), (unsigned)PP.tick, (unsigned)due, (unsigned)sure_to(), PP.guessed, PP.rollbacks);
 	}
+	return sent;
 }
 
 /* partybot=1: a bot's keys on the party's field: on the Custom screen the
@@ -594,10 +600,27 @@ static bool held_through(void) {
 	return false;
 }
 
+/* a message of my turn that did not go this frame, kept to go first the
+ * next: each comes once (its picks, its Program Advance), so a frame on
+ * which the clock lets no key of mine go (a frame early on it), or the link
+ * holds or breaks, must not lose one; my keys are no loss, the next frame's
+ * say them again */
+static void owe(uint16_t word) {
+	if (party_turn_message(word)) PP.owed = word;
+}
+
 static void fight_frame(uint32_t pad) {
-	/* (the dev's game alone: the bot's clock the field's frames, as no keys are sent) */
-	uint16_t mine = word_of(PP.seat, pad, PP.net ? PP.tick : party_core_frames(PP.core));
-	if (PP.net && held_through()) return;
+	/* (the dev's game alone: the bot's clock the field's frames, as no keys are sent; a message owed first, my screen
+	 * closed while one waits, party_turn.h) */
+	uint16_t mine = PP.owed ? PP.owed : word_of(PP.seat, pad, PP.net ? PP.tick : party_core_frames(PP.core));
+	/* (partyearly=1: each message of my turn first offered on a frame early on the clock, which sends no word of mine, as
+	 * a device that caught up a frame just then) */
+	bool early = PP.dev.early > 0 && !PP.owed && party_turn_message(mine);
+	PP.owed = 0;
+	if (PP.net && held_through()) {
+		owe(mine);
+		return;
+	}
 	if (!PP.net || PP.alone) {
 		uint16_t keys[PARTY_MOST] = { 0 };
 		keys[PP.seat] = mine;
@@ -608,9 +631,13 @@ static void fight_frame(uint32_t pad) {
 		return;
 	}
 	const char *broken = PP.link.link.broken(&PP.link.link);
-	if (broken) { alone(broken); return; }
+	if (broken) {
+		alone(broken);
+		owe(mine);
+		return;
+	}
 	gone_frame();
-	send_mine(mine);
+	if (!send_mine(mine, early)) owe(mine);
 	pull();
 	settle();
 	/* (then the frames my keys have gone for, a couple a tick, on a guess of the others' as far as the window goes) */
@@ -753,6 +780,15 @@ void party_play_draw(void) {
 	if (party_play_drawn_over() && party_play_draw_more) party_play_draw_more();
 }
 
+/* the Custom screen this game's pad drives, the field's for the lead and a partner's own for him, and its mode: "chips"
+ * where it takes his keys, else BN6_CUSTOM_MODE's number (opening, OK, waiting); none while there is none */
+static void custom_describe(FILE *f) {
+	unsigned v = viewer();
+	int mode = v && PP.b.own ? party_turn_mode(v) : party_core_phase(PP.core) == BN6_PHASE_CUSTOM ? (int)party_core_custom_mode(PP.core) : -1;
+	if (mode == BN6_MODE_CHIPS) fprintf(f, "partycustom chips\n");
+	else if (mode >= 0) fprintf(f, "partycustom %02x\n", (unsigned)mode);
+}
+
 void party_play_describe(FILE *f) {
 	/* (the spike's battle on the run's own core: --dev party=N, the viruses' bench) */
 	party_field_describe(f);
@@ -768,6 +804,7 @@ void party_play_describe(FILE *f) {
 	}
 	if (!PP.core || PP.stage != PP_FIGHT) return;
 	fprintf(f, "partyfield %u seat %u\n", PP.b.n, viewer());
+	custom_describe(f);
 	if (down_now()) fprintf(f, "partydown %s\n", PP.b.seat[PP.seat].pulled ? "spent" : "unspent");
 	/* (a partner's own Custom screen: the HP its box shows, and his own on the field, issue #757) */
 	unsigned turn = party_turn_hp(viewer());

@@ -109,6 +109,7 @@ typedef struct {
 	int party_twin;
 	int party_roll;
 	int party_delay; /* partydelay=N: a party's input delay over the server, N frames (party_play.h) */
+	int party_early; /* partyearly=1: on a party's field over the server, each message of my turn first offered on a frame early on the clock, no word of mine sent on it (party_play.h) */
 	int dive_room;  /* diveroom=N: a dive's layers give the other divers N MegaMen at most, as a layer with little room does (issue #755, dive_people.h) */
 	int party_lead; /* partylead=1: a party's enemies aim at the lead alone, as BN6 has it (party_field.h) */
 	int party_bot;  /* partybot=1: my keys in a party's fight on its core a bot's (party_play.h) */

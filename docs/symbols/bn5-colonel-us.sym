@@ -301,7 +301,9 @@
 0800F604 team_protoman_souls.b_left_0x04
 0800F62C team_protoman_souls.b_left_0x04_2
 0800F660 chaos_unison_power_attacks
+0800F68E family_0x3b
 0800F6A6 family_0x3c
+0800F720 family_0x3e
 0800F7FC family_0x42
 0800F840 family_0x44
 0800F9A0 his_b_left_0x25
@@ -343,6 +345,7 @@
 08011A8C BN5_MOOD_CALM
 08011BA4 BN5_SOUL_READY
 08011BDC team_protoman_souls.flags_0x20_0x10_collision_update
+08011BF8 his_ready
 08011CCC BN5_SOUL_REAPPLY
 08011D04 team_protoman_souls.flags_0x20_0x10_collision_update_2
 08011DD4 colonelsoul_button_chip.to
@@ -360,6 +363,7 @@
 080126EA push_r4_r6_r7_lr
 08012704 bn5_souls.emotion
 08012705 bn5_darkchips.emotion
+0801271E gives_3_searchsoul_elements_8_9
 08012738 emotion_getter
 080127CE BN5_MOOD_SET
 080127FA BN5_MOOD_GAIN
@@ -381,6 +385,9 @@
 08013394 BN5_DARK_PLATE
 080133C4 on_to_decide_state
 080133CE generic_state_2
+0801343A bn5_twin
+0801344C virus_plain_deletion.by
+0801347C virus_plain_deletion
 080134A0 generic_state_3
 08013612 bn5_magnet_panel.from
 08013630 BN5_PULL_ROWS
@@ -494,9 +501,12 @@
 08022CFC before_compaction
 08023350 BN5_SOUL_PICTURE_PAL
 08023358 BN5_SOUL_PICTURES
+080234A8 team_protoman_souls.start
+080234C6 eight_steps_by
 080236BC BN5_COLONEL_PHASE0
 080236E8 BN5_COLONEL_PHASE1
 08023C8C BN5_UNITE_STAND
+08023CF4 team_protoman_souls_4
 08023D70 soul_7_types_8_9_grey
 08023EC4 bn5_mood_bn6_2
 0802415E button_tiles_draw
@@ -530,6 +540,8 @@
 080252B2 BN5_PA_STAR_LIMIT
 080252E8 bn5_program_advances
 080252FE bn5_program_advances_2
+080253EC gathers_unpicked_chips_shuffles_them_by
+08025470 team_protoman_souls.after
 080254F8 BN5_COLONEL_DRAW
 08025C24 soul_passives_2
 08026920 one_more
@@ -537,6 +549,7 @@
 08026CFA mode_4_last_draw
 08026CFE past_it
 08027058 mode_0x24_end
+08027252 mode_step
 08027310 custom_screen_script
 08027410 mode_0x38_phases_table_read
 08027412 colonelsoul_button_chip.on
@@ -546,6 +559,8 @@
 08027F10 elements_set_up
 08028020 bn5_program_advances.323_337_registry_350_364_list_2
 0802806C bn5_mood_bn6_5
+080280FC one_turn
+080280FE where_hook_goes_on
 080281D4 colonelsoul_button_chip.slot_drawn
 08028342 colonelsoul_button_chip.button_tiles_by_state_element_8
 08028344 colonelsoul_button_chip.button_tiles_by_state_element_8_2
@@ -573,6 +588,7 @@
 08029C5A colonel_pattern_test
 08029CD4 colonelsoul_button_chip.slot_drawn_2
 08029D34 mode_4_last_draw_call
+0802A5D6 button_stands_where_element_8_is
 0802B3E0 BN5_BATTLE_TYPE
 0802B3F2 battle_win_song.options
 0802B4B0 player_chip_ai
@@ -607,7 +623,9 @@
 08031468 XRomLayout.map_anims
 080315D4 BN5_LIB_Z_INSTALL
 0803272C XRomLayout.sprite_lists
+08032B94 team_protoman_bodies.list_6
 08032D04 BN5_LIB_SPRITES_7
+08032EFC team_protoman_bodies.list_8
 080331B4 XRomLayout.map_table_rw
 080331CC XRomLayout.map_table
 08033220 acdc_town
@@ -853,7 +871,7 @@
 080C3A2A bn5_last_chips_3
 080C4782 bn5_sea_submerge_4
 080C4EAE bn5_darkloids_navi.to
-080C5C3A team_protoman_souls_4
+080C5C3A team_protoman_souls_5
 080C6358 team_protoman_meddy.0x080dffd2
 080C63AC BN5_MEDDY_EFFECT_KINDS
 080C643C bn5_sea_submerge.bn6_child_hidden
@@ -882,7 +900,7 @@
 080CBEF6 BN5_CLOUD_PANEL
 080CBFBC BN5_CLOUD_FIND_37
 080CC2A2 BN5_NAPALM_PANEL_FLAMES
-080CD3C1 team_protoman_souls_5
+080CD3C1 team_protoman_souls_6
 080CD466 by_spawner
 080CEFCC kinds_bn5
 080CF118 state_table_bn5
@@ -895,7 +913,7 @@
 080D1F86 called_by_0x5f
 080D3828 BN5_COSMO_SPAWN_6C
 080D3964 BN5_COSMO_SPAWN_6D
-080D4C49 team_protoman_souls_6
+080D4C49 team_protoman_souls_7
 080D56E0 BN5_COSMO_SPAWN_79
 080D951C football_burst_effect_id
 080DB608 find_kept_as_battle_is_won
@@ -918,6 +936,10 @@
 080E153E bn5_sea_submerge_5
 080E1932 ram_ram_sea
 080E1B44 navi_chip_object_word_for_them
+080E1B50 same_code
+080E1B84 virus_plain_deletion.bytes
+080E1BFE bn5_twin_spawn_0x0801344c_0x08013452_by
+080E1C1A bn5_twin_count_end_ending_sparks
 080E2390 support_0x3b_object
 080E23D4 support_0x3b_object_state
 080E2420 support_0x3b
@@ -943,6 +965,7 @@
 080EA0BA BN5_CLAIM_SPAWN2
 080EA1B6 django_chip_third_effect_spawned
 080EA3F2 cosmoman_chip_gate_spawned
+080EAD9E fourth_kind_0x8f_by
 080EB0F0 answers_with_family_0x49
 080EB514 attack_families_routines
 080EB5F8 bn5_darkinvs_bn6.word
@@ -958,11 +981,11 @@
 080EC400 support_family
 080EC448 bn6_chip_writer_chip_routine_attack
 080EC450 support_family_word_for_them
-080EC7DE team_protoman_souls_7
+080EC7DE team_protoman_souls_8
 080EC818 misc_family_subfamilies
-080ECBCE team_protoman_souls_8
+080ECBCE team_protoman_souls_9
 080ECBE0 routine_compares_it
-080ECC92 team_protoman_souls_9
+080ECC92 team_protoman_souls_10
 080ECE2F bn5_last_chips_6
 080ECE5C bn5_last_chips_7
 080ECE76 flash_number
@@ -972,11 +995,13 @@
 080EE745 chaos_unison_3
 080EE783 chaos_unison_4
 080EE7E5 battle_0x32_bit_4
+080EE93C scope_gun_hit_effect_0x68
 080EEA40 flash_image_object_kind_0x22_sprite
+080EEB40 capsule_bomb
 080EEC86 magnetsoul_charged_shot_0x15_0x0800f7fc_family
 080EEE82 his_charged_shot_power_attack_0x19
 080EF270 bn5_darkinvs_bn6_5
-080EF38A team_protoman_souls_10
+080EF38A team_protoman_souls_11
 080EF548 bn5_chips_code.mrkcan
 080F0436 release_consumer
 080F04CC idle_states
@@ -1084,6 +1109,7 @@
 0836684C bn5_cangard_2
 0837CBF8 bn5_liberation_board_14
 08389E68 bn5_liberation_board_15
+084069E0 team_protoman_bodies.list_6_2
 08474848 bn5_liberation_board_16
 08478DE0 bn5_liberation_board_17
 0847C53C bn5_liberation_board.bigbrute
@@ -1097,6 +1123,8 @@
 08492EF8 order_points_41
 0849D508 chip_83
 084A3300 bn5_darkchips.lz77
+084A7540 team_protoman_bodies.list_8_2
+084C27B8 list_6_0x084a7540_list_8
 085A7DE4 each_liberation_mission_5
 085AB6C0 map_0
 085AE0B0 each_liberation_mission_6

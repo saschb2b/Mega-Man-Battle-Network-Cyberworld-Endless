@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Hooks"
 description: "Hooks on BN6's code (`src/emu/hook.c`): a BKPT over an instruction that calls the engine's C mid-frame, event and answer hooks, one table per core, and every address hooked, from battles and maps to BN5's Souls."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T22:10:00Z }
 ---
 
 # Hooks
@@ -69,6 +69,11 @@ function replacement), while BN6's code stays the ROM's.
   of its calls is kept one a core (`hook_slot`: `xsea.c`'s and
   `xpanels.c`'s way back through their stubs, `soulchaos.c`'s charge
   stepped), and so are the Souls UNITE offers (`soulunite_held_core`).
+  A table holds `HOOK_MAX` hooks (240; a run's guardian battle with a BN4
+  Soul asks 197 of BN6's core, November 2026). Past it a hook is refused,
+  and the refusal is printed (`hook: the table's 240 slots are full`):
+  at 192 it went unsaid, and player_body's spawn and the win song lost
+  their hooks, a Liberation's bodies and a guardian's data with them.
 
 The hooks in use (`src/director/encounter.c`; [ROM data](../../rom/overview.md)):
 

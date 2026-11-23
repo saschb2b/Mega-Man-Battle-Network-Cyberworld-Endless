@@ -1,0 +1,205 @@
+{
+ "about": "SearchSoul's SHUFFLE taken, in BN6's engine alone (BN6's own SHUFFLE, kept from BN5's: its button, its mode and its helpers; held to BN5's course in soul_search_shuffle's battle run in both: the button taken once, its sound 0x113 eight times as the chips turn, the count 3 to 2): SearchSoul united on the first Custom screen by CopyDmg * from the same 30 chips as soul_search_button's, L at t520, the cursor right three times and down onto SHUFFLE, A, then START and A. Each game's shuffle draws its own deal from there (BN6's helpers 0x08029788 and 0x0802983C keep aside a pair BN5's have none of, and BN6 plays 0x182 as it ends): the two battles part at the screen's close, so this one is BN6's alone.",
+ "expect_why": "BN5's own course: the button taken once on the second screen, its sound 0x113 (BN5's 0x080234C6, eight steps) as BN6's own plays it.",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "folder6": [
+  "34BE",
+  "3404",
+  "1647",
+  "349A",
+  "341E"
+ ],
+ "deck6": [
+  "34BE",
+  "3404",
+  "1647",
+  "349A",
+  "341E",
+  "3404",
+  "1647",
+  "349A",
+  "341E",
+  "3404",
+  "1647",
+  "349A",
+  "341E",
+  "3404",
+  "1647",
+  "349A",
+  "341E",
+  "3404",
+  "1647",
+  "349A",
+  "341E",
+  "3404",
+  "1647",
+  "349A",
+  "341E",
+  "3404",
+  "1647",
+  "349A",
+  "341E",
+  "3404"
+ ],
+ "souls6": "100000",
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    70
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ]
+ ],
+ "kind": "engine",
+ "frames": 530,
+ "expect": {
+  "sound": "0x113",
+  "sound_at": [
+   524
+  ]
+ }
+}

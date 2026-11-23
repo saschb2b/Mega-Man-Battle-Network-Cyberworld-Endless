@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted Souls"
 description: "Issue #82's Souls track: BN5's six Team Colonel Souls in BN6's engine on the proxy form 8, milestones S0-S7 from UNITE on BN6's Custom screen to Chaos Unison and BN5's mood (`src/emu/soul*.c`, `tools/xsoul.py`)."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T17:59:28Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T16:10:00Z }
 ---
 
 # Transplanted Souls
@@ -212,7 +212,11 @@ the next.
   a frame later). ShadowSoul's attack is BN5's DarkInvs since 13 October
   2026 (The chips' code, DarkInvs, moved: MegaMan under BN5's chip AI,
   its arm's chaos flash answered from the Souls' block): `chaos_shadow_45`
-  PASS to t500, its recorded FAIL at t107 gone.
+  PASS to t500, its recorded FAIL at t107 gone. Team ProtoMan's Souls'
+  Chaos Unison is the same code, its attack a stub of ours per Soul
+  (below): NapalmSoul's is held by two specs more, `chaos_napalm_75` and
+  `chaos_napalm_90`, his row's charge 70 frames where Team Colonel's
+  rows hold 40.
 - **S7, BN5's mood and its DarkChip rule** (done; [MegaMan's forms and BN5's Souls in BN6's engine](../rom/souls.md), BN5's
   mood in BN6's battles): `src/emu/soulmood.c` keeps BN5's mood in the Souls' block
   beside BN6's own, by BN5's rules (a hit taken lowers it, a hit landed
@@ -312,6 +316,25 @@ the next.
   where BN6's twin of the player's timers runs, `BN6_PLAYER_TIMERS`):
   `soul_napalm`, `soul_napalm_shot`, `soul_napalm_charge` and
   `soul_napalm_lava` PASS against BN5's own battle, their mutations FAIL.
+  `soul_napalm_charge` runs to the battle's end since 23 November 2026:
+  the bomb deletes CanGard at t288, and the games parted at t321, his
+  deletion's last frame, on BN6's own plain deletion, which a moved
+  virus runs as BN6's (`BN6_VIRUS_DIE`): BN5's ends the dying's sparks
+  (the fourth kind's 0x11) and lets them go that frame, BN6's clears the
+  word his AI data keeps them in (`BN6_VIRUS_DIE_CLEAR`) and its sparks
+  end themselves a frame later. The differential reads those frames in
+  BN6's terms (its map `deletion_end`, [The differential](../devtools/differential.md),
+  A virus's last frame), a mutation that leaves BN6's word failing at
+  t321. His Chaos Unison's attack is DarkMetr (BN5's power attack 0x37,
+  `0x0800FA72`: the chip writer of DarkChip 195; BN6's 0xB7, a stub of
+  ours at `SOULS_TEAM_CHAOS` handing the writer the registry's 217), its
+  charge 70 frames at level 0 (BN5's row 0x37, where Team Colonel's
+  rows hold 40), then S6's cycle: `chaos_napalm_75` (released in phase
+  2: DarkMetr's meteors on a held CanladEX, its replay of BN5's draws
+  for the meteors' shake, as `chip_darkmetr`'s) and `chaos_napalm_90`
+  (released past it: the failure, the Dark Soul playing three Cannons)
+  PASS against BN5's battle, their mutations (DarkCirc handed to the
+  writer; Team Colonel's 40 frames, the failure turned success) FAIL.
   **GyroSoul** (2): UNITE by a Wind chip, his look, his propeller (BN5's
   companion overlay of kind 2, spawned as he enters and let go as he
   leaves, its kind BN6's 63 past the Navis', its sprite in list 0 at
@@ -365,10 +388,48 @@ the next.
   BN6's plain buster shot writing his attack variables' +0xC by a byte
   where BN5's writes the word, so the 0x114 his B+Left leaves there keeps
   its +0xD in BN6 (mask 050).
-  Open: `soul_napalm_charge` ends at t320, before CanGard's last frames,
-  where the games part on a fourth-kind object of his (BN5's let go at
-  t321, BN6's 0x11 still in play): not traced yet. His Chaos Unison
-  (DarkMetr) has its power attack in place but no spec of its own yet.
+  **SearchSoul** (3), his battle: UNITE by a Cursor chip, his look, his
+  charged shot (0x08, family 0x3B as 0xCD: the scope gun, five shots of 12,
+  its hit's effect BN5's 0x68 as 0xD0, Team ProtoMan's effects numbered
+  from 0xD0 since BN4's chips' units hold 0xC2-0xCF) and his ready (BN5's
+  0x08011BF8: the fourth kind's 0x8F, BN6's the same code, which marks the
+  foe side's invisible objects): `soul_search` (to t523) and
+  `soul_search_shot` PASS against BN5's battle, their mutations FAIL; the
+  reveal needs a foe that hides to be seen (with none the object ends in
+  its first frame): `soul_search_hide` gives CanGard the flashing the
+  Invis chip leaves (flag 0x2, the differential's `hide`) at the fight's
+  first frame, and both games' 0x8F find him and clear it at t1 (PASS;
+  its mutation, BN6's scan skipping every foe, FAILs there). No foe of
+  BN5's hides by itself: only the Invis chip's attack (0x28, the fourth
+  kind's 0x5D) and the chips' statuses (`0x080114E8`) set the flag. His SHUFFLE is BN5's Custom screen's Soul
+  button, the one ColonelSoul's is: `0x08023CF4` makes elements 8 and 9 of
+  the screen types 4 and 5 for SearchSoul (6 and 7 for MeddySoul's two
+  capsules, 8 and 9 for ColonelSoul's chip), by the Soul the united side
+  holds, its +4 the shuffles left (three a turn); A on it runs BN5's mode
+  0x080234A8, eight steps that shuffle the unpicked chips (0x080253EC,
+  0x08025470, sound 0x113). BN6 kept SHUFFLE whole: its own test
+  (0x0802A5D6: element 8 not type 8, MegaMan's form 0, 5, 8, 0xA or 0xB,
+  his NaviStats' +0x60 1), its set-up of types 4 and 5 with one shuffle a
+  turn (0x080280E0), its mode and its helpers (0x08029788, 0x0802983C).
+  So SearchSoul's is BN6's own (`src/emu/soulshuffle.c`): his Soul passes
+  the test and gets BN5's three a turn. `soul_search_button` holds the
+  button to BN5's (where it stands, its links, three a turn) on the second
+  Custom screen to t700, and `soul_search_shuffle` takes it in BN6's battle
+  (its sound 0x113 eight times, the count to two); taken, each game deals
+  from its own shuffle (BN6's helpers keep aside a pair BN5's have none of,
+  and BN6 plays 0x182 as it ends), so the battles part there. BN6's window
+  shows no count of the shuffles left, where BN5's does. MeddySoul's
+  capsules (types 6 and 7) have no such button in BN6: they are still to
+  come, on ColonelSoul's (DustCross's, `src/emu/soulcolonel.c`) or apart.
+  **MeddySoul** (6), his battle: UNITE by a Recovery chip, his look, his
+  charged shot (0x0E, family 0x3E as 0xCE: the capsule bomb); BN5 gives
+  form 6 no passive and no chip charge: `soul_meddy` (to t523) and
+  `soul_meddy_shot` PASS against BN5's battle, their mutations FAIL, with
+  one difference of the engines' written down as legit (mask 051): BN6
+  crosses into the Soul just before the fight, so his ready frame's own
+  count (28 frames, the one Soul's with any) is still running down at t1,
+  where BN5's unison let it run out; the frame drawn is the same. His
+  two capsules are the Soul button's types 6 and 7 (above), still to come.
 - **Next**: the Souls' engine is whole, ShadowSoul's chaos attack
   (BN5's DarkInvs) since 13 October 2026; what is left of DarkInvs is The
   chips' code's (DarkInvs, moved: three of its exits). The masks the differential kept "until the Souls track's S6"

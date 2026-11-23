@@ -12,6 +12,7 @@
 /* (on mGBA; a build on gpSP has hook_gpsp.c instead: CW_GPSP) */
 #ifndef CW_GPSP
 
+#include <stdio.h>
 #include <string.h>
 
 #include <mgba/core/core.h>
@@ -282,7 +283,10 @@ static bool add(HookCore *c, uint32_t addr, bool arm, EmuHook fn, void *user, in
 	if (h && h->live) return false;
 	/* (a removed hook's slot again: its original is back in memory) */
 	if (!h) {
-		if (c->nhooks == HOOK_MAX) return false;
+		if (c->nhooks == HOOK_MAX) {
+			fprintf(stderr, "hook: the table's %d slots are full: %08x not hooked\n", HOOK_MAX, (unsigned)addr);
+			return false;
+		}
 		h = &c->hooks[c->nhooks++];
 	}
 	*h = (Hook){ .addr = addr, .arm = arm, .live = true, .fn = fn, .user = user, .kind = kind };

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T20:53:56Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T16:10:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -142,7 +142,9 @@ unit's copy) and the element. A BN4 spec takes `film` as BN5's do, and `state4` 
 container sees it) saves BN4's guest once its first Custom screen's first
 frame has run, folder and Souls given, for [romlab](romlab.md) to go on
 from with the spec's keys from that screen's second frame under its
-probes and write watches. Against BN6
+probes and write watches; a BN5 spec's `state5` saves BN5's guest the
+same way (a Team ProtoMan Soul's Custom screen traced: SearchSoul's
+SHUFFLE). Against BN6
 a dark karma parts the two from the first frame on one byte: MegaMan's
 palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
 0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark
@@ -435,7 +437,14 @@ and traces both:
   BN5's buster's extra draw is the engine's own (legit.json's rng, only,
   both routines cited); any other is a difference, the family's where its
   code led to it. Without the replay Handi parts at its first draw that
-  BN5's buster or shake moved (`rng=follow`: t305, none: t35).
+  BN5's buster or shake moved (`rng=follow`: t305, none: t35). A Soul
+  united as the fight starts holds the clock for BN5's own crossing,
+  longer than BN6's, so BN5's per-frame draws of those frames reach the
+  first traced frame with no twin: the mask "the engine's per-frame
+  draws while the battle's clock holds, replayed" reads them as the
+  engine's where the frame's words are apart as the rng mask's held
+  clock reads them (`chaos_napalm_75`, a Chaos Unison whose DarkMetr
+  shakes the camera, 30 of them at t1).
 - **The traces** (`OUT.bn5`, `OUT.bn6`, their format in xdiff.c, version
   7): a record each time the timer moves while the battle fights: the
   objects of the first, third and fourth kinds in play (each from its list
@@ -764,7 +773,13 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   `hold: N` keeps the foes still: before each fight frame each one's
   paralysis timer is set to N (BN5's collision data +0x1E, BN6's +0x1C,
   each game's own status step counting it down) and, the first time, its
-  struck word's paralysis bit (the same bit in both). The chip's objects
+  struck word's paralysis bit (the same bit in both); `hide: N` makes
+  them flashing as the Invis chip leaves its user, once, at the fight's
+  first frame (BN5's flash timer +0x26, BN6's +0x24, N frames, and the
+  flag 0x2 in both: 0x0800E17C's and 0x08010474's writes), a hidden foe
+  for SearchSoul's ready to find as the fight begins (`soul_search_hide`;
+  written on the Custom screen, a foe's own first update sets its
+  collision data afresh after it). The chip's objects
   are MegaMan's; `megaman_types` names those a spawner no hook sees makes
   (NrthWind's gusts, `T4:0x3A`). `"sprites": "bytes"` (every chip spec)
   compares an object's sprite of no registry pair by its bytes where both
@@ -892,7 +907,8 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   (ShadowSoul's B+Left stance struck: the counter's first frame at once),
   their breaks failing them. `soul_knight_shot` stops at t278: the next frame the
   deleted CanGard's deletion effect is let go a frame apart in the two
-  engines, BN6's own end of a family's virus. An enemy's deletion leaves
+  engines, BN6's own end of a family's virus, which the comparator reads
+  in BN6's terms since (A virus's last frames, below). An enemy's deletion leaves
   each game's battle state's address in the effect it spawns (`battle
   state`, named alike).
 - **BN5's mood and its DarkChip rule** (the Souls track's S7; docs/
@@ -1070,6 +1086,38 @@ its place from that attack, so its Z is read by the struck attack's rule
 (`struck_leftovers`) and by no rule of its own. Each rule's compared bytes
 have a mutation that breaks them (`cosmoman_v1`'s height and count:
 [Transplanted Navis](../multirom/navis.md), CosmoMan).
+
+## A virus's last frames
+
+A moved family's virus dies by BN6's own plain deletion state
+(`BN6_VIRUS_DIE`, `0x0801664E`; BN5's twin `0x0801343A`), its family's
+state table naming BN6's generic states. Both spawn the dying's sparks
+(the fourth kind's 0x11, the same code in both) as the state begins,
+keep them in the virus's AI data +0x74 (`BN6_AI_DIE_SPARKS`), the
+sparks' +0x60 pointing back at that word, and count the virus's 0x20
+frames down. At the count's end BN5's ends the sparks itself
+(`0x080E1C1A`) and the fourth kind, which runs after the first, lets
+them go that frame, the AI data's word left naming the slot they left;
+BN6's clears the word instead (`BN6_VIRUS_DIE_CLEAR`) and never calls
+the sparks' end (`BN6_DIE_SPARKS_END`), so BN6's sparks, finding their
+word 0, set their own +8 8 and are let go at their next run, a frame
+after BN5's. Until 23 November 2026 every spec whose foe died parted
+there and stopped before it (`soul_napalm_charge` at t321; the
+families' track called it BN6's own end of a family's virus).
+legit.json's maps' `deletion_end` reads those frames in BN6's terms
+(`tools/xdiff_snap.py` `deletion_end`, the translations' step): a virus
+in its last state (+8 8) in both games, its word BN6's 0 and BN5's
+naming the fourth kind's slot its sparks left, has BN5's word read as
+0, and BN6's sparks that word named, in their own last state where
+BN5's are gone, read as let go; the verdict counts the frames
+(`deletion end`). Nothing else of either is let through: the frames
+before are compared as they are, and a BN6 that kept the word (the
+mutation `08016690:46C0`, its store a nop) parts at the deletion's last
+frame, `soul_napalm_charge`'s t321. `soul_napalm_charge` and
+`chaos_napalm_75` run to their battles' ends so (t323 and t239); copies
+of `soul_knight_shot` and `chip_darktorn` run on to theirs (t281, t97)
+pass too, the specs themselves keeping their frames until they are run
+on.
 
 ## The trace's moved ranges
 

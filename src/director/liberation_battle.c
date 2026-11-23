@@ -217,7 +217,7 @@ int lib_battle_field(Encounter *e, int x, int y, bool darkloid) {
 	return level;
 }
 
-void lib_battle_soul(int soul) { arm.soul = soul >= 7 && soul <= 12 ? soul : 0; arm.cross = 0; }
+void lib_battle_soul(int soul) { arm.soul = soul >= 1 && soul <= 12 ? soul : 0; arm.cross = 0; }
 
 void lib_battle_cross(int cross) { arm.cross = cross >= 1 && cross <= 5 ? cross : 0; arm.soul = 0; }
 

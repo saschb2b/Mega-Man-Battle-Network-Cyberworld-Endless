@@ -34,5 +34,9 @@ void party_turn_report(unsigned seat);
 /* a seat's last word as the guess of his next: his keys, never a message of his
  * turn again (each comes once) */
 uint16_t party_turn_guess(uint16_t last);
+/* whether a word of a seat's stream is a message of his turn (which comes once), not his keys */
+bool party_turn_message(uint16_t word);
+/* the mode of seat's own Custom screen while it is open (BN6_CUSTOM_MODE: BN6_MODE_CHIPS where it takes his keys), else -1 */
+int party_turn_mode(unsigned seat);
 
 #endif

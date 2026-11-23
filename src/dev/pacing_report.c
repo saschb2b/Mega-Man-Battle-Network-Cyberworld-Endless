@@ -237,11 +237,11 @@ static void elements_report(FILE *out) {
 	}
 	fprintf(out, "\n\nGuardians' elements and weaknesses:");
 	/* (BN5's and BN4's by their own stats: guardian_element, its first wheel) */
-	for (int n = 1; n <= GUARDIAN_BN4_LAST; ++n) {
+	for (int n = 1; n <= GUARDIAN_NEBULA_LAST; ++n) {
 		if (guardian_darkloid(n) || (!guardian_moved(n) && n >= 32)) continue;
 		if ((!guardian_moved(n) && enemy_id(1, n, 0) < 0) || (guardian_moved(n) && xguardian_hp(n, 0) < 0) || guardian(n)->name[0] == '?') continue;
 		int e = guardian_element(n), w = guardian_weakness(n);
-		fprintf(out, " %s%s %s/%s", guardian(n)->name, guardian_older(n) ? " (BN5)" : guardian_bn4(n) ? " (BN4)" : "", e > 0 ? elem_name(e) : "-",
+		fprintf(out, " %s%s %s/%s", guardian(n)->name, guardian_bn4(n) ? " (BN4)" : guardian_moved(n) ? " (BN5)" : "", e > 0 ? elem_name(e) : "-",
 			w > 0 ? elem_name(w) : "-");
 	}
 	fprintf(out, "\n");
@@ -486,6 +486,24 @@ static int deep_guardian(FILE *out, int navi) {
 	return flagged;
 }
 
+/* How often each of the older net's Navis guards each act of a first cycle, over the seeds 1-500 as --seed gives them
+ * (run_new): navi (runs, the first seed), Team ProtoMan's partners among them from act 2 (docs/game/team-protoman.md) */
+static void older_by_act(FILE *out) {
+	fprintf(out, "\nThe older net's guardians by act over seeds 1-500 (--seed): navi (runs, first seed)\n");
+	for (int act = 0; act < 6; ++act) {
+		int seen[GUARDIAN_NEBULA_LAST + 1] = { 0 }, first[GUARDIAN_NEBULA_LAST + 1] = { 0 };
+		for (uint32_t seed = 1; seed <= 500; ++seed) {
+			run_new(seed);
+			int navi = run_xguardian_at(act, run.biome_order[act]);
+			if (navi > 0 && navi <= GUARDIAN_NEBULA_LAST && !seen[navi]++) first[navi] = (int)seed;
+		}
+		fprintf(out, "act %d:", act + 1);
+		for (int n = 1; n <= GUARDIAN_NEBULA_LAST; ++n)
+			if (seen[n]) fprintf(out, " %s (%d, %d)", guardian(n)->name, seen[n], first[n]);
+		fprintf(out, "\n");
+	}
+}
+
 /* BN5's guardians (docs/game/bosses/bn5-navis.md) and BN4's
  * (bn4-navis.md), fought in BN6's engine: each in every act his area's
  * BN6 area can come in, and in the deep's acts BN5's every one and BN4's
@@ -509,9 +527,17 @@ static int older_guardians(FILE *out) {
 			for (int act = 0; act < 6; ++act)
 				if (acts >> act & 1) flagged += older_guardian_act(out, navi, act, x->name);
 			fprintf(out, "  %-12s %-11s later cycles: SP %d\n", x->name, guardian(navi)->name, xguardian_hp(navi, 3));
+			/* (his Team ProtoMan partner, by the coin from act 2: docs/game/team-protoman.md, Where they stand) */
+			int p = xguardian_partner(navi);
+			for (int act = 1; p && act < 6; ++act)
+				if (acts >> act & 1) flagged += older_guardian_act(out, p, act, x->name);
+			if (p) fprintf(out, "  %-12s %-11s later cycles: SP %d\n", x->name, guardian(p)->name, xguardian_hp(p, 3));
 		}
 	}
 	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi) flagged += deep_guardian(out, navi);
+	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi)
+		if (xguardian_partner(navi)) flagged += deep_guardian(out, xguardian_partner(navi));
+	older_by_act(out);
 	/* (and Nebula's two, the deep's alone: docs/game/bosses/bn5-navis.md) */
 	for (int navi = GUARDIAN_NEBULA_FIRST; navi <= GUARDIAN_NEBULA_LAST; ++navi) flagged += deep_guardian(out, navi);
 	return flagged;

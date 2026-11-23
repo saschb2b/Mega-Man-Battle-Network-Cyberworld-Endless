@@ -1,0 +1,221 @@
+{
+ "about": "BN5's MeddySoul and his charged shot in both engines: MeddySoul united (souls5 0x20, souls6 bit 23) by Recov10 * (BN5's 107, BN6's 154, Recovery), the first Custom screen's chip given up, UNITE and OK, as the first turn starts. B held from t100 for 140 frames: his charged shot, the capsule bomb (BN5's power attack 0x0E, its family 0x3E, BN6's 0xCE), at CanGard V1 at (6,2); MegaMan at (2,2) with 2000 HP, kept from harm. Every frame compared, MegaMan's own state a difference.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 500,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "346B"
+ ],
+ "deck5": [
+  "346B"
+ ],
+ "folder6": [
+  "349A"
+ ],
+ "deck6": [
+  "349A"
+ ],
+ "souls6": "800000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "B",
+   140
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x06"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x40"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own course (its trace, the reference): MeddySoul united from t1 (Meddy's AI index 6, its used bit 0x40, UNITE chosen on the first screen); MegaMan never hit (safe).",
+ "souls5": "20"
+}

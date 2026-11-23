@@ -30,9 +30,9 @@ unsigned souls_held(void);
 /* The Souls held as the layer about to be made is made (the director's,
  * with the folder's codes), kept beside the checkpoint: what its finds
  * and stock lean to (loot_souls.h), the same on a CONTINUE's rebuild, a
- * Soul won on the layer counted from the next */
+ * Soul won on the layer counted from the next (souls_layer_bn5 and
+ * souls_layer_bn4 read them) */
 void souls_note_layer(void);
-unsigned souls_layer(void);
 /* What the layer's finds and stock lean to (loot_souls.h): the kinds of
  * every Soul held as it was made, Team Colonel's, Team ProtoMan's and
  * BN4's (BN4's panel-cracking GutsSoul's none of BN5's kinds) */
@@ -62,7 +62,8 @@ unsigned souls_layer_bn4(void);
  * run.soul_start) */
 void souls_give_bn5(int soul);
 void souls_give_bn4(int soul);
-/* The dev flag's mask, for a new run's first Souls (devtools) */
-extern uint8_t souls_dev_mask;
+/* The dev flag's mask, for a new run's first Souls (devtools, --dev souls=MASK): bits 0-5 Team Colonel's (BN5's Souls
+ * 7-12), bits 6-11 Team ProtoMan's (BN5's Souls 1-6: 0x40 ProtoSoul) */
+extern uint16_t souls_dev_mask;
 
 #endif

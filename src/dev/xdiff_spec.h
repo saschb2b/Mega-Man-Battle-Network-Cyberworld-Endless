@@ -80,6 +80,8 @@ typedef struct {
 	int ndschips;
 	int hold;                                  /* (a chip's spec) the foes kept paralysed this many frames from each fight frame on, the chip's
 	                                              target holding still in both games; 0 none */
+	int hide;                                  /* the foes flashing this many frames from the fight's first frame (the Invis chip's
+	                                              status, xdiff.c hide_step): a hidden foe for SearchSoul's ready; 0 none */
 	struct { uint8_t col, row, type; } panels[MAX_PANELS];   /* (panels=) panels given a type in each game as its fight begins: a
 	                                              panel chip's spec (AquaUp's cracked, GreenWd's grass), the type's number the same in BN4,
 	                                              BN5 and BN6 for the ones a spec names (bn4.h's panel types) */
@@ -98,6 +100,7 @@ typedef struct {
 	int ntwins;
 	char out[256];
 	char state4[160];   /* (state4=) BN4's guest saved here as its first Custom screen opens: for romlab's probes and write watches */
+	char state5[160];   /* (state5=) ... BN5's, the same (a Team ProtoMan Soul's Custom screen traced: SearchSoul's SHUFFLE) */
 	bool bn5, bn6, follow, replay;
 	int bn4;            /* (game=bn4...) BN4 Red Sun's own battle on the guest core, XD_BN4_* (xdiff_bn4.h, xdiff_bn4_trace.h); 0 none */
 	int lag;            /* (lag=N) BN6's battle N fight frames behind BN4's: BN6's engine runs no state while the opening is paused

@@ -3,7 +3,7 @@ type: Tool
 title: "Scenarios: the game played through a course, its state checked"
 description: "`python3 build.py scenarios` plays each file of `tests/scenarios/` headless (`tools/scenarios.py`, on `tools/cw.py`'s games): a scripted course with the state in words checked on the way, so a bug that only a sequence of play shows stays fixed."
 tags: [devtools, tests]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-22T12:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T21:12:01Z }
 ---
 
 # Scenarios: the game played through a course, its state checked
@@ -304,7 +304,13 @@ guardian's door, its party leader first; `dive_party_describe`), `doorwait S for
 (the leader's: the seconds the door still waits for N crewmates), `crew N: NAMES`
 (`dive_crew_describe`), `join none|calling|joined|fighting` (a crew's
 battle: MegaMan's own held and offered, a crewmate's joined, the one
-field fought; `dive_join_describe`).
+field fought; `dive_join_describe`); on that field `partycustom
+chips|NN` (the Custom screen this game's pad drives, the field's for
+the lead and his own for a partner: `chips` where it takes keys, else
+BN6's mode in hex; `party_play_describe`), on which a course presses
+rather than on a count of frames, the field running at the clock's
+pace ([The shared dive](../online/shared-dive.md), The screen that
+takes his keys).
 
 ## A bug a scenario finds
 

@@ -79,6 +79,8 @@ void team_screen_close(TeamScreen *s);
 /* his side's GBA's picture there (ARENA_W x ARENA_H), and whether a turn is under way */
 const uint32_t *team_screen_video(const TeamScreen *s);
 bool team_screen_open_now(const TeamScreen *s);
+/* its BN6_CUSTOM_MODE as its last frame left it (BN6_MODE_CHIPS: it takes keys) */
+unsigned team_screen_mode(const TeamScreen *s);
 /* what a frame of it costs here, mean and worst, ms; and a turn's copy of the pair */
 double team_screen_ms(const TeamScreen *s, bool worst);
 double team_screen_copy_ms(const TeamScreen *s, bool worst);

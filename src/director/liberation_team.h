@@ -16,7 +16,8 @@
 
 /* The Navis the run holds for a board (MegaMan not among them), in their
  * order: the BN5 Souls whose bodies stand in BN6 (BN5's ROM read, the
- * Souls in BN6's engine), then Gregar's Cross Navis (the Cross brought,
+ * Souls in BN6's engine: Team Colonel's, then Team ProtoMan's, whose
+ * ProtoMan alone has a body, BN6's own), then Gregar's Cross Navis (the Cross brought,
  * else those found as an earlier act's guardian's: the run's state alone,
  * which a checkpoint's rebuild reads as the layer was made); into navi,
  * how many */
@@ -29,6 +30,10 @@ const char *lib_navi_name(int navi);
 int lib_navi_hp(int navi, int act);
 const char *lib_navi_form(int navi);
 const char *lib_navi_weakness(int navi);
+/* ... his guardian index where he stands on the board in BN6's own body
+ * and speaks with its own face (a Cross Navi's 1-5, the real ProtoMan's
+ * for ProtoSoul, guardians.h), 0 another */
+int lib_navi_bn6(int navi);
 /* The team a dark layer of act `act` (0-based) is made for: MegaMan and
  * the Navis the run holds, as many as BN5's team of that stage holds, the
  * layer's seed choosing where more are held (the player picks on arrival:

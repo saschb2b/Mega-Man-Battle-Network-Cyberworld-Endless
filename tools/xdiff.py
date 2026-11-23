@@ -206,6 +206,8 @@ def megaman_items(spec):
         parts.append('dschips=' + ','.join(spec['dschips']))
     if spec.get('hold'):
         parts.append(f'hold={spec["hold"]}')
+    if spec.get('hide'):
+        parts.append(f'hide={spec["hide"]}')
     if spec.get('kind') == 'reference':
         parts.append('game=bn5')
     if spec.get('kind') == 'engine':
@@ -234,6 +236,8 @@ def spec_text(spec, out, pokes, calls=(), twins=()):
     parts += [f'shot={g}:{n}:{f}:{path}' for g, n, f, path in spec.get('shots', [])]   # (pictures of a Custom screen: game, screen, frame)
     if spec.get('film'):   # (pictures of the fight in both games: timer from, to, step, prefix)
         parts.append('film=' + ':'.join(str(x) for x in spec['film']))
+    if spec.get('state5'):   # (BN5's guest saved as its first Custom screen opens, for tools/romlab: a path as the image sees it)
+        parts.append(f'state5={spec["state5"]}')
     parts += [f'poke={p}' for p in pokes] + [f'call={c}' for c in calls]
     return ';'.join(parts)
 
@@ -254,7 +258,8 @@ def run(name, spec, pokes, calls, quiet, twins=()):
     os.makedirs(os.path.join(WORK, 'runs'), exist_ok=True)
     os.makedirs(os.path.join(WORK, 'data'), exist_ok=True)
     out = f'/src/.build/xdiff/runs/{name}'
-    for path in [p for _, _, _, p in spec.get('shots', [])] + ([spec['film'][3]] if spec.get('film') else []):   # (a picture's folder, as the image sees /src)
+    for path in [p for _, _, _, p in spec.get('shots', [])] + ([spec['film'][3]] if spec.get('film') else []) + \
+            ([spec['state5']] if spec.get('state5') else []):   # (a picture's folder, as the image sees /src)
         if path.startswith('/src/'):
             os.makedirs(os.path.dirname(os.path.join(ROOT, path[5:])), exist_ok=True)
     for g in ('bn5', 'bn6'):

@@ -10,5 +10,13 @@
   "spec": "soul_napalm_charge",
   "soulbreak": 8388608,
   "what": "his charged FireHit1 runs its own family where BN5's 0x0801043A gives NapalmSoul's charged chip family 0x4B, the Napalm Bomb"
+ },
+ {
+  "name": "the deletion's end leaving the sparks' word",
+  "spec": "soul_napalm_charge",
+  "poke": [
+   "08016690:46C0"
+  ],
+  "what": "BN6's plain deletion's end (BN6_VIRUS_DIE_CLEAR) keeps CanGard's AI data +0x74 (its str r1,[r0,#0x74] a nop), so at its last frame BN6's sparks, ended by their own life, still stand named by it where BN5's are let go: the one frame legit.json's maps' deletion_end reads in BN6's terms, which takes only a word 0, so the comparator must part there"
  }
 ]

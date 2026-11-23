@@ -145,9 +145,10 @@ static int ncp_parse(Spec *s, const char *name, const char *v) {
 	return 1;
 }
 
-/* film=FROM:TO:STEP:PREFIX, and state4=PATH (BN4's state for romlab): 1 taken, 0 refused, -1 another item */
+/* film=FROM:TO:STEP:PREFIX, and state4=PATH and state5=PATH (BN4's or BN5's state for romlab): 1 taken, 0 refused, -1 another item */
 static int film_parse(Spec *s, const char *name, const char *v) {
 	if (!strcmp(name, "state4")) return snprintf(s->state4, sizeof s->state4, "%s", v) > 0;
+	if (!strcmp(name, "state5")) return snprintf(s->state5, sizeof s->state5, "%s", v) > 0;
 	if (strcmp(name, "film")) return -1;
 	Film *m = &s->film;
 	return sscanf(v, "%d:%d:%d:%159s", &m->from, &m->to, &m->step, m->prefix) == 4 && m->step > 0 && m->to >= m->from;
@@ -221,6 +222,7 @@ static int numbers_parse(Spec *s, const char *name, const char *v) {
 	if (!strcmp(name, "hp")) return (s->hp = atoi(v)) > 0 && s->hp <= 9999;
 	if (!strcmp(name, "frames")) return (s->frames = atoi(v)) > 0;
 	if (!strcmp(name, "hold")) return (s->hold = atoi(v)) > 0 && s->hold <= 0xFFFF;
+	if (!strcmp(name, "hide")) return (s->hide = atoi(v)) > 0 && s->hide <= 0xFFFF;
 	if (!strcmp(name, "panels")) return panels_parse(s, v);
 	if (!strcmp(name, "lag")) return (s->lag = atoi(v)) > 0 && s->lag <= 4;
 	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;

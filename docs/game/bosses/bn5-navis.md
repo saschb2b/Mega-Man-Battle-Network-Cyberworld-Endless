@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "BN5's Navis"
-description: "BN5's six Soul Navis guarding the areas BN5 dresses, fought in BN6's engine since issue #82: where and how often, version and HP band, Guardian Data with his Soul and Navi chip, and BN5's Darkloids."
+description: "BN5's six Soul Navis guarding the areas BN5 dresses and, from act 2, their Team ProtoMan partners by a coin, fought in BN6's engine since issue #82: where and how often, version and HP band, Guardian Data with his Soul and Navi chip, and BN5's Darkloids."
 tags: [game, bosses]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:35:13Z }
 ---
 
 # BN5's Navis (4 October 2026, issue #69; in BN6's engine since issue #82)
@@ -45,38 +45,54 @@ roams once its story is over ([Navis moved into BN6's battle engine](../../rom/n
 whose Souls Team Colonel's MegaMan unites with, each guards the area BN5
 sets him in:
 
-| BN5's area (it dresses) | His record roams | Guardian | His Soul unites with (BN5's kind) |
-| --- | --- | --- | --- |
-| ACDC Area (Central Area) | ACDC Area 1 | KnightMan | Break chips |
-| End Area (Seaside Area) | End Area 3, 4 | NumberMan or ToadMan (the run's seed) | Plus chips, Aqua chips |
-| Oran Area (Green Area) | Oran Area 1 | ShadowMan | Invisible chips |
-| SciLab (Sky Area) | SciLab 4 | TomahawkMan | Wood chips |
-| Undernet (Undernet) | Undernet 3 | Colonel | Obstacle chips |
-| Nebula Area (Graveyard) | (Bass) | the deep's pool | |
-| (the deep's pool) | LarkMan on Undernet 2, GridMan on Oran Area 2 | LarkMan or GridMan, the deep's acts alone | (no Soul: his Navi chips) |
+| BN5's area (it dresses) | His record roams | Guardian | From act 2, by a coin, his partner (Team ProtoMan's) | Their Souls unite with (BN5's kind) |
+| --- | --- | --- | --- | --- |
+| ACDC Area (Central Area) | ACDC Area 1 | KnightMan | MagnetMan | Break chips; Elec |
+| End Area (Seaside Area) | End Area 3, 4 | NumberMan or ToadMan (the run's seed) | SearchMan (NumberMan's), Meddy (ToadMan's) | Plus, Aqua; Cursor, Recovery |
+| Oran Area (Green Area) | Oran Area 1 | ShadowMan | GyroMan | Invisible; Wind |
+| SciLab (Sky Area) | SciLab 4 | TomahawkMan | NapalmMan | Wood; Fire |
+| Undernet (Undernet) | Undernet 3 | Colonel | (ProtoMan: DarkProto, not yet) | Obstacle |
+| Nebula Area (Graveyard) | (Bass) | the deep's pool | | |
+| (the deep's pool) | LarkMan on Undernet 2, GridMan on Oran Area 2 | LarkMan or GridMan, the deep's acts alone | | (no Soul: his Navi chips) |
+
+**Team ProtoMan's partners** (23 November 2026; [Team ProtoMan](../team-protoman.md),
+Where they stand). BN5's net records pair each of Team Colonel's six with
+one of Team ProtoMan's, their SP versions roaming one map, and the pair
+shares the area here: where an act's guardian is Team Colonel's Navi of
+the area, from act 2 a second coin of the seed, one for each area, puts
+his partner there in half the runs, so End Area's four are each as
+likely. Not act 1 (a first run meets the six it always met), and no
+tournament's entrant, as the six are in its pool ([The tournament](../tournament.md)):
+where a bracket stands in an act a partner guards, he is its final, as
+the act's guardian is. Beaten, he gives his own Soul as the six give
+theirs. Colonel's
+partner in the Undernet, BN5's ProtoMan as DarkProto, is one row of the
+partners' table (`src/layer/xguardian.c`) once he is moved.
 
 **How often**: on the guardian layer of a surface act whose area BN5
 dresses, in half the runs (a coin of the run's seed for each area, of its
 own beside the dress's), the short net's last act among them now that a
-Soul serves every battle after it. In the deep's acts, the Undernet's and
+Soul serves every battle after it; from act 2, his partner in half of
+those. In the deep's acts, the Undernet's and
 the Graveyard's (whatever dresses them) and the short net's dark way, the
 two nets' Navis share one pool by band: a coin of the seed and the act
 weighed by how many of each net's fit the act's band, each as likely,
-one of BN5's six where it lands on his (none that already guards a
-surface act of the run), else BN6's own pick, its area's own Navis
+one of BN5's where it lands on his (the six, their five partners and
+Nebula's two, none that already guards a surface act of the run), else
+BN6's own pick, its area's own Navis
 favoured as ever. Not the Nest (the Cybeast's), the Secret Area or an
 Undernet detour. Nothing is saved for it: a run continued without BN5's
 ROM meets BN6's guardian there, as its layers come in BN6's own tiles,
 and a New 3DS whose heap has no room for BN5's ROM, which then leaves it
 unread ([The 3DS's memory](../../engine/emulation/3ds-memory.md)), none of his. `--guardian 24`-`29`
-puts one in every act BN5 dresses and every deep act.
+(and Team ProtoMan's `60`-`64`) puts one in every act BN5 dresses and
+every deep act.
 
 **Nebula's two, the deep's alone** (the owner's call of 12 November
 2026). LarkMan and GridMan, BN5's Nebula Navis of the story, moved into
 BN6's engine ([Transplanted Navis](../../multirom/navis.md)), join the
-deep's pool beside the six, and no surface act's coin: Oran Area stays
-ShadowMan's (Team ProtoMan's Navis, one of whom would share it, guard no
-run yet: [Team ProtoMan](../team-protoman.md)). They
+deep's pool beside the six, and no surface act's coin: Oran Area's second is
+GyroMan, as BN5's records pair them ([Team ProtoMan](../team-protoman.md)). They
 have no Soul to give: beating one pays his Navi chips, his Guardian Data's
 chip V1 in the first three acts and SP from the fourth, as the six's. The
 reason: a Soul-less guardian in a surface coin is a worse roll for the
@@ -112,7 +128,12 @@ every first-cycle guardian lies in his band (`build.py pacing`):
 | ShadowMan | 2 / 3 (800-1000) | V2, 700 / V3, 1200 | 700 / 1000 |
 | TomahawkMan | 3 / 4 (1000-1300) | V2, 900 / V3, 1400 | 900 / 1300 |
 | Colonel | 5 (1100-1500) | V2, 1200 | 1200 |
-| the deep's (5, 6: 1100-1500, 1200-2000) | | V2 or V3, 1200-1600 | 1200-1600 |
+| MagnetMan | 2 (600-700) | V2, 800 | 700 |
+| SearchMan | 2 | V1, 800 | 700 |
+| Meddy | 2 | V1, 900 | 700 |
+| GyroMan | 2 / 3 | V1, 600 / V2, 800 | 600 / 800 |
+| NapalmMan | 3 / 4 | V1, 800 / V2, 1000 | 800 / 1000 |
+| the deep's (5, 6: 1100-1500, 1200-2000) | | V2 or V3, 1100-1800 | 1100-1800 |
 
 His name in the battle is BN5's for that version (the moved Navis' own
 names: Colonel's V2 is its DarkCol).
@@ -123,7 +144,10 @@ moves briefed from battle data once met in any run ([What MegaMan knows](../meta
 MegaMan knows), the rival record his own (beside BN6's Colonel and
 TomahawkMan, who are other Navis' copies). He stands in his own BN5
 overworld sprite and speaks with his own BN5 face, copied in from the
-player's BN5 ROM as its bystanders are. The battle is BN6's engine's (his
+player's BN5 ROM as its bystanders are; Team ProtoMan's five, whom Team
+Colonel's ROM draws none of (its lists 6 and 8 a placeholder at their
+numbers, [BN5's battles, records and rewards](../../rom/bn5-battles.md)), stand in a HeelNavi's body and
+speak without a face, as Nebula's two. The battle is BN6's engine's (his
 moved id, Navi AI 32-37, at his version), with the area's boss theme and
 background: no running, his reward rows paying the zenny BN6's guardians
 pay where their row holds their Navi chip. Lost, the run ends as at any
@@ -136,7 +160,11 @@ registry), as BN6's guardians give theirs: BN5's V1 of him in the first
 three acts, his SP from the fourth (BN5 has no EX: its SP stands where
 BN6's EX and SP do), his V1 where his SP does not play in BN6's battles
 yet; in the folder's code or *. Until the last round it gave a chip of
-his Soul's kind in that place, as BN6 had none of his.
+his Soul's kind in that place, as BN6 had none of his, and Team
+ProtoMan's still do, their Navi chips not registered yet: one of BN6's
+chips of his Soul's kind (a Recovery chip for Meddy, by the kind of its
+name in BN5), its rarest only where there is nothing else, the same at
+every meeting of the run.
 
 ## BN5's Darkloids (25 October 2026)
 
