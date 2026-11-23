@@ -79,13 +79,20 @@ int lib_command_of(int navi) {
 	case MATE_NUMBERMAN: return LIB_DO_NUMBER;
 	case MATE_SHADOWMAN: return LIB_DO_SNEAK;
 	case MATE_TOADMAN: return LIB_DO_MELODY;
+	/* (Team ProtoMan's own, BN5's masks: BN5_LIB_CMD_MASKS; Meddy's
+	 * TwinLiberation not traced, docs/game/liberation/building/cross-navis-team.md) */
+	case MATE_PROTOMAN: return LIB_DO_WIDESWRD;
+	case MATE_GYROMAN: return LIB_DO_BOMB;
+	case MATE_SEARCHMAN: return LIB_DO_SEARCH;
+	case MATE_NAPALMMAN: return LIB_DO_NAPALM;
+	case MATE_MAGNETMAN: return LIB_DO_MAGNET;
 	/* (the Cross Navis: Team ProtoMan's, by element, docs/game/liberation/) */
 	case MATE_HEATMAN: return LIB_DO_NAPALM;
 	case MATE_ELECMAN: return LIB_DO_MAGNET;
 	case MATE_SLASHMAN: return LIB_DO_WIDESWRD;
 	case MATE_ERASEMAN: return LIB_DO_SEARCH;
 	case MATE_CHARGEMAN: return LIB_DO_BOMB;
-	default: return LIB_DO_NONE;   /* (KnightMan: his StoneBody, always on) */
+	default: return LIB_DO_NONE;   /* (KnightMan: his StoneBody, always on; Meddy) */
 	}
 }
 

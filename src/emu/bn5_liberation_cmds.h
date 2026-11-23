@@ -31,6 +31,11 @@
 #define BN5_LIB_NAVI_NAPALMMAN 0x04      /* NapalmMan: Napalm */
 #define BN5_LIB_NAVI_MAGNETMAN 0x05      /* MagnetMan: MagnetBarrier */
 #define BN5_LIB_NAVI_MEDDY     0x06      /* Meddy: TwinLiberation, Save */
+/* ... their bodies: BN5's lists 6 and 8 (its overworld sprites and their faces at one number) hold ProtoMan's at 0x34 alone; */
+#define BN5_OW_PROTOMAN      0x34
+#define BN5_OW_TEAM_NONE_FIRST 0x40      /* ... 0x40-0x44, the five numbers before Colonel's 0x45, one placeholder each */
+#define BN5_OW_TEAM_NONE_LAST  0x44      /* ... (the other five's in the other version, assumed: docs/rom/liberation.md) */
+#define BN5_LIB_NAVI_HP_ROWS 6           /* BN5_LIB_NAVI_HP's rows: Team Colonel's six alone (ids 7, 0xB, 8, 0xA, 9, 0xC) */
 #define BN5_LIB_UNIT_NAVI    0x01        /* a board unit's u8: its Navi id or enemy kind (+0: 1 a teammate, 2 an enemy) */
 #define BN5_LIB_UNIT_FACING  0x05        /* ... its facing, 0-7 by 45 degrees: 1 toward x + 1, 3 y + 1, 5 x - 1, 7 y - 1 */
 #define BN5_LIB_UNIT_FLAGS   0x0E        /* ... its flags: 0x40 MagnetBarrier's, 0x80 a BonusPanel's shield, 8 LifeMelody's (slot 4) */

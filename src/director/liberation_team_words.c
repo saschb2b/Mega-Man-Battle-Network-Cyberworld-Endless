@@ -4,8 +4,10 @@
  * NumberMan's numbers, TomahawkMan's sayings, KnightMan a knight's
  * courtesy, ToadMan's croak; Gregar's Cross Navis in the habits BN6 gives
  * them: HeatMan hot-blooded, ElecMan's calm crackle, SlashMan's "Slash!",
- * EraseMan's cackle, ChargeMan a train. Each line is his alone, said with
- * his face. */
+ * EraseMan's cackle, ChargeMan a train; and ProtoMan, the real one, Chaud's
+ * (ProtoSoul held: the rival's netbattle won, docs/game/rival.md), a stern
+ * swordsman of few words as BN6 gives him. Each line is his alone, said
+ * with his face. */
 #include "liberation_team_words.h"
 
 #include <stdio.h>
@@ -57,6 +59,16 @@ static const char *const toadman[LINES] = {
 	"Ribbit... A little rest.",
 };
 
+/* (Chaud's Navi, who keeps score against MegaMan and lent him his Soul:
+ * here on Chaud's word, curt with his rival) */
+static const char *const protoman[LINES] = {
+	"...ProtoMan. Chaud sent me.|Don't slow me down,MegaMan.",
+	"Hmph. The panel's clear.",
+	"One stroke. That's all it took.",
+	"...Tch. My blade was slow.",
+	"Rest. Then we move.",
+};
+
 static const char *const heatman[LINES] = {
 	"HeatMan's here!|I'm all fired up! C'mon!",
 	"Burned clean through!",
@@ -101,6 +113,7 @@ static const char *const *lines_of(int navi) {
 	case MATE_TOMAHAWKMAN: return tomahawkman;
 	case MATE_KNIGHTMAN: return knightman;
 	case MATE_TOADMAN: return toadman;
+	case MATE_PROTOMAN: return protoman;
 	case MATE_HEATMAN: return heatman;
 	case MATE_ELECMAN: return elecman;
 	case MATE_SLASHMAN: return slashman;
@@ -137,6 +150,7 @@ const char *lib_mate_command_words(int navi, int n) {
 }
 
 const char *lib_soul_form_name(int navi) {
-	static const char *const forms[] = { "ColonelSoul", "ShadowSoul", "NumberSoul", "TomahawkSoul", "KnightSoul", "ToadSoul" };
-	return navi >= MATE_COLONEL && navi <= MATE_TOADMAN ? forms[navi - MATE_COLONEL] : "";
+	static const char *const forms[] = { "ProtoSoul", "GyroSoul", "SearchSoul", "NapalmSoul", "MagnetSoul", "MeddySoul",
+		"ColonelSoul", "ShadowSoul", "NumberSoul", "TomahawkSoul", "KnightSoul", "ToadSoul" };
+	return navi >= MATE_PROTOMAN && navi <= MATE_TOADMAN ? forms[navi - MATE_PROTOMAN] : "";
 }

@@ -6,7 +6,7 @@
  * chips are of a held Soul's kind, each of the tier it rolled (no Giga
  * early: the counts and tiers stay as they were), and one of a Net
  * Dealer's four chips; the kind the folder holds fewest chips of first.
- * Read from the Souls held as the layer was made (souls_layer), as the
+ * Read from the Souls held as the layer was made (souls_layer_bn5), as the
  * folder's codes are, so a checkpoint rebuilds the same stock. Nothing
  * is drawn where the run holds no Soul. DarkChips are never leaned to. */
 #ifndef CW_LOOT_SOULS_H
@@ -25,7 +25,8 @@ void loot_soul_souls(unsigned souls);
  * every Soul a run's form gives asks for its chips) */
 void loot_soul_kinds(unsigned more);
 /* Soul k's kind (BN5_CHIP_KIND, as soulkinds.h numbers a chip's), -1
- * where BN5's ROM is not read */
+ * where BN5's ROM is not read: Team Colonel's 0-5 (BN5's Souls 7-12), then
+ * Team ProtoMan's 6-11 (its Souls 1-6, souls_lean's) */
 int loot_soul_kind_of(int soul);
 /* Whether chip `id` is of Soul k's kind, and no DarkChip (the economy
  * report's count) */

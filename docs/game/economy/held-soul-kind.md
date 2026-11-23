@@ -38,7 +38,7 @@ folder instead (`src/core/loot_souls.c`).
   BN4's twelve, each by its kind in BN5's numbering (`souls_lean`); BN4's
   GutsSoul, panel-cracking, has none of those kinds and leans nothing. A
   run holding only Team Colonel's leans as before.
-- **When:** the Souls held as the layer is made (`souls_layer`, kept beside
+- **When:** the Souls held as the layer is made (`souls_layer_bn5`, kept beside
   the checkpoint with the Souls), so a CONTINUE rebuilds the same stock; a
   Soul won on a layer counts from the next. A run that holds none draws
   nothing more: the plans' numbers above are as they were.

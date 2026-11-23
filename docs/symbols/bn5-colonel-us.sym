@@ -620,7 +620,9 @@
 08031468 XRomLayout.map_anims
 080315D4 BN5_LIB_Z_INSTALL
 0803272C XRomLayout.sprite_lists
+08032B94 team_protoman_bodies.list_6
 08032D04 BN5_LIB_SPRITES_7
+08032EFC team_protoman_bodies.list_8
 080331B4 XRomLayout.map_table_rw
 080331CC XRomLayout.map_table
 08033220 acdc_town
@@ -1100,6 +1102,7 @@
 0836684C bn5_cangard_2
 0837CBF8 bn5_liberation_board_14
 08389E68 bn5_liberation_board_15
+084069E0 team_protoman_bodies.list_6_2
 08474848 bn5_liberation_board_16
 08478DE0 bn5_liberation_board_17
 0847C53C bn5_liberation_board.bigbrute
@@ -1113,6 +1116,8 @@
 08492EF8 order_points_41
 0849D508 chip_83
 084A3300 bn5_darkchips.lz77
+084A7540 team_protoman_bodies.list_8_2
+084C27B8 list_6_0x084a7540_list_8
 085A7DE4 each_liberation_mission_5
 085AB6C0 map_0
 085AE0B0 each_liberation_mission_6

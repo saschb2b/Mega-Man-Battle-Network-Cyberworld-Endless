@@ -16,7 +16,7 @@ const char *lib_mate_rest_words(int navi);
 /* ... his command with no battle (NumberCheck's finds, SneakAttack,
  * LifeMelody's teammates sung for: `n`; MagnetBarrier, BombLiberation) */
 const char *lib_mate_command_words(int navi, int n);
-/* A Soul Navi's form in battle, BN5's Soul's name ("ColonelSoul") */
+/* A Soul Navi's form in battle, BN5's Soul's name ("ColonelSoul", "ProtoSoul") */
 const char *lib_soul_form_name(int navi);
 
 #endif

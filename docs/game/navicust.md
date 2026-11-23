@@ -332,7 +332,7 @@ skill (10 November 2026):
 Built (10 November 2026): `src/emu/xncp.c` (the program in BN6's tables),
 `src/core/xprograms.c` (BN5's record, name and lines), `navicust.c`'s pool
 entry behind `navicust_set_soul`, which `director_board.c`'s `soult_sync`
-sets as each layer is made from the Souls held then (`souls_layer`, the
+sets as each layer is made from the Souls held then (`souls_layer_bn5`, the
 same on a CONTINUE's rebuild) and the layer's guardian. MegaMan's word for
 it: "SoulT+1: a Soul stays one more turn." Proved in both games by each
 game's own compile and battle (`build.py xdiff soul_soult`).

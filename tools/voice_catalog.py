@@ -143,6 +143,7 @@ OVERRIDES = [
     (r'^liberation_team_words:(tomahawkman|\w+:caseMATE_TOMAHAWKMAN)\b', 'TomahawkMan', None),
     (r'^liberation_team_words:(knightman|\w+:caseMATE_KNIGHTMAN)\b', 'KnightMan', None),
     (r'^liberation_team_words:(toadman|\w+:caseMATE_TOADMAN)\b', 'ToadMan', None),
+    (r'^liberation_team_words:(protoman|\w+:caseMATE_PROTOMAN)\b', 'ProtoMan', None),
     (r'^liberation_team_words:(heatman|\w+:caseMATE_HEATMAN)\b', 'HeatMan', None),
     (r'^liberation_team_words:(elecman|\w+:caseMATE_ELECMAN)\b', 'ElecMan', None),
     (r'^liberation_team_words:(slashman|\w+:caseMATE_SLASHMAN)\b', 'SlashMan', None),
