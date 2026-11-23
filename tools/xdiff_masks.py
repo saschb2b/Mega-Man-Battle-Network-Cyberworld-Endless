@@ -334,6 +334,17 @@ def per_frame(legit, game, caller):
     return in_ranges(legit['rng'].get('per_frame', []) + legit['rng'].get('shake', []), game, caller)
 
 
+def per_frame_draw(d, legit):
+    """the difference is a draw one game alone made from a routine both games draw from once a frame (rng, per_frame): under
+    the replay, a frame more of that game's own while the battle's clock held (a turn's change opened with L, mask 039)"""
+    if d.part != 'draw' or (d.a is None) == (d.b is None):
+        return False
+    side = d.a if d.a is not None else d.b
+    if not isinstance(side, tuple):
+        return False
+    return in_ranges(legit['rng'].get('per_frame', []), 5 if side[0] == 'BN5' else 6, side[1])
+
+
 def stepped(x, y, n):
     """y is x stepped n times by the games' RNG step (x is y stepped -n times where n is negative)"""
     if n < 0:
@@ -435,6 +446,7 @@ WHEN = {
     'buster draw': buster_draw,
     'glitch draw': glitch_draw,
     'engine draw': lambda d, fa, fb, prev: engine_draw(d, fa.canon.legit),
+    'per-frame draw': lambda d, fa, fb, prev: per_frame_draw(d, fa.canon.legit),
 }
 
 
