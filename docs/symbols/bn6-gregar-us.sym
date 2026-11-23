@@ -485,6 +485,9 @@
 0800CC52 BN6_PANEL_BLINK_SET
 0800CCBE collision_panels_highlighted
 0800CDB4 BN6_PANEL_COUNT
+0800D086 BN6_ROW_SEARCH
+0800D09C BN6_ROW_SEARCH_START
+0800D09E BN6_ROW_SEARCH_LOOP
 0800D0BC virus_target_by
 0800D58C column_areagrab_takes
 0800D5BA BN6_GRAB_OWN_COLUMN
@@ -495,6 +498,8 @@
 0800DDDC bn5_mood_bn6_2
 0800DDEC bn5_mood_bn6_3
 0800E276 BN6_PANEL_COORDS
+0800E2C0 BN6_ENEMY_DIRECTION
+0800E2CA chip_used_turned.at_0800e2ca
 0800E2CE point_x_sign
 0800E2D8 BN6_SUBTRACT_HP
 0800E3BE hit_damage_summed
@@ -1474,7 +1479,12 @@
 080E2DC6 BN6_DIE_SPARKS_END
 080E48BC fourth_kind_0x38_colonel_strike
 080E4B10 team_protoman_meddy_5
+080E4DB0 bn6f_falzar
 080E5FF8 own_0x3e
+080E60F0 BN6_GOLMHIT_FIST
+080E6144 chip_used_turned.spawned_by_misc_family_subfamily_0x15
+080E61B4 chip_used_turned.filter
+080E630A chip_used_turned.spawned_by_misc_family_subfamily_0x15_2
 080E64B4 callers_that_aim_player_chips_start
 080E64C6 BN6_AQUANDL_FIND_VIRUSES
 080E64DA BN6_AQUANDL_FIND_NAVIS

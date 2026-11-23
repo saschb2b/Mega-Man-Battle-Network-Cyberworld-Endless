@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-23T23:30:00Z
-* **Update**: rom/chips-code.md (a chip used turned round: BN6's search of a row and its way toward the enemy, mended for MegaMan between a Surrounded field's two sides, and the sweep of every chip turned left, issue #838), devtools/scenarios.md (the battle's `megamanfaces` and `foeshurt` lines), code/tools.md (`tools/turned_sweep.py`'s row), code/emu.md (`turned_aim.c`).
