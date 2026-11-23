@@ -76,6 +76,19 @@
 #define BN5_LIB_SEARCH_MAX   10
 #define BN5_LIB_SEARCH_KEEP  0x080522CEu /* ... cut to its item and trap panels; none: no battle, the point spent */
 
+/* TwinLiberation (Meddy's, steps 0x4E-0x53; the second Navi's 0x4E-0x58): two battles at a line's two ends, read in the code, not
+ * played (docs/rom/liberation.md, TwinLiberation) */
+#define BN5_LIB_CMD_TWIN_END 2           /* the second Navi's TwinLiberation, the same name, in no Navi's mask */
+#define BN5_LIB_TWIN_CHECK   0x080557E2u /* Meddy's: an Order Point, the faced panel (0x08055B4C, mode 0x10), then the line: */
+#define BN5_LIB_TWIN_LINE    0x0805247Au /* ... from the faced panel along the facing, while the panel's value is 1 (no enemy), */
+#define BN5_LIB_TWIN_KINDS   0x080502E4u /* ... these values (dark and item 1), counted: */
+#define BN5_LIB_TWIN_MIN     2           /* ... at least 2 panels arm it, */
+#define BN5_LIB_TWIN_MAX     12          /* ... at most 12 */
+#define BN5_LIB_TWIN_ENDS    (BN5_LIB_STATE + 0x1C) /* ... u16 the faced panel, +0x1E u16 the line's last (y << 8 | x): 0x08052504 */
+                                         /* ... writes, 0x080524FC reads, 0x0805250C clears; her battle (after step 0x53) frees nothing */
+#define BN5_LIB_TWIN_END_CHECK 0x08055818u /* the second Navi's: offered where the ends are set (0x080524FC) */
+#define BN5_LIB_TWIN_FREE    0x080521D4u /* ... after its battle (step 0x58): the whole line, the end back to the start, freed */
+
 /* MagnetBarrier (steps 0x60-0x63) and BombLiberation (0x76-0x7B), neither with a battle */
 #define BN5_LIB_BARRIER_ON   0x08054518u /* each teammate's BN5_LIB_UNIT_FLAGS gains BN5_LIB_BARRIER: harm to him 0 (0x08053D32), */
 #define BN5_LIB_BARRIER_OFF  0x0805455Cu /* ... till the Darkloids' phase's last step (0x0804E85A) clears it */

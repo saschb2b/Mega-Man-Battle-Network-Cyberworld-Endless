@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-23T15:32:27Z
+* **Update**: game/team-protoman.md (On a dark board: the other five in a HeelNavi's body by Nebula's precedent, Meddy's TwinLiberation traced and left; unit 10's row), game/liberation/building/cross-navis-team.md (Team ProtoMan's own Navis: the five's body, face and lines, Meddy's command, the scenarios), game/liberation/bn5/navis.md (Meddy's TwinLiberation read in the ROM), rom/liberation.md (TwinLiberation's routines; the five's bodies).

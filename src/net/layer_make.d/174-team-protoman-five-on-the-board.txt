@@ -1,0 +1,1 @@
+Team ProtoMan's other five join a dark layer's board (docs/game/team-protoman.md, On a dark board): a run holding GyroSoul, SearchSoul, NapalmSoul, MagnetSoul or MeddySoul makes another board's team, its commands' spots, units and par from the same seed.

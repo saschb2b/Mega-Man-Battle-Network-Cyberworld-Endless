@@ -62,20 +62,27 @@ static int bn5_hp(int navi, int mission) {
 	return 0;
 }
 
-/* A Navi who stands on the board in BN6's own body, as BN6's guardians
- * stand on layers: his guardian index (a Cross Navi's 1-5, the real
- * ProtoMan's), 0 another */
-int lib_navi_bn6(int navi) {
+/* A Navi who stands on the board as a guardian of ours stands on layers,
+ * in that guardian's body and with his face: his guardian index (a Cross
+ * Navi's 1-5, BN6's own; the real ProtoMan's for ProtoSoul, the rival's;
+ * Team ProtoMan's other five's, navis 59-64, whom Team Colonel's ROM gives
+ * no overworld sprite or face (its lists 6 and 8 at 0x40-0x44 the one
+ * placeholder each, docs/rom/liberation.md): a HeelNavi's body and no face,
+ * as Nebula's LarkMan and GridMan stand on their arenas till theirs are
+ * read, docs/game/team-protoman.md, On a dark board), 0 another */
+int lib_navi_guardian(int navi) {
 	int c = lib_mate_cross(navi);
-	return c ? c : navi == MATE_PROTOMAN ? PROTOMAN_NAVI : 0;
+	if (c) return c;
+	if (navi == MATE_PROTOMAN) return PROTOMAN_NAVI;
+	return lib_mate_team(navi) ? GUARDIAN_TEAM_FIRST + navi - MATE_PROTOMAN : 0;
 }
 
-/* (Team ProtoMan's Navi of Soul `navi`: a body to stand in. ProtoSoul is
- * the real ProtoMan's, given by the rival's netbattle (docs/game/team-protoman.md,
- * ProtoMan), who stands in BN6's own sprite; Team Colonel's ROM has none of
- * the other five's, its lists 6 and 8 at 0x40-0x44 the one placeholder
- * each: docs/rom/liberation.md) */
-static bool team_body(int navi) { return lib_navi_bn6(navi) != 0; }
+/* (Team ProtoMan's names, BN5's: the guardians' table names none of navis
+ * 59-64 till they guard) */
+static const char *team_name(int navi) {
+	static const char *const names[] = { "ProtoMan", "GyroMan", "SearchMan", "NapalmMan", "MagnetMan", "Meddy" };
+	return names[navi - MATE_PROTOMAN];
+}
 
 int lib_team_held(uint8_t navi[LIB_HELD]) {
 	int n = 0;
@@ -83,10 +90,10 @@ int lib_team_held(uint8_t navi[LIB_HELD]) {
 		for (int k = 0; k < SOULS; ++k)
 			if (souls_held() >> k & 1) navi[n++] = (uint8_t)(MATE_COLONEL + k);
 	/* (a held Team ProtoMan Soul brings its Navi, where the Soul stands in
-	 * BN6's engine and he has a body) */
+	 * BN6's engine) */
 	if (XR[XROM_BN5_COLONEL_US].data)
 		for (int s = MATE_PROTOMAN; s <= MATE_MEDDY; ++s)
-			if ((souls_held_bn5() >> (s - 1) & 1) && soulunite_has_bn5(s) && team_body(s)) navi[n++] = (uint8_t)s;
+			if ((souls_held_bn5() >> (s - 1) & 1) && soulunite_has_bn5(s)) navi[n++] = (uint8_t)s;
 	for (int c = 1; c <= MATE_CHARGEMAN - MATE_HEATMAN + 1; ++c)
 		if (powers_cross_held(c)) navi[n++] = (uint8_t)(MATE_HEATMAN + c - 1);
 	return n;
@@ -95,9 +102,9 @@ int lib_team_held(uint8_t navi[LIB_HELD]) {
 static bool soul_navi(int navi) { return navi >= MATE_COLONEL && navi <= MATE_TOADMAN; }
 
 const char *lib_navi_name(int navi) {
-	int g = lib_navi_bn6(navi);
-	if (g) return guardian(g)->name;
-	if (lib_mate_team(navi)) return guardian(GUARDIAN_TEAM_FIRST + navi - MATE_PROTOMAN)->name;
+	if (lib_mate_team(navi)) return team_name(navi);
+	int c = lib_mate_cross(navi);
+	if (c) return guardian(c)->name;
 	return soul_navi(navi) ? guardian(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL)->name : "MegaMan";
 }
 
@@ -138,10 +145,11 @@ const char *lib_navi_weakness(int navi) {
 
 /* Navi `navi`'s body as place k of the team stands on the board: a Cross
  * Navi's or ProtoMan's BN6's own overworld sprite (as BN6's guardians
- * stand on layers), a Team Colonel Soul Navi's BN5's copied into the
- * teammates' k-th list-6 number; -1 none */
+ * stand on layers), Team ProtoMan's other five's a HeelNavi's, a Team
+ * Colonel Soul Navi's BN5's copied into the teammates' k-th list-6 number;
+ * -1 none */
 static int body_of(int navi, int k) {
-	int g = lib_navi_bn6(navi);
+	int g = lib_navi_guardian(navi);
 	if (g) return guardian_sprite(g);
 	if (!soul_navi(navi)) return -1;
 	return xnavi_mate(k - 1, guardian_older_sprite(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL));
@@ -248,11 +256,12 @@ int lib_in_play(void) { return LB.in_play; }
 
 const char *lib_mate_name(int k) { return lib_navi_name(k > 0 && k < LB.b.team.n ? LB.b.team.navi[k] : MATE_MEGAMAN); }
 
-/* (a Soul Navi's mugshot is at his list-6 number, as BN6_OW_MEGAMAN is
- * MegaMan's face too; a Cross Navi's and ProtoMan's his own of BN6's) */
+/* (a Team Colonel Soul Navi's mugshot is at his list-6 number, as
+ * BN6_OW_MEGAMAN is MegaMan's face too; a guardian's of ours his face,
+ * none for Team ProtoMan's other five: a HeelNavi's is the bystanders') */
 int lib_mate_face(int k) {
-	int g = k > 0 && k < LB.b.team.n ? lib_navi_bn6(LB.b.team.navi[k]) : 0;
-	return g ? guardian_face(g) : k > 0 && k < LB.b.team.n ? LB.mate[k].sprite : BN6_OW_MEGAMAN;
+	int navi = k > 0 && k < LB.b.team.n ? LB.b.team.navi[k] : MATE_MEGAMAN, g = lib_navi_guardian(navi);
+	return g ? guardian_face(g) : navi != MATE_MEGAMAN ? LB.mate[k].sprite : BN6_OW_MEGAMAN;
 }
 
 const char *lib_mate_says(int k, int what, int n) {
