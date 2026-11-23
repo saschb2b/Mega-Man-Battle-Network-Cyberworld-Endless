@@ -138,6 +138,7 @@ void pet_describe(FILE *f) {
 	jukebox_describe(f);
 	library_describe(f);
 	pet_menu_describe(f);
+	pet_options_describe(f);
 	pet_forms_describe(f);
 }
 

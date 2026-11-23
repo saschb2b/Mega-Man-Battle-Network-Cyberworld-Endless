@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 /* Once, on the core's ROM copy (pet_install): the label made from the
  * labels' letters, the grey lifted; false where the ROM's labels are not
@@ -18,6 +19,11 @@ bool pet_options_here(void);
  * labels' tiles: its 9 x 2 tile entries (Save's, the word's columns ours),
  * for pet_row.c; false while the labels are BN6's */
 bool pet_options_forms_map(uint16_t out[2 * 9]);
+/* The state in words, in the PET: `blanktile zero` while BN6's blank tile
+ * (0x2FF of BG character block 2, BG0's every entry on the Chip Folder's
+ * screens) is clear of the labels' copy, `drawn` where a screen of BN6's
+ * would show it; reads only */
+void pet_options_describe(FILE *f);
 /* Each game frame: Options taken from the menu opens. */
 void pet_options_update(void);
 /* The player's keys: those held as Options closes kept from the game

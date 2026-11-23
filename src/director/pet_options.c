@@ -178,6 +178,17 @@ bool pet_options_install(void) {
 
 bool pet_options_here(void) { return installed; }
 
+void pet_options_describe(FILE *f) {
+	/* (a PET screen of BN6's, or its menu over the map) */
+	int mode = emu_read8(emu_read32(BN6_TOOLKIT));
+	if (mode != BN6_MODE_SUBMENU && (mode != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_PET)) return;
+	const uint8_t *t = emu_memory(0x0600DFE0u, TILE);
+	if (!t) return;
+	bool zero = true;
+	for (int i = 0; i < TILE; ++i) zero &= !t[i];
+	fprintf(f, "blanktile %s\n", zero ? "zero" : "drawn");
+}
+
 bool pet_options_forms_map(uint16_t out[2 * BN6_PET_LABEL_W]) {
 	if (installed) memcpy(out, forms_map, sizeof forms_map);
 	return installed;
