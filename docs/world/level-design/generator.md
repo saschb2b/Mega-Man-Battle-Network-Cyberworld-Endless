@@ -364,6 +364,19 @@ Breaks. A tile that draws nothing over part of the floor's top, a hole
 where the background shows through, is mended once the map is whole:
 [holes in the floor](floor-holes.md).
 
+A void panel with floor on two opposite sides, a gap one panel wide
+between two pads or rooms, is drawn as the two floors apart, each with
+its own edge and the gap open (`tiles_pick.c`, `gap_pick`; issue 836).
+The originals hold such a void only inside a field: Mr. Weather Comp's
+maps draw it as a sunken slot of shaded floor, walled off. Its pairs,
+an exact class, drew a generated gap between two pads as floor cut
+straight down on the tiles' grid, sky through it and a dark square of
+the slot at its end, which a player took for a walkway. Each side is
+now picked as if the other were not there (the other side of the line
+through the gap taken for void, the line itself kept for both), the one
+alone where only one draws on a tile, else the floor in front whole; a
+pit, floor on all four sides, keeps its pick.
+
 BN4's ACDC Area leaves out its cyan roads and ringed hubs by their hues
 (`skip_styles`). Any 8 pixels of the roads' hue on a panel's top did it,
 and its squares' frames are drawn in teal lines of that hue: the upper

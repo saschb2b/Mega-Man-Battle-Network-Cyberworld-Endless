@@ -481,6 +481,59 @@ static const TileCand *middle_pick(const TileBook *b, int A, int B, int phase) {
 /* A pair as the tile picked. */
 static TilePick pick_of(const TileCand *c) { return (TilePick){ c->e0, c->e1, look_of(c), c->mask, c->side }; }
 
+/* One side of a gap: the floor on one side of the line through panel
+ * (A, B) along `axis` (0: across A, 1: across B), and on the line itself,
+ * the other side taken for void. */
+typedef struct { TileFloor floor; const void *ctx; int A, B, axis, side; } Half;
+
+static int half(int A, int B, const void *ctx) {
+	const Half *h = ctx;
+	int d = h->axis ? B - h->B : A - h->A;
+	return d * h->side < 0 ? TILE_VOID : h->floor(A, B, h->ctx);
+}
+
+/* The tile being picked, where it lies and what is round it. */
+typedef struct { const TileBook *books; int nbooks; const TileGrid *g; int tx, ty; const TileNeighbours *n; } TileAt;
+
+/* A void panel with floor on two opposite sides, not on both of the other
+ * two: a gap one panel wide between two floors (issue 836). The originals show
+ * such a void only inside a field, Mr. Weather Comp's dark slots drawn as
+ * sunken floor, so its pairs drew a gap between two pads or rooms as a
+ * floor cut on the tiles' grid, sky through it. Each side is drawn as if
+ * the other were not there, as apart() draws two materials: its own edge,
+ * the gap void; where both draw on a tile, the one in front. */
+static bool gap_pick(const TileAt *at, TileFloor floor, const void *ctx, TilePick *out) {
+	const TileBook *books = at->books;
+	const TileGrid *g = at->g;
+	const TileNeighbours *n = at->n;
+	int nbooks = at->nbooks, tx = at->tx, ty = at->ty, phase, A, B;
+	unsigned oa, ob;
+	tile_class(g, tx, ty, &phase, &A, &B);
+	tl_occupancy(floor, ctx, A, B, &oa, &ob);
+	unsigned occupied = oa | ob;
+	bool across_a = (occupied & 0x38) == 0x28, across_b = (occupied & 0x92) == 0x82;
+	if (across_a == across_b) return false;   /* (none, or a pit: floor on all four sides) */
+	int axis = across_b, dist, off, off2;
+	Half lo = { floor, ctx, A, B, axis, -1 }, hi = { floor, ctx, A, B, axis, 1 };
+	unsigned la, lb, ha, hb;
+	tl_occupancy(half, &lo, A, B, &la, &lb);
+	tl_occupancy(half, &hi, A, B, &ha, &hb);
+	const TileCand *pl = best(books, nbooks, g, tx, ty, phase, la, lb, false, half, &lo, false, NULL, n, &dist, &off);
+	count(dist, pl);
+	const TileCand *ph = best(books, nbooks, g, tx, ty, phase, ha, hb, false, half, &hi, false, NULL, n, &dist, &off2);
+	count(dist, ph);
+	if (!pl || !ph) return false;
+	if (!pl->mask || !ph->mask) {
+		tiles_pick_off = pl->mask ? off : off2;
+		*out = pick_of(pl->mask ? pl : ph);
+		return true;
+	}
+	/* both: the floor in front, whose face covers the other's rim behind it */
+	tiles_pick_off = off > off2 ? off : off2;
+	*out = pick_of(tiles_in_front(g, tx, ty, half, &lo, half, &hi) ? pl : ph);
+	return true;
+}
+
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
 	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n, TilePick *out) {
 	int phase, A, B, dist, off, off2;
@@ -517,6 +570,8 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 			return true;
 		}
 	}
+	const TileAt at = { books, nbooks, g, tx, ty, n };
+	if (gap_pick(&at, floor, ctx, out)) return true;
 	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, false, seams, n, &dist, &off);
 	count(dist, c);
 	if (!c) return false;

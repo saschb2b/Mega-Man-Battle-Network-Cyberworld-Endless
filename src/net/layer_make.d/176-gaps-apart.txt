@@ -1,0 +1,1 @@
+A void panel between two floors on opposite sides is drawn as the two sides apart, each its own edge, the gap void (tiles_pick.c's gap_pick, issue 836): Mr. Weather Comp's layers had drawn such a gap as its maps' sunken slot, a floor cut on the tiles' grid with sky through it, and every area's layers with such a gap draw other tiles there.
