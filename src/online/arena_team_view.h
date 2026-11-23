@@ -5,7 +5,8 @@
  * arena_team_client.h), a partner's own HP box over BN6's (which shows
  * his lead's), and the four MegaMen told apart: each one's seat marked by
  * his feet, the ally BN6 leaves unlabelled given his HP as BN6 gives the
- * enemies theirs. Our own drawing in the PET's colours (second_frame.h).
+ * enemies theirs, in its digits (hp_plate.h). Our own drawing in the PET's
+ * colours (second_frame.h).
  * Reads the core, changes nothing. */
 #ifndef CW_ARENA_TEAM_VIEW_H
 #define CW_ARENA_TEAM_VIEW_H

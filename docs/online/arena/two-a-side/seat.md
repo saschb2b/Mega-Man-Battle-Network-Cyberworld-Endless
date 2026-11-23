@@ -16,4 +16,9 @@ Custom screen's window while it is open, read from his own object. In
 the fight each MegaMan's seat is marked by his feet (`P1` to `P4`, the
 seat plus one, his own side's in cyan, the other's in gold), and the
 ally BN6 leaves unlabelled (a lead's partner on the lead's GBA, the lead
-on his partner's) has his HP under him as BN6 gives the enemies theirs.
+on his partner's) has his HP under him as BN6 gives the enemies theirs:
+where BN6 writes an enemy's (centred on his panel's middle) and in its
+own battle digits from the player's ROM, counted down in orange and up in
+green as an enemy's is (`src/online/hp_plate.c`; [Sprites, fonts and
+pictures](../../../rom/graphics.md), The HP under an enemy). Until 23
+November 2026 it was the engine's pixel font, left-aligned beside him.
