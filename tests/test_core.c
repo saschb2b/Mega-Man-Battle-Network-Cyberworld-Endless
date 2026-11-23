@@ -52,6 +52,7 @@
 #include "chip_pool.h"
 #include "guardians.h"
 #include "npc_sprite.h"
+#include "xguardian.h"
 #include "xguardian_bn4.h"
 #include "launcher_roms.h"
 #include "launcher_text.h"
@@ -1628,6 +1629,12 @@ static void test_pacing(void) {
 	CHECK(pacing_xguardian_version(junk, 4, 0, false) == 1 && pacing_xguardian_version(junk, 5, 0, false) == 2, "JunkMan V2 then V3 in the deep");
 	CHECK(guardian_moved(GUARDIAN_OLDER_FIRST) && guardian_moved(GUARDIAN_BN4_FIRST + 1) && !guardian_moved(1) && !guardian_moved(GUARDIAN_DARKLOID_FIRST),
 		"BN5's six and BN4's Navis the older net's moved guardians, BN6's and the Darkloids not");
+	/* (Team ProtoMan's partners in BN5's net records, from act 2: docs/game/team-protoman.md, Where they stand; Colonel's,
+	 * DarkProto, not yet) */
+	CHECK(guardian_moved(GUARDIAN_TEAM_FIRST + 1) && xguardian_partner(GUARDIAN_OLDER_FIRST + 1) == GUARDIAN_TEAM_FIRST + 1 &&
+		xguardian_partner(GUARDIAN_OLDER_FIRST + 5) == GUARDIAN_TEAM_LAST && !xguardian_partner(GUARDIAN_OLDER_FIRST) &&
+		!xguardian_partner(GUARDIAN_TEAM_FIRST + 1) && !xguardian_partners_at(0) && xguardian_partners_at(1),
+		"ShadowMan's partner GyroMan, ToadMan's Meddy, Colonel none yet; partners from act 2");
 	/* heals: the middle layer of each act on the first two cycles, and the
 	 * run's first layer */
 	CHECK(pacing_heal_certain(2) && pacing_heal_certain(17) && pacing_heal_certain(1) && !pacing_heal_certain(3) &&
