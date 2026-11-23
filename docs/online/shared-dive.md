@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T21:12:01Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T17:28:20Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -1264,8 +1264,15 @@ small, in one place, and covers nothing it needs to read):
   data); the act and the layer say how deep, not how strong. Chosen over
   the act and over Busting Levels (a battle's, not a diver's).
 - **In battle**: a partner's HP under his name on a party's field
-  (`party_marks.c`), as BN6 writes an enemy's under him; MegaMan's own
-  is the HP box. A crewmate fighting his own battle: his plate's HP
+  (`party_marks.c`), as BN6 writes an enemy's under him and in BN6's own
+  battle digits, read from the player's ROM and counted down in orange
+  and up in green as an enemy's (`hp_plate.c`, since 23 November 2026:
+  the engine's pixel font had made the two numbers of one frame look
+  different; [Sprites, fonts and pictures](../rom/graphics.md), The HP
+  under an enemy); MegaMan's own is the HP box. The name stays in the
+  pixel font: BN6 has no letters of that size for it. On the field's
+  bottom row the name and HP over his head end where the mark of one two
+  rows up begins, the digits being a line taller. A crewmate fighting his own battle: his plate's HP
   falls as he is hit, read from his battle.
 - **Later, each its own issue**: a second screen's page (`src/second/`,
   [issue #729](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/729)),

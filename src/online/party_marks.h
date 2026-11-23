@@ -1,7 +1,8 @@
 /* Who is who on a party's field (issue #713; docs/online/shared-dive.md,
  * Who is who): each MegaMan of the party marked by his feet with his
  * diver's name, cut to what a panel holds, the player's own behind the
- * PET's arrow in its orange, the others in the crew's colour; and a partner's
+ * PET's arrow in its orange, the others in the crew's colour, a partner's
+ * HP under his name in BN6's own digits (hp_plate.h); and a partner's
  * own HP box over BN6's, which shows the lead's. Our own drawing over the
  * field's picture, as the Arena's two a side marks his seats
  * (arena_team_view.h): read from the field's core as it stands for the

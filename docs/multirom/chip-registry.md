@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chip registry"
 description: "BN5's 283 chips in BN6's chip tables grown to 1024 (`src/core/xchips_registry.c`, `chips.c`): a chip both games name stays BN6's, the rest take free ids, with placeholders without BN5's ROM and the pack extended in EWRAM."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T16:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:20:00Z }
 ---
 
 # The chip registry
@@ -55,6 +55,15 @@ chip step gives any one ([Dev tools](../devtools/overview.md)).
   entry (ids 512-602 have one). BN5's last five Program Advances take
   365-367 (BigNoise, CsmoPris, WildBird) and, past the ids a pack counts,
   603 and 604 (Football, PileDrvr); 511 is held.
+  MeddySoul's two capsules BN6 has no chip of the name of, BN5's
+  pseudo-chips YelCapsl and BlkCapsl (380, 381), take 734 and 735, past
+  BN4's last (`XREG_CAPSULE`: never a run's find, a reward, a folder or the
+  Library, so their pack entries, in the cart's save RAM as every id's
+  from 635, stay empty; the Custom screen's capsules alone show them,
+  [Transplanted Souls](souls.md), MeddySoul's capsules); the other three are
+  BN6's own by name (382-384), WhiCapsl's icon and picture BN5's in the
+  image, where Gregar's record shows IceCube's (`chips.c`'s
+  `art_borrowed`).
   A row of its own keeps its codes, library type and MB: what its
   placeholder needs. The pairs were made by name from both ROMs, which
   their SHA-1s fix; the unit tests hold the table to its rules

@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-23",
+  "what": "MegaMan's aim turned round on a Surrounded field located and mended (issue #838; docs/rom/chips-code.md, A chip used turned round): BN6's search of a row (bn6_panels.h BN6_ROW_SEARCH 0x0800D086, its start BN6_ROW_SEARCH_START 0x0800D09C, its loop BN6_ROW_SEARCH_LOOP 0x0800D09E) walks from the field's edge behind the searcher, so between the two sides GolmHit's fist (BN6_GOLMHIT_FIST 0x080E60F0, its search at 0x080E6144) fell on column 6 turned left and column 1 facing right; BN6's way toward the enemy (BN6_ENEMY_DIRECTION 0x0800E2C0) takes the side alone, where DiveMan's chip and 32 of BN4's moved chips aim; a BattleSettings' +6 its column pattern (bn6_forms.h BN6_SETTINGS_SIDES). Hooks start MegaMan's side's search at its own column and answer its facing, on a field none of BN6's plain three (src/emu/turned_aim.c); tools/turned_sweep.py swept 643 chips turned left, the rest open in issue #846."
+}

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **New: the layer's map stays open.** A press of SELECT opens the map
+  and leaves it open while MegaMan walks; the next press closes it, as
+  does a battle, a chat, the PET or a warp. Held, it shows while held,
+  as before. Thanks to agergo100 for the idea (issue #840).
+
 - **New: Falzar's five Crosses.** SpoutMan, TomahawkMan, TenguMan,
   GroundMan and DustMan now give their Crosses when they fall as an
   act's guardian, as Gregar's five Cross Navis do: SpoutCross,
@@ -23,6 +28,12 @@
   by Attack. The card now shows the power the chip deals in battle, the
   one its own game shows for a Navi you never deleted against the clock:
   80 for CosmoMan SP. Thanks to Agergo100 for the report (issue #835).
+
+- **Fixed: GolmHit struck behind MegaMan in a liberation's Surrounded
+  battle (issue #838).** Turned to the left, its fist came down on the
+  far right of the field; facing right, on the far left behind him. It
+  now strikes the first of the enemy's columns ahead of him, whichever
+  way he faces. Thanks to Agergo100 for the report.
 
 - **Fixed: a gap between two floors drawn as a cut walkway (issue
   #836).** In Mr. Weather Comp, a gap one panel wide between two rooms
