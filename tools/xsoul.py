@@ -90,8 +90,11 @@ UNITS = (
     # foe Navi's shadow taken off))
     ('search', 3, (0x0800F68E, 0x080EE93C, 0x08011BF8)),
     # (MeddySoul: his charged shot's power attack and family, the capsule bomb; no passive, no chip charge (BN5's 0x08010902
-    # names no form 6); his capsules are the Custom screen's Soul button, SearchSoul's SHUFFLE's)
-    ('meddy', 6, (0x0800F720, 0x080EEB40)),
+    # names no form 6); his capsules on the Custom screen: the Soul button's set-up (0x08023CF4, which src/emu/soulcapsule.c
+    # runs for Soul 6: the capsules drawn by BN5's own steps and RNG call, from DATA's tables in BN6's entries) and two phases
+    # of BN5's mode 0x3C, a capsule taken (0x080237B0: put on the last pick, the lit rules, sound 0x92; 0x08023828: back to
+    # the chips), which soulcapsule.c's mode runs after BN6's own UNITE flight; its first phase and A are soulcapsule.c's own)
+    ('meddy', 6, (0x0800F720, 0x080EEB40, 0x08023CF4, 0x080237B0, 0x08023828)),
 )
 # Team ProtoMan's units: their blocks in a room of their own (soul_room.h's SOULS_TEAM_CODE), their sprites too
 # (SOULS_TEAM_ART, list 0 from TEAM_ART_FIRST), so that Team Colonel's code and numbers stay where they were
@@ -145,7 +148,9 @@ FORM_FIELD = 0x2C
 
 # The Souls' own pairs, where the symbol map's is wrong or none (each body read in both games): BN5's chip writer's second
 # entry (push; movs r4,#0; b to their common part) and BN6's, beside the first's pair 0x0800FE6A -> 0x080126E4
-PAIRS = {0x0800FE70: (0x080126EA, 'the chip writer\'s second entry: push {r4,r6,r7,lr}; movs r4,#0; b to the common part, in both'),
+PAIRS = {0x080014D6: (0x08001562, 'GetPositiveSignedRNGSecondary: the second word stepped (BN5 0x02001C94, BN6 0x02001120, '
+                                   'each game\'s own), its value with bit 31 cleared, the same steps'),
+         0x0800FE70: (0x080126EA, 'the chip writer\'s second entry: push {r4,r6,r7,lr}; movs r4,#0; b to the common part, in both'),
          0x080258E8: (0x08029CD4, 'a pick\'s slot drawn on the Custom screen: the same steps, each game\'s own tiles and map place')}
 # The Souls' audits of their calls' differing twins (as tools/bn5_twins.py's AUDITS for the families')
 AUDITS = {
@@ -170,6 +175,12 @@ AUDITS = {
     (0x08024A2A, 0x08028E32): "the lit rules run again as the button's phase ends: BN5's five (the chips', OK's, UNITE's, ColonelSoul's "
                               "button, MeddySoul's), BN6's four (the same three, then DustCross's button, the place src/emu/"
                               "soulcolonel.c answers with BN5's ColonelSoul rule; MeddySoul is Team ProtoMan's)",
+    (0x080014D6, 0x08001562): "GetPositiveSignedRNGSecondary (the capsules drawn, MeddySoul's set-up): the same steps, each on its "
+                              "own game's second RNG word (BN5 0x02001C94, BN6 0x02001120, BN5_RNG_SECONDARY and BN6_RNG_SECONDARY), "
+                              "bit 31 cleared",
+    (0x080254DC, 0x080298D8): "the flying icon drawn (MeddySoul's capsule taken, mode 0x3C's phase 0x14): an OBJ at the screen's "
+                              "+0x44, palette 13, its tiles each game's own place for UNITE's flying icon (BN5 0x392, 0x06017240; BN6 "
+                              "0x396, 0x060172C0), where each game's UNITE and src/emu/soulcapsule.c's first phase copy the icon",
     (0x08015140, 0x08018810): "an owner's arm point, by its NameID's sprite (the arm flash's set-up, a kind whose +4 is set): BN6 answers "
                               "(0, 7) for its own NameIDs 0xCD-0xFF and else takes the same steps, its calls their twins; the owner of "
                               "every flash the Souls spawn is MegaMan (0x1A0, a form's 0x1AB on), his sprite's arm row read from the rows "
@@ -177,6 +188,13 @@ AUDITS = {
 }
 
 # BN5's RAM its code names, and BN6's in its place, each read from both games' code
+# BN5's ROM data a moved routine reads that the Souls hold in BN6's terms: the address BN6's copy reads instead (MeddySoul's
+# capsules' two tables, BN5_CAPSULES_HEALTHY and BN5_CAPSULES_HURT: their chip entries as BN6's, src/emu/soulcapsule.c)
+DATA = {
+    0x08025E64: ('SOULS_CAPSULES + 0x80u', 'MeddySoul\'s capsules while his HP is a quarter of his max or more, in BN6\'s entries (soulcapsule.c)'),
+    0x08025E84: ('SOULS_CAPSULES + 0xA0u', 'MeddySoul\'s capsules below a quarter, in BN6\'s entries (soulcapsule.c)'),
+}
+
 RAM = {
     0x02034000: (0x0203FF60, 'BN5\'s per-side words of ColonelSoul\'s obstacle strike (0x080CACE0, 8 bytes a side): the RAM plan\'s '
                              'RAM_COLONEL (free_space.h), which BN6 leaves alone'),
@@ -596,6 +614,9 @@ class Deriv:
             inside = any(lo <= v < hi for lo, hi in self.blocks)
             if inside:
                 self.words[lit] = (v, None, 'data moved with the code')
+                return
+            if v in DATA:
+                self.words[lit] = (v, DATA[v][0], DATA[v][1])
                 return
             for lo, n, to, why in bn5_twins.DATA_TWINS:
                 if lo <= v < lo + n:

@@ -115,7 +115,11 @@
 #define SOULS_TEAM_THUMB   (FREE_TEAM_SOULS + 0x51FA0u)   /* the project's own Thumb their hooks jump to: NapalmSoul's lava, GyroSoul's
                                                            propeller spent and set (soulchips.c), to: */
 #define SOULS_TEAM_THUMB_END (FREE_TEAM_SOULS + 0x52000u)
-#define SOULS_TEAM_END     (FREE_TEAM_SOULS + 0x52000u)
+#define SOULS_CAPSULES     (FREE_TEAM_SOULS + 0x52000u)   /* MeddySoul's capsules (soulcapsule.c): the Custom screen's mode 0x3C, its first
+                                                           phase's stub, A on a capsule, the capsules' tables in BN6's entries, their bits
+                                                           and ids, to: */
+#define SOULS_CAPSULES_END (FREE_TEAM_SOULS + 0x52100u)
+#define SOULS_TEAM_END     (FREE_TEAM_SOULS + 0x52100u)
 
 /* ---- BN4's Souls' look: one room, the united Soul's (free_space.h's FREE_BN4_SOUL_LOOK; soullook.c, docs/multirom/bn4-souls.md,
  * The shared room): the twelve sprites take 438 KB and the copy has no such room, so the room holds one Soul's at a time, filled
