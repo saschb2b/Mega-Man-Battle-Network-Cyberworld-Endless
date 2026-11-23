@@ -190,6 +190,7 @@
 0800906A liberation_battle_field.from_2
 080090E8 bn5_chips_code.gate
 08009190 BN5_LIB_TURNS_UP
+080092E0 saves_times_reset_bn5
 08009326 side_battle_counter_raised
 080098D8 primary_kept_as_battle_begins
 08009A0A put_back_after_opening
@@ -261,6 +262,7 @@
 0800EB06 bn5_chips_code
 0800EB0C bn5_chips_code_2
 0800EB12 cusvolt1_3
+0800EB50 card_0x0812315c_into
 0800ED20 bn5_last_chips
 0800ED24 bn5_last_chips.0x0800ed20
 0800EDB4 BN5_NAVI_COMPANION
@@ -1097,6 +1099,7 @@
 08113CD8 BN5_STORY_BATTLES
 08114000 families_code_end
 0811488C BN5_LIB_BATTLES
+0812315C moved_sp_power.into
 08126CA8 objects_routines
 08126D4C BN5_LIB_BONUS_ICONS
 08126D68 objects_routines_0x08126ca8
