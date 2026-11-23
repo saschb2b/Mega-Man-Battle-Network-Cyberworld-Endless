@@ -39,7 +39,7 @@
 #define FLIGHT_TILES 0x060172C0u   /* BN6's UNITE flight's icon tiles (0x0802709E; BN5's 0x06017240), the OBJ its draw makes (0x080298D8) */
 #define FLIGHT_PAL 0x030016F0u     /* ... and its palette's place (0x080270B2; BN5's 0x030036F0) */
 #define HP_MAX 0x26                /* an object's max HP (the heal's, BN5's 0x0800FFF8) */
-#define CAPSULE_DAMAGE_BITS 0x7800u   /* the damage word's bits a capsule gives (white 0x4000, black 0x2000, yellow 0x1000, purple 0x0800) */
+#define CAPSULE_DAMAGE_BITS 0x7800u   /* the damage word's bits a capsule gives (white 0x4000, yellow 0x2000, black 0x1000, purple 0x0800) */
 
 /* the room (SOULS_CAPSULES): */
 #define CAPSULE_MODE   (SOULS_CAPSULES + 0x00u)   /* mode 0x3C's routine and its phases' table, */
@@ -148,8 +148,8 @@ static HookAct take(HookRegs *r, void *user) {
 
 /* ---- the fight ---- */
 
-/* (BN6_CHIP_FLAGS_DAMAGE, r0 the damage, r1 the chip's flags) BN5's two bits Gregar dropped (0x08010374-0x08010386): yellow
- * 0x1000, purple 0x0800; BN6's own two (white, black) after */
+/* (BN6_CHIP_FLAGS_DAMAGE, r0 the damage, r1 the chip's flags) BN5's two bits Gregar dropped (0x08010374-0x08010386): black
+ * 0x1000, purple 0x0800; BN6's own two (white, yellow) after */
 static HookAct flags(HookRegs *r, void *user) {
 	(void)user;
 	if (done) r->r[0] |= (r->r[1] & 0x08 ? 0x1000u : 0) | (r->r[1] & 0x20 ? 0x0800u : 0);
@@ -169,7 +169,7 @@ static HookAct heal(HookRegs *r, void *user) {
 /* (BN6_DAMAGE_DECODE, r0 a collision data: its damage word into its hit) BN5's (0x080165E4) where MeddySoul's side's attack
  * carries a capsule's bit, which Gregar reads otherwise (0x2000 and 0x1000 as its +0x12's 0xF8 and 0xF7, 0x0800 not at all):
  * the damage's eleven bits, doubled by 0x8000; white 0x4000 the status 0x10 (BN6's and BN5's tables' paralysis, 90 frames)
- * and +0xE 0; black 0x2000 0x20 (confusion, 480); yellow 0x1000 0x30 (blindness, 480); purple 0x0800 its +0x12 0x1118 */
+ * and +0xE 0; yellow 0x2000 0x20 (confusion, 480); black 0x1000 0x30 (blindness, 480); purple 0x0800 its +0x12 0x1118 */
 static HookAct decode(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t coll = r->r[0];

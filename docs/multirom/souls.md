@@ -418,12 +418,12 @@ the next.
   its power (`0x08024C78`, the fifth lit rule). A on a lit capsule (sound
   0x81) runs mode 0x3C: the capsule's icon flies to the pick on UNITE's
   own flight phases, then the pick's element takes the capsule's bit in
-  its +4 (0x08 yellow, 0x04 black, 0x02 white, 0x20 purple, 0x10 pink)
+  its +4 (0x04 yellow, 0x08 black, 0x02 white, 0x20 purple, 0x10 pink)
   and the capsule's element in its +5, the capsule turns chosen and the
   lit rules run again (sound 0x92). B on that pick takes the capsule off
   and lights it again. At OK each pick's +4 goes into the pending
   record's +0x44 + its place, and the chip's use reads it back as its
-  flags: white, black, yellow and purple set the damage word's 0x4000,
+  flags: white, yellow, black and purple set the damage word's 0x4000,
   0x2000, 0x1000 and 0x0800, and pink heals a tenth of his max HP, rounded
   up, as the chip is used. BN5's hit decode turns the first three into
   the status a hit gives, 0x10, 0x20 and 0x30, which its status table
@@ -432,11 +432,11 @@ the next.
   plumbing: the draws of types 6 and 7 on the chips' screen and in the
   chip's window (each as the chip its entry names, its code 27 drawn
   blank as BN5's, `0x08028214`), B's step that gives a capsule back, OK's
-  copy of +4, the chip use's flags with the white and black bits, and a
+  copy of +4, the chip use's flags with the white and yellow bits, and a
   status table of the same numbers (`0x080209EC`). Gregar dropped the
   set-up for Soul 6, the lit rule, A on a capsule (an empty routine in the
   A table's places 6 and 7), mode 0x3C's phases (the mode goes straight
-  back to 4), the yellow and purple bits and the pink heal; and its hit
+  back to 4), the black and purple bits and the pink heal; and its hit
   decode reads 0x2000 and 0x1000 as its own (+0x12 0xF8 and 0xF7) and
   ignores 0x0800, so its reading is no twin of BN5's. The capsules stand
   on BN6's own elements and draws. Their chips by the chip registry's rule,
@@ -449,7 +449,7 @@ the next.
   address, chosen by the Soul); A and mode 0x3C are the project's Thumb
   in BN6's empty places, the mode's first phase loading the capsule's
   icon where BN6's UNITE flight draws it, then BN6's own flight, then
-  BN5's last two phases moved; in the fight, BN5's yellow and purple bits
+  BN5's last two phases moved; in the fight, BN5's black and purple bits
   and heal, and BN5's decode for MeddySoul's side's attacks that carry a
   capsule's bit. The differential's trace holds elements 8 and 9 and the
   screen's two capsules' entries since version 9 (each entry by its chip,

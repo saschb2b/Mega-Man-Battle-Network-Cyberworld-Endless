@@ -43,7 +43,7 @@
 #define BN5_CAPSULE_LIT_CALL  0x080237EAu /* ... and its call of the lit rules after (0x08024A2A) */
 #define BN5_CAPSULE_PHASE5    0x080237B0u /* the capsule on the last pick: +7 2 (chosen), the pick's +5 the capsule's element, its +4
                                              ORed with BN5_CAPSULE_BITS by id, the lit rules again, sound 0x92 */
-#define BN5_CAPSULE_BITS      0x08023820u /* 5 bytes by id - 380: 0x08, 0x04, 0x02, 0x20, 0x10 */
+#define BN5_CAPSULE_BITS      0x08023820u /* 5 bytes by id - 380: 0x04 yellow, 0x08 black, 0x02 white, 0x20 purple, 0x10 pink */
 #define BN5_CAPSULE_PHASE6    0x08023828u /* back to mode 4 */
 #define BN5_CAPSULE_UNDO      0x08024D7Cu /* B on the chips, the last pick given back: a capsule on it (+5) taken off (+5 0, +4 &
                                              ~0x3E) and lit again (its element's +7 0) */

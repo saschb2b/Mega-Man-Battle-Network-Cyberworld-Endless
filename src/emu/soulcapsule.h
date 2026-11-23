@@ -3,7 +3,7 @@
  * elements Gregar kept for it, 8 and 9 of types 6 and 7, which BN6's own code draws as the chips their entries name (BN6's
  * 382-384, the registry's 734 and 735), gives back on B and copies into the chip at OK; what Gregar dropped comes back:
  * the set-up and the lit rule (BN5's, through soulcolonel.c's hooks on DustCross's, one hook an address), A on a capsule
- * and mode 0x3C (BN5's phases on BN6's own UNITE flight), and in the fight the yellow and purple bits and the pink heal. */
+ * and mode 0x3C (BN5's phases on BN6's own UNITE flight), and in the fight the black and purple bits and the pink heal. */
 #ifndef CW_SOULCAPSULE_H
 #define CW_SOULCAPSULE_H
 

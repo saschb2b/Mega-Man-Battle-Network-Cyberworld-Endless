@@ -8,11 +8,11 @@
   "what": "A on a capsule takes BN5's grey path whatever it shows (the lit test's bne made b): BN5's buzz, no flight, the Cannon fired without its capsule"
  },
  {
-  "name": "MeddySoul's yellow capsule without its bit",
+  "name": "MeddySoul's black capsule without its bit",
   "spec": "soul_meddy_capsule_used",
   "poke": [
-   "08E920C0:0400"
+   "08E920C0:0004"
   ],
-  "what": "the capsules' bits by id with YelCapsl's 0x08 cleared (BlkCapsl's 0x04 kept): the capsule the spec takes flies onto the Cannon but its element's +4 takes nothing, so the Cannon's hit leaves CanGard unblinded where BN5's blinds him for 480 frames"
+  "what": "the capsules' bits by id with BlkCapsl's 0x08 cleared (YelCapsl's 0x04 kept): the capsule the spec takes flies onto the Cannon but its element's +4 takes nothing, so the Cannon's hit leaves CanGard unblinded where BN5's blinds him for 480 frames"
  }
 ]
