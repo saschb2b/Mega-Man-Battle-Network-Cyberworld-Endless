@@ -321,8 +321,9 @@ static bool sounds(void) {
 		const SoulSong *s = &soulcode_bn5.songs[i];
 		if (xsong_install_at(XROM_BN5_COLONEL_US, s->from, s->to) != s->to) return false;
 	}
-	/* (Team ProtoMan's played by the Souls' own hooks: soulteam_chips.c's propeller) */
-	return !nteam || xsong_install_at(XROM_BN5_COLONEL_US, SOUL_TEAM_PROPELLER_SONG, SOUL_TEAM_PROPELLER_SLOT) == SOUL_TEAM_PROPELLER_SLOT;
+	/* (Team ProtoMan's played by the Souls' own hooks and Thumb: soulteam_chips.c's propeller, soulcapsule.c's A on a grey capsule) */
+	return !nteam || (xsong_install_at(XROM_BN5_COLONEL_US, SOUL_TEAM_PROPELLER_SONG, SOUL_TEAM_PROPELLER_SLOT) == SOUL_TEAM_PROPELLER_SLOT &&
+		xsong_install_at(XROM_BN5_COLONEL_US, SOUL_TEAM_GREY_SONG, SOUL_TEAM_GREY_SLOT) == SOUL_TEAM_GREY_SLOT);
 }
 
 /* every byte the abilities stand on, as Gregar and BN5 have them */

@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-23T15:20:00Z
+* **Update**: multirom/souls.md (MeddySoul's capsules traced in both ROMs and built on BN6's own elements 6 and 7: BN5's set-up, lit rule, A, mode 0x3C, the bits into the chip's damage, the heal and BN5's hit decode for them; what Gregar kept and dropped), rom/souls.md (MeddySoul's capsules' row), multirom/chip-registry.md (YelCapsl and BlkCapsl at 734 and 735, XREG_CAPSULE; WhiCapsl's art BN5's), game/team-protoman.md (the Souls table's MeddySoul line, unit 8), code/emu.md (`soulcapsule.c`, `bn5_capsules.h`), devtools/differential.md (the trace's version 9: elements 8 and 9 and the capsules).
