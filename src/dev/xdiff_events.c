@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn5_capsules.h"
 #include "bn5.h"
 #include "bytes.h"
 #include "debug.h"
@@ -648,6 +649,7 @@ static bool watched(const XvMoved *m, const XVirusFamily *const *fams, int nfams
 		return true;
 	if (navis && xn_code_at(m->to) && navi_code(m)) return true;
 	if (xd_navi4_code(m)) return true;   /* (a played BN4 Navi chip's unit and its Navi's code: xdiff_navi4.h) */
+	if (m->from == BN5_SOUL_BUTTON) return true;   /* (the Soul button's set-up moved, MeddySoul's: its capsules' draw BN5's, soulcapsule.c) */
 	return chip_code(m->to) || (xn_code_at(m->to) && navi_shared(m));
 }
 

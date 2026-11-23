@@ -100,6 +100,9 @@
 #define BN6_CHIP_POWERS       0x080109DCu /* the computed powers' routines (a chip's power of 1000 and up: the routine by power - 1000, r0 the */
 #define BN6_CHIP_POWERS_COUNT 45          /* ... chip, r1 its side; bn6f 0x080109A4's table), 45 of them, code after */
 #define BN6_CHIP_POWERS_REF   0x080109D4u /* ... the one word naming the table (0x080109C2: ldr r2, then by the power's index) */
+#define BN6_CHIP_POWER_OF     0x080109A4u /* a chip's power computed (bn6f sub_80109A4, Gregar's as Falzar's: r0 the chip, r1 its
+                                           * side; its record's power where under 1000, else the routine BN6_CHIP_POWERS names by
+                                           * the power less 1000, through mov lr, pc): what the battle deals, the hand's +0xC */
 #define BN6_NAVI_ROUTINES     0x0802CD5Cu /* ... from entry 0x2A, by the Navi chip's subfamily (BN6_NAVI_ROUTINE_COUNT) */
 #define BN6_NAVI_ROUTINE_COUNT 29
 #define BN6_CHIP_ROUTINES_REF 0x080ED138u /* the support family's literal naming BN6_CHIP_ROUTINES (0x080ED0EE: ldr r3, then by AttackVars +3) */

@@ -26,6 +26,9 @@ enum {
 	XREG_PA,        /* a Program Advance of its own: its record, formed once BN6's lists hold its recipes */
 	XREG_MOVED,     /* an id of its own whose code BN6 lacks, moved from BN5's into BN6's engine (src/core/xchips_moved.h: its family and
 	                   subfamily there): it plays where BN5's ROM is read */
+	XREG_CAPSULE,   /* an id of its own for one of MeddySoul's capsules (BN5's pseudo-chips 380 and 381, YelCapsl and BlkCapsl; BN6 has
+	                   the other three by name, 382-384): its record, name and art for the Custom screen's capsules (src/emu/
+	                   soulcapsule.c), never a run's find, a reward, a folder or the Library */
 };
 
 typedef struct {
@@ -38,6 +41,9 @@ typedef struct {
 } XChipReg;
 
 #define XREG_IDS 1024   /* BN6's chip ids: ten bits (chip_entry.h), 512-1023 free */
+#define XREG_CAPSULE_FIRST 734   /* XREG_CAPSULE's ids, past BN4's last (733): BN5's 380 and 381 (their pack entries the cart's save RAM's,
+                                  * BN6_PACK_SAVE_FIRST on, which nothing fills: no run gives one) */
+#define XREG_CAPSULES 2
 extern const XChipReg xreg_rows[];
 extern const int xreg_count;
 
