@@ -42,8 +42,9 @@ last, unit 11), and since 23 November 2026 runs meet them: each guards
 his Team Colonel partner's area by a coin from act 2, DarkProto Colonel's
 in the Undernet, and stands in the deep's pool, his Guardian Data giving
 his Soul (unit 7, below). All six Souls unite (units 8 and 9), MeddySoul's
-capsules on BN6's own Custom screen. The board (unit 10) waits but ProtoMan's command. Team
-Colonel's ROM draws none of the five
+capsules on BN6's own Custom screen. A held Soul brings its Navi onto a
+dark board with his own command (unit 10, On a dark board; Meddy's
+TwinLiberation waits). Team Colonel's ROM draws none of the five
 on the net (its lists 6 and 8 hold a placeholder at their numbers,
 [BN5's battles, records and rewards](../rom/bn5-battles.md)), so each
 stands on his arena in a HeelNavi's body and speaks without a face, as
@@ -295,20 +296,36 @@ the pick lists both. The fiction holds: the board's ProtoMan is the one
 whose Soul MegaMan won in the netbattle, on this net in person, and his
 line as he joins says Chaud sent him.
 
-**The other five have no body yet.** Team Colonel's ROM holds no
-overworld sprite or face of GyroMan, SearchMan, NapalmMan, MagnetMan or
-Meddy: its lists 6 and 8 point 0x40-0x44, the five numbers before
-Colonel's 0x45, at one placeholder each ([BN5's Liberation
-Missions](../rom/liberation.md), Team ProtoMan's bodies). So their Souls,
-held, bring no Navi to the board yet: the code takes each in once he has a
-body, his command already his (Meddy's TwinLiberation still untraced).
-Unit 7 meets the same gap: "their bodies and faces copied as the six's"
-has nothing to copy. The owner's question, asked here: how should they
-stand? Recommended: off the board until they have a body, as now, their
-commands kept by the Cross Navis they were lent to. The other ways: in
-their moved battle sprites, as Falzar's Navis stand as guardians (no walk
-of theirs, so one in play could not walk the board), or in a stand-in's
-body (a HeelNavi's, which the owner turned down for the guardians).
+**The other five in a HeelNavi's body** (23 November 2026). Team
+Colonel's ROM holds no overworld sprite or face of GyroMan, SearchMan,
+NapalmMan, MagnetMan or Meddy: its lists 6 and 8 point 0x40-0x44, the five
+numbers before Colonel's 0x45, at one placeholder each ([BN5's Liberation
+Missions](../rom/liberation.md), Team ProtoMan's bodies). They join the
+board anyway, by the precedent the run already keeps for a Navi whose
+sprite is not read: Nebula's LarkMan and GridMan stand on their arenas in
+a HeelNavi's body and speak without a face ([BN5's Navis](bosses/bn5-navis.md),
+Nebula's two), and unit 7 stands these five as guardians the same way. So
+each held Soul's Navi stands and walks the board in a HeelNavi's body,
+speaks his own lines with no face, and brings his own command: GyroMan's
+BombLiberation, SearchMan's PanelSearch, NapalmMan's Napalm, MagnetMan's
+MagnetBarrier. A Cross Navi of the same element keeps the one he was lent
+and the pick chooses. The body follows the guardians' table (navis 59-64),
+so a face or sprite read later for unit 7 reaches the board too. The
+owner's earlier ask, guardians in their own shape rather than a
+HeelNavi's ("the copies that didn't come out right", `guardians.c`), was
+for Navis whose sprites BN6 has; these five have none to show.
+
+**Meddy has no command yet.** Her TwinLiberation is traced (BN5's
+Liberation Missions, TwinLiberation) and is a two-Navi command: her battle
+at one end of a line of two to twelve dark panels frees nothing and arms
+the line, and a second Navi's TwinLiberation, an entry in no Navi's mask
+of commands, fights the second battle that frees the whole line. Built
+here it needs a line kept on the board across turns and a CONTINUE (the
+board's note grows), a second command in every other Navi's window, its
+spot in the command rule and the planner's play of it: more than this
+unit, so she joins with Liberation and Pass alone, as KnightMan does
+without his StoneBody.
+
 
 ## The build, in order
 
@@ -326,8 +343,8 @@ and own states); each Navi is M, as each of Team Colonel's was:
 | 7. Guardians (built) | The partner coin in `xguardian.c` (`xguardian_partnered`: from act 2, even odds by a coin of the seed for each area, no tournament's entrant (a bracket's final is its act's guardian, a partner where he guards it); the partners' table one row an area, Colonel's DarkProto's since unit 11), the deep's pool of eleven and Nebula's two (`run.c`'s `deep_xguardian`), their versions by the six's rule (`build.py pacing`: every one in his band, as the table above has them), Guardian Data his Soul and one of BN6's chips of his Soul's kind (`kind_chip`), their lines in `guardian_lines.c` through [the voice rules](../voice/rules.md); no body or face of theirs in Team Colonel's ROM, so a HeelNavi's and none, as Nebula's two; `tests/scenarios/xrom_guardians.py`'s `bn5/gyroman` to `bn5/meddy` and `xrom_partner.py` | S-M |
 | 8. Their Souls (NapalmSoul, GyroSoul, MagnetSoul, and SearchSoul's and MeddySoul's battle built) | `tools/xsoul.py` over forms 2-6, a Soul at a time with its specs as S2-S5 held the six: NapalmSoul (built: UNITE, look, element, charged shot, chip charge and Napalm Bomb, lava, +40 to Fire chips, Chaos Unison's power attack; `soul_napalm`, `_shot`, `_charge`, `_lava` PASS, their mutations FAIL; [Transplanted Souls](../multirom/souls.md), Team ProtoMan's Souls), GyroSoul (built: UNITE, look, propeller and its rule, Air and Float shoes, tornado; `soul_gyro`, `_shot`, `_propeller`, `_double` PASS), MagnetSoul (built: UNITE, look, element, charged shot, B+Left, chip charge doubled, the magnet panel's push spared; `soul_magnet`, `_shot`, `_left`, `_charge`, `_double`, `_panel` PASS), SearchSoul (his battle built: UNITE, look, the scope gun, his ready's object; `soul_search`, `_shot` PASS; his SHUFFLE BN6's own button, kept from BN5's: `soul_search_button`, `soul_search_shuffle` PASS), MeddySoul (built: UNITE, look, the capsule bomb, and his capsules on BN6's own elements 6 and 7, BN5's set-up, lit rule, A, mode 0x3C, bits, heal and hit decode, YelCapsl and BlkCapsl the registry's 734 and 735; `soul_meddy`, `_shot`, `_capsules`, `_capsule_used`) and the capsules made his on BN6's screen (the trace in [Transplanted Souls](../multirom/souls.md), Team ProtoMan's Souls) | L |
 | 9. ProtoSoul | Form 1 by the same walk (built: UNITE, look, his WideSword, Reflect on B and back by the chips' Guard family, the Sword chip charge doubled and stepped two panels in; `soul_proto`, `_shot`, `_left`, `_charge` PASS, their mutations FAIL; [Transplanted Souls](../multirom/souls.md), Team ProtoMan's Souls), given at the rival's netbattle won with BN5's ROM read, Chaud's box (the giving: run-forms') | M |
-| 10. The board (ProtoMan built) | A held Soul's Navi with his own command: ProtoMan for ProtoSoul, in BN6's own body, his WideSwrd, his battles in ProtoSoul, picked beside SlashMan (`liberation-team/command/protoman`, `pick/protoman`); the other five wait for a body (On a dark board) | S |
-| 11. DarkProto (built) | BN5's ProtoMan as DarkProto, his V2's name (the owner's answer below): his recipe in seat 11 (Navi AI 26, ids 0x1F0-0x1F3), installed after BN5's chips' code, his shield and blade the chips' copies and his afterimage LarkMan's; `darkproto_v1`, `_v1_keys`, `_sp` PASS against BN5's battle; five mutations FAIL ([Transplanted Navis](../multirom/navis.md), DarkProto). His art, once counted at some 290 KB that fit no room, was the shield's kinds table misread: his own is his battle sprite (38,370 bytes, the last place in `FREE_TEAM_SPRITES`) and his slash's sprite (12,211 bytes, the shared art's fifth room past it), both in the team's own region, no new span. Fightable by id (`foes 1F0@52`); his guardian wiring (Colonel's partner in the Undernet, `GUARDIAN_TEAM_FIRST`, navi 59) waits for unit 7 | M |
+| 10. The board (built) | A held Soul's Navi with his own command: ProtoMan for ProtoSoul, in BN6's own body, his WideSwrd, his battles in ProtoSoul, picked beside SlashMan (`liberation-team/command/protoman`, `pick/protoman`); the other five in a HeelNavi's body with no face, GyroMan's BombLiberation, SearchMan's PanelSearch, NapalmMan's Napalm, MagnetMan's MagnetBarrier (`command/gyroman`, `command/napalmman`); Meddy with none, her TwinLiberation traced and left (`command/meddy`; On a dark board) | S |
+| 11. DarkProto (built) | BN5's ProtoMan as DarkProto, his V2's name (the owner's answer below): his recipe in seat 11 (Navi AI 26, ids 0x1F0-0x1F3), installed after BN5's chips' code, his shield and blade the chips' copies and his afterimage LarkMan's; `darkproto_v1`, `_v1_keys`, `_sp` PASS against BN5's battle; five mutations FAIL ([Transplanted Navis](../multirom/navis.md), DarkProto). His art, once counted at some 290 KB that fit no room, was the shield's kinds table misread: his own is his battle sprite (38,370 bytes, the last place in `FREE_TEAM_SPRITES`) and his slash's sprite (12,211 bytes, the shared art's fifth room past it), both in the team's own region, no new span. Fightable by id (`foes 1F0@52`) and Colonel's partner in the Undernet (navi 59, unit 7's table), his Guardian Data ProtoSoul | M |
 
 Their own Navi chips (BN5 ids 0xE0-0xF1, eighteen) wait for the registry
 to have room; until then his Guardian Data gives a chip of his Soul's
