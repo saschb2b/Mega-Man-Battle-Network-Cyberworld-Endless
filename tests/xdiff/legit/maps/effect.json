@@ -172,13 +172,13 @@
   }
  ],
  "copies": {
-  "why": "In a spec with the Souls installed (souls6), or whose spec asks (effect_copies: the obstacle strike's, colonel_strike): BN5's effects the Souls' code spawns that BN6's engine spawns of its own too (0x14 and 0x02, BN6's redrawn: 0x02 by a counter's family 0x47, BN6's twin of BN5's 0x2C), and ShadowSoul's slash 0x17 (BN6's of the same record redrawn, another animation), run as the Navis' copies of BN5's (one BN6 number a BN5 effect, issue #82's allocations: 0xA0, 0xA2, 0xA3, src/emu/xnavi_bn5.c), and the Souls' own copies, 0x03 (the unison's phase 0 spawns BN6's own) at 0xC0 and the obstacle strike's shot's hit 0x20 (its table 0x080C6C08, row 12, fixed in the chips' copy: tools/bn5_twins.py's SHARED_ROWS) at 0xC1, and Team ProtoMan's from 0xD0 (SearchSoul's scope gun's hit, BN5's 0x68, at 0xD0: tools/xsoul.py's TEAM_EFFECT_FIRST), each drawn with BN5's sprite: a BN6 copy is read as the BN5 effect it copies, BN5's id as itself in both (which of the two a spawn is, the code that spawned it says). ColonelSoul's ScreenDivide's three (0x48-0x4A) and TomahawkSoul's swing (0x45) are the Navis' 0xA8-0xAA and 0xA6, read as such in every spec (tools/xdiff_snap.py's chip_effects, the chips' units naming them). The Navis' 0xAB, Colonel's copy of BN5's 0x01, the same: in colonel_strike BN6's engine spawns its own 0x01 where BN5's spawns 0x01, and Colonel's code the copy.",
+  "why": "In a spec with the Souls installed (souls6), or whose spec asks (effect_copies: the obstacle strike's, colonel_strike): BN5's effects the Souls' code spawns that BN6's engine spawns of its own too (0x14 and 0x02, BN6's redrawn: 0x02 by a counter's family 0x47, BN6's twin of BN5's 0x2C), and ShadowSoul's slash 0x17 (BN6's of the same record redrawn, another animation), run as the Navis' copies of BN5's (one BN6 number a BN5 effect, issue #82's allocations: 0xA0, 0xA2, 0xA3, src/emu/xnavi_bn5.c), 0x03 (the unison's phase 0 spawns BN6's own) the Navis' copy at 0xB4 (DarkProto's slash, which the Souls share since #830), and the Souls' own copy, the obstacle strike's shot's hit 0x20 (its table 0x080C6C08, row 12, fixed in the chips' copy: tools/bn5_twins.py's SHARED_ROWS) at 0xC0, and Team ProtoMan's from 0xD0 (SearchSoul's scope gun's hit, BN5's 0x68, at 0xD0: tools/xsoul.py's TEAM_EFFECT_FIRST), each drawn with BN5's sprite: a BN6 copy is read as the BN5 effect it copies, BN5's id as itself in both (which of the two a spawn is, the code that spawned it says). ColonelSoul's ScreenDivide's three (0x48-0x4A) and TomahawkSoul's swing (0x45) are the Navis' 0xA8-0xAA and 0xA6, read as such in every spec (tools/xdiff_snap.py's chip_effects, the chips' units naming them). The Navis' 0xAB, Colonel's copy of BN5's 0x01, the same: in colonel_strike BN6's engine spawns its own 0x01 where BN5's spawns 0x01, and Colonel's code the copy.",
   "bn6_to_bn5": {
    "0xA0": "0x14",
    "0xA2": "0x02",
    "0xA3": "0x17",
-   "0xC0": "0x03",
-   "0xC1": "0x20",
+   "0xB4": "0x03",
+   "0xC0": "0x20",
    "0xAB": "0x01",
    "0xD0": "0x68"
   }

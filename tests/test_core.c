@@ -4798,6 +4798,7 @@ static void test_free_space(void) {
 		{ "their loadouts", SOULS_TEAM_LOADOUTS, SOULS_TEAM_LOADOUTS_END },
 		{ "the charge times", SOULS_CHARGES, SOULS_CHARGES_END }, { "their chaos power attacks", SOULS_TEAM_CHAOS, SOULS_TEAM_CHAOS_END },
 		{ "their overlays' masks", SOULS_TEAM_OVERLAYS, SOULS_TEAM_OVERLAYS_END }, { "their hooks' Thumb", SOULS_TEAM_THUMB, SOULS_TEAM_THUMB_END },
+		{ "MeddySoul's capsules", SOULS_CAPSULES, SOULS_CAPSULES_END },
 	};
 	regions_apart("Team ProtoMan's Souls' room", team_souls, (int)(sizeof team_souls / sizeof *team_souls), FREE_TEAM_SOULS, FREE_TEAM_SOULS_END);
 	CHECK(SOULS_ARM_ROWS_END - SOULS_ARM_ROWS >= 0x44u * (3 + 6 + 6), "the Souls' grown arm rows: room for BN6's, Team Colonel's and Team ProtoMan's");
@@ -5978,10 +5979,19 @@ static void test_chip_registry(void) {
 		plays += xreg_rows[i].how == XREG_RECORD;
 		dark += xreg_rows[i].how == XREG_DARK;
 		pas += xreg_rows[i].how == XREG_PA;
-		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
+		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320 && xreg_rows[i].how != XREG_CAPSULE;
 	}
-	CHECK(xreg_count == 283 && own == 164 && plays >= 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, "
+	CHECK(xreg_count == 285 && own == 166 && plays >= 8 && dark == 7 && pas == 20, "registry: 285 chips, 166 of ids of their own, "
 		"no fewer than 8 playing, 7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
+	/* (MeddySoul's two capsules BN6 has no chip of the name of, past BN4's last id: no pack entry, never a run's find; BN6's
+	 * own three keep their ids, docs/multirom/souls.md, MeddySoul's capsules) */
+	const XChipReg *yel = xreg_of_bn5(380), *blk = xreg_of_bn5(381);
+	CHECK(yel && yel->bn6 == XREG_CAPSULE_FIRST && yel->how == XREG_CAPSULE && blk && blk->bn6 == XREG_CAPSULE_FIRST + 1 &&
+		blk->how == XREG_CAPSULE && xreg_at(734) == yel && !xreg4_at(734) && !xreg4_at(735) && !xreg_of_bn5(382) &&
+		!chip_pool_older(734) && !chip_pool_older(735),
+		"registry: YelCapsl at 734, BlkCapsl at 735, never a find (their pack entries, the cart's save RAM's, never given); WhiCapsl BN6's own");
+	static const XChipReg stray[] = { { 380, 600, XREG_CAPSULE, 0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 3, 5 } };
+	CHECK(xreg_check(stray, 1, why, sizeof why) == 1, "registry: a capsule outside the capsules' ids refused");
 	CHECK(high == 20 + 100 + 15, "registry: the Program Advances and 115 chips past 319, in the pack's extension (%d)", high);
 	/* (BN5's last Program Advances: three in the spare ids below BN6's per-battle bits' end, two past nine bits, whose bit
 	 * is the engine's, xchips_wide.c) */
@@ -5994,7 +6004,7 @@ static void test_chip_registry(void) {
 	const XChipReg *cloud = xreg_of_bn5(266), *django_ds = xreg_of_bn5(280);
 	bool wide_rows = cloud && cloud->bn6 == 512 && cloud->how == XREG_MOVED && django_ds && django_ds->bn6 == 526 && xreg_at(526) == django_ds;
 	for (int i = 0; i < xreg_count; ++i)
-		if (xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 512 && xreg_rows[i].how != XREG_PA) wide_rows = wide_rows && bn6_pack_entry(0x02002230u, xreg_rows[i].bn6) != 0;
+		if (xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 512 && xreg_rows[i].how != XREG_PA && xreg_rows[i].how != XREG_CAPSULE) wide_rows = wide_rows && bn6_pack_entry(0x02002230u, xreg_rows[i].bn6) != 0;
 	CHECK(wide_rows, "registry: CloudMan's V1 at 512, DjangoDS at 526, every chip past 511 a folder can hold with a pack entry");
 	/* (the Darkloids' first batch in the free ids, 511 held for the wide
 	 * rewards: docs/multirom/bn4-chips.md, Past 511) */
@@ -6002,7 +6012,7 @@ static void test_chip_registry(void) {
 	CHECK(shade && shade->bn6 == 505 && shade->how == XREG_MOVED && bliz_ds && bliz_ds->bn6 == 510 && xreg_at(510) == bliz_ds && !xreg_at(XREG_HELD),
 		"registry: ShadeMan's V1 at 505, BlizManDS at 510, nothing at 511");
 	static const XChipReg moved_row[] = { { 91, 298, XREG_MOVED, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
-	static const XChipReg no_way[] = { { 91, 298, XREG_MOVED + 1, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
+	static const XChipReg no_way[] = { { 91, 298, XREG_CAPSULE + 1, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
 	CHECK(!xreg_check(moved_row, 1, why, sizeof why) && xreg_check(no_way, 1, why, sizeof why) == 1, "registry: a moved chip's row taken, a way past it refused");
 	const XChipReg *ws = xreg_of_bn5(9), *cannon = xreg_of_bn5(1), *atk = xreg_of_bn5(149), *z = xreg_of_bn5(218);
 	CHECK(ws && ws->bn6 == 204 && ws->how == XREG_RECORD && ws->twin == 23 && xreg_at(204) == ws, "registry: BN5's WideSht1 is 204, over BN6's WideSht");

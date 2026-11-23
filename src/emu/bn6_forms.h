@@ -121,6 +121,8 @@
 #define BN6_SHUFFLE_COUNT_NEXT 0x080280FEu /* the instruction after it: where soulshuffle.c's hook goes on with SearchSoul's three in r0 */
 #define BN6_ELEMENT_EMBLEM    2           /* BN6_ELEMENT_TYPE: element 0xB standing (BN6's emblem, BN5's UNITE) */
 #define BN6_CUSTOM_UNITE      (BN6_CUSTOM_ELEMENTS + 0xB * BN6_ELEMENT_SIZE) /* element 0xB (BN5_CUSTOM_UNITE's twin) */
+#define BN6_CUSTOM_CAPSULES   (BN6_CUSTOM_SCREEN + 0x26) /* u16 twice: MeddySoul's capsules' entries, elements 8's and 9's (BN5's +0x26 too,
+                                             bn5_capsules.h's BN5_SCREEN_CAPSULES; soulcapsule.c) */
 #define BN6_CUSTOM_NAVI       (BN6_CUSTOM_SCREEN + 0x10) /* u8 the Navi the side fights as, 0 MegaMan (both games' stand rules want 0) */
 #define BN6_CUSTOM_EMBLEM_TAKEN (BN6_CUSTOM_SCREEN + 0x17) /* u8 1 while the emblem is chosen (mode 0x48 sets it): CROSSSELECT does not open */
 #define BN6_CUSTOM_CROSS_TAKEN (BN6_CUSTOM_SCREEN + 0x19) /* u8 1 once a Cross is chosen on CROSSSELECT: the emblem stays grey (0x08028F6C) */

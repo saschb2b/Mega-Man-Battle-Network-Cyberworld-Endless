@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **New: the layer's map stays open.** A press of SELECT opens the map
+  and leaves it open while MegaMan walks; the next press closes it, as
+  does a battle, a chat, the PET or a warp. Held, it shows while held,
+  as before. Thanks to agergo100 for the idea (issue #840).
+
 - **New: Falzar's five Crosses.** SpoutMan, TomahawkMan, TenguMan,
   GroundMan and DustMan now give their Crosses when they fall as an
   act's guardian, as Gregar's five Cross Navis do: SpoutCross,

@@ -3,7 +3,7 @@ type: Tool
 title: "Scenarios: the game played through a course, its state checked"
 description: "`python3 build.py scenarios` plays each file of `tests/scenarios/` headless (`tools/scenarios.py`, on `tools/cw.py`'s games): a scripted course with the state in words checked on the way, so a bug that only a sequence of play shows stays fixed."
 tags: [devtools, tests]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T21:12:01Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T12:00:00Z }
 ---
 
 # Scenarios: the game played through a course, its state checked
@@ -191,6 +191,7 @@ on every seed ([tools/play.py](play.md) has the steps):
 | --- | --- | --- |
 | `savemasks N` (the masks BN6's own save has made since the start: one a save, where nothing wrote into the RAM while it was masked; a write fails the save's sum, and BN6 masks and saves it all again), `savemasked yes` or `no` (the RAM masked now) | a run, at home too | `save_mask_describe`, `src/emu/save_mask.c` |
 | `chips N` (the chips owned, the Folder's and the Pack's: BN6's pack counts both), `programs N`, `unlockers N`, `rushfood N`, `regmemory N` | a run, at home too | `holds_describe`, `director_folder.c` |
+| `map open`, `hidden` (opened by a press, under a chat for now) or `closed`: the layer's map over the picture (issue #840) | a layer | `director_describe`, `director_describe.c` |
 | `choice K/N` (the cursor on option K of the N a chat box asks) | while BN6's box shows a question | `talk_describe`, `talk.c` |
 | `pickat K/N` the cursor's row as a player counts it, `pickof hp`, `chip`, `program` or `skip` what that row is (with the pick's other lines, `pick`, `offers`, `pickrows`, `pickrow`, `pickready`, below) | a reward pick's screen | `director_pick_describe`, `reward_pick.c` |
 | `shoprows N`, and of the row under the cursor `price N` (as shown, zenny or BugFrags) and `stock N` | BN6's shop screen | `shop_describe`, `shop.c` |
