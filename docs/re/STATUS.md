@@ -3,12 +3,12 @@ type: Status
 title: "Research status: Cyberworld Endless: online Net Squares (epic #120)"
 description: "Where each reverse-engineering feature stands, written by tools/re_status.py from docs/re/ledger/: its state, what is done and left, the changes since, experiments and decisions needed."
 tags: [re]
-generated: { by: process:re_status, at: 2026-11-22T00:00:00Z }
+generated: { by: process:re_status, at: 2026-11-23T00:00:00Z }
 ---
 
 # Research status: Cyberworld Endless: online Net Squares (epic #120)
 
-Updated 22 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/ledger.json) and the folders beside it; the [dashboard](dashboard.html) shows the same.
+Updated 23 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/ledger.json) and the folders beside it; the [dashboard](dashboard.html) shows the same.
 
 | Feature | Status | Now | What is left | Updated |
 | --- | --- | --- | --- | --- |
@@ -36,9 +36,9 @@ Updated 22 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/le
 | [Shared dive](../online/shared-dive.md) | Being built | A door's party fights its guardian on one field over the server: a core of its own built alike on every game (--dev partycore=N alone), every seat's keys guessed and rolled back as the Arena's, the hashes compared, the guardian's aim passed over the party in turn, the end back into each run. | The partners' own NaviStats, hand and Custom screen on the field; a crew's join-in battles on one field. | 15 Nov 2026 |
 | [Team ProtoMan's Souls in BN6's engine](../multirom/souls.md) | Being built | BN5's Souls 1-6, which Team Colonel's ROM holds whole but never gives (BN5_SOUL_FLAGS 0xFF), on BN6's proxy form as Team Colonel's six (src/emu/soulteam.h; docs/multirom/souls.md, Team ProtoMan's Souls; docs/rom/souls.md, their row): the differential opens one in BN5's own battle by its flag entry written in the guest's ROM copy (souls5); tools/xsoul.py walks their units after Team Colonel's into a room of their own (FREE_TEAM_SOULS), their power attacks at SOUL_POWER_TEAM (0xB1), past room for BN4's twelve. NapalmSoul and GyroSoul built and proved against BN5's battle: UNITE, look, element, charged shot (0x19, family 0x44 as 0xC8), chip charge doubled as the Napalm Bomb (0x0801043A, family 0x4B as 0xC9), lava step (0x080125FA), +40 to Fire chips (0x0800D0CE), Chaos Unison's power attack: soul_napalm, soul_napalm_shot, soul_napalm_charge, soul_napalm_lava PASS, their mutations FAIL. Every compare of the form with 1-6 in BN5's code is listed (docs/rom/souls.md). GyroSoul: his propeller (the companion overlay of BN5's kind 2 as BN6's 63), Air and Float shoes, tornado (0x09, family 0x3C as 0xCA), the propeller's rule (0x080102CA, 0x08010264) and spin: soul_gyro, soul_gyro_shot, soul_gyro_propeller PASS against BN5, soul_gyro_double held to BN5's course. MagnetSoul (5) moved too: his charged shot and B+Left, BN5's third-kind 0x75 and 0x3F with them (BN6's other bodies), his B+Left's misc family as the Souls' own copy (0xCC), his Elec chip charge doubled and the magnet panel's push spared (soul_magnet, _shot, _left, _charge, _panel PASS; _double held to BN5's course). ProtoSoul (1) too: his WideSword by the Souls' sword family, Reflect by the chips' Guard family, his Sword chip charge doubled and stepped in (soul_proto, _shot, _left, _charge PASS). SearchSoul's battle too (the scope gun, his ready's object): soul_search, _shot PASS. SearchSoul's SHUFFLE: BN6 kept BN5's button (0x0802A5D6, 0x080280E0), his Soul passes its test with three a turn (soulshuffle.c). MeddySoul's battle too (the capsule bomb): soul_meddy, _shot PASS. | MeddySoul (his capsules: BN5's Custom screen's Soul button, types 6 and 7, 0x08023CF4); NapalmSoul's Chaos Unison's spec; soul_napalm_charge's last frames (CanGard's fourth-kind object let go a frame apart at t321, not traced). Their emotion-window faces: none in Team Colonel's ROM (MegaMan's own shown). | 22 Nov 2026 |
 
-## Since the last update (21 Nov 2026)
+## Since the last update (22 Nov 2026)
 
-- Nothing.
+- 23 Nov 2026: BN6's PET reads a shown power past 1000 as one of its own Navis' by MegaMan's best time (0x08010C76: the times at 0x020018C0 + 2n, the powers at 0x08020E54 + 22n, n the power less 1001), for the folder editor's card (Gregar 0x0811A874, drawn at 0x0811A878) and the pack's Attack sort (0x08121D7E); 0x08010CE0 is its twin at the step 5 (the card's where the submenu's bytes are 0x18 0x1C). The battle computes the power by 0x080109A4 instead. A moved SP's record names an entry of BN6's grown table (1128 and up), so the card read past BN6's Navis: CosmoMn SP's 6544 (issue 835). Both routines are hooked: a grown entry goes to 0x080109A4 for side 0. BN5's card (0x0812315C into 0x0800EB50: times 0x02002670, steps 0x0800EB94, powers 0x0801D27A) and BN4's (0x0801969C: times 0x02001610, steps 0x080196E0, powers 0x08018B48) are BN6's routine by their own tables, and each save's times start 0xFFFF (BN5 0x080092E0, BN4 0x08007FFA fill a side's 0x2C bytes with ~0), past every step: a card with no time shows its row's last power, which the moved routine deals with XC_SP_TIMES none (src/emu/xchips_shown.c; docs/rom/chips-code.md, its row A moved SP's power in the PET).
 
 ## Experiments
 
