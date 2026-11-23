@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chips' code"
 description: "Issue #82's C2 and C3: BN5's chips proved against BN5's own battle frame by frame, and BN5's code for those BN6 lacks moved in as units (`tools/xchiprecipe.py`, `src/emu/xchips_code.c`), DarkInvs and Program Advances among them."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T02:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T16:10:00Z }
 ---
 
 # The chips' code

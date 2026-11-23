@@ -3,7 +3,7 @@ type: ROM Map
 title: "Virus families moved into BN6's battle engine"
 description: "Addresses for BN5's virus families moved into BN6's battle engine: BN6's tables, ids and held chips, the room and second-level dispatch, shims, sounds and arm points, the control family, the twins audit and the differential's hooks."
 tags: [rom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T16:10:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"

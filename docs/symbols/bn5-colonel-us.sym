@@ -385,6 +385,9 @@
 08013394 BN5_DARK_PLATE
 080133C4 on_to_decide_state
 080133CE generic_state_2
+0801343A bn5_twin
+0801344C virus_plain_deletion.by
+0801347C virus_plain_deletion
 080134A0 generic_state_3
 08013612 bn5_magnet_panel.from
 08013630 BN5_PULL_ROWS
@@ -933,6 +936,10 @@
 080E153E bn5_sea_submerge_5
 080E1932 ram_ram_sea
 080E1B44 navi_chip_object_word_for_them
+080E1B50 same_code
+080E1B84 virus_plain_deletion.bytes
+080E1BFE bn5_twin_spawn_0x0801344c_0x08013452_by
+080E1C1A bn5_twin_count_end_ending_sparks
 080E2390 support_0x3b_object
 080E23D4 support_0x3b_object_state
 080E2420 support_0x3b
