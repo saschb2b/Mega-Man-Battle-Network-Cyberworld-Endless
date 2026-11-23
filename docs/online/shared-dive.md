@@ -1264,8 +1264,15 @@ small, in one place, and covers nothing it needs to read):
   data); the act and the layer say how deep, not how strong. Chosen over
   the act and over Busting Levels (a battle's, not a diver's).
 - **In battle**: a partner's HP under his name on a party's field
-  (`party_marks.c`), as BN6 writes an enemy's under him; MegaMan's own
-  is the HP box. A crewmate fighting his own battle: his plate's HP
+  (`party_marks.c`), as BN6 writes an enemy's under him and in BN6's own
+  battle digits, read from the player's ROM and counted down in orange
+  and up in green as an enemy's (`hp_plate.c`, since 23 November 2026:
+  the engine's pixel font had made the two numbers of one frame look
+  different; [Sprites, fonts and pictures](../rom/graphics.md), The HP
+  under an enemy); MegaMan's own is the HP box. The name stays in the
+  pixel font: BN6 has no letters of that size for it. On the field's
+  bottom row the name and HP over his head end where the mark of one two
+  rows up begins, the digits being a line taller. A crewmate fighting his own battle: his plate's HP
   falls as he is hit, read from his battle.
 - **Later, each its own issue**: a second screen's page (`src/second/`,
   [issue #729](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/729)),

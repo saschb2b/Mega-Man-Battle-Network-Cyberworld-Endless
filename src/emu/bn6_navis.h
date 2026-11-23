@@ -165,6 +165,27 @@
 #define BN6_HP_PLATE_SIZE     0x14        /* ... each this long: +0 its flags (bit 0 listed), */
 #define BN6_HP_PLATE_SHOWN    0x02        /* ... u16 the HP it shows, counted toward the object's a frame at a time, */
 #define BN6_HP_PLATE_OBJECT   0x0C        /* ... its object */
+/* How BN6 writes that HP (docs/rom/graphics.md, The HP under an enemy; online play draws a partner's so, src/online/hp_plate.c) */
+#define BN6_HP_PLATE_STEP     0x0801C168u /* each frame, each plate listed: its HP shown (+2) stepped toward its object's HP (its +0x24) by */
+#define BN6_HP_PLATE_ROLL     3           /* ... the gap's eighth (>> this) */
+#define BN6_HP_PLATE_ROLL_ADD 2           /* ... and 2, at most to it; */
+#define BN6_HP_PLATE_FONT     0x08        /* ... its +8 the digits' colour, an index of BN6_HP_FONTS: 0 white, 1 orange (counting down, the */
+#define BN6_HP_PLATE_TIMER    0x09        /* ... frame after too, or its BN6_T1_COLLISION's BN6_COLL_POISON_TIMER running), 2 green (counting */
+#define BN6_HP_FONT_WHITE     0           /* ... up, and BN6_HP_PLATE_GREEN frames after), its +9 the frames left before white again */
+#define BN6_HP_FONT_ORANGE    1
+#define BN6_HP_FONT_GREEN     2
+#define BN6_HP_PLATE_GREEN    10
+#define BN6_HP_PLATE_POISON   2           /* ... (the frames a poison timer's orange stays, set each frame it runs) */
+#define BN6_HP_PLATE_DRAW     0x0801C202u /* each frame, each plate listed: its number (four places at most, 0 one) written into a 32x16 OBJ's */
+#define BN6_HP_PLATE_VRAM     0x06016600u /* ... tiles here, 0x100 a plate (OBJ tile 816 + 8 x the plate), the digits right-aligned in it */
+#define BN6_HP_DIGIT_STEP     8           /* ... this far apart, the OBJ 32 less 4 x its digits left of its object's place on the screen */
+                                          /* ... (0x0800362C: the number centred on it), its top there, priority 2, OBJ palette 14 */
+#define BN6_HP_FONTS          0x0801C34Cu /* three pointers, a BN6_HP_PLATE_FONT each (0x0801D854, 0x0801D880, 0x0801D8AC), to eleven: */
+#define BN6_HP_FONT_GLYPHS    11          /* ... the digits 0-9 and a blank, 8x16 (an OBJ's two tiles, the top first), 0x40 bytes each: */
+#define BN6_HP_DIGITS         0x086DEA3Cu /* ... white's 0 here (orange's 0x086DECBC, green's 0x086DEF3C), their lit rows */
+#define BN6_HP_DIGIT_TOP      3           /* ... from the cell's third, */
+#define BN6_HP_DIGIT_H        10          /* ... this many */
+#define BN6_HP_DIGITS_PAL     0x086B5A0Cu /* their colours: the battle's copy list (its entry at 0x0801ECB4) puts them in OBJ palette 14 */
 /* What a BN4 Navi's companion and objects ask of BN6 (docs/multirom/bn4-navis.md, ThunderMan built) */
 #define BN6_COMPANION_BEGIN   0x08010DD0u /* r5 an actor: its companion begun by its id's triple (0x08010DDA: the table at
                                              BN6_NAVI_COMPANION_REF's by actor type and AI index, r2 0, called by mov lr,pc and bx r0) */

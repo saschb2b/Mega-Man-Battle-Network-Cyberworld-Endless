@@ -11,6 +11,7 @@
 #include "crew_look.h"
 #include "dive_words.h"
 #include "gfx.h"
+#include "hp_plate.h"
 #include "online_transport.h"
 #include "online_visit.h"
 #include "pet_look.h"
@@ -21,7 +22,8 @@
 #define BELOW  1    /* a mark's top under his feet' line */
 #define PAD    1    /* its plate's edge around the letters */
 #define CHIP_LINE 148   /* BN6's chip's name in a battle, its top on the picture (seen in the captures) */
-#define BODY 44         /* a MegaMan on the field, from his feet to over his head (seen in the captures) */
+#define BODY 47         /* a MegaMan on the field, from his feet to over his head (seen in the captures), and on the bottom row */
+                        /* ... to where the mark under the feet of one two rows up begins (2 panels of 24 less BELOW) */
 
 /* the partners' names in the crew's colour (crew_look.h, as on a layer) */
 #define OWN_COLOUR  LOOK_ORANGE   /* the player's own: the PET cursor's orange */
@@ -76,9 +78,9 @@ void party_marks_seats(const uint32_t seats[PARTY_MOST], unsigned mine) {
 }
 
 /* a mark's plate centred under a MegaMan's feet (x, y): its left, top, width and height on the screen; a partner's
- * HP under it. Where the two would reach BN6's chip name at the picture's foot (`foot`, the row it begins on this
- * screen), on the field's bottom row, they stand over his head instead, the name over the HP as everywhere (issue
- * #781: the HP had gone over the name and the pair been cut at the foot) */
+ * HP under it, in BN6's own digits (hp_plate.h). Where the two would reach BN6's chip name at the picture's foot
+ * (`foot`, the row it begins on this screen), on the field's bottom row, they stand over his head instead, the name
+ * over the HP as everywhere (issue #781: the HP had gone over the name and the pair been cut at the foot) */
 typedef struct { int left, top, w, h, arrow; } Plate;
 
 static Plate plate(int x, int y, const char *tag, bool own, int foot) {
@@ -88,7 +90,7 @@ static Plate plate(int x, int y, const char *tag, bool own, int foot) {
 	p.h = PIXFONT_CAP + 2 * PAD + 1;
 	p.left = x - p.w / 2;
 	p.top = y + BELOW;
-	int pair = p.h + (own ? 0 : PIXFONT_H + 1);
+	int pair = p.h + (own ? 0 : BN6_HP_DIGIT_H + 1);
 	if (p.top + pair > foot) p.top = y - BODY - pair;
 	return p;
 }
@@ -102,7 +104,12 @@ static void mark(int x, int y, const char *tag, bool own) {
 }
 
 /* the field as seat `mine` sees it: the HP box his (0: BN6's own, the lead's) and each MegaMan standing, where */
-typedef struct { unsigned hp_box, count, seat[PARTY_MOST], hp[PARTY_MOST]; int x[PARTY_MOST], y[PARTY_MOST]; bool open, own_box; } Seen;
+typedef struct {
+	unsigned hp_box, count, seat[PARTY_MOST], hp[PARTY_MOST];
+	uint32_t object[PARTY_MOST];
+	int x[PARTY_MOST], y[PARTY_MOST];
+	bool open, own_box;
+} Seen;
 
 static bool seen(struct mCore *c, unsigned mine, unsigned n, Seen *v) {
 	if (!c || n < 2 || mine >= PARTY_MOST) return false;
@@ -116,29 +123,31 @@ static bool seen(struct mCore *c, unsigned mine, unsigned n, Seen *v) {
 		v->own_box = true;
 		v->hp_box = o >= BN6_EWRAM && o < BN6_EWRAM_END ? (unsigned)(uint16_t)c->rawRead16(c, o + BN6_T1_HP, -1) : 0;
 	}
-	for (unsigned k = 0; k < n && k < PARTY_MOST && !v->open; ++k)
-		if (arena_team_view_feet(c, arena_team_view_megaman(c, 0, k), 0, &x, &y, &hp)) {
-			v->seat[v->count] = k;
-			v->hp[v->count] = hp;
-			v->x[v->count] = x;
-			v->y[v->count++] = y;
-		}
+	for (unsigned k = 0; k < n && k < PARTY_MOST && !v->open; ++k) {
+		uint32_t o = arena_team_view_megaman(c, 0, k);
+		if (!arena_team_view_feet(c, o, 0, &x, &y, &hp)) continue;
+		v->seat[v->count] = k;
+		v->object[v->count] = o;
+		v->hp[v->count] = hp;
+		v->x[v->count] = x;
+		v->y[v->count++] = y;
+	}
 	return true;
 }
 
 void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
+	static HpPlate hp[PARTY_MOST];   /* (each partner's number as last drawn: the drawing's own) */
 	Seen v;
 	if (!seen(c, mine, n, &v)) return;
 	if (v.own_box) arena_team_view_hp(v.hp_box, v.open);
 	for (unsigned i = 0; i < v.count; ++i) {
 		bool own = v.seat[i] == mine;
 		mark(v.x[i], v.y[i], tags[v.seat[i]], own);
-		/* (a partner's HP under his name, as BN6 writes an enemy's under him: his own is in the HP box; issue #717) */
+		/* (a partner's HP under his name, as BN6 writes an enemy's under him and in its digits: his own is in the HP box;
+		 * issue #717) */
 		if (own) continue;
-		char hp[8];
 		Plate p = plate(v.x[i], v.y[i], tags[v.seat[i]], false, P.core_y + CHIP_LINE);
-		snprintf(hp, sizeof hp, "%u", v.hp[i]);
-		pixfont_draw(v.x[i], p.top + p.h + 1, hp, LOOK_TEXT, shade, PIXFONT_CENTER, 1);
+		hp_plate_draw(&hp[v.seat[i]], c, v.object[i], v.x[i], p.top + p.h + 1 - BN6_HP_DIGIT_TOP);
 	}
 }
 
