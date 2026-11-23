@@ -1,7 +1,7 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids, Team ProtoMan's NapalmMan, GyroMan, SearchMan, Meddy and MagnetMan and Nebula's LarkMan and GridMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids, Team ProtoMan's six (ProtoMan as DarkProto) and Nebula's LarkMan and GridMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:00:00Z }
 ---
@@ -296,7 +296,7 @@ into the battle engine).
   comparator stops without a verdict, and his count and check of his
   magnet panels decide in no spec.
 - **DarkProto**, BN5's ProtoMan (AI 1, Navi AI 26, ids 0x1F0-0x1F3;
-  `darkproto_v1`, `darkproto_v1_keys`, `darkproto_sp`: STATUS), the
+  `darkproto_v1`, `darkproto_v1_keys`, `darkproto_sp`: PASS), the
   owner's call of 9 November ([Team ProtoMan: foes and
   Souls](../game/team-protoman.md), The owner's questions), named for his
   V2 (BN5's names archive: DarkProt). *His types:* the first kind's 0x10
@@ -318,7 +318,17 @@ into the battle engine).
   5:0x3, his WideSword's slash, 12,211 bytes) list 5's 0xA9 in the
   shared art's fifth room, `FREE_TEAM_SHARED_FIVE` (14 KB, the tail of
   Team ProtoMan's sprites' room past his battle sprite, 38,370 bytes at
-  `FREE_TEAM_SPRITES` + 0x37000). His sounds are all BN6's.
+  `FREE_TEAM_SPRITES` + 0x37000). His sounds are all BN6's. Two rules
+  more: his main block holds 272 calls, past the code mover's 256 a
+  block (`BLS_MAX`, 512 now), and his 0x6B's +4 word is the pointer into
+  his table his state leaves in r4 (`spawn_leftovers`: each copy's own,
+  its low byte the count compared). Five mutations break his copy and
+  FAIL (a state's number, two effects' numbers, the 0x6B spawned as
+  another type, its count). His slash's effect, his afterimage and his
+  AreaGrab are reached by no spec of his yet. The Souls hold a copy of
+  the same slash (BN5's 5:0x3 at list 0's 0x54, their effect 0xC0), which
+  `tools/xsoul.py` would now share from his (0xB4), renumbering the
+  Souls' effects: left for the Souls' next regeneration.
 - **GridMan** (AI 18, Navi AI 44, ids 0x3F0-0x3F3; `gridman_v1`,
   `gridman_v1_keys`, `gridman_sp`: PASS since 12 November), the first of
   Nebula's two of the story. *Their seats:* LarkMan's and GridMan's AI 17

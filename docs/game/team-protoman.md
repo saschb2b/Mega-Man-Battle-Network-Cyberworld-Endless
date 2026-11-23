@@ -36,11 +36,13 @@ its first unit, the room, is built, and five of the six Navis are moved
 ROM (its rows in [BN5's battles, records and rewards](../rom/bn5-battles.md), Team ProtoMan's six)
 unless it says otherwise.
 
-**Where it stands in 0.21.0:** NapalmMan, GyroMan, SearchMan, Meddy and
-MagnetMan are in BN6's battle engine, each proved against BN5's own
-battle frame by frame, but no run meets them: none guards a run yet, and
-beating one gives no Soul. Their guardian wiring, their Souls, ProtoSoul,
-the board and DarkProto wait for 0.22.0 (The build, units 7 to 10).
+**Where it stands:** all six are in BN6's battle engine, each proved
+against BN5's own battle frame by frame: NapalmMan, GyroMan, SearchMan,
+Meddy and MagnetMan since 0.21.0, and DarkProto, BN5's ProtoMan, since 23
+November 2026 (The build, unit 11), fightable by id but guarding no run
+yet. Their Souls are built but MeddySoul's capsules (units 8 and 9);
+their guardian wiring and the board wait for units 7 and 10. DarkProto's
+copy is in the ROM copy's fixed 16 MB, no new allocation.
 Their copies cost the New 3DS no headroom: its heap modelled with them
 installed peaks at 77.8 MB with BN5's ROM beside BN6's and 85.9 of 96
 with BN4's too, nothing refused and no crash in 24 runs
@@ -294,7 +296,7 @@ and own states); each Navi is M, as each of Team Colonel's was:
 | 8. Their Souls (NapalmSoul, GyroSoul, MagnetSoul, and SearchSoul's and MeddySoul's battle built) | `tools/xsoul.py` over forms 2-6, a Soul at a time with its specs as S2-S5 held the six: NapalmSoul (built: UNITE, look, element, charged shot, chip charge and Napalm Bomb, lava, +40 to Fire chips, Chaos Unison's power attack; `soul_napalm`, `_shot`, `_charge`, `_lava` PASS, their mutations FAIL; [Transplanted Souls](../multirom/souls.md), Team ProtoMan's Souls), GyroSoul (built: UNITE, look, propeller and its rule, Air and Float shoes, tornado; `soul_gyro`, `_shot`, `_propeller`, `_double` PASS), MagnetSoul (built: UNITE, look, element, charged shot, B+Left, chip charge doubled, the magnet panel's push spared; `soul_magnet`, `_shot`, `_left`, `_charge`, `_double`, `_panel` PASS), SearchSoul (his battle built: UNITE, look, the scope gun, his ready's object; `soul_search`, `_shot` PASS; his SHUFFLE BN6's own button, kept from BN5's: `soul_search_button`, `soul_search_shuffle` PASS), MeddySoul (his battle built: UNITE, look, the capsule bomb; `soul_meddy`, `_shot` PASS; his capsules the Soul button's types 6 and 7, which BN6 has no button for) and the capsules made his on BN6's screen (the trace in [Transplanted Souls](../multirom/souls.md), Team ProtoMan's Souls) | L |
 | 9. ProtoSoul | Form 1 by the same walk (built: UNITE, look, his WideSword, Reflect on B and back by the chips' Guard family, the Sword chip charge doubled and stepped two panels in; `soul_proto`, `_shot`, `_left`, `_charge` PASS, their mutations FAIL; [Transplanted Souls](../multirom/souls.md), Team ProtoMan's Souls), given at the rival's netbattle won with BN5's ROM read, Chaud's box (the giving: run-forms') | M |
 | 10. The board | A held Soul's Navi with his own command | S |
-| 11. DarkProto (STATUS) | BN5's ProtoMan as DarkProto, his V2's name (the owner's answer below): his recipe in seat 11 (Navi AI 26, ids 0x1F0-0x1F3), installed after BN5's chips' code, his shield and blade the chips' copies and his afterimage LarkMan's; `darkproto_v1`, `_v1_keys`, `_sp` against BN5's battle ([Transplanted Navis](../multirom/navis.md), DarkProto). His art, once counted at some 290 KB that fit no room, was the shield's kinds table misread: his own is his battle sprite (38,370 bytes, the last place in `FREE_TEAM_SPRITES`) and his slash's sprite (12,211 bytes, the shared art's fifth room past it), both in the team's own region, no new span. Fightable by id (`foes 1F0@52`); his guardian wiring (Colonel's partner in the Undernet, `GUARDIAN_TEAM_FIRST`, navi 59) waits for unit 7 | M |
+| 11. DarkProto (built) | BN5's ProtoMan as DarkProto, his V2's name (the owner's answer below): his recipe in seat 11 (Navi AI 26, ids 0x1F0-0x1F3), installed after BN5's chips' code, his shield and blade the chips' copies and his afterimage LarkMan's; `darkproto_v1`, `_v1_keys`, `_sp` PASS against BN5's battle; five mutations FAIL ([Transplanted Navis](../multirom/navis.md), DarkProto). His art, once counted at some 290 KB that fit no room, was the shield's kinds table misread: his own is his battle sprite (38,370 bytes, the last place in `FREE_TEAM_SPRITES`) and his slash's sprite (12,211 bytes, the shared art's fifth room past it), both in the team's own region, no new span. Fightable by id (`foes 1F0@52`); his guardian wiring (Colonel's partner in the Undernet, `GUARDIAN_TEAM_FIRST`, navi 59) waits for unit 7 | M |
 
 Their own Navi chips (BN5 ids 0xE0-0xF1, eighteen) wait for the registry
 to have room; until then his Guardian Data gives a chip of his Soul's
