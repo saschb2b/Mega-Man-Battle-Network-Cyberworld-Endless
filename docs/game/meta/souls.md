@@ -119,7 +119,7 @@ points first marked as proposals among them.
   the kind the folder holds fewest of first (`src/core/loot_souls.c`). The
   counts stay; only which chips come changes, and DarkChips never come so.
   The Souls held as each layer is made are what its finds and stock lean
-  to (`souls_layer`, beside the checkpoint), so a Soul won on a layer
+  to (`souls_layer_bn5`, beside the checkpoint), so a Soul won on a layer
   counts from the next and a CONTINUE makes the same stock.
 - **Said where it happens:** at his Guardian Data MegaMan names the Soul,
   that it is with them every battle, the chip kind it takes (with one of

@@ -19,7 +19,9 @@ static int want;         /* the kind a pick takes */
 static bool stocking;    /* ... and none the folder is full of (a dealer's) */
 
 int loot_soul_kind_of(int soul) {
-	return soul >= 0 && soul < SOULS_TEAM ? xrecords_soul_kind(XROM_BN5_COLONEL_US, BN5_NAVI_COLONEL + soul) : -1;
+	/* (Team Colonel's 0-5, then Team ProtoMan's, BN5's Souls 1-6, as 6-11: the economy report's rows) */
+	int ai = soul >= 0 && soul < SOULS_TEAM ? BN5_NAVI_COLONEL + soul : soul >= SOULS_TEAM && soul < 2 * SOULS_TEAM ? BN5_NAVI_PROTOMAN + soul - SOULS_TEAM : 0;
+	return ai ? xrecords_soul_kind(XROM_BN5_COLONEL_US, ai) : -1;
 }
 
 bool loot_soul_chip(int id, int soul) {

@@ -95,7 +95,7 @@ int xguardian_hp_fought(int navi, int version, int depth) {
 
 int guardian_element(int navi) {
 	int e = 0;
-	if (guardian_older(navi) || guardian_nebula(navi)) xrecords_navi_hp(XROM, guardian_bn5_ai(navi), 0, &e);
+	if (guardian_older(navi) || guardian_nebula(navi) || guardian_team(navi)) xrecords_navi_hp(XROM, guardian_bn5_ai(navi), 0, &e);
 	else if (guardian_bn4(navi)) e = xguardian_bn4_element(navi);
 	else e = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : 0;
 	return e > 0 ? e : 0;
@@ -108,8 +108,42 @@ int guardian_weakness(int navi) {
 	return e > 0 && e <= ELEM_WOOD ? beats[e] : 0;
 }
 
-/* (the chip kind his Soul unites with in his game, BN5_CHIP_KIND; -1 none) */
-static int xguardian_kind(int navi) { return guardian_older(navi) ? xrecords_soul_kind(XROM, guardian_older_ai(navi)) : -1; }
+/* (the chip kind his Soul unites with in his game, BN5_CHIP_KIND: Team Colonel's and Team ProtoMan's; -1 none) */
+static int xguardian_kind(int navi) {
+	return guardian_older(navi) || guardian_team(navi) ? xrecords_soul_kind(XROM, guardian_bn5_ai(navi)) : -1;
+}
+
+/* Team Colonel's Navis and their partners in BN5's net records, each pair's SP versions roaming one map once its story is
+ * over (docs/rom/bn5-battles.md, BN5's Navis as guardians; docs/game/team-protoman.md, Where they stand): BN5's AI indexes */
+static const struct { uint8_t navi, partner; } partners[] = {
+	{ BN5_NAVI_SHADOWMAN, BN5_NAVI_GYROMAN },       /* Oran Area 1 */
+	{ BN5_NAVI_NUMBERMAN, BN5_NAVI_SEARCHMAN },     /* End Area 3 */
+	{ BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_NAPALMMAN },   /* SciLab 4 */
+	{ BN5_NAVI_KNIGHTMAN, BN5_NAVI_MAGNETMAN },     /* ACDC Area 1 */
+	{ BN5_NAVI_TOADMAN, BN5_NAVI_MEDDY },           /* End Area 4 */
+	/* (Colonel's in the Undernet 3, BN5's ProtoMan as DarkProto, his row once he is moved: { BN5_NAVI_COLONEL,
+	 * BN5_NAVI_PROTOMAN }) */
+};
+
+int xguardian_partner(int navi) {
+	for (unsigned i = 0; guardian_older(navi) && i < sizeof partners / sizeof *partners; ++i)
+		if (partners[i].navi == guardian_older_ai(navi)) return GUARDIAN_TEAM_FIRST + partners[i].partner - BN5_NAVI_PROTOMAN;
+	return 0;
+}
+
+bool xguardian_partners_at(int act) {
+	/* (not act 1's: a first run meets the six it always met. A tournament's final is its act's guardian, a partner
+	 * where he guards it, but no partner is one of its entrants: bracket.c's pool, docs/game/tournament.md) */
+	return act >= 1 && act <= 5;
+}
+
+int xguardian_partnered(int navi, int act, int area) {
+	int p = xguardian_partner(navi);
+	if (!p || !xguardian_partners_at(act) || !xguardian_fightable(p)) return navi;
+	/* (even odds, a coin of the seed for each area of its own, beside the dress's and the guardian's) */
+	uint32_t h = (run.seed ^ 0x50544E52u) * 2654435761u;   /* "PTNR" */
+	return h >> (8 + area % 24) & 1 ? p : navi;
+}
 
 /* BN5's V1 Navi chip of each of Team Colonel's six, by AI index from
  * Colonel (BN5's chip ids: its SP the next, its DS the one after; the
@@ -154,9 +188,30 @@ static int chip_at(int navi, int depth) {
 	return id ? id : navi_chip_of(navi, 0);
 }
 
+/* (BN6's chip `id`'s rarity, 0-4) */
+static int rarity(int id) {
+	const uint8_t *rec = chips_record(id);
+	return rec ? rec[BN6_CHIP_RARITY] : 4;
+}
+
+/* (Team ProtoMan's, who have no Navi chip registered yet: one of BN6's chips of his Soul's kind in its place, as Team
+ * Colonel's gave before theirs were registered, its rarest only where there is nothing else (a deep find, not an act's
+ * key), picked by the run's seed, the same at every meeting; 0 none) */
+static int kind_chip(int navi) {
+	uint16_t ids[64];
+	int n = xchips_kind(xguardian_kind(navi), ids, 64), common = 0;
+	for (int i = 0; i < n; ++i) common += rarity(ids[i]) < 4;
+	if (!n) return 0;
+	uint32_t h = ((run.seed ^ 0x4B494E44u) + (uint32_t)navi * 0x9E3779B9u) * 2654435761u;   /* "KIND" */
+	int pick = (int)((h >> 8) % (uint32_t)(common ? common : n));
+	for (int i = 0, k = 0; i < n; ++i)
+		if ((!common || rarity(ids[i]) < 4) && k++ == pick) return ids[i];
+	return 0;
+}
+
 int xguardian_chip(int navi, int depth, int *code) {
 	*code = 26;
-	int id = chip_at(navi, depth);
+	int id = guardian_team(navi) ? kind_chip(navi) : chip_at(navi, depth);
 	if (id <= 0) return 0;
 	/* (its letter where the folder holds it, else its *, else its first: a
 	 * guardian's Navi chip comes so, guardian_objs.c) */
