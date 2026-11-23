@@ -72,7 +72,7 @@ typedef struct {
 	uint8_t soul_start;      /* in a Soul form, the Soul brought: BN5's Soul number (1-12, souls.h) in SOUL BN5, BN4's (1-12, RollSoul to WoodSoul) in SOUL BN4; 0 none */
 	uint16_t cross_active;   /* the Crosses CROSSSELECT lists, bit navi - 1 (powers.c's 1-10), RUN_CROSS_ROWS at most; 0 BN6's own rule, the first five held in BN6's order */
 	uint16_t cross_held;     /* in CROSS, the Crosses the run holds, bit navi - 1, the brought one's among them (the mix's are its earlier acts' guardians', powers.c) */
-	uint16_t cross_layer;    /* ... as the layer about to be made was made, what its guardian's data is told by (souls_layer's twin) */
+	uint16_t cross_layer;    /* ... as the layer about to be made was made, what its guardian's data is told by (souls_layer_bn5's twin) */
 	uint8_t soul_turns;      /* in a Soul form, the turns more a unison lasts (BN5's SoulT+1, the Cybeast's or the BeastOut helper's): 0 or 1 */
 } Run;
 

@@ -65,8 +65,6 @@ void souls_note_layer(void) {
 	souls.bn4_layer = souls.bn4;
 }
 
-unsigned souls_layer(void) { return souls.layer; }
-
 void souls_lean(void) {
 	loot_soul_souls(souls.layer);
 	unsigned kinds = 0;

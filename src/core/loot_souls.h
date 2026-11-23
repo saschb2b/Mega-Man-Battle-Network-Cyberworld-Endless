@@ -6,7 +6,7 @@
  * chips are of a held Soul's kind, each of the tier it rolled (no Giga
  * early: the counts and tiers stay as they were), and one of a Net
  * Dealer's four chips; the kind the folder holds fewest chips of first.
- * Read from the Souls held as the layer was made (souls_layer), as the
+ * Read from the Souls held as the layer was made (souls_layer_bn5), as the
  * folder's codes are, so a checkpoint rebuilds the same stock. Nothing
  * is drawn where the run holds no Soul. DarkChips are never leaned to. */
 #ifndef CW_LOOT_SOULS_H

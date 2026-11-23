@@ -229,7 +229,7 @@ void spins_sync(void) {
 
 /* SoulT+1's place in the layer about to be offered (docs/game/navicust.md,
  * 11; navicust_set_soul): open while the run held a Soul as the layer was
- * made (souls_layer: the same on a CONTINUE's rebuild) or its guardian,
+ * made (souls_layer_bn5: the same on a CONTINUE's rebuild) or its guardian,
  * one of BN5's Team Colonel or Team ProtoMan, gives one it held none of, whose draft it
  * leads; never where the core has no program 48 (BN5's ROM not read). */
 void soult_sync(void) {

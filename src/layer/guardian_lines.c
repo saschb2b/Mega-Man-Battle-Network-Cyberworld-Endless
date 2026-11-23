@@ -132,39 +132,39 @@ int guardian_netbattle_terms(char *out, size_t n) {
  * worth of insight, the moves left for the fight to show, and EraseMan's
  * danger said as a danger: an erase at low HP had come with no word) */
 const char *guardian_rumor(int navi) {
-	switch (navi) {
-	case 1: return "his fire never goes out!";
-	case 2: return "his lightning strikes out of nowhere!";
-	case 3: return "you never see him coming. Just his claws!";
-	case 4: return "he deletes Navis outright. Don't face him weak!";
-	case 5: return "he flattens anything on his tracks!";
-	case 6: return "he floods the whole field!";
-	case 7: return "he never fights alone. Watch the sky!";
-	case 8: return "he's as fast as the wind!";
-	case 9: return "he comes up from below!";
-	case 10: return "he turns your own panels against you!";
-	case 11: return "his shield stops everything,and his sword's a blur!";
-	case 12: return "he leaves nothing but craters!";
-	case 13: return "he hunts from under the water!";
-	case 14: return "he runs his show from the back!";
-	case 15: return "he passes sentence with a whip!";
-	case 16: return "he's never the same element twice!";
-	case 18: return "his army is huge. One stroke ends it!";
-	/* (BN5's: the older net's Navis, as the net tells of them) */
-	case 24: return "the old Net's Colonel runs it like a war!";
-	case 25: return "he strikes from the dark,then he's gone!";
-	case 26: return "he lets the dice decide,and they like him!";
-	case 27: return "the old Net's spirits fight at his side!";
-	case 28: return "no attack has ever dented his armor!";
-	case 29: return "his music freezes Navis in place!";
-	/* (Team ProtoMan's, as the net tells of the older net's other team) */
-	case 60: return "he fights from up in the sky!";
-	case 61: return "he never misses a shot!";
-	case 62: return "he's a walking arsenal!";
-	case 63: return "nobody breaks free of his pull!";
-	case 64: return "her medicine is no cure!";
-	default: return NULL;
-	}
+	static const char *const rumors[] = {
+		[1] = "his fire never goes out!",
+		[2] = "his lightning strikes out of nowhere!",
+		[3] = "you never see him coming. Just his claws!",
+		[4] = "he deletes Navis outright. Don't face him weak!",
+		[5] = "he flattens anything on his tracks!",
+		[6] = "he floods the whole field!",
+		[7] = "he never fights alone. Watch the sky!",
+		[8] = "he's as fast as the wind!",
+		[9] = "he comes up from below!",
+		[10] = "he turns your own panels against you!",
+		[11] = "his shield stops everything,and his sword's a blur!",
+		[12] = "he leaves nothing but craters!",
+		[13] = "he hunts from under the water!",
+		[14] = "he runs his show from the back!",
+		[15] = "he passes sentence with a whip!",
+		[16] = "he's never the same element twice!",
+		[18] = "his army is huge. One stroke ends it!",
+		/* (BN5's: the older net's Navis, as the net tells of them) */
+		[24] = "the old Net's Colonel runs it like a war!",
+		[25] = "he strikes from the dark,then he's gone!",
+		[26] = "he lets the dice decide,and they like him!",
+		[27] = "the old Net's spirits fight at his side!",
+		[28] = "no attack has ever dented his armor!",
+		[29] = "his music freezes Navis in place!",
+		/* (Team ProtoMan's, as the net tells of the older net's other team) */
+		[60] = "he fights from up in the sky!",
+		[61] = "he never misses a shot!",
+		[62] = "he's a walking arsenal!",
+		[63] = "nobody breaks free of his pull!",
+		[64] = "her medicine is no cure!",
+	};
+	return navi > 0 && navi < (int)(sizeof rumors / sizeof *rumors) ? rumors[navi] : NULL;
 }
 
 /* What each says: meeting MegaMan the first time, again after losing to
