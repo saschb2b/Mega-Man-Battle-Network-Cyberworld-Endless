@@ -249,6 +249,23 @@
 #define BN6_GRAB_TURN         0x0800D5E4u /* ... where the walk left the field (0x0800CC72 said so): ldrb r6,[r5,#0x12], the step made the facing's, and on; */
                                           /* ... no test that it had turned already, so with no such column on the field it never ends (grab_search.h) */
 #define BN6_GRAB_FOUND        0x0800D5E0u /* ... its end: adds r0,r6,#0; pop {r4,r6,r7,pc} */
+/* A panel taken for a while, and handed back: a column's timer runs while it holds a panel of the other side's
+ * (docs/rom/liberation.md, A panel taken and handed back; issue #837). No code of ours uses them yet */
+#define BN6_PANEL_SIDE_SET    0x0800CC14u /* bn6f object_setPanelAlliance (r0 column, r1 row, r2 side): a panel of type 0 refused,
+                                           * its BN6_PANEL_SIDE_TIMER 0; four callers, each followed by BN6_COLUMN_TIMER_SET */
+#define BN6_COLUMN_TIMER_SET  0x0800CC36u /* bn6f object_setPanelAllianceTimerLong (r0 column): its BN6_COLUMN_TIMER 0x708; called at */
+                                          /* ... 0x080C7D76, 0x080CE3EA, 0x080E795A and 0x0810D904 (Catack's) */
+#define BN6_COLUMN_SIDES      0x02034010u /* the columns' record, BN6_COLUMN_SIDES_SIZE a column (1-6 at + column * 8): +1 set as its timer
+                                           * ran out, +2 its panels of the other side's, +3 those of them nothing stands on, +4 and +5 their
+                                           * rows' masks (bn6f sub_800C6F0's four results), */
+#define BN6_COLUMN_TIMER      0x06        /* ... +6 u16 the timer, cleared where the column holds no panel of the other side's */
+#define BN6_COLUMN_SIDES_SIZE 8
+#define BN6_COLUMN_SIDES_RUN  0x0800C746u /* bn6f sub_800C746, each frame but in a pause or time freeze (0x0800BFD4): counts each column's
+                                           * timer down a frame, sets +1 at 0, then hands the taken panels of a run of such columns back
+                                           * where nothing stands on them (bn6f sub_800C81E: the side again, BN6_PANEL_SIDE_TIMER 0x5A) */
+#define BN6_CATACK_TAKE       0x0810D8E2u /* Catack (AI 7, ids 0x25-0x28; its state table 0x0810DA20) drove onto a panel: where it is not
+                                           * its side's (BN6_PANEL_FLAGS 0x20 against its side), BN6_PANEL_SIDE_SET and the timer, */
+#define BN6_CATACK_TAKE_END   0x0810D904u /* ... the last its bl to BN6_COLUMN_TIMER_SET */
 
 /* A panel flag (bn6.h's BN6_PANEL_FLAGS) */
 #define BN6_PANEL_SIDE_0      0x00010000u /* BN6_PANEL_FLAGS: an object of side 0 stands on it, what side 1's panel scans want: the Gunner's
