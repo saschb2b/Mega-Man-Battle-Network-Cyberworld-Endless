@@ -3,7 +3,7 @@ type: Feature
 title: "The Cross Navis and the team picked, as built"
 description: "BN6's Cross Navis on a dark board with Team ProtoMan's commands traced in BN5's ROM, each fought as MegaMan in that Cross, the team picked on arrival (`liberation_team.c`, `liberation_pick.c`), and the real ProtoMan with his own WideSwrd where ProtoSoul is held; the owner's decisions 9 and 10."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:25:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:32:27Z }
 ---
 
 # The Cross Navis and the team picked, as built (25 October 2026)

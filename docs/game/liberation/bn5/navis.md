@@ -3,7 +3,7 @@ type: Research
 title: "The Navis"
 description: "The Navis of BN5's Liberation Missions: each one's board HP by mission (`BN5_LIB_NAVI_HP`) and the commands BN5 lists, with each command's shape from the guides (LongSwrd, ScrenDiv, SneakAttack, NumberCheck, LifeMelody)."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T13:38:54Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:32:27Z }
 ---
 
 # The Navis (ROM, text, guides)
