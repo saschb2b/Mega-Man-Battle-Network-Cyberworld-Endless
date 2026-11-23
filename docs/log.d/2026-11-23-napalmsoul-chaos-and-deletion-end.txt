@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-23T16:10:00Z
+* **Update**: multirom/souls.md (NapalmSoul's Chaos Unison held to BN5's battle, DarkMetr after his row's 70 frames: chaos_napalm_75 and chaos_napalm_90; soul_napalm_charge run to the battle's end, its t321 traced to BN6's own plain deletion), devtools/differential.md (A virus's last frames: the map deletion_end reads BN6's sparks let go a frame after BN5's in BN6's terms), rom/virus-families.md (a virus's plain deletion in both games: BN6_VIRUS_DIE and its end, the dying's sparks), multirom/chips-code.md (a moved virus's deletion: both of its differences read in BN6's terms now).

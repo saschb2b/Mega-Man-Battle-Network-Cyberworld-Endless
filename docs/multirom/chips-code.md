@@ -544,5 +544,11 @@ of. The registry's ids, records and art stay C1's (above).
 - **A moved virus's deletion**: the specs stop before a foe is deleted
   (Boxer1, InfVulc1, SuprSpr1, DarkMetr): a moved family's deleted virus
   spawns the fourth kind's 0x11 with a RAM pointer at +0x34 (BN5
-  `0x02034A90`, BN6 `0x02034880`) the comparator does not read in BN6's
-  terms, the virus families' track's.
+  `0x02034A90`, BN6 `0x02034880`) the comparator did not read in BN6's
+  terms, the virus families' track's. Both of its differences are read
+  in BN6's terms now: that word as each game's battle state (`battle
+  state`), and the deletion's last frames, where BN6's own plain deletion
+  lets the sparks go a frame after BN5's, by the map `deletion_end`
+  ([The differential](../devtools/differential.md), A virus's last
+  frames). A copy of `chip_darktorn` run on to its battle's end (t97)
+  passes so; the chips' specs keep their frames until they are run on.
