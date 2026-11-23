@@ -169,13 +169,14 @@
 #define BN6_HP_PLATE_STEP     0x0801C168u /* each frame, each plate listed: its HP shown (+2) stepped toward its object's HP (its +0x24) by */
 #define BN6_HP_PLATE_ROLL     3           /* ... the gap's eighth (>> this) */
 #define BN6_HP_PLATE_ROLL_ADD 2           /* ... and 2, at most to it; */
-#define BN6_HP_PLATE_FONT     0x08        /* ... its +8 the digits' colour, an index of BN6_HP_FONTS: 0 white, 1 orange (counting down, the */
-#define BN6_HP_PLATE_TIMER    0x09        /* ... frame after too, or its BN6_T1_COLLISION's BN6_COLL_POISON_TIMER running), 2 green (counting */
-#define BN6_HP_FONT_WHITE     0           /* ... up, and BN6_HP_PLATE_GREEN frames after), its +9 the frames left before white again */
-#define BN6_HP_FONT_ORANGE    1
-#define BN6_HP_FONT_GREEN     2
-#define BN6_HP_PLATE_GREEN    10
-#define BN6_HP_PLATE_POISON   2           /* ... (the frames a poison timer's orange stays, set each frame it runs) */
+#define BN6_HP_PLATE_FONT     0x08        /* ... its +8 the digits' colour, an index of BN6_HP_FONTS: */
+#define BN6_HP_FONT_WHITE     0           /* ... white, the HP shown its object's; */
+#define BN6_HP_FONT_ORANGE    1           /* ... orange, counting down and the frame after, or while its BN6_T1_COLLISION's */
+                                          /* ... BN6_COLL_POISON_TIMER runs; */
+#define BN6_HP_FONT_GREEN     2           /* ... green, counting up and BN6_HP_PLATE_GREEN frames after; */
+#define BN6_HP_PLATE_TIMER    0x09        /* ... its +9 the frames left before white again: */
+#define BN6_HP_PLATE_GREEN    10          /* ... green's, */
+#define BN6_HP_PLATE_POISON   2           /* ... a poison timer's orange's (set again each frame it runs) */
 #define BN6_HP_PLATE_DRAW     0x0801C202u /* each frame, each plate listed: its number (four places at most, 0 one) written into a 32x16 OBJ's */
 #define BN6_HP_PLATE_VRAM     0x06016600u /* ... tiles here, 0x100 a plate (OBJ tile 816 + 8 x the plate), the digits right-aligned in it */
 #define BN6_HP_DIGIT_STEP     8           /* ... this far apart, the OBJ 32 less 4 x its digits left of its object's place on the screen */

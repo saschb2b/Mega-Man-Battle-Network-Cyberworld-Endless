@@ -21,6 +21,7 @@
 #define BUDGET PARTY_MARKS_BUDGET
 #define BELOW  1    /* a mark's top under his feet' line */
 #define PAD    1    /* its plate's edge around the letters */
+#define HP_GAP 1    /* a partner's HP under his plate, this far */
 #define CHIP_LINE 148   /* BN6's chip's name in a battle, its top on the picture (seen in the captures) */
 #define BODY 47         /* a MegaMan on the field, from his feet to over his head (seen in the captures), and on the bottom row */
                         /* ... to where the mark under the feet of one two rows up begins (2 panels of 24 less BELOW) */
@@ -90,7 +91,7 @@ static Plate plate(int x, int y, const char *tag, bool own, int foot) {
 	p.h = PIXFONT_CAP + 2 * PAD + 1;
 	p.left = x - p.w / 2;
 	p.top = y + BELOW;
-	int pair = p.h + (own ? 0 : BN6_HP_DIGIT_H + 1);
+	int pair = p.h + (own ? 0 : HP_GAP + BN6_HP_DIGIT_H);
 	if (p.top + pair > foot) p.top = y - BODY - pair;
 	return p;
 }
@@ -147,7 +148,7 @@ void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
 		 * issue #717) */
 		if (own) continue;
 		Plate p = plate(v.x[i], v.y[i], tags[v.seat[i]], false, P.core_y + CHIP_LINE);
-		hp_plate_draw(&hp[v.seat[i]], c, v.object[i], v.x[i], p.top + p.h + 1 - BN6_HP_DIGIT_TOP);
+		hp_plate_draw(&hp[v.seat[i]], c, v.object[i], v.x[i], p.top + p.h + HP_GAP - BN6_HP_DIGIT_TOP);
 	}
 }
 
