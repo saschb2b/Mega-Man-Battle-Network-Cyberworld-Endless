@@ -1,7 +1,7 @@
 """The older nets' Navis as an act's guardian: BN5's six, Team ProtoMan's
-five and Nebula's two, BN4's twelve. The door, his fight in BN6's engine
+six (ProtoMan as DarkProto) and Nebula's two, BN4's twelve. The door, his fight in BN6's engine
 under his own name, his deletion, his Guardian Data taken (five HPMemory,
-and the Soul of each of BN5's six and Team ProtoMan's five); and each of
+and the Soul of each of BN5's six and Team ProtoMan's six); and each of
 BN4's seen
 facing MegaMan on the map from either side of his arena (0.22.0: BN4
 draws four views where BN6 draws eight, and a guardian with MegaMan on his
@@ -14,10 +14,10 @@ IN_BATTLE = {'ShadowMan': 'ShadoMan', 'NumberMan': 'NumbrMan', 'TomahawkMan': 'T
              'WoodMan': 'WoodM', 'TopMan': 'TopM', 'BurnerMan': 'BurnM', 'SparkMan': 'SprkM'}
 BN5 = {24: 'Colonel', 25: 'ShadowMan', 26: 'NumberMan', 27: 'TomahawkMan', 28: 'KnightMan', 29: 'ToadMan'}
 NEBULA = {65: 'LarkMan', 66: 'GridMan'}
-# (Team ProtoMan's, their Team Colonel partners' second guardians: docs/game/team-protoman.md)
-TEAM = {60: 'GyroMan', 61: 'SearchMan', 62: 'NapalmMan', 63: 'MagnetMan', 64: 'Meddy'}
+# (Team ProtoMan's, their Team Colonel partners' second guardians, BN5's ProtoMan as DarkProto: docs/game/team-protoman.md)
+TEAM = {59: 'DarkProto', 60: 'GyroMan', 61: 'SearchMan', 62: 'NapalmMan', 63: 'MagnetMan', 64: 'Meddy'}
 # (... in battle by BN5's names, SearchMan's BN5's SerchMan where BN4's is SrchM)
-TEAM_IN_BATTLE = {'SearchMan': 'SerchM', 'NapalmMan': 'NapalmM', 'MagnetMan': 'MagnetM'}
+TEAM_IN_BATTLE = {'SearchMan': 'SerchM', 'NapalmMan': 'NapalmM', 'MagnetMan': 'MagnetM', 'DarkProto': 'DarkProt'}
 BN4 = {34: 'Roll', 35: 'GutsMan', 36: 'WindMan', 37: 'SearchMan', 38: 'FireMan', 39: 'ThunderMan', 43: 'JunkMan', 44: 'AquaMan',
        45: 'WoodMan', 46: 'TopMan', 48: 'BurnerMan', 50: 'SparkMan'}
 
