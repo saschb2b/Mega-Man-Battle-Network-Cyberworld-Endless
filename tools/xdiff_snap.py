@@ -56,13 +56,18 @@ SPRITE_DATA = (0x18, 0x1C, 0x20, 0x24)            # ... the words that point int
 DISPATCH_COPY = 0x3C                               # a virus's AI data's u16 BN6's dispatcher copies its object's +0x3E into
 AI_SIZE, COLL_ROOM, PANEL_ROOM, PANELS = 0x100, 0xA8, 0x24, 40
 BN4_COLL_SIZE = 0x90   # (BN4's collision data in its RAM, src/emu/bn4.h: a pointer into one read by BN4's size)
-TRACE_VERSION = 8   # (src/dev/xdiff.c's: the state BN6's engine keeps apart, the player block and the dispatch's types; version 2
-                    # traces, with none of them, still read)
+TRACE_VERSION = 9   # (src/dev/xdiff.c's: the state BN6's engine keeps apart, the player block (elements 8 and 9 and the capsules
+                    # from 9) and the dispatch's types; version 2 traces, with none of them, still read)
 # MegaMan's side's player block (src/dev/xdiff.c, trace version 5): his battle NaviStats, the word of what was used this
 # battle (BN5's Souls, BN6's Crosses), his pending form's 16 bytes, the Souls' state in BN6's engine (BN6_SOULS' 0x80
 # bytes, BN5's zero), the Custom screen's element 0xB (UNITE: BN5_CUSTOM_UNITE, BN6_CUSTOM_UNITE)
 PLAYER_NAVI, PLAYER_USED, PLAYER_PENDING, NAVI_FORM = 0x00, 0x64, 0x68, 0x2C
 PLAYER_SOULS, PLAYER_UNITE = 0x78, 0xF8
+# ... then the screen's elements 8 and 9 (the Souls' button: MeddySoul's capsules' at types 6 and 7) and the screen's word at
+# +0x24, whose last four bytes hold the two capsules' entries (BN6_CUSTOM_CAPSULES, BN5's at the same place)
+PLAYER_BUTTON, PLAYER_CAPSULES = 0x104, 0x11C
+CUSTOM_SCREEN = {5: 0x02036B10, 6: 0x020364C0}   # (BN5_CUSTOM_SCREEN, BN6_CUSTOM_SCREEN: an element's +8 compared as its place there)
+CAPSULE_TYPES = (6, 7)
 NAVI_MOOD = 0x0E                  # his battle NaviStats' mood (BN5's battle mood; BN6's own)
 SOULS_SIDE = 0x20                 # BN6_SOULS_SIDE: a side's Souls' state
 PENDING_OBJECT = PLAYER_PENDING + 8   # (the pending record's +8: his battle object)
@@ -1594,6 +1599,32 @@ def soul_cells(fa, fb, ai5, ai6):
         out.append(Diff(t, 'player', 'crosses used', PLAYER_USED, 0, crosses))
     ua, ub = fa.fr['player'][PLAYER_UNITE:PLAYER_UNITE + 12], fb.fr['player'][PLAYER_UNITE:PLAYER_UNITE + 12]
     out += [Diff(t, 'player', 'unite', k, ua[k], ub[k]) for k in range(len(ua)) if ua[k] != ub[k]]
+    return out + capsule_cells(fa, fb)
+
+
+def capsule_cells(fa, fb):
+    """The Custom screen's elements 8 and 9 and its two capsules' entries (trace version 9), where either game's element 8 is
+    MeddySoul's capsule (type 6: BN5's 0x08023D20, BN6's src/emu/soulcapsule.c): each element's bytes, its +8 as the place on
+    its own screen it names, and each capsule by its chip (BN5's id as BN6's, the registry's) and code (BN5's nine-bit
+    entry, BN6's ten-bit); a difference of MegaMan's (role 'player')"""
+    pa, pb, t = fa.fr['player'], fb.fr['player'], fa.fr['t']
+    if fa.game != 5 or len(pa) < PLAYER_CAPSULES + 8 or len(pb) < PLAYER_CAPSULES + 8:
+        return []
+    ea, eb = pa[PLAYER_BUTTON:PLAYER_BUTTON + 24], pb[PLAYER_BUTTON:PLAYER_BUTTON + 24]
+    if ea[0] not in CAPSULE_TYPES and eb[0] not in CAPSULE_TYPES:
+        return []
+    out = []
+    for e in (0, 12):
+        out += [Diff(t, 'player', 'capsule element', e + k, ea[e + k], eb[e + k]) for k in range(8) if ea[e + k] != eb[e + k]]
+        va, vb = u32(ea, e + 8) - CUSTOM_SCREEN[5], u32(eb, e + 8) - CUSTOM_SCREEN[6]
+        if va != vb:
+            out.append(Diff(t, 'player', 'capsule element', e + 8, va, vb))
+    for k in (2, 4):
+        a, b = u16(pa, PLAYER_CAPSULES + k), u16(pb, PLAYER_CAPSULES + k)
+        ca = (fa.canon.chip(5, a & 0x1FF), a >> 9) if a else 0
+        cb = (b & 0x3FF, b >> 10) if b else 0
+        if ca != cb:
+            out.append(Diff(t, 'player', 'capsule', k, ca, cb))
     return out
 
 

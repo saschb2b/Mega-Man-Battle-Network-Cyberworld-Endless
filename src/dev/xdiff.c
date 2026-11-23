@@ -13,23 +13,23 @@
  * pending form, BN5_SOUL_PENDING's or BN6_CROSS_PENDING's 16 bytes; the
  * Souls' state in BN6's engine, BN6_SOULS' SOULS_SIZE bytes, BN5's zero;
  * the Custom screen's element 0xB, UNITE, BN6_CUSTOM_UNITE's or
- * BN5_CUSTOM_UNITE's 12 bytes, as its last screen left it); then each
- * object of the first kind (its slot, whether its AI's data and collision
- * data are read, its type as the second-level dispatch runs it where its
- * type is its kind's dispatch type (its game's number in the side table by
- * its slot, xvirus_dispatch.h; BN6's alone, else 0), its 0xD8 bytes from
- * its list node on (BN6_OBJECT_NODE before it), its AI's 0x100 and its
- * collision data's BN6_COLL_SIZE, BN5's padded), each of the third (its
- * slot, its type as the dispatch runs it, its bytes, its collision data),
- * each of the fourth (its slot, its type so, its 0xC8 bytes from its node),
- * the 40 panels (BN5_PANEL_SIZE each,
- * BN6's padded), the run order (each object's address), the sounds
- * begun (a music player and the song's number), and the events
- * (XD_EVENT_WORDS words each: kind, sub and flags in the first). All u32
+ * BN5_CUSTOM_UNITE's 12 bytes, then its elements 8 and 9 and its two
+ * capsules' entries, as its last screen left them); then each object of the
+ * first kind (its slot, whether its AI's data and collision data are read,
+ * its type as the second-level dispatch runs it where its type is its
+ * kind's dispatch type (its game's number in the side table by its slot,
+ * xvirus_dispatch.h; BN6's alone, else 0), its 0xD8 bytes from its list
+ * node on (BN6_OBJECT_NODE before it), its AI's 0x100 and its collision
+ * data's BN6_COLL_SIZE, BN5's padded), each of the third (its slot, its
+ * type as the dispatch runs it, its bytes, its collision data), each of the
+ * fourth (its slot, its type so, its 0xC8 bytes from its node), the 40
+ * panels (BN5_PANEL_SIZE each, BN6's padded), the run order (each object's
+ * address), the sounds begun (a music player and the song's number), and
+ * the events (XD_EVENT_WORDS words each: kind, sub and flags in the first).
+ * All u32
  * little-endian but the counts and slots. Local only: both ROMs, and what
  * it writes is their RAM (kept in .build, never in git). */
 #include "xdiff.h"
-
 
 #include <SDL.h>
 #include <stdio.h>
@@ -59,9 +59,8 @@
 #define PANELS    40      /* the field's panels, 8 a row, rows 0-4 */
 #define SONGS     0x400   /* the song table's entries looked through for a header */
 #define OPENING   3000    /* the frames a battle may take to its fight */
-#define TRACE_VERSION 8   /* (the moved state, BN5's green flash, in the state kept apart; the chip AI's lists and the Navis' own state, version 7; the
-                             state BN6's engine keeps apart, BN5's sea's submerge, version 6; the player block, the Souls' version 4, and the
-                             dispatch's types, the dispatch's 3, in one) */
+#define TRACE_VERSION 9   /* (elements 8 and 9 and MeddySoul's capsules in the player block; the moved state, 8; the chip AI's lists and the Navis'
+                             own state, 7; BN5's sea's submerge, 6; the player block, the Souls' 4, and the dispatch's types, the dispatch's 3) */
 #define APART_SEA (RAM_DARK_LISTS - RAM_SEA)   /* what BN6's engine keeps apart of the objects': the sea's room (xsea.h: the submerged, their markers), */
 #define APART_LISTS (RAM_NAVIS - RAM_DARK_LISTS)   /* ... then the chip AI's lists, both sides (BN6_DARK_LISTS; BN5's BN5_DARK_LISTS), */
 #define APART_NAVIS (RAM_DARK_AI - RAM_NAVIS)   /* ... then the Navis' own state (Colonel's sides' bits: BN5's of BattleState +0x5C, the rest 0), */
@@ -75,7 +74,7 @@ _Static_assert(APART_SEA <= 0x100u && APART_LISTS == 2u * BN5_DARK_LIST_SIZE && 
 #define METER_DARK 400   /* (dark=1) BN5's dark meter under its 470 (0x0800DDE4, 0x08012832: the battle opens dark) */
 #define USED_SIZE 4   /* the word of what was used this battle (BN5_SOULS_USED, BN6_CROSSES_USED) */
 #define SOULS_SIZE BN6_SOULS_SIZE   /* the Souls' state in BN6's engine (BN6_SOULS: both sides', the rest of its range) */
-#define PLAYER_SIZE (USED_SIZE + BN6_BATTLE_NAVI_SIZE + BN6_CROSS_PENDING_SIZE + SOULS_SIZE + BN6_ELEMENT_SIZE)   /* the player block */
+#define PLAYER_SIZE (USED_SIZE + BN6_BATTLE_NAVI_SIZE + BN6_CROSS_PENDING_SIZE + SOULS_SIZE + 8 + 3 * BN6_ELEMENT_SIZE)   /* the player block */
 
 /* ---- a game's battle as the trace reads it ---- */
 
@@ -233,6 +232,8 @@ static void player_out(Side *g) {
 	else bytes_out(g, v->pending ? v->pending + side * BN6_CROSS_PENDING_SIZE : 0, BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE);
 	bytes_out(g, v->souls, SOULS_SIZE, SOULS_SIZE);
 	bytes_out(g, v->unite, BN6_ELEMENT_SIZE, BN6_ELEMENT_SIZE);
+	bytes_out(g, v->unite ? v->unite - 3 * BN6_ELEMENT_SIZE : 0, 2 * BN6_ELEMENT_SIZE, 2 * BN6_ELEMENT_SIZE);   /* (elements 8 and 9, both games' alike) */
+	bytes_out(g, v->unite ? v->unite - (BN6_CUSTOM_UNITE - BN6_CUSTOM_CAPSULES) - 2 : 0, 8, 8);   /* (the capsules' word-aligned, BN5's alike) */
 }
 
 /* the objects in the order they run, their addresses into `order`: how many */
