@@ -104,7 +104,7 @@ TEAM_ART_ROOM = 0x18000     # SOULS_TEAM_ART's
 TEAM_ART_FIRST, TEAM_ART_LAST = 0x66, 0x7F   # (list 0's numbers past Team ProtoMan's Souls' own 0x60-0x65: soul_room.h)
 # The companion overlay (BN5's first kind's 0x56, tools/bn5_navi_twins.py's OVERLAY5) a Team ProtoMan Soul's enter spawns of a
 # kind BN6 lacks (GyroSoul's propeller, BN5's kind 2): BN6's kind for it past the Navis' (xnavi_recipe.h's XN_KIND_OF: 19 + a
-# seat, to 61; the grown tables hold 64, xnavi_room.h's XN_KINDS), docs/project/claims/team-protoman-souls.json
+# seat, to 61; the grown tables hold 64, xnavi_room.h's XN_KINDS; the kinds 62-63 the Team ProtoMan claim's, docs/project/claims.md)
 OVERLAY5 = dict(spawner=0x080C3808, masks=0x080C36AC, sprites=0x080C36C4, kinds=6)
 TEAM_OVERLAY_KINDS = {2: 63}
 
@@ -240,7 +240,7 @@ EXTRA_ART = ((5, 0x1C),)
 EFFECT_ORDER = (0x48, 0x49, 0x4A, 0x17, 0x45, 0x03, 0x14, 0x02, 0x20)
 EFFECT_FIRST, EFFECT_LAST = 0xC0, 0xCF
 # (Team ProtoMan's, numbered apart from 0xD0: BN4's chips' units count theirs down from 0xCF, to 0xC2 so far, soul_room.h,
-# docs/project/claims/team-protoman-souls.json)
+# the Team ProtoMan claim's, docs/project/claims.md)
 TEAM_EFFECT_FIRST, TEAM_EFFECT_LAST = 0xD0, 0xDF
 # BN5's songs a Soul plays that Gregar has otherwise (xrecipe.py's song_sig: BN6's own 0x70 and 0x117 are none of them, its
 # 0x115 another sound), each at the BN6 slot the allocations' amendment gives that sound whatever track copies it (the
