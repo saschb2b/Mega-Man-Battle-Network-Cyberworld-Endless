@@ -395,9 +395,7 @@ the next.
   (its sound 0x113 eight times, the count to two); taken, each game deals
   from its own shuffle (BN6's helpers keep aside a pair BN5's have none of,
   and BN6 plays 0x182 as it ends), so the battles part there. BN6's window
-  shows no count of the shuffles left, where BN5's does. MeddySoul's
-  capsules (types 6 and 7) have no such button in BN6: they are still to
-  come, on ColonelSoul's (DustCross's, `src/emu/soulcolonel.c`) or apart.
+  shows no count of the shuffles left, where BN5's does.
   **MeddySoul** (6), his battle: UNITE by a Recovery chip, his look, his
   charged shot (0x0E, family 0x3E as 0xCE: the capsule bomb); BN5 gives
   form 6 no passive and no chip charge: `soul_meddy` (to t523) and
@@ -406,7 +404,56 @@ the next.
   crosses into the Soul just before the fight, so his ready frame's own
   count (28 frames, the one Soul's with any) is still running down at t1,
   where BN5's unison let it run out; the frame drawn is the same. His
-  two capsules are the Soul button's types 6 and 7 (above), still to come.
+  two capsules are the Soul button's types 6 and 7, traced below and not
+  in BN6's engine yet.
+  **MeddySoul's capsules**, read from both ROMs (`src/emu/bn5_capsules.h`;
+  [the addresses](../rom/souls.md), MeddySoul's capsules). In BN5 the
+  Soul button's set-up makes elements 8 and 9 types 6 and 7 for Soul 6,
+  both grey, and while the screen's +0x26 is 0 draws two capsules with
+  two RNG draws from one of two tables of 16 (MegaMan's HP a quarter of
+  his max or more: yellow, black or white 13 times in 16; below it:
+  pink 7 times in 16). A capsule is a chip entry, code 27 and ids 380-384, YelCapsl,
+  BlkCapsl, WhiCapsl, PrpCapsl and PnkCapsl, which the elements' +8
+  point at. Both light while the last chip picked is a chip with no
+  capsule whose record shows its power (`0x08024C78`, the fifth lit
+  rule). A on a lit capsule (sound 0x81) runs mode 0x3C: the capsule's
+  icon flies to the pick on UNITE's own flight phases, then the pick's
+  element takes the capsule's bit in its +4 (0x08 yellow, 0x04 black,
+  0x02 white, 0x20 purple, 0x10 pink) and the capsule's element in its
+  +5, the capsule turns chosen and the lit rules run again (sound 0x92).
+  B on that pick takes the capsule off and lights it again. At OK each
+  pick's +4 goes into the pending record's +0x44 + its place, and the
+  chip's use reads it back as its flags: white, black, yellow and purple
+  set the damage word's 0x4000, 0x2000, 0x1000 and 0x0800, which BN5's
+  hit decode turns into the status a hit gives (+0x10 0x10, 0x20, 0x30)
+  and, for 0x0800, its +0x12 0x1118; pink heals a tenth of his max HP as
+  the chip is used. What those statuses do to the struck is not traced
+  yet. BN6 kept the plumbing: the draws of types 6 and 7 on the chips'
+  screen and in the chip's window (each as the chip its entry names,
+  its code 27 drawn blank as BN5's, `0x08028214`),
+  B's step that gives a capsule back, OK's copy of +4, the chip use's
+  flags and the white and black bits (0x4000, 0x2000). Gregar dropped
+  the set-up for Soul 6, the lit rule, A on a capsule (an empty routine
+  in the A table's places 6 and 7), mode 0x3C's phases (the mode goes
+  straight back to 4), the yellow and purple bits and the pink heal;
+  and its hit decode reads 0x2000 and 0x1000 its own way (+0x12 0xF8
+  and 0xF7) and ignores 0x0800. So the capsules can stand on BN6's own
+  screen as BN6 left it, its elements 6 and 7 and its draws, rather than
+  on ColonelSoul's DustCross button. The blocker is the chip table.
+  BN6's own draws show a capsule as the chip its id names, and BN6's
+  table holds only two of the five capsules at BN5's own ids: 383
+  PrpCapsl and 384 PnkCapsl, with BN5's names, pictures and palettes
+  (their icons' bytes BN6's own). 382 WhiCapsl keeps its name but has
+  the icon and picture IceCube and Z Saver show, and 380 and 381 are
+  IceCube and Z Saver. Building the capsules therefore waits on BN6 chip ids for
+  YelCapsl and BlkCapsl, and on WhiCapsl's art, or on five ids for
+  all five through the chip registry ([The chip registry](chip-registry.md)),
+  which Team ProtoMan's claim does not give. The differential already
+  sees them missing: `soul_meddy` run on to a second Custom screen
+  parts at t524, where BN5's UNITE links up to elements 9 and 8 (its +2
+  and +3) and BN6's to none, and BN5's two draws have moved its RNG
+  words. To hold the capsules themselves to BN5's, its trace needs
+  elements 8 and 9 and the screen's two entries beside element 0xB.
   Open: `soul_napalm_charge` ends at t320, before CanGard's last frames,
   where the games part on a fourth-kind object of his (BN5's let go at
   t321, BN6's 0x11 still in play): not traced yet. His Chaos Unison
