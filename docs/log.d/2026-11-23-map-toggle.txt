@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-23T12:00:00Z
-* **Update**: game/fidelity.md (the layer's map: a press of SELECT opens it until the next, a hold shows it while held, issue #840), devtools/scenarios.md (the state's `map` line).
