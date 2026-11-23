@@ -1,0 +1,10 @@
+{
+ "name": "the engine's per-frame draws while the battle's clock holds, replayed",
+ "part": "draw",
+ "when": "held draw",
+ "why": "The mask \"the engine's draws while the battle's clock holds\" under rng=replay: both games draw three random numbers each frame whatever the battle does (rng, per_frame: the game state's GetRNG and GetRNGSecondary, the main loop's GetRNGSecondary), and where the battle's clock holds for a number of frames each game's own (a Soul's unison, BN5's own crossing, against BN6's proxy crossing made before the fight), the first traced frame after holds the per-frame draws of the frames one game had more, which the replay finds no twin for in the other's frame. Each such draw is the engine's, not the Soul's or the family's: held only where its caller is a per-frame routine and the frame's words are apart as the rng mask reads them, every other draw since the last traced frame the same in number in both and each word the other's stepped by exactly the per-frame draws one game made more.",
+ "evidence": [
+  "the per-frame routines: BN5's game state's 0x08004C98 (its GetRNG and GetRNGSecondary returning to 0x08004CAD and 0x08004CB1) and main loop's 0x08000300 (its GetRNGSecondary returning to 0x08000321), BN6's twins 0x080050EC and 0x08000300 (rng, per_frame and twins)",
+  "chaos_napalm_75 (NapalmSoul's Chaos Unison united at the fight's start, rng=replay for DarkMetr's meteors' shake): at t1 BN5's trace holds 10 draws by 0x08004CAD, 10 by 0x08004CB1 and 10 by 0x08000321 that BN6's lacks, its frame's words apart by those 30 steps (the rng mask's held clock explaining them); no other draw of the battle unmatched to t239"
+ ]
+}

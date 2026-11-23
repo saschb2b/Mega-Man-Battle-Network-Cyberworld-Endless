@@ -1,0 +1,10 @@
+[
+ {
+  "name": "NapalmSoul's Chaos Unison DarkCirc",
+  "spec": "chaos_napalm_75",
+  "poke": [
+   "08E91ED8:00D6"
+  ],
+  "what": "NapalmSoul's chaos stub (SOULS_TEAM_CHAOS + 3 x 24, src/emu/soulpower.c's team_chaos) hands the chip writer DarkCirc (BN6's 214, SearchSoul's DarkChip) where BN5's 0x0800FA72 writes DarkMetr (its 195, BN6's 217): the attack released in phase 2 another chip's"
+ }
+]
