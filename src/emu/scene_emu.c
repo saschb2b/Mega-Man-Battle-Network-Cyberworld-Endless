@@ -263,6 +263,14 @@ static void held(void) {
 	if (!pet_plays_music() && !online_visit_held() && !online_visit_waiting()) music_carry_held();
 }
 
+/* fast forward's state read before the update's frames (none at the dev
+ * menu's speed), and its music: the song at the GBA's pace on the
+ * engine's MP2K while it runs (audio.h, music_fast_update) */
+static void fast_step(bool dev_fast) {
+	if (!dev_fast) fast_forward_update();
+	music_fast_update(!dev_fast && fast_forward_running());
+}
+
 static void update(void) {
 	emu_drawing = false;
 	if (soft_reset()) return;
@@ -306,8 +314,7 @@ static void update(void) {
 	if (emu_threaded()) {
 		if (devtools_open()) { frame_keys(); held(); return; }
 		music_carry_resume();
-		if (!dev_fast) fast_forward_update();
-		music_fast_update(!dev_fast && fast_forward_running());
+		fast_step(dev_fast);
 		for (int i = 0; frame_goes_on(i, speed); ++i) {
 			if (started) TIMED("director", after_frame());
 			emu_frame_as(cinema_keys(frame_keys()), dev_fast ? 0 : fast_forward_how(i));
@@ -319,9 +326,7 @@ static void update(void) {
 	uint32_t keys = frame_keys();
 	if (devtools_open()) { held(); return; }   /* the game holds still under the dev menu */
 	music_carry_resume();
-	if (!dev_fast) fast_forward_update();
-	/* (fast forward's music: the song at the GBA's pace on the engine's MP2K, audio.h) */
-	music_fast_update(!dev_fast && fast_forward_running());
+	fast_step(dev_fast);
 	for (int i = 0; frame_goes_on(i, speed); ++i) {
 		/* (the way into BN6's folder editor is pressed a frame at a time, run through at once: its keys each frame) */
 		if (i && director_lab_editing()) keys = frame_keys();
