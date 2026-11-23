@@ -76,6 +76,7 @@
                                              its animations' masks (a word a kind, at 0x080C5B44), */
 #define BN6_OVERLAY_SPRITES_REF 0x080C5C2Cu /* ... and its sprites' (two bytes a kind, list offset and number, at 0x080C5B90): */
 #define BN6_OVERLAY_KINDS     19          /* ... its kinds */
+#define BN6_OVERLAY_TYPE      0x56        /* the companion overlay's first-kind type (its spawn 0x080C5D18, its routine 0x080C5BB8) */
 #define BN6_T1_OVERLAY        0x50        /* an object's companion overlay, 0 none (BN5's GyroSoul's enter keeps his propeller there, 0x0800F070) */
 #define BN6_OVERLAY_OFFSET    0x07        /* u8 the overlay's animation's offset past its owner's (0x080C5C3A; BN5's at its +0x60, 0x080C374A) */
 #define BN6_OVERLAY_SPUN      0x11        /* ... BN5's GyroSoul's propeller set (0x080C3876) */

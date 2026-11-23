@@ -1,0 +1,10 @@
+{
+ "bn4": "0x90",
+ "bn6": "0x206",
+ "clock": "state",
+ "souls": [
+  "8"
+ ],
+ "what": "NumSoul's charged shot's throw 0x90, its copy",
+ "why": "Played by MegaMan's state 0x15 as NumSoul throws his charged shot's die (BN4: movs r0,#0x90, its bl to PlaySoundEffect at 0x080EC192; BN6: the state's copy, NumSoul's unit's at BN6's grown 0xDB, its bl aimed at a shim of the unit's home that makes r0 0x206, XvSoundCall), a state's clock, his: the same sound, BN4's song copied into BN6's grown song table's slot 0x206 by SeekBom's unit first (src/audio/xsong.c XSOUNDS), as the bombs' throw's (082). bn4_soul_num at t156"
+}
