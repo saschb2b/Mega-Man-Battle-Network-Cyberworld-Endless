@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-23
+* **Update**: rom/liberation.md (a row for Catack's take of the panel it drives onto and the column timer that hands it back, BN6 and BN5, issue #837).
 * **Update**: rom/chips-code.md (a chip used turned round: BN6's search of a row and its way toward the enemy, mended for MegaMan between a Surrounded field's two sides, and the sweep of every chip turned left, issue #838), devtools/scenarios.md (the battle's `megamanfaces` and `foeshurt` lines), code/tools.md (`tools/turned_sweep.py`'s row), code/emu.md (`turned_aim.c`).
 * **Update**: game/fidelity.md (the layer's map: a press of SELECT opens it until the next, a hold shows it while held, issue #840), devtools/scenarios.md (the state's `map` line).
 * **Update**: multirom/souls.md (MeddySoul's capsules traced in both ROMs and built on BN6's own elements 6 and 7: BN5's set-up, lit rule, A, mode 0x3C, the bits into the chip's damage, the heal and BN5's hit decode for them; what Gregar kept and dropped), rom/souls.md (MeddySoul's capsules' row), multirom/chip-registry.md (YelCapsl and BlkCapsl at 734 and 735, XREG_CAPSULE; WhiCapsl's art BN5's), game/team-protoman.md (the Souls table's MeddySoul line, unit 8), code/emu.md (`soulcapsule.c`, `bn5_capsules.h`), devtools/differential.md (the trace's version 9: elements 8 and 9 and the capsules).
