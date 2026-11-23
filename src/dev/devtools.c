@@ -96,7 +96,7 @@ void devtools_parse(const char *spec) {
 			dev.folder = (int)strtol(t + 7, &end, 0);
 			dev.folder_n = *end == '/' ? atoi(end + 1) : 30;
 		}
-		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint8_t)strtoul(t + 6, NULL, 0);
+		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint16_t)strtoul(t + 6, NULL, 0);
 		/* (glitchlook=3+x0: BN6's Green Area, then BN5's first, as --net-biome
 		 * names them; another game's kept as -1 - N, glitch_look.c) */
 		else if (!strncmp(t, "glitchlook=", 11))

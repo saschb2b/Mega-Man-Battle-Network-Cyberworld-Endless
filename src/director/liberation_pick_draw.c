@@ -96,11 +96,12 @@ static void go_draw(int x0, int y0) {
 
 /* ---- the Navi ---- */
 
-/* His face: his game's mugshot (a Soul Navi's read from BN5's ROM, as the
- * launcher reads its cartridge's) */
+/* His face: his game's mugshot (a Team Colonel Soul Navi's read from BN5's
+ * ROM, as the launcher reads its cartridge's; a Cross Navi's and ProtoMan's
+ * BN6's own) */
 static Sprite *face_of(int navi) {
-	int c = lib_mate_cross(navi);
-	if (navi < MATE_COLONEL || navi > MATE_TOADMAN) return sprite_get(SPR_MUGSHOT, c ? guardian_face(c) : FACE_MEGAMAN);
+	int g = lib_navi_bn6(navi);
+	if (navi < MATE_COLONEL || navi > MATE_TOADMAN) return sprite_get(SPR_MUGSHOT, g ? guardian_face(g) : FACE_MEGAMAN);
 	const XRom *x = &XR[XROM_BN5_COLONEL_US];
 	if (!x->data || !x->layout || !x->layout->sprite_lists) return NULL;
 	return sprite_get_rom(x->data, x->layout->sprite_lists, SPR_MUGSHOT, guardian_older_sprite(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL));
