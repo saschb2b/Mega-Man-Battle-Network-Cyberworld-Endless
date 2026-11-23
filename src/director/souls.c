@@ -26,7 +26,7 @@ static SoulSave souls;
 _Static_assert(sizeof(SoulSave) == 12 && offsetof(SoulSave, seed) == 0 && offsetof(SoulSave, held) == 4 &&
 	offsetof(SoulSave, layer) == 5 && offsetof(SoulSave, team) == 6 && offsetof(SoulSave, team_layer) == 7 &&
 	offsetof(SoulSave, bn4) == 8 && offsetof(SoulSave, bn4_layer) == 10, "Soul save layout changed");
-uint8_t souls_dev_mask;
+uint16_t souls_dev_mask;
 
 void souls_give_bn5(int soul) {
 	if (soul >= 1 && soul <= SOULS_TEAM) souls.team |= (uint8_t)(1u << (soul - 1));
@@ -41,6 +41,7 @@ void souls_new_run(uint32_t seed) {
 	memset(&souls, 0, sizeof souls);
 	souls.seed = seed;
 	souls.held = (uint8_t)(souls_dev_mask & ((1u << SOULS) - 1));
+	souls.team = (uint8_t)(souls_dev_mask >> SOULS & ((1u << SOULS_TEAM) - 1));
 	/* (the Soul a Soul form brought from the start, run.soul_start) */
 	if (run.seed == seed && run.soul_start && run.form == RUN_FORM_SOUL_BN5) souls_give_bn5(run.soul_start);
 	if (run.seed == seed && run.soul_start && run.form == RUN_FORM_SOUL_BN4) souls_give_bn4(run.soul_start);

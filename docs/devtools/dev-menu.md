@@ -131,7 +131,9 @@ own HeatMan moved as Navi AI 25, ids 0x1C4-0x1C9, for the foes step and
 Souls then either). BN5's Souls and DarkChips have three:
 `souls=MASK` (a new run holding BN5's Souls, bit k Team Colonel's Soul
 7 + k: 1 Colonel's, 2 ShadowMan's, 4 NumberMan's, 8 TomahawkMan's, 0x10
-KnightMan's, 0x20 ToadMan's; UNITE on BN6's Custom screen in every battle,
+KnightMan's, 0x20 ToadMan's, then Team ProtoMan's, bit 6 + k their Soul
+1 + k: 0x40 ProtoSoul, 0x80 GyroSoul, 0x100 SearchSoul, 0x200 NapalmSoul,
+0x400 MagnetSoul, 0x800 MeddySoul; UNITE on BN6's Custom screen in every battle,
 the Souls installed wherever BN5's Navis are: [The proxy form](proxy-form.md)),
 `darkchips=MASK` (a new run holding DarkChips, bit k BN5's kind k, its id
 187 + k: BN6's four 0x2 DrkSword, 0x4 DarkInvs, 0x40 DarkThnd, 0x80

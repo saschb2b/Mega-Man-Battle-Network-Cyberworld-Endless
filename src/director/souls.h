@@ -62,7 +62,8 @@ unsigned souls_layer_bn4(void);
  * run.soul_start) */
 void souls_give_bn5(int soul);
 void souls_give_bn4(int soul);
-/* The dev flag's mask, for a new run's first Souls (devtools) */
-extern uint8_t souls_dev_mask;
+/* The dev flag's mask, for a new run's first Souls (devtools, --dev souls=MASK): bits 0-5 Team Colonel's (BN5's Souls
+ * 7-12), bits 6-11 Team ProtoMan's (BN5's Souls 1-6: 0x40 ProtoSoul) */
+extern uint16_t souls_dev_mask;
 
 #endif

@@ -3,8 +3,8 @@ cross-navis-team.md): BN5's own board and Darkloid, the team of the Navis
 whose Souls or Crosses the run holds, each Navi's turn and his command, a
 teammate's battle fought as MegaMan in his Soul or Cross on his HP, his
 being struck down, the team picked, a BonusPanel's roulette. (--dev
-souls=MASK holds BN5's Souls, a bit each from Colonel's; --setup's CROSS
-brings a Cross Navi; a team's board is its own, so a Navi's seed is one
+souls=MASK holds BN5's Souls, a bit each from Colonel's, then Team
+ProtoMan's from bit 6 (64 ProtoSoul); --setup's CROSS brings a Cross Navi; a team's board is its own, so a Navi's seed is one
 where his command can be taken from the first phase.)"""
 import os
 import sys
@@ -109,6 +109,12 @@ scene('command/elecman', """ElecMan's MagnetBarrier: no battle, no harm on the b
 scene('command/chargeman', """ChargeMan's BombLiberation: the dark panel he flies over freed with no battle.""",
       cross(5, ',god', 6), commanded('ChargeMan', 'BombLiberation', 'over', 'dark', None, ('moved', 'freed', 1), ('moved', 'orderpoints', -1)))
 
+# (ProtoSoul held: the real ProtoMan, Chaud's, in BN6's own body, list 6's 0x3B, his own WideSwrd)
+c = commanded('ProtoMan', 'WideSwrd', 'dark', 'dark', 'soul=1')
+c.insert(c.index(('do', 'board dark; wait 4')), ('expect', 'body=59'))
+scene('command/protoman', """A held Team ProtoMan Soul brings its own Navi: ProtoMan on the board in BN6's own body, his own WideSwrd
+      by a battle fought as MegaMan in ProtoSoul on his HP.""", soul(64, ',god'), c)
+
 c = Course(('expect', 'mate1~KnightMan'), *in_play('KnightMan'))
 c.command('dark').add(('expect', 'command=Liberation'), ('do', 'press DOWN'), ('expect', 'command=Pass'), ('do', 'press DOWN'),
                       ('expect', 'command=Liberation'))
@@ -135,6 +141,14 @@ scene('pick/changed', """The team's pick: A on another Navi takes him in the one
       soul(3), PICKED + [
     ('do', 'press UP; press UP'), ('expect', 'teamrow=Colonel'), ('do', 'press A'), ('expect', 'teampick=Colonel'),
     ('do', 'press START; wait 10')] + BRIEFED + [('expect', 'mate1~Colonel'), ('expect', 'inplay=MegaMan')])
+
+# (ProtoSoul held and SlashCross brought, a place for one: SlashMan keeps the WideSwrd he was lent, and the pick chooses)
+PROTO_SLASH = board(',souls=64', 5, ' --setup endless,0,0,0,3,0')
+scene('pick/protoman', """ProtoMan beside a Cross Navi of his command: ProtoMan and SlashMan both held for one place, the pick
+      lists both, and A on ProtoMan takes him in it.""", PROTO_SLASH, [
+    ('until', 'board=pick', 1500), ('expect', 'teampick=SlashMan'), ('expect', 'teamrow=GO'),
+    ('do', 'press UP; press UP'), ('expect', 'teamrow=ProtoMan'), ('do', 'press A'), ('expect', 'teampick=ProtoMan'),
+    ('do', 'press START; wait 10')] + BRIEFED + [('expect', 'mate1~ProtoMan'), ('expect', 'inplay=MegaMan')])
 
 
 def roulette(slot, before, *after):

@@ -54,14 +54,18 @@ enum { UNIT_DARKLOID, UNIT_BRUTE, UNIT_HAWK, UNIT_BLADIA };
 /* The team (docs/game/liberation/decision.md, The team): MegaMan first, then the Navis
  * the run holds, at most BN5's team of five: those whose BN5 Souls it
  * holds, each by BN5's id (a team record's +5, bn5_liberation.h's
- * BN5_LIB_NAVI_*), which is his Soul's number too (souls.h: bit k the Soul
- * of id 7 + k), and Gregar's Cross Navis it holds (the Cross brought, or
+ * BN5_LIB_NAVI_*), which is his Soul's number too (souls.h: Team
+ * Colonel's 7-12, Team ProtoMan's 1-6, docs/game/team-protoman.md, On a
+ * dark board), and Gregar's Cross Navis it holds (the Cross brought, or
  * those found), each by BN6's navi index (powers.c: HeatMan 1 .. ChargeMan
  * 5) past 0x20 */
 #define LIB_TEAM 5
-#define LIB_HELD 11      /* the Navis a run can hold: BN5's six Souls, Gregar's five Crosses */
-enum { MATE_MEGAMAN = 0, MATE_COLONEL = 7, MATE_SHADOWMAN, MATE_NUMBERMAN, MATE_TOMAHAWKMAN, MATE_KNIGHTMAN, MATE_TOADMAN,
+#define LIB_HELD 17      /* the Navis a run can hold: BN5's twelve Souls' (Team ProtoMan's and Team Colonel's), Gregar's five Crosses' */
+enum { MATE_MEGAMAN = 0, MATE_PROTOMAN, MATE_GYROMAN, MATE_SEARCHMAN, MATE_NAPALMMAN, MATE_MAGNETMAN, MATE_MEDDY,
+	MATE_COLONEL = 7, MATE_SHADOWMAN, MATE_NUMBERMAN, MATE_TOMAHAWKMAN, MATE_KNIGHTMAN, MATE_TOADMAN,
 	MATE_HEATMAN = 0x21, MATE_ELECMAN, MATE_SLASHMAN, MATE_ERASEMAN, MATE_CHARGEMAN };
+/* ... one of Team ProtoMan's, whose Soul the run holds (BN5's Souls 1-6) */
+static inline bool lib_mate_team(int navi) { return navi >= MATE_PROTOMAN && navi <= MATE_MEDDY; }
 /* ... a Cross Navi's BN6 navi index (1-5), 0 another */
 static inline int lib_mate_cross(int navi) { return navi >= MATE_HEATMAN && navi <= MATE_CHARGEMAN ? navi - MATE_HEATMAN + 1 : 0; }
 typedef struct {
