@@ -163,6 +163,7 @@ const char *guardian_rumor(int navi) {
 		[62] = "he's a walking arsenal!",
 		[63] = "nobody breaks free of his pull!",
 		[64] = "her medicine is no cure!",
+		[59] = "he's the old Net's ProtoMan,gone dark!",
 	};
 	return navi > 0 && navi < (int)(sizeof rumors / sizeof *rumors) ? rumors[navi] : NULL;
 }
@@ -315,6 +316,13 @@ static const struct { const char *first, *rematch, *revenge, *stronger, *defeat;
 		"I pulled you right in last time!|You just can't stay away,huh?",
 		"North and south,both mine now!|Feel the pull!",
 		"My field... It's gone..." },
+	/* (DarkProto, the older net's copy of ProtoMan gone dark: the swordsman's few words, the rival's ProtoMan none of his;
+	 * docs/game/team-protoman.md, ProtoMan) */
+	[59] = { "...So you're the one.|Draw. This won't take long.",
+		"You cut me down once.|The dark made my blade keener.",
+		"You fell to my blade before.|...Nothing has changed.",
+		"The dark runs deeper now.|So does my blade.",
+		"...The dark... fades...?" },
 	[64] = { "Oh my,you look unwell!|Time for your treatment!",
 		"You skipped your last checkup!|You won't get away this time!",
 		"My medicine knocked you out!|Ready for another dose?",

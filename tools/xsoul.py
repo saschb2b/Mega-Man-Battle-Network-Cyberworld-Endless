@@ -235,7 +235,8 @@ EXTRA_ART = ((5, 0x1C),)
 # ... and the effects so (their ids from 0xC0 in this order: ColonelSoul's ScreenDivide's three, ShadowSoul's slash,
 # TomahawkSoul's swing, the three BN6 redrew, the obstacle strike's shot's hit), a later walk's numbered after them; an
 # effect another track copied first is that track's number (BEFORE: the Navis' ScreenDivide, slash, swing, 0x14 and 0x02),
-# so the Souls' own are 0x03 at 0xC0 and 0x20 at 0xC1 (tools/bn5_twins.py's SHARED_ROWS names that one in the chips' copy)
+# so the Souls' own is 0x20 at 0xC0 (0x03, the slash, the Navis' since DarkProto's; tools/bn5_twins.py's SHARED_ROWS names it in
+# the chips' copy)
 EFFECT_ORDER = (0x48, 0x49, 0x4A, 0x17, 0x45, 0x03, 0x14, 0x02, 0x20)
 EFFECT_FIRST, EFFECT_LAST = 0xC0, 0xCF
 # (Team ProtoMan's, numbered apart from 0xD0: BN4's chips' units count theirs down from 0xCF, to 0xC2 so far, soul_room.h,

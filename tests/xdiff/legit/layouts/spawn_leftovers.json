@@ -73,6 +73,15 @@
     3
    ],
    "evidence": "LarkMan's attack's object (the third kind's 0xBA, moved): its spawner (0x080DDB48: push {r0,r2,r3,r5}; movs r0,#0xBA; bl 0x08003178; pop {r1-r3,r5}; then str r3,[r0,#0x78] and str r0,[r3]) hands the spawn its caller's r3, a place in RAM it also keeps at +0x78, so +0x3C starts as each game's own address of it (BN5's 0x02038D30, BN6's 0x02038598: larkman_v1 at t505). Its init (0x080DD85E) calls 0x080DDB7C, which writes the upper half (strh r0,[r5,#0x3E] at 0x080DDBD0, its height 0x20); its code (0x080DD820-0x080DDE20) reads and writes no other byte of +0x3C-0x3F: bytes 2 and 3 compared, the low half each game's leftover (BN5's 0xB338, BN6's 0xAAE8 once the height is set; larkman_sp at t469)."
+  },
+  {
+   "kind": "T3",
+   "type": "0x6B",
+   "word": "0x4",
+   "compares": [
+    0
+   ],
+   "evidence": "DarkProto's (BN5's ProtoMan's, the third kind's 0x6B, moved): his state at BN5 0x080F2C5C loads r4 with a pointer into his own table (ldr r4,=0x080F2A10 at 0x080F2C68; adds r4,#4 at 0x080F2C72) and calls the 0x6B's spawner (0x080D3620: push {r0,r1,r5}; movs r0,#0x6B; bl 0x08003178; then strb r2,[r0,#4], its count) at 0x080F2C90 after routines that keep r4 (0x080014A6, 0x0800DBAE, 0x08016C56), so the spawn's +4 word is that pointer in each game's copy of his block (BN5's 0x080F2A14, BN6's XN_TEAM_CODE + 0x7C), its low byte then the count (darkproto_v1 at t52: BN5 0x080F2AFF, BN6's read as 0x080F2A97, the low byte 0xFF in both). Its routine (0x080D3570-0x080D363E) reads and writes +4 alone, a byte (ldrb, subs, strb at 0x080D35C8-0x080D35CC), and no +5-+7; the engine's it calls are CosmoMan's 0x79's (0x08016126, 0x0800325C, 0x08016760, 0x08016B90, 0x08016B1A, 0x080167B0, 0x08008B6E, 0x08016B88) and 0x08016162 on its collision data (ldr r0,[r5,#0x54] at 0x080D3604), none reading the object's +5-+7. The low byte is compared (compares: byte 0), the upper three are each copy's leftover."
   }
  ]
 }

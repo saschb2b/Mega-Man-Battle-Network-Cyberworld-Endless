@@ -305,10 +305,10 @@ KEPT = {
 # BN5, what it names ('sprite': its list x 4 and number, two bytes; 'effect': an effect id), BN6's (list, number) or id, the
 # track whose numbers they are, and why
 SHARED_ROWS = (
-    dict(at=0x080C6C52, kind='effect', to=0xC1, track='souls',
+    dict(at=0x080C6C52, kind='effect', to=0xC0, track='souls',
          why="the obstacle strike's shot's effect (the table 0x080C6C08's row 12, +2: the parameter the strike spawns the third "
              "kind's 0x12 with, BN5 0x080CAB40; the chips' Vulcan shots their own rows): BN5's 0x20, whose sprite BN6 has none "
-             "of by its bytes, copied by the Souls at their 0xC1 (tools/xsoul.py's EFFECT_ORDER)"),
+             "of by its bytes, copied by the Souls at their 0xC0 (tools/xsoul.py's EFFECT_ORDER; their 0x03 the Navis' since DarkProto)"),
 )
 
 
@@ -417,6 +417,8 @@ TYPES = {
     (3, 0xC6): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
     (3, 0xC8): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
     (3, 0xB0): ('moved', None, 'navis', "LarkMan's: " + NO_TWIN),
+    (1, 0x10): ('moved', None, 'navis', "DarkProto's (BN5's ProtoMan): " + NO_TWIN),
+    (3, 0x6B): ('moved', None, 'navis', "DarkProto's (BN5's ProtoMan): " + NO_TWIN),
     (3, 0xBB): ('moved', None, 'navis', "LarkMan's: " + NO_TWIN),
     (3, 0x36): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x37): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),

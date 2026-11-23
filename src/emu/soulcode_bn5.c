@@ -612,7 +612,7 @@ static const XvImm imms[] = {
 	{ 0x0800F9AE, THUMB_MOVS, 0, 0, 0x1A, 0xCC },   /* its family: CurAction 0x1a in BN5, the Souls' 0xcc in BN6 (xattack_grow.h) */
 	{ 0x0800FA10, THUMB_MOVS, 0, 0, 0x50, 0xC3 },   /* its family: CurAction 0x50 in BN5, the Souls' 0xc3 in BN6 (xattack_grow.h) */
 	{ 0x0800FC00, THUMB_MOVS, 0, 0, 0x3D, 0xC4 },   /* its family: CurAction 0x3d in BN5, the Souls' 0xc4 in BN6 (xattack_grow.h) */
-	{ 0x08012066, THUMB_MOVS, 4, 0, 0x3, 0xC0 },   /* its effect: 0x3 in BN5, 0xc0 in BN6 */
+	{ 0x08012066, THUMB_MOVS, 4, 0, 0x3, 0xB4 },   /* its effect: 0x3 in BN5, 0xb4 in BN6 */
 	{ 0x080CAA7E, THUMB_ADDS, 4, 0, 0x17, 0xA3 },   /* its effect: 0x17 in BN5, 0xa3 in BN6 */
 	{ 0x080CD3E4, THUMB_MOVS, 2, 0, 0x2D, 0xB9 },   /* its sprite: list 4 0x2d in BN5, list 4 0xb9 in BN6 */
 	{ 0x080D4CBA, THUMB_LDR, 0, 2, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
@@ -652,22 +652,20 @@ static const SoulRoute routes[] = {
 };
 /* the effects it spawns of another track's install, one BN6 number a BN5 effect: present before the Souls' install */
 static const uint8_t shared_effects[] = {
-	0xA0, 0xA2, 0xA3, 0xA6, 0xA8, 0xA9, 0xAA,
+	0xA0, 0xA2, 0xA3, 0xA6, 0xA8, 0xA9, 0xAA, 0xB4,
 };
 /* BN5's sprites its code draws that BN6 has none of by their bytes: copied into SOULS_ART (past it FREE_SOULS_ART), listed at a number of a grown list
  * (list 0 the Souls' own; another's list a number of the track tools/bn5_objects.py names, whose copy serves where it stands first) */
 static const XvSprite sprites[] = {
-	{ 5, 0x03, 0, 0x54, SOULS_ART + 0x0, 0x3000 },
-	{ 4, 0x20, 0, 0x57, SOULS_ART + 0x3000, 0x1D00 },
-	{ 5, 0x1C, 0, 0x58, SOULS_ART + 0x4D00, 0x1900 },
-	{ 3, 0x1F, 0, 0x4E, SOULS_ART + 0x6600, 0x400 },
+	{ 4, 0x20, 0, 0x57, SOULS_ART + 0x0, 0x1D00 },
+	{ 5, 0x1C, 0, 0x58, SOULS_ART + 0x1D00, 0x1900 },
+	{ 3, 0x1F, 0, 0x4E, SOULS_ART + 0x3600, 0x400 },
 	{ 3, 0x10, 0, 0x66, SOULS_TEAM_ART + 0x0, 0x500 },
 	{ 4, 0x16, 0, 0x67, SOULS_TEAM_ART + 0x500, 0x1F00 },
 };
 /* BN5's effects its code spawns that BN6 has none of: at an id of the grown table, BN5's entry with its sprite as listed above */
 static const SoulEffect effects[] = {
-	{ 0x03, 0xC0, 0, 0x54, 0x00, 0x00 },
-	{ 0x20, 0xC1, 5, 0xFC, 0x00, 0x00 },
+	{ 0x20, 0xC0, 5, 0xFC, 0x00, 0x00 },
 	{ 0x68, 0xD0, 2, 0x8B, 0x00, 0x00 },
 };
 /* bytes of its raw tables BN6 numbers otherwise */

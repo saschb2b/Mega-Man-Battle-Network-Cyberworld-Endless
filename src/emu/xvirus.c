@@ -264,7 +264,8 @@ static void imms_patch(const XVirusFamily *f, const XvBlock *b, uint8_t *code) {
 	}
 }
 
-#define BLS_MAX 256
+/* (a block's BLs at most: DarkProto's code, BN5's ProtoMan's, holds 272 in one block) */
+#define BLS_MAX 512
 
 /* ---- its shims (xvirus_shim.h), in its home after its held chips ---- */
 

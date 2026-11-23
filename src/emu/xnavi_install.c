@@ -461,6 +461,8 @@ int xnavi_bn6_id(int id) {
 	return -1;
 }
 
+static bool bn5_in;   /* (BN5's Navis put in by xnavi_install_all: the ones after the chips' code follow, xnavi_install_after_chips) */
+
 void xnavi_install_all(int which) {
 	static bool done;
 	if (done || !emu_ready() || which == XNAVI_NONE) return;
@@ -469,10 +471,20 @@ void xnavi_install_all(int which) {
 	if (which == XNAVI_CONTROL) xnavi_install(&xnavi_control);
 	else {
 		xnavi_objects_install();
-		for (int i = 0; i < xnavi_bn5_count; ++i) xnavi_install(xnavi_bn5[i]);
+		for (int i = 0; i < xnavi_bn5_count; ++i)
+			if (!xnavi_bn5[i]->after_chips) xnavi_install(xnavi_bn5[i]);
 		int dark = xnavi_bn6_id(BN5_DARK_SOUL_ID);
 		if (dark >= 0) xnavi_dark_install(dark);
+		bn5_in = true;
 	}
+}
+
+void xnavi_install_after_chips(void) {
+	static bool done;
+	if (done || !bn5_in) return;
+	done = true;
+	for (int i = 0; i < xnavi_bn5_count; ++i)
+		if (xnavi_bn5[i]->after_chips) xnavi_install(xnavi_bn5[i]);
 }
 
 int xnavi_bn4_id(int id) {

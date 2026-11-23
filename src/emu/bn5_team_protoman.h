@@ -55,4 +55,17 @@
                                        * setPanelType (0x080E24F0) on each of eight panels, */
 #define BN5_MAGNET_PANELS 0x080E2518u /* ... a byte pair (column, row) each: columns 1, 3, 4, 6 of rows 1 and 3 */
 
+
+/* DarkProto, BN5's ProtoMan (AI 1, ids 0x101-0x104, V2 named DarkProt; BN6's Navi AI 26, ids 0x1F0-0x1F3): installed after BN5's
+ * chips' code (XNavi.after_chips), his shield and blade the chips' copies of their types, his afterimage LarkMan's */
+#define BN5_PROTO_CODE         0x080F2998u /* his state table, struct2 and code, to 0x080F3F58 */
+#define BN5_PROTO_AREAGRAB     0x080F2C2Cu /* the pool word his attack's chip is (ldr r0,=0x75 at 0x080F2A7A, BN5's AreaGrab; BN6's
+                                              0xA3 by its name), handed to BN5's chip writer at 0x080F2A7C */
+#define BN5_PROTO_AFTERIMAGE   0x080F3266u /* his spawn of the swords' afterimage (0x080E36DC, BN5_AFTERIMAGE_SPAWN): r4's two low
+                                              bytes his own battle sprite, list 2 (movs r1,#8 at 0x080F3252) 0x1 (movs r2,#1 at
+                                              0x080F3254), added and shifted in after two bytes of his own */
+#define BN5_PROTO_SHIELD_SPAWN 0x080F3C2Au /* his call of the shield's spawner 0x080CA454 (the third kind's 0x2B, Guard's and
+                                              CrsShld's, the chips' copy run): its kind 3 his own battle sprite, row 3 of the
+                                              shield's kinds table 0x080CA2D8 (six bytes a row: list x 4, number, ...) */
+
 #endif
