@@ -230,15 +230,16 @@ void spins_sync(void) {
 /* SoulT+1's place in the layer about to be offered (docs/game/navicust.md,
  * 11; navicust_set_soul): open while the run held a Soul as the layer was
  * made (souls_layer: the same on a CONTINUE's rebuild) or its guardian,
- * one of BN5's Team Colonel, gives one it held none of, whose draft it
+ * one of BN5's Team Colonel or Team ProtoMan, gives one it held none of, whose draft it
  * leads; never where the core has no program 48 (BN5's ROM not read). */
 void soult_sync(void) {
 	bool gives = false;
 	for (int i = 0; i < layer.nobj; ++i) {
 		int navi = layer.obj[i].param;
-		if (layer.obj[i].type == OBJ_BOSS && guardian_older(navi)) gives = !(souls_layer() >> (navi - GUARDIAN_OLDER_FIRST) & 1);
+		if (layer.obj[i].type == OBJ_BOSS && (guardian_older(navi) || guardian_team(navi)))
+			gives = !(souls_layer_bn5() >> (guardian_bn5_ai(navi) - 1) & 1);
 	}
-	navicust_set_soul(xncp_installed() && (souls_layer() || gives), gives);
+	navicust_set_soul(xncp_installed() && (souls_layer_bn5() || gives), gives);
 }
 
 /* A key item the game gave (EV_ITEM_GIVEN): a ScrtData, which MegaMan

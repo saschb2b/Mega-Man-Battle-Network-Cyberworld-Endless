@@ -157,6 +157,12 @@ const char *guardian_rumor(int navi) {
 	case 27: return "the old Net's spirits fight at his side!";
 	case 28: return "no attack has ever dented his armor!";
 	case 29: return "his music freezes Navis in place!";
+	/* (Team ProtoMan's, as the net tells of the older net's other team) */
+	case 60: return "he fights from up in the sky!";
+	case 61: return "he never misses a shot!";
+	case 62: return "he's a walking arsenal!";
+	case 63: return "nobody breaks free of his pull!";
+	case 64: return "her medicine is no cure!";
 	default: return NULL;
 	}
 }
@@ -287,6 +293,33 @@ static const struct { const char *first, *rematch, *revenge, *stronger, *defeat;
 		"Ribbit ribbit! My song stunned you!|Shall I play it again?",
 		"A whole new symphony,ribbit!|Louder than ever!",
 		"The concert... is over... ribbit..." },
+	/* BN5's Team ProtoMan, their partners' second guardians (our words too, a habit each from his look as the six's:
+	 * GyroMan a pilot, SearchMan a sniper's few words, NapalmMan a walking tank, MagnetMan his pull, Meddy a nurse) */
+	[60] = { "Whirrr! Propeller's spinning!|Try dodging me from up here!",
+		"You shot me down once.|I'm flying higher this time!",
+		"Roger! Target grounded last time!|Ready for another run?",
+		"New engine,new rotors! Whirrr!|Nothing outflies me now!",
+		"Mayday... Mayday... Going down..." },
+	[61] = { "Target acquired.|You're already in my sights.",
+		"You slipped my scope once.|I've corrected my aim.",
+		"One shot,one hit. Like last time.|Hold still,MegaMan.",
+		"My scope sees through anything now.|There's nowhere to hide.",
+		"Target... lost... Mission failed..." },
+	[62] = { "Fire in the hole!|I'll blast you off the map!",
+		"You dodged my shells last time!|Now I've got more ammo!",
+		"Kaboom! You went up in flames!|Back for another blast?",
+		"Every cannon's loaded now!|Fire in the hole!",
+		"Out of... ammo... Kaboom..." },
+	[63] = { "Heh... You feel that,MegaMan?|Nobody escapes my pull!",
+		"You broke free of my pull once.|My field is stronger now!",
+		"I pulled you right in last time!|You just can't stay away,huh?",
+		"North and south,both mine now!|Feel the pull!",
+		"My field... It's gone..." },
+	[64] = { "Oh my,you look unwell!|Time for your treatment!",
+		"You skipped your last checkup!|You won't get away this time!",
+		"My medicine knocked you out!|Ready for another dose?",
+		"I've mixed a stronger dose!|This won't hurt... much!",
+		"Oh dear... I need... a doctor..." },
 	/* BN5's Nebula Navis, the deep's pool's (our words too) */
 	[65] = { "Target sighted from above.|You won't see me strike!",
 		"You clipped my wings once.|They grew back sharper.",
@@ -433,7 +466,7 @@ const char *guardian_soul_words(int navi, int kind, bool held, const char *chip,
 		"an obstacle", "a Wind", "a Break" };
 	const char *name = guardian(navi)->name;
 	if (held) {
-		snprintf(s, sizeof s, "@M %s's Soul data... We already have his Soul!", name);
+		snprintf(s, sizeof s, "@M %s's Soul data... We already have %s Soul!", name, navi == GUARDIAN_TEAM_LAST ? "her" : "his");   /* (Meddy's) */
 		return s;
 	}
 	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
