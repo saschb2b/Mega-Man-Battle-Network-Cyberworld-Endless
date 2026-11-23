@@ -104,6 +104,7 @@ static void enter(void) {
 }
 
 static void leave(void) {
+	music_fast_drop();
 	music_carry_drop();
 	pet_leave();
 	director_pick_shut();
@@ -208,6 +209,8 @@ static void save_runs_out(void) {
 }
 
 void emu_keep_run(void) {
+	/* (fast forward's music given back: the game's own kept where it was heard) */
+	music_fast_held();
 	save_runs_out();
 	if (!director_can_suspend() && director_settles()) {
 		emu_sync();
@@ -256,6 +259,7 @@ static bool frame_goes_on(int i, int speed) { return speed > 1 ? i < speed && !d
  * under it (audio.h, music_carry_held), where no screen plays its own (the
  * Jukebox) and no other core sounds (a NetBattle from the Net Square) */
 static void held(void) {
+	music_fast_held();
 	if (!pet_plays_music() && !online_visit_held() && !online_visit_waiting()) music_carry_held();
 }
 
@@ -263,9 +267,9 @@ static void update(void) {
 	emu_drawing = false;
 	if (soft_reset()) return;
 	/* (a NetBattle from the Net Square: the game's core holds still under it) */
-	if (online_visit_held()) { online_visit_held_frame(keys_from_buttons()); return; }
+	if (online_visit_held()) { music_fast_held(); online_visit_held_frame(keys_from_buttons()); return; }
 	/* (the link to the Square dropped: the game's core holds still under the wait) */
-	if (online_visit_waiting()) { online_visit_wait_frame(); return; }
+	if (online_visit_waiting()) { music_fast_held(); online_visit_wait_frame(); return; }
 	/* (a reward pick up, docs/game/reward-pick.md: the game's core holds still under it, its keys the screen's) */
 	if (director_pick_shown()) {
 		director_pick_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons());
@@ -303,6 +307,7 @@ static void update(void) {
 		if (devtools_open()) { frame_keys(); held(); return; }
 		music_carry_resume();
 		if (!dev_fast) fast_forward_update();
+		music_fast_update(!dev_fast && fast_forward_running());
 		for (int i = 0; frame_goes_on(i, speed); ++i) {
 			if (started) TIMED("director", after_frame());
 			emu_frame_as(cinema_keys(frame_keys()), dev_fast ? 0 : fast_forward_how(i));
@@ -315,6 +320,8 @@ static void update(void) {
 	if (devtools_open()) { held(); return; }   /* the game holds still under the dev menu */
 	music_carry_resume();
 	if (!dev_fast) fast_forward_update();
+	/* (fast forward's music: the song at the GBA's pace on the engine's MP2K, audio.h) */
+	music_fast_update(!dev_fast && fast_forward_running());
 	for (int i = 0; frame_goes_on(i, speed); ++i) {
 		/* (the way into BN6's folder editor is pressed a frame at a time, run through at once: its keys each frame) */
 		if (i && director_lab_editing()) keys = frame_keys();

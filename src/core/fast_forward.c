@@ -12,6 +12,10 @@ static int speed = FAST_DEFAULT;
 void fast_speed_set(int s) { speed = s < FAST_OFF ? FAST_OFF : s > FAST_MOST ? FAST_MOST : s; }
 int fast_speed(void) { return speed; }
 
+static bool music_own_pace = true;
+void fast_music_set(bool own_pace) { music_own_pace = own_pace; }
+bool fast_music(void) { return music_own_pace; }
+
 const char *fast_speed_word(int s) {
 	static const char *const words[FAST_MOST + 1] = { "off", "off", "2x", "3x", "4x" };
 	return words[s < FAST_OFF ? FAST_OFF : s > FAST_MOST ? FAST_MOST : s];

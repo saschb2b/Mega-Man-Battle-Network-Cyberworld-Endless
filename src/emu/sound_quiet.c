@@ -21,6 +21,9 @@ static int levels[2] = { -1, -1 };
 static volatile int shares[2] = { SOUND_SHARE_ALL, SOUND_SHARE_ALL };
 /* (a state just loaded: every track told at the next frame) */
 static bool loaded;
+/* (the music away in the engine, as it was when the shares were taken) */
+static volatile bool away;
+static bool away_taken;
 
 /* (on the core's thread where it has one) */
 static HookAct vol_pit_set(HookRegs *r, void *user) {
@@ -50,11 +53,13 @@ static HookAct vol_pit_set(HookRegs *r, void *user) {
 /* the shares of the levels heard now, true where either changed */
 static bool take_levels(void) {
 	int m = sound_heard_music(), e = sound_heard_effects();
-	if (m == levels[0] && e == levels[1]) return false;
+	bool a = away;
+	if (m == levels[0] && e == levels[1] && a == away_taken) return false;
 	levels[0] = m;
 	levels[1] = e;
+	away_taken = a;
 	int louder = m > e ? m : e;
-	shares[0] = sound_heard_share(m, louder);
+	shares[0] = a ? 0 : sound_heard_share(m, louder);
 	shares[1] = sound_heard_share(e, louder);
 	return true;
 }
@@ -98,3 +103,5 @@ void sound_quiet_frame(void) {
 }
 
 void sound_quiet_loaded(void) { loaded = true; }
+
+void sound_quiet_music_away(bool a) { away = a; }

@@ -239,6 +239,13 @@ void gba_sound_frame(const int8_t *right, const int8_t *left, int n) {
 	G.frame_start = end;
 }
 
+void gba_sound_pace(int per_frame) {
+	if (!G.left) return;
+	double rate = per_frame > 0 ? per_frame * ((double)CLOCK / FRAME) : OUT_RATE;
+	blip_set_rates(G.left, CLOCK, rate);
+	blip_set_rates(G.right, CLOCK, rate);
+}
+
 int gba_sound_avail(void) { return G.ready ? blip_samples_avail(G.left) : 0; }
 
 int gba_sound_read(int16_t *out, int frames) {

@@ -189,7 +189,10 @@ static void pull_audio_from(struct mCore *c) {
 		blip_read_samples(l, tmp, got, 1);
 		blip_read_samples(r, tmp + 1, got, 1);
 		if (unheard) { tail_take(tmp, got); continue; }
-		if (own) tail_join(tmp, got);
+		if (own) {
+			tail_join(tmp, got);
+			emu_sound_mix(tmp, got);
+		}
 		emu_sound_put(tmp, got);
 	}
 	/* (a frame heard: the next unheard one's first samples are its tail) */
