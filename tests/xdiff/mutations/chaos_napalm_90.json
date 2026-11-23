@@ -1,0 +1,10 @@
+[
+ {
+  "name": "NapalmSoul's chaos charge Team Colonel's",
+  "spec": "chaos_napalm_90",
+  "poke": [
+   "08E91BA6:0028"
+  ],
+  "what": "NapalmSoul's chaos power's charge time at level 0 (BN6's 0xB7's row of the grown charge times, SOULS_CHARGES + 10 x 0xB7) 40 frames, Team Colonel's rows', where BN5's row 0x37 (0x0801CA68) holds 70: charged 30 frames early, so the hold of 90 is released in phase 2, DarkMetr where BN5's fails"
+ }
+]
