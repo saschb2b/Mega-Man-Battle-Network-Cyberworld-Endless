@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted Navis"
 description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids, Team ProtoMan's six (ProtoMan as DarkProto) and Nebula's LarkMan and GridMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:45:00Z }
 ---
 
 # Transplanted Navis

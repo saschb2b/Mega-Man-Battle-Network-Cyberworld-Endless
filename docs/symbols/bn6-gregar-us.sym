@@ -1350,6 +1350,8 @@
 080C825C three_falling_rocks_third_kind_0x1d
 080C827C team_protoman_gyroman_3
 080C834A spawns_bn6_0x12
+080CA2D8 kinds_table
+080CA454 called_bn5_proto_shield_spawn
 080CA91D souls_code_bn6_5
 080CABCA spawned_by
 080CAC3C BN6_THUNDER
@@ -1492,6 +1494,10 @@
 080F2334 bn5_navi_frame
 080F2374 bn5_navi_tables
 080F2749 bn5_navi_nullsub
+080F2C2C team_protoman_protoman
+080F3252 team_protoman_protoman.8
+080F3254 team_protoman_protoman.1
+080F3266 list_2_by_movs_r1
 080F3658 BN6_NAVI_OBJECT
 080F367C BN6_NAVI_FRAME
 080F36C4 BN6_NAVI_REF_PRESTEP
@@ -1500,6 +1506,7 @@
 080F36D0 BN6_NAVI_REF_POST
 080F36D4 BN6_NAVI_TABLES
 080F3BE8 BN6_NAVI_NULLSUB
+080F3C2A team_protoman_protoman_2
 080F3D7C held_chips
 080F3E3C his_code
 080F3E71 his_states
