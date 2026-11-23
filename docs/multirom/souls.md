@@ -454,6 +454,14 @@ the next.
   capsule's bit. The differential's trace holds elements 8 and 9 and the
   screen's two capsules' entries since version 9 (each entry by its chip,
   BN5's ids as the registry's).
+  `soul_meddy_capsules` holds the two capsules to BN5's on the second
+  Custom screen to t700, the cursor over them and their window, and
+  `soul_meddy_capsule_used` takes BlkCapsl onto a Cannon whose hit
+  blinds CanGard for 480 frames in both, to t760. Both run under the
+  replay, which keys the moved set-up's draw as BN5's, BN6's screen
+  opening a frame later than BN5's (mask 052: the per-frame draws of
+  BN6's four frames more at a turn's change, which the replay finds no
+  twin for); their mutations FAIL.
   Open: `soul_napalm_charge` ends at t320, before CanGard's last frames,
   where the games part on a fourth-kind object of his (BN5's let go at
   t321, BN6's 0x11 still in play): not traced yet. His Chaos Unison
