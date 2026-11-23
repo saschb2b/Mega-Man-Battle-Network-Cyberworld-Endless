@@ -32,7 +32,7 @@ import os
 import re
 
 import shards
-from xdiff_snap import NODE, OBJ_ACTION, ROOT, rom
+from xdiff_snap import NODE, OBJ_ACTION, ROOT, SPRITE, T1_MOVED, rom
 
 PLAYER_SOULS = 0x78            # (xdiff_snap.PLAYER_SOULS: BN6's Souls block, side 0, in the player block)
 SOUL_ID, SOUL_TURNS = 0x00, 0x02   # (BN6_SOUL_ID, BN6_SOUL_TURNS: src/emu/bn6_forms.h)
@@ -52,6 +52,7 @@ POWERS = (5, 6, 7, 8)          # (BN6_AI_POWER_CHIP, _A, _CHARGE, _C)
 # BN6_AI_SPARE: BN4's +5, +8, +9, +0x2C, +0x2D, ...): their places in BN6's units
 SHOTS4, BUTTON4, FRAMES4 = 0xF0, 0xF2, 0xF3
 TURNS_USED4, TURNS4 = 0x18, 0x19
+LOCK4, LOCK6 = 0x3A, 0x19                 # (his lock-out after a chip: BN4's u16 at +0x3A, BN6's byte at +0x19, megaman_lockout's)
 COUNT4 = 0x32                             # (BN4's B counter, u16, at its own place)
 COUNT_CHIP4 = 0xF5                        # (... its A counter, BN4's +0x30, u16: BN6's keys hold +0x30, so a leftover, after +0x2C)
 TIME_CHIP4 = 0xFC                         # (BN4's chip charge's time, its cache +0x34 at BN6_AI_SPARE_LAST)
@@ -67,6 +68,21 @@ REQUESTS, RAPID4, CHARGED6, RAPID_AT = 0x44, 0x20, 0x02, 6   # (... at six asked
 CHAOS6_NONE = 0xFF                        # (BN6's +0x11, its chip's chaos power, 0xFF none: BN6_AI_POWER_CHIP's note)
 GLOW4, GLOW6, GLOW_SLOT = ('T4', 0x05), ('T4', 0x08), 0x58
 SOUL_OBJECTS4 = (('T4', 0x44),)
+# A Soul's companion (NumSoul's, FireSoul's: BN4_SOUL_COMPANION's first-kind 0x57) as BN6's companion overlay, its type 0x56 of
+# the kind SOUL_OVERLAY_BN4 (src/emu/soulcompanion.c), told as one by tools/xdiff_bn4.py's t1_moved
+COMPANION = ('T1', T1_MOVED | 0x57)
+COMPANION_TYPES = (0x57, 0x56)            # (its type, +1, in each)
+SOUL_OVERLAY_BN4 = 61                     # (soul_room.h)
+OVERLAY = 0x50                            # (BN6_T1_OVERLAY: MegaMan's overlay, BN4's companion kept at his AI +0x48)
+SPAWN_FLAGS6 = 0x04                       # (+0: both spawns OR in 0x04 (BN6's 0x080C5D18 0x14); BN4's init clears it where the battle has
+                                          # appeared, 0x080CC438-0x080CC43E, BN6's overlay keeps it)
+PLACE = 0x08                              # (its sprite state's +8, u16: the renderer's tile place, given in the order things are drawn)
+MODE4, DRAWN4 = 0x09, 8                   # (+9: BN4's companion's mode, 8 drawn, 0x080CC466; BN6's overlay has none)
+MASKS6 = 0x54                             # (+0x54: BN6's overlay's masks by animation, its kind's)
+WORD = 0x04                               # (+4, +5: BN4's its sprite's list offset and number; BN6's its kind and 0)
+COMPANIONS4 = 0x18068                     # (BN4_FORM_COMPANIONS: a u16 by form)
+OWN_ART = (0x18, 0x28)                    # (a sprite state's words into its sprite: xdiff_bn4.py's OWN_ART)
+SPRITE_STATE = 0x2C                       # (its bytes: xdiff_bn4_opening.SPRITE_STATE)
 COLL_MET = 0x68                           # (BN6_COLL_MET: the regions a collision data met, BN4's +0x4C at BN6's place in the trace)           # (a Soul's object spawned as he takes the form: SrchSoul's, tools/xchiprecipe_bn4.py SOUL_ENTERS)
 
 
@@ -157,6 +173,8 @@ class Souls4:
 
     def __init__(self, ta, tb, rom4, lag):
         self.names, self.forms, self.powers, self.frames = rules(), bn4_forms(), power_map(rom4), form_frames(rom4)
+        self.rom4, self.trace_b = rom4, tb
+        self.companion_first = {}   # (the companion's animation, its sprite's and its +0x11, at its first difference read)
         self.a, self.b, self.lag = {f['t']: f for f in ta['frames']}, {f['t']: f for f in tb['frames']}, lag
         self.unison_last = None   # (BN4's last frame of its unison)
         self.since_unison = False  # (BN4's MegaMan in no state but his ready one since it: unison var)
@@ -193,8 +211,8 @@ class Souls4:
 
     def mask(self, d, fa, fb):
         """the rule's name that reads d as the same state, None where none"""
-        for key, rule in (('unison', self.unison), ('soul object', self.soul_object), ('held', self.held), ('unison var', self.unison_var), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
-                          ('soul', self.soul), ('pending', self.pending), ('form frames', self.form_frames),
+        for key, rule in (('unison', self.unison), ('soul object', self.soul_object), ('companion', self.companion), ('held', self.held), ('unison var', self.unison_var), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
+                          ('soul', self.soul), ('lockout', self.lockout), ('pending', self.pending), ('form frames', self.form_frames),
                           ('shots', self.shots), ('presses', self.presses), ('charge', self.charge)):
             if key in self.names and rule(d, fa, fb):
                 return self.names[key]
@@ -252,6 +270,81 @@ class Souls4:
         if isinstance(d.role, tuple) and d.role[:2] == MEGAMAN and d.part == 'coll' and COLL_MET <= d.off < COLL_MET + 4:
             return isinstance(d.a, int) and isinstance(d.b, int) and d.a & ~d.b == 0
         return False
+
+    def companion(self, d, fa, fb):
+        """a Soul's companion, BN4's first-kind 0x57 and BN6's companion overlay of BN4's Souls' kind: its type, its word (BN4's
+        sprite's list offset and number, BN6's kind and its palette's 0), its flags (the 0x04 both spawns set, BN6's kept), the renderer's tile place, BN4's mode
+        (drawn) where BN6's overlay has none, BN6's masks by animation, its sprite's words by their offsets into the same
+        bytes (its last set-up's CRC32 alike); and MegaMan's keeping of it, BN6's at his +0x50 and BN4's at his AI +0x48 (the
+        trace's leftovers), each the companion's"""
+        if not isinstance(d.role, tuple):
+            return False
+        num = lambda v: v[1] if isinstance(v, tuple) and len(v) == 2 and v[0] == 'raw' else v if isinstance(v, int) and not isinstance(v, bool) else None
+        a, b = num(d.a), num(d.b)
+        if d.role[:2] == COMPANION and d.part == 'obj':
+            form = fa.fr.get('player', b'')[BN4_NAVI_FORM] if len(fa.fr.get('player', b'')) > BN4_NAVI_FORM else 0
+            word = int.from_bytes(self.rom4[COMPANIONS4 + 2 * form:COMPANIONS4 + 2 * form + 2], 'little') if self.rom4 else 0
+            if d.off == 0:
+                return a is not None and b is not None and a ^ b == SPAWN_FLAGS6 and bool(b & SPAWN_FLAGS6)
+            if d.off == 1:
+                return (a, b) == COMPANION_TYPES
+            if d.off == WORD:
+                return word != 0 and (a, b) == (word & 0xFF, SOUL_OVERLAY_BN4)
+            if d.off == WORD + 1:
+                return word != 0 and (a, b) == (word >> 8, 0)
+            if d.off == MODE4:
+                return (a, b) == (DRAWN4, 0)
+            if MASKS6 <= d.off < MASKS6 + 4:
+                return a == 0 and b is not None and b != 0
+            sp = SPRITE['T1']
+            if sp + PLACE <= d.off < sp + PLACE + 2:
+                return True
+            if sp <= d.off < sp + SPRITE_STATE and a is not None:
+                return self.companion_sprite(d, fa, fb, a, b)
+            return False
+        if d.role[:2] != MEGAMAN:
+            return False
+        mate = next((x for x in fa.fr['objs'] if isinstance(x.role, tuple) and x.role[:2] == COMPANION), None)
+        if mate is None:
+            return False
+        if d.part == 'obj' and d.off == OVERLAY:
+            return a == 0 and isinstance(d.b, tuple) and len(d.b) == 3 and str(d.b[0]).startswith(f'T1:{COMPANION[1]:#x}#')
+        if d.part == 'ai' and b == 0 and a is not None:
+            o = self.mm(fa.fr)
+            at = o.ai.find(mate.addr.to_bytes(4, 'little')) if o is not None and o.ai is not None else -1
+            return at >= 0 and at <= d.off < at + 4
+        return False
+
+    def companion_sprite(self, d, fa, fb, a, b):
+        """its sprite's state at BN6's of BN4's same fight frame while its animation is the one its init set (his, before the
+        fight), which runs by the fight's frames in both (each drawn mode's sprite update, BN4 0x080CC5E8 / BN6 0x080C5D0C,
+        unless the time stop holds; FireMan's companion's the same, xdiff_bn4.py navi_opening_art): its words into its sprite
+        by their offsets into the same bytes (its last set-ups' CRC32 alike), its other bytes as they are. Once he takes
+        another, it follows his, BN6's a frame later as all of his: compared as ever, its words into its sprite by their
+        offsets"""
+        from xdiff_bn4 import arts_set
+        sp, t = SPRITE['T1'], fa.fr['t']
+        fs = self.b.get(t)
+        oa = next((x for x in fa.fr['objs'] if x.role == d.role), None)
+        ob = next((x for x in fs['objs'] if x.role == d.role), None) if fs else None
+        if oa is None or ob is None:
+            return False
+        now = (oa.o8(sp), oa.o8(0x11))
+        if self.companion_first.setdefault(d.role, now) != now:
+            self.companion_first[d.role] = None   # (the opening's over for good: his next animations follow his at the lag)
+        opening = self.companion_first[d.role] == now
+        if not opening:
+            ob = next((x for x in fb.fr['objs'] if x.role == d.role), None)
+            if ob is None:
+                return False
+        if sp + OWN_ART[0] <= d.off < sp + OWN_ART[1] and (d.off - sp) % 4 == 0:
+            tb = t if opening else fb.fr['t']
+            art_a = arts_set(fa.trace).get(t, {}).get(d.role)
+            art_b = arts_set(self.trace_b).get(tb, {}).get(d.role)
+            vb = ob.o32(d.off) if opening else b
+            return art_a is not None and art_b is not None and art_a[0] == art_b[0] and vb is not None and \
+                a - oa.o32(sp + OWN_ART[0]) == vb - ob.o32(sp + OWN_ART[0])
+        return opening and isinstance(d.a, int) and ob.o8(d.off) == a
 
     def held(self, d, fa, fb):
         if self.unison_last is None or not isinstance(d.role, tuple) or d.role[:2] == MEGAMAN or d.part != 'obj':
@@ -311,6 +404,14 @@ class Souls4:
         # (BN4's turns and their count at its own places, BN6's 0 there: its Souls block holds them, checks())
         return self.united(fa, fb) and self.word_bytes(d, fa, fb, lambda k, a, b: k in (TURNS_USED4, TURNS4) and b[k] == 0 or
                                                        self.charge_byte(k, a, b))
+
+    def lockout(self, d, fa, fb):
+        # (his lock-out after a chip, BN4's at +0x3A and BN6's at +0x19 (legit.json's bn4 megaman_lockout), where BN4's +0x19 holds
+        # his Soul's turns, which checks() holds to BN6's Souls block: each engine's place of the one count)
+        def explain(k, a, b):
+            kept = a[LOCK4] | a[LOCK4 + 1] << 8
+            return kept == b[LOCK6] and (k == TURNS4 or (k in (LOCK4, LOCK4 + 1) and b[k] == 0))
+        return self.united(fa, fb) and self.word_bytes(d, fa, fb, explain)
 
     def pending(self, d, fa, fb):
         return d.role == 'player' and d.part == 'pending form' and d.a == 0xFF and d.b == BN6_FORM_PROXY and self.united(fa, fb)

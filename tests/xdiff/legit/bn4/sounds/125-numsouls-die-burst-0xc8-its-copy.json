@@ -1,0 +1,10 @@
+{
+ "bn4": "0xC8",
+ "bn6": "0x205",
+ "clock": "state",
+ "souls": [
+  "8"
+ ],
+ "what": "NumSoul's die's burst 0xC8, its copy",
+ "why": "Played by NumSoul's charged shot's die (the third kind's 0x05) as it bursts (BN4: movs r0,#0xc8 at 0x080CDAF0, its bl at 0x080CDAF2, after its explosion's spawn 0x080E18EE; and as it is struck and stands, 0x080CDD28; BN6: the copies' bls aimed at a shim of the unit's home that makes r0 0x205, XvSoundCall): the same sound, BN4's song copied into slot 0x205 by PropBom's unit first (src/audio/xsong.c XSOUNDS), as PropBom's bomb's (084). In NumSoul's specs alone: BN4's engine plays 0xC8 of its own too (its runner's, an obstacle struck, 078), where BN6's plays its own. bn4_soul_num at t207, the die ended at -80 HP in both"
+}
