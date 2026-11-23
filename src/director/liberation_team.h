@@ -30,10 +30,11 @@ const char *lib_navi_name(int navi);
 int lib_navi_hp(int navi, int act);
 const char *lib_navi_form(int navi);
 const char *lib_navi_weakness(int navi);
-/* ... his guardian index where he stands on the board in BN6's own body
- * and speaks with its own face (a Cross Navi's 1-5, the real ProtoMan's
- * for ProtoSoul, guardians.h), 0 another */
-int lib_navi_bn6(int navi);
+/* ... the guardian whose body he stands in on the board and whose face he
+ * speaks with (guardians.h: a Cross Navi's 1-5, the real ProtoMan's for
+ * ProtoSoul, Team ProtoMan's other five's navis 59-64, a HeelNavi's body
+ * and no face), 0 another (MegaMan, Team Colonel's copied from BN5's ROM) */
+int lib_navi_guardian(int navi);
 /* The team a dark layer of act `act` (0-based) is made for: MegaMan and
  * the Navis the run holds, as many as BN5's team of that stage holds, the
  * layer's seed choosing where more are held (the player picks on arrival:
