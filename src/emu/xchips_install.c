@@ -15,6 +15,7 @@
 #include "xchips_code.h"
 #include "xchips_pack.h"
 #include "xchips_registry.h"
+#include "xchips_shown.h"
 #include "xchips_wide.h"
 #include "xinstall_log.h"
 #include "xncp.h"
@@ -236,6 +237,7 @@ static bool install(void) {
 	/* (without it the routine's own loop zeroes the save RAM's entries, a third of a frame's work: xchips_pack.h) */
 	if (!installed_len && !emu_hook(CHIPS_CODE + XPACK_CLEAR_HOOK, xchips_pack_cleared, NULL))
 		fprintf(stderr, "chips: no hook on the pack's clear: its loop zeroes the save RAM's entries\n");
+	if (!installed_len && !xchips_shown_install()) fprintf(stderr, "chips: no hook on the PET's computed powers: a moved SP's card reads past BN6's Navis\n");
 	claims_end();
 	xchips_wide_install();
 	xncp_install();   /* (BN5's NaviCust program SoulT+1 as BN6's program 48, where BN5's ROM is read) */

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **New: the layer's map stays open.** A press of SELECT opens the map
+  and leaves it open while MegaMan walks; the next press closes it, as
+  does a battle, a chat, the PET or a warp. Held, it shows while held,
+  as before. Thanks to agergo100 for the idea (issue #840).
+
 - **New: you choose the chip a Bring request takes.** Where more than
   one kind of chip in your Pack fits the NetBattler's request, he opens
   BN6's Chip Trader screen over those alone: put in the one you can
@@ -23,6 +28,19 @@
   a frame ahead of the clock as he pressed OK: the field waited for them
   to the turn's 30-second limit and then gave him no chips. They always
   arrive now.
+
+- **Fixed: CosmoMan SP's card showed a power of 6544.** The Navi chips'
+  SP from Battle Network 5 and 4 (NumberMan's to GridMan's, and GutsMan's)
+  showed a wrong number on their card in Folder Edit and sorted wrongly
+  by Attack. The card now shows the power the chip deals in battle, the
+  one its own game shows for a Navi you never deleted against the clock:
+  80 for CosmoMan SP. Thanks to Agergo100 for the report (issue #835).
+
+- **Fixed: GolmHit struck behind MegaMan in a liberation's Surrounded
+  battle (issue #838).** Turned to the left, its fist came down on the
+  far right of the field; facing right, on the far left behind him. It
+  now strikes the first of the enemy's columns ahead of him, whichever
+  way he faces. Thanks to Agergo100 for the report.
 
 ## 0.23.0 (2026-11-19)
 

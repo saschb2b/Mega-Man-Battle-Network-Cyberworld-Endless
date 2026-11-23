@@ -22,6 +22,7 @@
 #include "lesson_words.h"
 #include "liberation.h"
 #include "npc.h"
+#include "platform.h"
 #include "talk.h"
 #include "town.h"
 
@@ -483,6 +484,46 @@ static uint32_t layer_r(uint32_t keys) {
 	return keys & ~KEY_R;
 }
 
+/* SELECT on a layer: the map (issue #840). A press opens it and the next
+ * closes it; held past MAP_PEEK of the platform's frames (fast forward's
+ * several of the game's in one still one), or with L or R pressed while
+ * down, it shows while held, as it always did, and goes as SELECT is let
+ * go. MegaMan walks under it either way. A chat or a talk hides it, and
+ * one that comes while SELECT is up closes it; anything else that takes
+ * the screen (a battle, the PET, a warp, the layer's end) closes it in
+ * map_close. */
+#define MAP_PEEK 15
+static uint32_t map_keys(uint32_t keys, bool chord) {
+	bool sel = (keys & KEY_SELECT) != 0, chat = emu_read8(BN6_CHATBOX) || talk_busy();
+	if (sel && !D.select_held) {
+		D.map_open = !D.map_open;
+		D.select_at = P.frame;
+		D.select_chord = false;
+	}
+	D.select_chord |= sel && chord;
+	if (!sel && D.select_held && D.map_open && (P.frame - D.select_at >= MAP_PEEK || D.select_chord)) D.map_open = false;
+	if (chat && !sel) D.map_open = false;
+	D.select_held = sel;
+	D.map_shown = D.map_open && !chat;
+	map_note_held(D.map_shown);
+	return keys & ~KEY_SELECT;
+}
+
+/* Off a layer's map, or warping on it: the map closes, SELECT's press
+ * still followed so that one held into a battle opens nothing as it ends */
+static void map_close(uint32_t keys) {
+	D.map_open = D.map_shown = false;
+	D.select_held = (keys & KEY_SELECT) != 0;
+}
+
+/* The map's frame: closed off a layer's map and through a warp, SELECT
+ * the map's alone on a layer (a warp's frames too) */
+static uint32_t map_frame(uint32_t keys, bool chord) {
+	if (!D.active || D.town || !on_map()) { map_close(keys); return keys; }
+	if (D.warping || emu_read8(BN6_WARP_PENDING) != 0) { map_close(keys); return keys & ~KEY_SELECT; }
+	return map_keys(keys, chord);
+}
+
 uint32_t director_keys(uint32_t keys) {
 	keys = director_lab_after(keys);
 	talk_only_update();
@@ -499,14 +540,12 @@ uint32_t director_keys(uint32_t keys) {
 	D.r_held = r;
 	D.a_held = a;
 	D.dir_held = (keys & PAD_KEYS) != 0;
-	D.map_shown = false;
+	keys = map_frame(keys, pressed || r_pressed);
 	if (D.active && !autopilot_on()) keys = custom_buffer(keys, pressed, r_pressed);
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
 	/* (A ends the arrival's card early: its words wait on it) */
 	if (D.arrival_hold && a_pressed && cinema_card_age() >= CARD_SKIP) cinema_card_yield();
 	if (!lib_on()) keys = a_keys(keys, a_pressed);
-	/* SELECT on a layer: the map, while it is held */
-	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_note_held(D.map_shown); keys &= ~KEY_SELECT; }
 	/* (a liberation's board: its own moves and menu, docs/game/liberation/) */
 	if (lib_on()) return lib_keys(keys);
 	if (director_in_town() && r_pressed && home_r(&keys)) return keys;

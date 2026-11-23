@@ -3,7 +3,7 @@ type: Feature
 title: "The partner's seat: his HP box and the four told apart"
 description: "The partner's seat (`arena_team_view.c`, `teamseat=N`): his own HP box over BN6's, the P1 to P4 marks at each MegaMan's feet, and the HP of the ally BN6 leaves unlabelled."
 tags: [online, arena]
-generated: { by: claude-code/unrecorded, at: 2026-10-21T21:44:08Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T17:28:20Z }
 ---
 
 # The partner's seat: his HP box and the four told apart
@@ -16,4 +16,9 @@ Custom screen's window while it is open, read from his own object. In
 the fight each MegaMan's seat is marked by his feet (`P1` to `P4`, the
 seat plus one, his own side's in cyan, the other's in gold), and the
 ally BN6 leaves unlabelled (a lead's partner on the lead's GBA, the lead
-on his partner's) has his HP under him as BN6 gives the enemies theirs.
+on his partner's) has his HP under him as BN6 gives the enemies theirs:
+where BN6 writes an enemy's (centred on his panel's middle) and in its
+own battle digits from the player's ROM, counted down in orange and up in
+green as an enemy's is (`src/online/hp_plate.c`; [Sprites, fonts and
+pictures](../../../rom/graphics.md), The HP under an enemy). Until 23
+November 2026 it was the engine's pixel font, left-aligned beside him.

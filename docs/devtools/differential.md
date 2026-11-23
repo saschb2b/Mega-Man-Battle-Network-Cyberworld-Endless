@@ -451,7 +451,7 @@ and traces both:
   clock reads them (`chaos_napalm_75`, a Chaos Unison whose DarkMetr
   shakes the camera, 30 of them at t1).
 - **The traces** (`OUT.bn5`, `OUT.bn6`, their format in xdiff.c, version
-  7): a record each time the timer moves while the battle fights: the
+  9): a record each time the timer moves while the battle fights: the
   objects of the first, third and fourth kinds in play (each from its list
   node on, its AI's data and its collision data, and in BN6's the byte
   the second-level dispatch's side table holds for its slot), the 40 panels, the order
@@ -460,8 +460,9 @@ and traces both:
   was used this battle, BN5's Souls or BN6's Crosses, and his side's
   pending form: [Virus families moved into BN6's battle engine](../rom/virus-families.md), MegaMan as the differential's subject;
   the Souls' state in BN6's engine, `BN6_SOULS`' 0x80 bytes, zero in
-  BN5's; the Custom screen's element 0xB, UNITE, as each game's last
-  screen left it), what BN6's engine keeps apart of the objects (the sea's
+  BN5's; the Custom screen's element 0xB, UNITE, then its elements 8 and
+  9 and the screen's two capsules' entries, as each game's last screen
+  left them: MeddySoul's capsules compared while either game shows them), what BN6's engine keeps apart of the objects (the sea's
   submerge's 0x90 bytes, `RAM_SEA`: the submerged by their collision
   data's bit and their markers; zero in BN5's, which keeps it in the
   collision data, read there as BN6 keeps it by legit.json's `layouts`

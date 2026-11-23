@@ -16,9 +16,11 @@
 #include "emu.h"
 #include "rom.h"
 #include "soul_room.h"
+#include "soulcapsule.h"
 #include "soulcode.h"
 #include "soulkinds.h"
 #include "soullife.h"
+#include "soulteam.h"
 #include "thumb_reloc.h"
 #include "xstrike.h"
 
@@ -61,10 +63,10 @@ static bool button_chosen(void) {
 /* ---- the button ---- */
 
 /* (DustCross's elements' set-up as a Custom screen opens, its first instruction: r5 the screen) BN5's for ColonelSoul
- * (0x08023D70-0x08023D8A): elements 8 and 9 the button, grey */
+ * (0x08023D70-0x08023D8A): elements 8 and 9 the button, grey; MeddySoul's, the same hook's (soulcapsule.c) */
 static HookAct setup(HookRegs *r, void *user) {
 	(void)user;
-	(void)r;
+	if (soul_on(screen_side()) == SOUL_MEDDY) return soulcapsule_setup(r);
 	if (!colonel_screen() || hook_read8(BN6_CUSTOM_NAVI)) return HOOK_CONTINUE;
 	uint32_t b = element(ELEMENT_BUTTON), b9 = element(ELEMENT_BUTTON + 1);
 	hook_write8(b + BN6_ELEMENT_TYPE, ELEMENT_BUTTON);
@@ -99,6 +101,7 @@ static bool lit(uint32_t screen, uint32_t b) {
 /* (DustCross's lit rule after a pick, its first instruction: r5 the screen) BN5's ColonelSoul's */
 static HookAct light(HookRegs *r, void *user) {
 	(void)user;
+	if (soul_on(screen_side()) == SOUL_MEDDY) return soulcapsule_light(r);
 	if (!colonel_screen()) return HOOK_CONTINUE;
 	uint32_t b = element(ELEMENT_BUTTON);
 	if (hook_read8(b + BN6_ELEMENT_TYPE) != ELEMENT_BUTTON || hook_read8(b + BN6_ELEMENT_STATE) == STATE_CHOSEN) return HOOK_RETURN;

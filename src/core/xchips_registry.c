@@ -317,6 +317,9 @@ const XChipReg xreg_rows[] = {
 	{ 347, 335, XREG_SAME },   /* TimeBom+ */
 	{ 348, 343, XREG_SAME },   /* BodyGrd */
 	{ 349, 604, XREG_PA,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 4,  5 },   /* PileDrvr */
+	/* (MeddySoul's capsules BN6 has no chip of the name of, past BN4's last id: docs/multirom/souls.md, MeddySoul's capsules) */
+	{ 380, 734, XREG_CAPSULE, 0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 3, 5 },   /* YelCapsl */
+	{ 381, 735, XREG_CAPSULE, 0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 3, 5 },   /* BlkCapsl */
 };
 const int xreg_count = (int)(sizeof xreg_rows / sizeof *xreg_rows);
 
@@ -371,7 +374,9 @@ int xreg_check(const XChipReg *rows, int n, char *why, size_t len) {
 	for (int i = 0; i < n; ++i) {
 		const XChipReg *r = &rows[i];
 		if (!r->bn5 || r->bn5 >= BN5_IDS || bn5_seen[r->bn5]++) return bad(i, why, len, "BN5's id is none, past its records, or twice");
-		if (r->how > XREG_MOVED) return bad(i, why, len, "no such way in");
+		if (r->how > XREG_CAPSULE) return bad(i, why, len, "no such way in");
+		if ((r->how == XREG_CAPSULE) != (r->bn6 >= XREG_CAPSULE_FIRST && r->bn6 < XREG_CAPSULE_FIRST + XREG_CAPSULES))
+			return bad(i, why, len, "a capsule's id is not the capsules', or the capsules' another chip's");
 		if (!xreg_own(r)) {
 			if (!r->bn6 || (r->bn6 > 313 && (r->bn6 < 320 || r->bn6 > 349))) return bad(i, why, len, "BN6's chip of its name is no folder chip");
 			continue;

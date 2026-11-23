@@ -197,7 +197,7 @@ static int registry_named(const char *name) {
 	if (!paired) return 0;
 	for (int j = 1; j < BN5_CHIPS; ++j) {
 		const XChipReg *r = same(name, names5[j]) ? xreg_of_bn5(j) : NULL;
-		if (r && xreg_own(r) && r->how != XREG_PA) return r->bn6;
+		if (r && xreg_own(r) && r->how != XREG_PA && r->how != XREG_CAPSULE) return r->bn6;
 	}
 	return 0;
 }
