@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Souls on BN6's proxy form"
 description: "What moving BN4 Red Sun's twelve Souls (Red Sun's six and Blue Moon's six, which run in Red Sun's ROM) onto BN6's proxy form takes: how BN4 takes a form, each Soul's abilities and the code it brings against BN6's twins, what BN5's path supplies and what BN4 must, a cost ranking and which Souls first; ThunSoul moved, the first, and what is left."
 tags: [multirom, bn4, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T21:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T17:50:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, read in tools/romlab and by tools/bn4_souls.py"
@@ -395,6 +395,27 @@ The proof is `bn4_soul_srch` (with its control): united by two Invis, B held
 charge 10 frames longer, the shots' damage another, another Soul's sprite.
 The object's scan finds no hidden foe there, so no frame of the fight tests
 it yet.
+
+## NumSoul in BN6's engine
+
+NumSoul (Blue Moon's Soul 8, form 8, kind Plus) is BN6's Soul 17 (k 4 in
+`soulbn4.c`'s `forms`, held bit 10), the fifth BN4 Soul and the first with
+a companion. What it took:
+
+| Part | NumSoul's |
+| --- | --- |
+| His charged shot | power attack 0x11 into family 0x15, an attack unit at BN6's grown 0xDB (the claim's 0xD8-0xDF; SrchSoul took 0xDA): he throws a die (the third kind's 0x05, 40 HP) that bursts on the foe. Its object's two calls out (`0x0800AC20`, `0x0800B0F6`) have audited twins; its throw's sound 0x90 is SeekBom's copy at slot 0x206, its burst's 0xC8 PropBom's at 0x205 |
+| His pass | his taking of the form (`BN4_FORM_ENTERS`' 8, `0x0800E134`) adds 10 to the hand's chips of no kind whose power shows (`BN4_NUM_PASS`), BN5's NumberSoul's rule: `soulbn4_enter`'s passes, generalised from GutsSoul's |
+| His companion | BN4 spawns it at the unison and as the Soul ends (`BN4_SOUL_COMPANION`, `0x0800B7E8`): first-kind 0x57, its word `BN4_FORM_COMPANIONS`' by form (list 4's 1, 2,068 bytes), kept at his AI +0x48, following his animation and place each frame. BN6's companion overlay (first-kind 0x56, `BN6_OVERLAY_TYPE`) is that object with a mask by animation added (its update `0x080C5C34` against BN4's `0x080CC46E`, its spawn `0x080C5D18` the twin of `0x080CC5F4`), so `soulcompanion.c` gives BN4's Souls' companions an overlay kind of their own, 61 (`SOUL_OVERLAY_BN4`, in the Navis' grown tables under Team ProtoMan's 62-63): its masks all set, so it keeps his depth as BN4's does, its sprite list 0's 0x81, which the shared room fills after his picture. `soullife.c` spawns it through BN6's own form routine (`BN6_FORM_OVERLAY_SPAWN`) as he enters the proxy form, at his `BN6_T1_OVERLAY` where BN6's own tells of an overlay find it, and takes it away through BN6's own (`BN6_FORM_OVERLAY_TAKE`) as he leaves; its animation is his BN4 number (`soullook.c`'s `anim_set` through its parent). FireMan's moved 0x57 (BN6's 0xE2) is no road: spawned beside a Soul it held BN6's battle on the Custom screen |
+| The room | five BN4 Souls' loadouts are eleven rows, past `SOULS_LOADOUTS`' ten: the room grew to eighteen (#821) |
+
+The proof is `bn4_soul_num` (with its control): united by Attck+10 (BN6's
+Atk+10) on the first Custom screen, B held 122 frames for his die, A at 220
+for MokoRus1 with his pass's 10. Its three mutations: the charge 10 frames
+longer, the pass left out, the companion's masks a step behind him. FireSoul
+shares the companion (list 4's 0, 9,288 bytes, which fits after FireMan's
+picture) but has an object of his own as he enters too, which `soullife.c`
+does not yet run beside it.
 
 ## Two Souls of one kind
 

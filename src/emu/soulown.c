@@ -6,6 +6,7 @@
 #include "soulchips.h"
 #include "soulcode.h"
 #include "soulcolonel.h"
+#include "soulcompanion.h"
 #include "soullook.h"
 #include "soulmood.h"
 #include "soulpassive.h"
@@ -15,7 +16,7 @@
 #include "soulunite.h"
 
 bool soulown_install(int soulbreak) {
-	return soulcode_install(&soulcode_bn5) && soullook_install(SOULBREAK_LOOK(soulbreak)) &&
+	return soulcode_install(&soulcode_bn5) && soullook_install(SOULBREAK_LOOK(soulbreak)) && soulcompanion_install() &&
 		soulchaos_install(SOULBREAK_POWER(soulbreak)) && soulpower_install(SOULBREAK_POWER(soulbreak)) &&
 		soulpassive_install(SOULBREAK_PASSIVE(soulbreak)) && soulchips_install(SOULBREAK_CHIPS(soulbreak)) &&
 		soulcolonel_install(SOULBREAK_PASSIVE(soulbreak)) && soulmood_install(SOULBREAK_MOOD(soulbreak)) &&

@@ -530,6 +530,7 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; uint8_t player
 	/* ... the BN4 Souls' line's, from 0x300 up: ThunSoul's ring (SandRing's ring's too) */
 	{ XROM_BN4_RED_SUN_US, 0x91, SONG_GROWN_FIRST + 0x126 },   /* (0x300) */
 	{ XROM_BN4_RED_SUN_US, 0xA7, SONG_GROWN_FIRST + 0x127 },   /* (0x301: GutsSoul's rapid buster's shots) */
+	{ XROM_BN4_RED_SUN_US, 0xAC, SONG_GROWN_FIRST + 0x128 },   /* (0x302: NumSoul's charged shot's object) */
 	/* BN4's late families' (tools/xrecipe_bn4.py's LATE_SOUND_SLOTS), the grown table's 0x380 up (xvirus_recipe.h
 	 * XV_BN4_GROWN_SLOT_FIRST; docs/rom/sound.md, The song table grown): Kilby's, MagTect's (its 0xF8 the chips' 0x202 above) */
 	{ XROM_BN4_RED_SUN_US, 0xCD, SONG_GROWN_FIRST + 0x1A6 }, { XROM_BN4_RED_SUN_US, 0xB8, SONG_GROWN_FIRST + 0x1A7 },   /* (0x380, 0x381) */

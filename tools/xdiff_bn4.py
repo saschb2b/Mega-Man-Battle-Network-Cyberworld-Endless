@@ -38,6 +38,9 @@ from xdiff_snap import (BLINK, DRAW, KEPT, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT,
 XV_FIRST_ID = 0x200   # (src/emu/xvirus_recipe.h: the moved families' enemy ids from here)
 XN_BN4_FIRST_ID = 0x380   # (src/emu/xnavi_recipe.h: BN4's moved Navis' enemy ids from here, four a seat)
 XN_BN4_ART = 0x08800000 + 0x750000   # (src/emu/free_space.h FREE_BN4_NAVI_ART: what the battle's BN4 Navi draws, xnavi_bn4_art.h)
+# BN4's Souls' companion (BN4_SOUL_COMPANION's first-kind 0x57) as BN6's companion overlay (its type 0x56, its +4 the kind
+# soul_room.h SOUL_OVERLAY_BN4): src/emu/soulcompanion.c
+BN4_COMPANION_TYPE, BN6_OVERLAY_TYPE, OBJ_OVERLAY_KIND, SOUL_OVERLAY_BN4 = 0x57, 0x56, 0x04, 61
 XN_BN4_SPRITE, XN_BN4_SPRITE_SIZE = 0x08800000 + 0x77C000, 0x10000   # (FREE_BN4_NAVI_SPRITE: the battle's Navi's battle sprite, xnavi_bn4_room.h)
 RECIPES = ('xvirus_bn4.c', 'xnavi_bn4.c', 'xchips_bn4.c')   # (src/emu: BN4's families' recipes, its Navis', its chips' units)
 
@@ -269,6 +272,9 @@ class Bn4Canon:
         """a first-kind object of a type the recipe moves (bn4_moved_types' kind 1: FireMan's companion 0x57), no enemy:
         its type, BN6's dispatched one's side-table number read back as BN4's; else None (an enemy, by its NameID)"""
         if game == 6:
+            # (BN6's companion overlay of BN4's Souls' kind: BN4's companion 0x57 as BN6's own 0x56, src/emu/soulcompanion.c)
+            if not o.moved and o.o8(OBJ_TYPE) == BN6_OVERLAY_TYPE and o.o8(OBJ_OVERLAY_KIND) == SOUL_OVERLAY_BN4:
+                return BN4_COMPANION_TYPE
             return self.moved_types.get((1, o.o8(OBJ_TYPE))) if o.moved else None
         return o.o8(OBJ_TYPE) if o.o8(OBJ_TYPE) in {v for (k, _), v in self.moved_types.items() if k == 1} else None
 

@@ -25,6 +25,10 @@
 #define BN6_FORM_OVERLAYS     0x0801127Cu /* u32 a form: the routine that spawns a Cross's overlay as he crosses (0x08011268 calls it) */
 #define BN6_FORM_OVERLAYS_END 0x08011398u /* u32 a form: the routine that takes it away as he leaves the form (0x08011384) */
 #define BN6_FORM_OVERLAY_NONE 0x08010F68u /* mov pc,lr: BN6_FORM_OVERLAYS' entry 0 (no form), no overlay */
+#define BN6_FORM_OVERLAY_SPAWN 0x08011344u /* r0 an overlay's word (its kind, +5), r2 its +6: the companion overlay spawned (0x080C5D18) and kept at his
+                                            * BN6_T1_OVERLAY, a Cross's overlay routine's (0x080112E0's and its kin's) */
+#define BN6_FORM_OVERLAY_TAKE 0x080113FCu /* BN6_FORM_OVERLAYS_END's entry for the Crosses: his BN6_T1_OVERLAY's object, where one is, told to
+                                           * end (0x080C5D38: its +8 the word 8, BN4's 0x080CC614 the same) and the place 0 */
 #define BN6_FORM_ELEMENTS     0x080108B8u /* u8 a form: his element (0x0801086C, into his object +0x0E and collision data +2) */
 #define BN6_FORM_WEAKNESSES   0x080108D1u /* u8 a form: the second wheel's elements he is weak to (0x0801086C, into collision data +0x18) */
 #define BN6_FORM_PASSIVES     0x08014550u /* u32 a form: the routine giving his AI data the form's passive (0x08014536: an Airshoe, a SuperArmor) */

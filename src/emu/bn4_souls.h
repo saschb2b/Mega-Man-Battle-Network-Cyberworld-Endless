@@ -18,8 +18,17 @@
 #define BN4_GUTS_PASS_KIND 0x0800E1F0u /* ... cmp r1,#0xc: of the kind none (BN4_CHIP_KIND), */
 #define BN4_GUTS_PASS_KIND2 0x0800E1F6u /* ... cmp r1,#8: or panel-cracking, */
 #define BN4_GUTS_PASS_ADD 0x0800E1FEu /* ... adds r1,#0x1e: 30 */
+#define BN4_NUM_ENTER     0x0800E134u /* NumSoul's (form 8's): r0 his side, on to his hand's pass (0x0800E194), the same as GutsSoul's */
+#define BN4_NUM_PASS_KIND 0x0800E1BAu /* ... but one kind: cmp r1,#0xc, none (BN4_CHIP_KIND), */
+#define BN4_NUM_PASS_ADD  0x0800E1C0u /* ... adds r1,#0xa: 10 (BN5's NumberSoul's rule) */
 /* GutsSoul's rapid buster: B pressed six times in his form (the key handler 0x0800BDE0, r4 his AI data, r6 his requests at
  * its start) asks his state 0x10, eight shots of his buster (soulrapid.c) */
+#define BN4_SOUL_COMPANION 0x0800B7E8u /* r5 MegaMan, at the unison (0x080EBBBE) and as the Soul ends (0x080EBF34): his AI +0x48's
+                                        * object told to end (0x080CC614, after 0x080EBBBA's and 0x080EBF30's the same), then
+                                        * BN4_FORM_COMPANIONS by his form (0x0800D7CA's NaviStats +0x24) spawned where its word is not 0
+                                        * (BN4_FIRE_COMPANION_SPAWN: r4 the word, its list's byte offset and number; no 0x10000, so his
+                                        * animation its own) and kept there; told as his animation changes (0x0800DCE8 by NaviStats
+                                        * +0x23, 0x080F1860) */
 /* A Soul's chip charge (AquaSoul's, form 11; ProtSoul's, MetlSoul's and FireSoul's by the same code): */
 #define BN4_POWER_EMPTY   0x0800CC2Cu /* mov pc,lr: the chip charge's power attack of forms 7, 9 and 11 (BN4_FORM_LOADOUTS +2), its charge
                                        * times (BN4_CHARGE_TIMES' row) the chip charge's alone */

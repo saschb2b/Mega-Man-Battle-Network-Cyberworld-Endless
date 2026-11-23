@@ -18,6 +18,7 @@
 #include "soul_room.h"
 #include "soulbn4.h"
 #include "soulcode.h"
+#include "soulcompanion.h"
 #include "soullife.h"
 #include "soulpower.h"
 #include "soulteam.h"
@@ -373,25 +374,40 @@ static void faces_copy(void) {
 
 /* ---- BN4's Souls' look: one room, the united Soul's (soul_room.h's SOULS4_*; docs/multirom/bn4-souls.md, The shared room) ---- */
 
-/* BN4's sprite list/number at `at` within `room` bytes (decompressed where its game keeps it so; at 0, only measured), false
- * where it cannot be read or does not fit */
-static bool sprite4_at(int list, int number, uint32_t at, uint32_t room) {
+/* BN4's sprite list/number at `at` within `room` bytes (decompressed where its game keeps it so; at 0, only measured), its
+ * length at *len; false where it cannot be read or does not fit */
+static bool sprite4_at(int list, int number, uint32_t at, uint32_t room, uint32_t *len) {
 	const XRom *x = &XR[XROM_BN4_RED_SUN_US];
-	uint32_t len;
-	uint8_t *d = xnavi_sprite_bytes(x->data, x->layout->sprite_lists, list, number, &len);
-	bool ok = d && len <= room;
-	if (ok && at) emu_write(at, d, len);
+	uint8_t *d = xnavi_sprite_bytes(x->data, x->layout->sprite_lists, list, number, len);
+	bool ok = d && *len <= room;
+	if (ok && at) emu_write(at, d, *len);
 	else if (!ok) fprintf(stderr, "soullook: BN4's sprite %d:%#x cannot be read, or does not fit its room\n", list, number);
 	free(d);
 	return ok;
 }
 
-/* whether BN4's k-th moved Soul's look fits the room (his sprite and picture there) */
-static bool room4_fits(int k) {
+/* BN4's k-th moved Soul's sprite, picture and companion's sprite (soulcompanion.c) into the room, or only measured where
+ * `write` is false: the companion's word-aligned past the picture, in the picture's room, listed at SOUL_LIST0_BN4_COMPANION */
+static bool room4_put(int k, bool write) {
 	SoulBn4 soul;
-	return soulbn4_read(k, &soul) && sprite4_at(BN4_LIST_SOULS, soul.form, 0, SOULS4_SPRITE_END - SOULS4_SPRITE) &&
-		sprite4_at(BN4_LIST_PICTURES, soul.form, 0, SOULS4_PICTURE_END - SOULS4_PICTURE);
+	uint32_t len, pic;
+	int list, number;
+	if (!soulbn4_read(k, &soul) || !sprite4_at(BN4_LIST_SOULS, soul.form, write ? SOULS4_SPRITE : 0, SOULS4_SPRITE_END - SOULS4_SPRITE, &len) ||
+		!sprite4_at(BN4_LIST_PICTURES, soul.form, write ? SOULS4_PICTURE : 0, SOULS4_PICTURE_END - SOULS4_PICTURE, &pic))
+		return false;
+	if (!soulcompanion_sprite(k, &list, &number)) return true;
+	uint32_t at = (SOULS4_PICTURE + pic + 3) & ~3u;
+	if (!sprite4_at(list, number, write ? at : 0, at < SOULS4_PICTURE_END ? SOULS4_PICTURE_END - at : 0, &len)) return false;
+	if (write) {
+		claims_begin(SOULCODE_CLAIMS);   /* (the list's entry, the moved code's as look4_install wrote it) */
+		emu_write32(SOULS_LIST0 + 4u * SOUL_LIST0_BN4_COMPANION, at);
+		claims_end();
+	}
+	return true;
 }
+
+/* whether BN4's k-th moved Soul's look fits the room (his sprite and picture there, and his companion's) */
+static bool room4_fits(int k) { return room4_put(k, false); }
 
 /* A BN4 Soul's face in Red Sun's ROM, its tiles (FACE_SIZE bytes: the count's digit is drawn under them) and its palette: his
  * own for Red Sun's six (the face his form + 4); for Blue Moon's six, whose faces Red Sun's ROM has not, MegaMan's plain face
@@ -403,7 +419,7 @@ static void face4_of(int form, uint32_t *tiles, uint32_t *pal) {
 }
 
 /* The room filled with BN4's k-th moved Soul's look: his sprite (BN4's list 0 by his form), his unison's picture (his Soul Navi's
- * battle sprite, list 2 by his form: BN4_SOUL_PICTURE_NUMBER), his face's tiles and its palette (the face his form + 4,
+ * battle sprite, list 2 by his form: BN4_SOUL_PICTURE_NUMBER) and his companion's sprite past it (room4_put), his face's tiles and its palette (the face his form + 4,
  * BN4_FACE_GET; MegaMan's plain one for Blue Moon's six: face4_of), and his form as whose they are (SOULS4_HELD). False, the
  * room's record none, where a sprite cannot be read or does not fit. */
 static bool room4_fill(int k) {
@@ -412,8 +428,7 @@ static bool room4_fill(int k) {
 	if (!soulbn4_read(k, &soul)) return false;
 	claims_begin(SOULLOOK_CLAIMS);
 	emu_write8(SOULS4_HELD, NONE4);
-	bool ok = sprite4_at(BN4_LIST_SOULS, soul.form, SOULS4_SPRITE, SOULS4_SPRITE_END - SOULS4_SPRITE) &&
-		sprite4_at(BN4_LIST_PICTURES, soul.form, SOULS4_PICTURE, SOULS4_PICTURE_END - SOULS4_PICTURE);
+	bool ok = room4_put(k, true);
 	if (ok) {
 		uint32_t tiles, pal;
 		face4_of(soul.form, &tiles, &pal);
@@ -442,14 +457,19 @@ void soullook_frame(void) {
 }
 _Static_assert(SOULS_BN4 < NONE4, "a BN4 Soul's form is never the room's none (SOULS4_HELD)");
 
+static bool a_t1(uint32_t obj) {
+	return obj >= BN6_T1_OBJECTS && obj < BN6_T1_OBJECTS + BN6_T1_SIZE * BN6_T1_COUNT && (obj - BN6_T1_OBJECTS) % BN6_T1_SIZE == 0;
+}
+
 /* (BN6_SPRITE_SET_ANIM, r0 the animation, r5 the object) MegaMan in a BN4 Soul wears BN4's art: an animation an attack unit's
  * recipe gave BN6's art's number of (xchips_bn4_anims, by his CurAction) set as BN4's number of it, his +0x10 left BN6's for
- * the code that reads it (docs/multirom/bn4-souls.md, His animations in a BN4 Soul) */
+ * the code that reads it (docs/multirom/bn4-souls.md, His animations in a BN4 Soul); and so his companion's, BN4's art too,
+ * whose animation is his (+0x10 his, its offset 0: soulcompanion.c) */
 static HookAct anim_set(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t obj = r->r[5];
-	if (obj < BN6_T1_OBJECTS || obj >= BN6_T1_OBJECTS + BN6_T1_SIZE * BN6_T1_COUNT || (obj - BN6_T1_OBJECTS) % BN6_T1_SIZE ||
-		soulbn4_k(soul_id_of(obj)) < 0)
+	obj = soulcompanion_owner(obj);   /* (a BN4 Soul's companion: its parent's family and Soul) */
+	if (!a_t1(obj) || soulbn4_k(soul_id_of(obj)) < 0)
 		return HOOK_CONTINUE;
 	uint8_t family = hook_read8(obj + BN6_T1_ACTION);
 	for (int i = 0; i < xchips_bn4_anims_count; ++i)
@@ -482,10 +502,12 @@ static void look4_install(void) {
 	claims_begin(SOULCODE_CLAIMS);
 	emu_write32(SOULS_LIST0 + 4u * SOUL_LIST0_BN4, SOULS4_SPRITE);
 	emu_write32(SOULS_LIST0 + 4u * SOUL_LIST0_BN4_PICTURE, SOULS4_PICTURE);
+	emu_write32(SOULS_LIST0 + 4u * SOUL_LIST0_BN4_COMPANION, SOULS4_PICTURE);   /* (the room's fill points it past the picture) */
 	claims_end();
 	done4 = true;
 }
-_Static_assert(SOULS4_END <= FREE_BN4_SOUL_LOOK_END && SOUL_LIST0_BN4 < SOULS_LIST0_ENTRIES && SOUL_LIST0_BN4_PICTURE < SOULS_LIST0_ENTRIES && SOUL_FACE_BN4 == SOUL_FACE_FIRST + SOULS &&
+_Static_assert(SOULS4_END <= FREE_BN4_SOUL_LOOK_END && SOUL_LIST0_BN4 < SOULS_LIST0_ENTRIES && SOUL_LIST0_BN4_PICTURE < SOULS_LIST0_ENTRIES &&
+	SOUL_LIST0_BN4_COMPANION < SOULS_LIST0_ENTRIES && SOUL_FACE_BN4 == SOUL_FACE_FIRST + SOULS &&
 	4u * (SOUL_FACE_BN4 + 1) <= SOULS_FACES_END - SOULS_FACES && PAL_SIZE * (SOUL_FACE_BN4 + 1) <= SOULS_FACE_PALS_END - SOULS_FACE_PALS,
 	"BN4's Soul's look past its room or the Souls' grown tables (soul_room.h)");
 

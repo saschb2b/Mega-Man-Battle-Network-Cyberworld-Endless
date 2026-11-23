@@ -5,11 +5,13 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bn6_forms.h"
 #include "bn6_navis.h"
 #include "darkinvs.h"
 #include "debug.h"
 #include "emu.h"
 #include "soulbn4.h"
+#include "soulcompanion.h"
 #include "soulmood.h"
 
 #define THUMB_BX_LR 0x4770u   /* a stub's instruction, which its hook stands on */
@@ -106,8 +108,17 @@ static HookAct entered(HookRegs *r, void *user) {
 		/* (no Cross's overlay: what BN5's Soul spawns as he enters it, NumberSoul's) */
 		if (routed && next < SOULS_BN5_FORMS) return go(r, soul_enter[next]);
 		if (soulbn4_k(next) >= 0) {
-			soulbn4_enter(me, soulbn4_k(next));   /* (BN4's routine as the form is taken: GutsSoul's hand pass) */
-			return go(r, soulbn4_enter_copy(soulbn4_k(next)));   /* (... or its copy where it spawns an object: SrchSoul's) */
+			int k = soulbn4_k(next);
+			soulbn4_enter(me, k);   /* (BN4's routine as the form is taken: GutsSoul's and NumSoul's hand pass) */
+			/* (... his companion spawned, BN4's at the unison: NumSoul's; or the routine's copy where it spawns an object:
+			 * SrchSoul's. FireSoul, who has both, waits on the two together) */
+			uint32_t word;
+			if (soulcompanion_enter(k, &word)) {
+				r->r[0] = word;
+				r->r[2] = 0;
+				return go(r, BN6_FORM_OVERLAY_SPAWN);
+			}
+			return go(r, soulbn4_enter_copy(k));
 		}
 	}
 	/* (a double of his set up in his form while a Soul is his, HolyDrem's or Poltrgst's: BN5 runs the Soul's own entry for
@@ -142,7 +153,7 @@ static HookAct left(HookRegs *r, void *user) {
 	}
 	/* (what BN5's Soul takes away as he leaves it, NumberSoul's) */
 	if (soul && routed && soul < SOULS_BN5_FORMS) return go(r, soul_leave[soul]);
-	if (soulbn4_k(soul) >= 0) return go(r, 0);
+	if (soulbn4_k(soul) >= 0) return go(r, soulcompanion_leave(soulbn4_k(soul)));   /* (his companion taken away, BN4's at the end) */
 	return go(r, leave_to);
 }
 

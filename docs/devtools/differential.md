@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T16:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T17:50:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -118,6 +118,11 @@ counter, button 1; each engine's sound of a charged chip;
 a Soul's object spawned as he takes the form, BN4's inside its unison and
 BN6's still in play in the fight's first frames, its hit area in MegaMan's
 word of the regions he met (SrchSoul's);
+a Soul's companion, BN4's own first-kind 0x57 and BN6's companion overlay of
+BN4's Souls' kind told as one (`t1_moved`), its type, word, flag and mode
+each engine's, its sprite read at the same fight frame while its first
+animation stands and by its offsets into the same bytes after (NumSoul's);
+his lock-out after a chip at BN6's +0x19 where BN4's holds his Soul's turns;
 GutsSoul's count of B's presses toward his rapid buster and its window,
 BN4's in his AI data, BN6's in his side's Souls block (`soulrapid.c`),
 held to each other at every frame;

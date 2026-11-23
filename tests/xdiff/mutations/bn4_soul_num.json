@@ -1,0 +1,22 @@
+[
+ {
+  "name": "NumSoul's charge 10 frames longer",
+  "spec": "bn4_soul_num",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 130 frames for his grown power attack where BN4_CHARGE_TIMES' row of 0x11 holds 120: B held 122 frames fires the plain buster, not his die"
+ },
+ {
+  "name": "NumSoul's pass left out",
+  "spec": "bn4_soul_num",
+  "soulbreak": 512,
+  "what": "the passives' break SOULPASSIVE_BREAK_PLUS leaves his entering's pass out (src/emu/soulbn4.c soulbn4_enter): MokoRus1 strikes 10 less than BN4's"
+ },
+ {
+  "name": "NumSoul's companion a step behind him",
+  "spec": "bn4_soul_num",
+  "poke": [
+   "08AFAC00:00000000"
+  ],
+  "what": "the companion overlay's masks of BN4's Souls' kind (SOULS4_COMPANION_MASKS, src/emu/soulcompanion.c) 0 for his first four animations: BN6's overlay drawn a step behind him (its +0x38 and +0x3C less 0x10000) where BN4's companion keeps his place"
+ }
+]

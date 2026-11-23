@@ -70,6 +70,9 @@
 #define SOUL_LIST0_BN4     0x5F          /* ... of BN4's united Soul's sprite, the first list's last (tools/xsoul.py's ART_LAST one under it) */
 #define SOUL_LIST0_BN4_PICTURE 0x80      /* ... of his unison's picture (BN4's numbers 0x80-0x8F, docs/project/claims.md; Team ProtoMan's
                                             Souls' 0x60-0x7F) */
+#define SOUL_LIST0_BN4_COMPANION 0x81    /* ... of his companion's sprite (soulcompanion.c: NumSoul's and FireSoul's), after his picture */
+#define SOUL_OVERLAY_BN4   61            /* the companion overlay's kind of BN4's Souls' companions (soulcompanion.c), in the Navis' grown
+                                            tables (xnavi_room.h's XN_KINDS) under Team ProtoMan's 62-63 (docs/project/claims.md) */
 #define SOUL_EFFECT_FIRST  0xC0          /* BN6's grown effect ids the Souls' code takes (xvirus_grow.h's 256), to: */
 #define SOUL_EFFECT_LAST   0xCF
 #define SOUL_EFFECT_TEAM   0xD0          /* ... Team ProtoMan's, to 0xDF (BN4's chips' units count theirs down from 0xCF: tools/xsoul.py) */
@@ -127,11 +130,15 @@
 #define SOULS4_SPRITE      (FREE_BN4_SOUL_LOOK + 0x00000u)  /* his sprite, BN4's list 0 by his form, to: */
 #define SOULS4_SPRITE_END  (FREE_BN4_SOUL_LOOK + 0x0A800u)
 #define SOULS4_PICTURE     (FREE_BN4_SOUL_LOOK + 0x0A800u)  /* his unison's picture, his Soul Navi's battle sprite (BN4's list 2 by his form:
-                                                               BN4_STATS_SPRITES' list byte 8, sprite_load's list offset), to: */
+                                                               BN4_STATS_SPRITES' list byte 8, sprite_load's list offset), then his
+                                                               companion's sprite where he has one (word-aligned past it), to: */
 #define SOULS4_PICTURE_END (FREE_BN4_SOUL_LOOK + 0x19700u)
 #define SOULS4_FACE        (FREE_BN4_SOUL_LOOK + 0x19700u)  /* his face's tiles, 0x100 bytes (BN4_SOUL_FACES), */
 #define SOULS4_DIGITS      (FREE_BN4_SOUL_LOOK + 0x19800u)  /* ... BN4's count's digits, six of 0x80 bytes, 5 to 0 (BN4_FACE_DIGITS), */
-#define SOULS4_HELD        (FREE_BN4_SOUL_LOOK + 0x19B00u)  /* ... and the form whose look the room holds (0xFF, the fill, none), to */
-#define SOULS4_END         (FREE_BN4_SOUL_LOOK + 0x19B10u)
+#define SOULS4_HELD        (FREE_BN4_SOUL_LOOK + 0x19B00u)  /* ... and the form whose look the room holds (0xFF, the fill, none), */
+#define SOULS4_COMPANION_MASKS (FREE_BN4_SOUL_LOOK + 0x19C00u) /* ... their companion overlay's masks, a byte an animation, written once
+                                                                 (soulcompanion.c), to: */
+#define SOULS4_COMPANION_MASKS_END (FREE_BN4_SOUL_LOOK + 0x19D00u)
+#define SOULS4_END         SOULS4_COMPANION_MASKS_END
 
 #endif
