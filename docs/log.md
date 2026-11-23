@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-23
+* **Update**: game/team-protoman.md (On a dark board: ProtoMan built for a held ProtoSoul, the other five without a body and the owner's question; unit 10's row), game/liberation/building/cross-navis-team.md (Team ProtoMan's own Navis: ids, commands, HP, ProtoMan in BN6's body, the scenarios; its description), game/liberation/building/index.md (its line), rom/liberation.md (Team ProtoMan's bodies and board HP in Team Colonel's ROM), devtools/dev-menu.md (`souls=MASK`'s Team ProtoMan bits).
 * **Update**: multirom/souls.md (SearchSoul's reveal seen at last: soul_search_hide, a foe flashing as the Invis chip leaves him, found and cleared at t1 in both games), devtools/differential.md (the spec's `hide`).
 
 ## 2026-11-22
