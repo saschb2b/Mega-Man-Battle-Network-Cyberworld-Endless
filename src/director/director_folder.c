@@ -26,6 +26,7 @@
 #include "save_blob.h"
 #include "souls.h"
 #include "trader.h"
+#include "xchips_shown.h"
 
 /* The run's folder as the game holds it (30 entries, chip | code << 9;
  * zeros where its data is not there) */
@@ -476,4 +477,7 @@ void folder_describe(FILE *f) {
 	if (art >= 0 && art != (int)chip_entry_id(folder[0])) chips_name(art, other, sizeof other);
 	if (!*other) snprintf(other, sizeof other, "%d", art);
 	fprintf(f, "foldercard %s\n", art == CHIPS_ART_BLANK ? "blank" : art < 0 ? "none" : other);
+	/* (the power the folder editor's card last drew, as BN6 drew it, and its chip: issue 835, CosmoMn SP's 6544) */
+	int drawn, power;
+	if (xchips_shown_card(&drawn, &power)) fprintf(f, "cardpower %d\ncardchip %d\n", power, drawn);
 }

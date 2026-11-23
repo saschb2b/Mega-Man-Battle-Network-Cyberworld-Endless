@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-23T23:30:00Z
+* **Update**: rom/chips-code.md (a row: BN6's card and sort read a computed power as a Navi's, the hook that sends a moved SP's the battle's way, BN5's and BN4's cards and their saves' times measured, issue 835), multirom/chips-code.md (Computed powers: the PET's road), devtools/agents-tools.md (the state's `cardpower` and `cardchip`), code/emu.md (`xchips_shown.c`).

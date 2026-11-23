@@ -17,6 +17,13 @@
   to the turn's 30-second limit and then gave him no chips. They always
   arrive now.
 
+- **Fixed: CosmoMan SP's card showed a power of 6544.** The Navi chips'
+  SP from Battle Network 5 and 4 (NumberMan's to GridMan's, and GutsMan's)
+  showed a wrong number on their card in Folder Edit and sorted wrongly
+  by Attack. The card now shows the power the chip deals in battle, the
+  one its own game shows for a Navi you never deleted against the clock:
+  80 for CosmoMan SP. Thanks to Agergo100 for the report (issue #835).
+
 ## 0.23.0 (2026-11-19)
 
 - **New: your friends on Discord see you play, and how far the run
