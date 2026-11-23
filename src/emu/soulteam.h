@@ -31,6 +31,8 @@ _Static_assert(SOULS_HELD_BN4 + SOULS_HELD_BN4_ALL <= SOULS_HELD_TEAM, "Team Pro
  * set, BN5's 0x167, copied by soulpower.c) */
 #define SOUL_TEAM_PROPELLER_SONG 0x167
 #define SOUL_TEAM_PROPELLER_SLOT 0x340
+#define SOUL_TEAM_GREY_SONG 0x69    /* ... MeddySoul's capsule refused, A on a grey one (BN5's 0x08024A20; soulcapsule.c's Thumb), */
+#define SOUL_TEAM_GREY_SLOT 0x341
 
 /* Whether BN5's Soul n (1-6) is one of Team ProtoMan's */
 static inline int soulteam_is(int soul) { return soul >= SOUL_TEAM_FIRST && soul < SOUL_TEAM_FIRST + SOULS_TEAM; }

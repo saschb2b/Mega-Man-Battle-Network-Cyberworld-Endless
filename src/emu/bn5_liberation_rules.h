@@ -90,4 +90,14 @@
 #define BN5_LIB_UNIT_HP_OUT  0x08053BF4u /* ... +9 the unit, +0x14 HP) as its enemy spawns (0x08006862); the HP left written back at the end */
                                          /* ... (0x0800906A, 0x080138CA). The battle reads nothing else of the board */
 
+/* A panel taken for a while on a Surrounded field: BN5's Catack fields in missions 3, 6, 7 and 8 (levels 3-4) and
+ * takes each panel it drives onto, MegaMan's middle row among them, the column's timer handing it back (bn6_panels.h's
+ * BN6_COLUMN_*, the same instructions; docs/rom/liberation.md, A panel taken and handed back; issue #837) */
+#define BN5_PANEL_SIDE_SET   0x0800B2D6u /* BN6_PANEL_SIDE_SET's twin (r0 column, r1 row, r2 side) */
+#define BN5_COLUMN_TIMER_SET 0x0800B2F8u /* BN6_COLUMN_TIMER_SET's (+6 0x708 of BN5_COLUMN_SIDES + column * 8); called at 0x080C68CE, */
+                                         /* ... 0x080CE24E, 0x080E678E and 0x081093DA (Catack's) */
+#define BN5_COLUMN_SIDES     0x02034020u /* BN6_COLUMN_SIDES' twin, its literal in BN5_COLUMN_TIMER_SET */
+#define BN5_CATACK_TAKE      0x081093B8u /* Catack (AI 15, ids 0x55-0x58; its state table 0x081094A8): BN6_CATACK_TAKE's instructions */
+#define BN5_CATACK_TAKE_END  0x081093DAu /* ... to its bl to BN5_COLUMN_TIMER_SET */
+
 #endif

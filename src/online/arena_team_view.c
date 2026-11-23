@@ -9,6 +9,7 @@
 #include "arena_team_custom.h"
 #include "bn6.h"
 #include "gfx.h"
+#include "hp_plate.h"
 #include "pixfont.h"
 #include "platform.h"
 #include "second_frame.h"
@@ -26,6 +27,7 @@
 #define HP_H         16
 #define TAG_X        20   /* a seat's mark from his panel's middle, left of BN6's HP label under him and a line up */
 #define TAG_UP       9
+#define PLATE_UP     4    /* BN6's HP label's top over his feet as we place them: his panel's middle (BN6_HP_PLATE_DRAW) */
 #define SIGN_Y       30   /* the team's sign: under the Square's name plate (arena_view.h), at the picture's right */
 #define SIGN_H       11
 #define DOT_FRAMES   20   /* a dot of the three lit this long, then the next */
@@ -70,21 +72,22 @@ void arena_team_view_hp(unsigned hp, bool open) {
 }
 
 /* each MegaMan's seat by his feet, in his side's colour (the viewer's own
- * side's cyan), and the ally BN6 leaves unlabelled his HP under him */
+ * side's cyan), and the ally BN6 leaves unlabelled his HP under him where
+ * BN6 writes an enemy's, in its digits */
 static void marks(struct mCore *c, unsigned view, unsigned own) {
+	static HpPlate ally[4];   /* (each seat's number as last drawn: the drawing's own) */
 	for (unsigned side = 0; side < 2; ++side)
 		for (unsigned k = 0; k < 2; ++k) {
 			int px, py;
 			unsigned hp, seat = k ? 2 + side : side;
-			if (!arena_team_view_feet(c, arena_team_view_megaman(c, side, k), view, &px, &py, &hp)) continue;
+			uint32_t o = arena_team_view_megaman(c, side, k);
+			if (!arena_team_view_feet(c, o, view, &px, &py, &hp)) continue;
 			char tag[8];
 			snprintf(tag, sizeof tag, "P%u", seat + 1);
 			pixfont_draw(px - TAG_X, py - TAG_UP, tag, side == view ? PET_CYAN_HI : PET_GOLD, shade, PIXFONT_LEFT, 1);
 			/* (BN6 labels the enemies and keeps the viewer's in the box: the ally beside him has none) */
 			if (side != view || seat == own) continue;
-			char n[8];
-			snprintf(n, sizeof n, "%u", hp);
-			pixfont_draw(px + 2, py, n, PET_WHITE, shade, PIXFONT_LEFT, 1);
+			hp_plate_draw(&ally[seat], c, o, px, py - PLATE_UP);
 		}
 }
 

@@ -121,6 +121,8 @@
 #define BN6_SHUFFLE_COUNT_NEXT 0x080280FEu /* the instruction after it: where soulshuffle.c's hook goes on with SearchSoul's three in r0 */
 #define BN6_ELEMENT_EMBLEM    2           /* BN6_ELEMENT_TYPE: element 0xB standing (BN6's emblem, BN5's UNITE) */
 #define BN6_CUSTOM_UNITE      (BN6_CUSTOM_ELEMENTS + 0xB * BN6_ELEMENT_SIZE) /* element 0xB (BN5_CUSTOM_UNITE's twin) */
+#define BN6_CUSTOM_CAPSULES   (BN6_CUSTOM_SCREEN + 0x26) /* u16 twice: MeddySoul's capsules' entries, elements 8's and 9's (BN5's +0x26 too,
+                                             bn5_capsules.h's BN5_SCREEN_CAPSULES; soulcapsule.c) */
 #define BN6_CUSTOM_NAVI       (BN6_CUSTOM_SCREEN + 0x10) /* u8 the Navi the side fights as, 0 MegaMan (both games' stand rules want 0) */
 #define BN6_CUSTOM_EMBLEM_TAKEN (BN6_CUSTOM_SCREEN + 0x17) /* u8 1 while the emblem is chosen (mode 0x48 sets it): CROSSSELECT does not open */
 #define BN6_CUSTOM_CROSS_TAKEN (BN6_CUSTOM_SCREEN + 0x19) /* u8 1 once a Cross is chosen on CROSSSELECT: the emblem stays grey (0x08028F6C) */
@@ -140,6 +142,7 @@
                                            * BATTLE_ACTORS_PER_SIDE), its MegaMan first on his side */
 #define BN6_BATTLE_SETTINGS   (BN6_BATTLE_STATE + 0x3C) /* u32 the battle's BattleSettings; its +3 the mode (0x0802D234), BN6_BATTLE_LINK a link */
 #define BN6_SETTINGS_MODE     0x03        /* a BattleSettings' +3: the battle's mode (0x0802D242), BN6_BATTLE_LINK a link */
+#define BN6_SETTINGS_SIDES    0x06        /* a BattleSettings' +6: its column pattern (bn6_panels.h's BN6_SIDES_PLAIN and the rest; BN6_SIDES_OF reads it) */
 #define BN6_BATTLE_LINK       1           /* BN6_SETTINGS_MODE: a link battle (where neither game offers UNITE) */
 #define BN6_NAVI_MOOD         0x0E        /* a battle NaviStats' +0x0E: its side's mood (BN6_BATTLE_MOOD's), read by BN5's thresholds (BN5_MOOD_WORRIED) */
 #define BN6_NAVI_FORM         0x2C        /* a battle NaviStats' +0x2C: its side's form (BN6_BATTLE_FORM's) */

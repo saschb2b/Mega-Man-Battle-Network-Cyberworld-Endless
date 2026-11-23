@@ -95,6 +95,18 @@ static uint32_t art_take(uint32_t a[3], const uint8_t *rec, uint32_t game, uint3
 	return at;
 }
 
+/* BN6's own chips whose record shows another chip's art where BN5's record of the same name and number has its own:
+ * WhiCapsl (382: IceCube's icon and picture in Gregar's record), one of MeddySoul's capsules (docs/multirom/souls.md,
+ * MeddySoul's capsules). BN5's art where its ROM is read, as the registry's rows' is; BN6's record as it is without */
+static const uint16_t art_borrowed[] = { 382 };
+#define ART_BORROWED (int)(sizeof art_borrowed / sizeof *art_borrowed)
+
+static bool borrowed(int id) {
+	for (int i = 0; i < ART_BORROWED; ++i)
+		if (art_borrowed[i] == id) return true;
+	return false;
+}
+
 static uint32_t art_plan(const uint32_t blank[3]) {
 	uint32_t at = CHIPS_ART;
 	shared.n = 0;
@@ -104,6 +116,11 @@ static uint32_t art_plan(const uint32_t blank[3]) {
 		if (!art_row(r, n / xreg_count)) continue;
 		memcpy(M.art[r->bn6], blank, sizeof M.art[0]);
 		if (M.rom5) at = art_take(M.art[r->bn6], M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5, 0, at);
+	}
+	for (int i = 0; M.rom5 && i < ART_BORROWED; ++i) {
+		const uint8_t *own = R.data + R.layout->chip_data + XREC_SIZE * (uint32_t)art_borrowed[i];
+		for (int k = 0; k < 3; ++k) M.art[art_borrowed[i]][k] = get32(own + BN6_CHIP_ICON_PTR + 4 * k);
+		at = art_take(M.art[art_borrowed[i]], M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * art_borrowed[i], 0, at);
 	}
 	/* (BN4's rows after them, so that BN5's keep their places) */
 	for (int n = 0; n < xreg4_count; ++n) {
@@ -136,6 +153,15 @@ static void art_copy(void) {
 		const uint8_t *rec = M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5;
 		for (int k = 0; k < 3; ++k) {
 			uint32_t to = M.art[r->bn6][k];
+			if (to < CHIPS_ART || to - CHIPS_FREE + size[k] > M.len) continue;
+			memcpy(M.img + (to - CHIPS_FREE), M.rom5 + rom_off(get32(rec + BN6_CHIP_ICON_PTR + 4 * k)), size[k]);
+			if (!k) xrec_icon_recolour(M.img + (to - CHIPS_FREE), map);
+		}
+	}
+	for (int i = 0; i < ART_BORROWED; ++i) {
+		const uint8_t *rec = M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * art_borrowed[i];
+		for (int k = 0; k < 3; ++k) {
+			uint32_t to = M.art[art_borrowed[i]][k];
 			if (to < CHIPS_ART || to - CHIPS_FREE + size[k] > M.len) continue;
 			memcpy(M.img + (to - CHIPS_FREE), M.rom5 + rom_off(get32(rec + BN6_CHIP_ICON_PTR + 4 * k)), size[k]);
 			if (!k) xrec_icon_recolour(M.img + (to - CHIPS_FREE), map);
@@ -340,7 +366,7 @@ static void record6_make(int id, const uint8_t *table, const uint32_t blank[3], 
 	const XChipReg *named = mv || (giga && M.rom5) ? xreg_named(id) : NULL;
 	if (named && mv) xrec_same_moved(M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * named->bn5, mv, out);
 	/* (and BN5's art, art_row's; one of Falzar's Gigas BN5 does not draw BN6's blank, not another Giga's) */
-	const uint32_t *art = named && M.art[id][0] ? M.art[id] : giga ? blank : NULL;
+	const uint32_t *art = (named || borrowed(id)) && M.art[id][0] ? M.art[id] : giga ? blank : NULL;
 	for (int k = 0; art && k < 3; ++k) put32(out + BN6_CHIP_ICON_PTR + 4 * k, art[k]);
 }
 
