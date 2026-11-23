@@ -363,6 +363,19 @@ def held_clock(d, fa, fb):
     return all(stepped(d.a[w], d.b[w], n.get((6, w, True), 0) - n.get((5, w, True), 0)) for w in (0, 1))
 
 
+def held_draw(d, fa, fb):
+    """d is a draw one game made with no twin in the other's frame under rng=replay, by a routine that draws once a frame
+    whatever the battle does (per_frame), in the first traced frame after the battle's clock held for a number of frames each
+    game's own: the frame's words apart as held_clock reads them (every other draw the same in number in both, each word the
+    other's stepped by exactly the per-frame draws one game made more)"""
+    if d.part != 'draw' or d.role != 'battle':
+        return False
+    side = d.a if d.a is not None else d.b
+    if not per_frame(fa.canon.legit, 5 if side[0] == 'BN5' else 6, side[1]) or fa.fr['rng'] == fb.fr['rng']:
+        return False
+    return held_clock(Diff(d.t, 'battle', 'rng', 0, fa.fr['rng'], fb.fr['rng']), fa, fb)
+
+
 def in_both(d, fa, fb):
     """the difference's object is one both games had in play at some frame (its role in both traces): an end a frame apart,
     not an object one game alone spawned (an effect of another id: its role another)"""
@@ -428,6 +441,7 @@ WHEN = {
     'hand of ten': lambda d, fa, fb, prev: hand_of_ten(d, fa),
     'his panel': lambda d, fa, fb, prev: his_panel(d, fa, fb),
     'held clock': lambda d, fa, fb, prev: held_clock(d, fa, fb),
+    'held draw': lambda d, fa, fb, prev: held_draw(d, fa, fb),
     'united': lambda d, fa, fb, prev: united(fa) and united(fb),
     'not united': lambda d, fa, fb, prev: not (united(fa) and united(fb)),
     'form left': lambda d, fa, fb, prev: form_left(fb),
