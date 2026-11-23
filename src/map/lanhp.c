@@ -44,7 +44,7 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 #define COURIER_SPRITE 60
 #define MARK_SPRITE 0x07
 #define MARK_Z 46
-#define COURIER_TEXT 768   /* the bytes his words may take */
+#define COURIER_TEXT 1024  /* the bytes his words may take (a request's chip asked for, seven held and the keys: 780, issue #841) */
 
 /* The Net Square's gate (docs/world/home/square-gate.md; docs/online/): BN6's
  * great white teleporter (sprite list 7's 0x06: its core lit in animation

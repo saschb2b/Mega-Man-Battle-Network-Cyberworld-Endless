@@ -1,7 +1,9 @@
 /* director_courier.h. The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2;
  * issue #108): a Mr.Prog who stands there while the town holds something
  * for this visit, BN6's "!!" over his head, and says what waits, the
- * most valuable first: a finished request's pay with its asker, else the
+ * most valuable first: the held request, up for settling, which he
+ * settles in its asker's name (issue #841: the pay, a chip taken to them,
+ * or their word where it was not done), else the
  * new requests on AsterLand's Request BBS while none is held, what each
  * asks and pays, then the keys AsterLand's
  * SubChip seller stocked. What the visit holds is fixed as it begins
@@ -31,7 +33,7 @@
 enum { WAITS_REWARD = 1, WAITS_REQUESTS = 2, WAITS_KEYS = 4 };
 
 static struct {
-	int reward;          /* the asker whose pay waits, -1 none */
+	int reward;          /* the asker whose request is up for settling, -1 none */
 	unsigned posted;     /* the askers with a request up this visit (bit k asker k) */
 	int unlockers;       /* the SubChip seller's keys this visit */
 	bool rush_food, www_id;
@@ -49,7 +51,9 @@ static int what_waits(void) {
 }
 
 void home_courier_visit(void) {
-	C.reward = run.job.kind != JOB_NONE && run.job.state == JOB_DONE && jobs_due(&run.job, run.depth) ? run.job.asker : -1;
+	/* (done or not: a request not done held the board shut until its
+	 * asker was walked to, for a word) */
+	C.reward = run.job.kind != JOB_NONE && jobs_due(&run.job, run.depth) && run.job.asker < JOB_ASKERS ? run.job.asker : -1;
 	C.posted = 0;
 	for (int k = 0; k < JOB_ASKERS; ++k)
 		if (job_talk[k].mode == JOB_TALK_OFFER) C.posted |= 1u << k;
@@ -82,6 +86,8 @@ void home_courier_frame(void) {
 	bool keys = w & WAITS_KEYS, first = true;
 	ta_begin(&t);
 	ta_script(&t);
+	/* (heard, his "!!" goes; new words bring it back as he is met again) */
+	ta_flag_set(&t, LANHP_COURIER_TOLD_FLAG);
 	/* (the run's first visit, before its first layer: run.depth as the askers' own, director_jobs.c) */
 	/* (each offer's kind and pay, a box each: what a walk to the board
 	 * would read, course check of 26 October 2026) */
@@ -92,11 +98,20 @@ void home_courier_frame(void) {
 	for (int a = 0; a < JOB_ASKERS && (w & WAITS_REQUESTS); ++a)
 		if (C.posted >> a & 1 && k < sizeof offers)
 			k += (size_t)snprintf(offers + k, sizeof offers - k, "%s%s", n++ ? "|" : "", job_offer_brief(&job_talk[a].job));
-	ta_pages(&t, home_courier_words(w & WAITS_REWARD ? C.reward : -1, offers, n, run.depth <= 1, keys ? C.unlockers : 0, keys && C.rush_food,
-		keys && C.www_id), FACE_PROG, &first);
-	/* (heard, his "!!" goes; new words bring it back as he is met again) */
-	ta_flag_set(&t, LANHP_COURIER_TOLD_FLAG);
-	ta_end(&t);
-	if (lanhp_courier_say(out, ta_build(&t, out))) { C.said = w; flag_clear(LANHP_COURIER_TOLD_FLAG); }
-	if (emu_debug_on()) fprintf(stderr, "courier: his words name 0x%x%s\n", w, C.said == w ? "" : ", too long to write");
+	const char *news = home_courier_words(offers, n, run.depth <= 1, keys ? C.unlockers : 0, keys && C.rush_food, keys && C.www_id);
+	if (w & WAITS_REWARD) {
+		/* (the held request settled here, in its asker's name: his first
+		 * script on to it, the news after where it is kept) */
+		uint8_t on[] = { 0xF0, 0x00, 0 };   /* ts_jump */
+		int at = t.len + 2;
+		ta_bytes(&t, on, sizeof on);
+		int to = job_courier_script(&t, FACE_PROG, &job_talk[C.reward], news);
+		if (at < TEXT_MAX_BYTES) t.buf[at] = (uint8_t)to;
+	} else {
+		ta_pages(&t, news, FACE_PROG, &first);
+		ta_end(&t);
+	}
+	int len = ta_build(&t, out);
+	if (lanhp_courier_say(out, len)) { C.said = w; flag_clear(LANHP_COURIER_TOLD_FLAG); }
+	if (emu_debug_on()) fprintf(stderr, "courier: his words name 0x%x, %d bytes%s\n", w, len, C.said == w ? "" : ", too long to write");
 }

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **New: a request's reward is taken in Lan's HP.** The Mr.Prog there
+  hands over a finished request's pay in its asker's name, carries a
+  Bring request's chip to the NetBattler and his trade back, and passes
+  on the asker's word where a request was not done, so the board opens
+  for a new one at once. No jack-out and walk to the asker any more; they
+  still settle it in the town for whoever goes to them first, once
+  either place. Thanks to agergo100 for the idea (issue #841).
+
 - **New: Falzar's five Crosses.** SpoutMan, TomahawkMan, TenguMan,
   GroundMan and DustMan now give their Crosses when they fall as an
   act's guardian, as Gregar's five Cross Navis do: SpoutCross,

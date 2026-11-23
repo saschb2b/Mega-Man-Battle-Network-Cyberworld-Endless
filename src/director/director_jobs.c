@@ -17,6 +17,7 @@
 #include "debug.h"
 #include "director.h"
 #include "director_folder.h"
+#include "director_home.h"
 #include "director_state.h"
 #include "emu.h"
 #include "flags.h"
@@ -185,7 +186,7 @@ void home_jobs_words(void) {
 const char *home_jobs_status(const char *words) {
 	static char buf[512];
 	if (!run.job.kind || !jobs_due(&run.job, run.depth) || flag_get(JOB_SETTLED_FLAG)) return words;
-	snprintf(buf, sizeof buf, "%s|%s", words, job_due_words(&run.job));
+	snprintf(buf, sizeof buf, "%s|%s", words, job_due_words(&run.job, home_in_hp()));
 	return buf;
 }
 

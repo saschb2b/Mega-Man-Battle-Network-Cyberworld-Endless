@@ -2,8 +2,9 @@
  * the NetBattler at AsterLand's board (a grown-up who calls Lan "kid"),
  * the NetBattle club's member in class 6-1 (a classmate), the man from
  * Dad's lab in town. Each offers, waits, and settles at the next visit,
- * paying in BN6's own way ("MegaMan got: ..."); BN6's Request BBS's rule
- * holds: one request at a time. */
+ * paying in BN6's own way ("MegaMan got: ..."), or the courier in Lan's HP
+ * settles it in their name (issue #841); BN6's Request BBS's rule holds:
+ * one request at a time. */
 #include "job_words.h"
 
 #include <stdio.h>
@@ -114,12 +115,17 @@ const char *job_done_words(int asker) {
 	}
 }
 
-const char *job_due_words(const Job *job) {
+const char *job_due_words(const Job *job, bool in_hp) {
 	static const char *const where[JOB_ASKERS] = { "@M He's at AsterLand's board!", "@M Let's stop by the Academy!", "@M He's out in town somewhere!" };
 	static const char *const who[JOB_ASKERS] = { "the NetBattler", "the club", "the man from the lab" };
 	static char w[160];
 	int k = job->asker < JOB_ASKERS ? job->asker : JOB_LAB;
-	if (job->kind == JOB_BRING)
+	/* (in Lan's HP the courier settles it, issue #841) */
+	if (in_hp && job->kind == JOB_BRING)
+		snprintf(w, sizeof w, "@M Lan,the NetBattler wants %s chip!|@M That Mr.Prog can take it to him!", an_element(job->need));
+	else if (in_hp && job->state == JOB_DONE) snprintf(w, sizeof w, "@M Lan,that Mr.Prog has %s's reward!", who[k]);
+	else if (in_hp) snprintf(w, sizeof w, "@M We didn't finish %s's request...|@M That Mr.Prog has word from them.", who[k]);
+	else if (job->kind == JOB_BRING)
 		snprintf(w, sizeof w, "@M Lan,the NetBattler wants %s chip!|@M One from our Pack. %s", an_element(job->need), where[k] + 3);
 	else if (job->state == JOB_DONE) snprintf(w, sizeof w, "@M Lan,%s's reward is waiting!|%s", who[k], where[k]);
 	else snprintf(w, sizeof w, "@M We didn't finish %s's request...|@M Let's tell them.", who[k]);
@@ -259,42 +265,64 @@ static int offer_script(TextArchive *t, int face, const Job *j, bool lost) {
 	return i;
 }
 
-/* a chip handed over: chip c of the talk's, taken from the Pack, then the pay */
-static int hand_over(TextArchive *t, int face, const JobTalk *jt, int c) {
+/* Who settles the held request, and in what words: its asker where they
+ * stand, or the courier in Lan's HP in their name (issue #841). The
+ * script is one, so a request is settled once, either place. */
+typedef struct {
+	int face;
+	const char *done;     /* the pay handed over */
+	const char *failed;   /* a request not done, let go */
+	const char *intro;    /* before a chip is looked for, NULL none */
+	const char *none;     /* no chip of the element in the Pack */
+	const char *give_up;  /* ... and the question */
+	const char *keep;     /* No: the request kept */
+} Settler;
+
+/* the pay handed over and the request settled: what each chip's handover
+ * ends in */
+static int paid_script(TextArchive *t, const Settler *s, const Job *j) {
+	int i = ta_script(t);
+	bool first = false;   /* (after "Lan handed over") */
+	ta_pages(t, s->done, s->face, &first);
+	give_pay(t, j, &first);
+	settled(t);
+	ta_end(t);
+	return i;
+}
+
+/* a chip handed over: chip c of the talk's, taken from the Pack, then on to
+ * the pay */
+static int hand_over(TextArchive *t, const JobTalk *jt, int c, int paid, bool first) {
 	ChipInfo ci;
 	chip_info(jt->bring_chip[c], &ci);
 	int i = ta_script(t);
 	char line[48];
 	snprintf(line, sizeof line, "Lan handed over:\n\"%s %c\".", ci.name, jt->bring_code[c] == 26 ? '*' : 'A' + jt->bring_code[c]);
-	ta_page(t, FACE_NONE, line, true);
+	ta_page(t, FACE_NONE, line, first);
 	uint8_t take[] = { 0xF4, 0x11, (uint8_t)jt->bring_chip[c], (uint8_t)(jt->bring_chip[c] >> 8), (uint8_t)jt->bring_code[c], 1 };   /* ts_item_take_chip */
 	ta_bytes(t, take, sizeof take);
-	bool first = false;
-	ta_pages(t, done_words(&jt->job), face, &first);
-	give_pay(t, &jt->job, &first);
-	settled(t);
-	ta_end(t);
+	ta_jump(t, paid);
 	return i;
 }
 
 /* a chip asked for: the first of the element's MegaMan holds that is in
  * the Pack as Lan talks; else where it has to be, and whether to let the
  * request go */
-static int bring_script(TextArchive *t, int face, const JobTalk *jt, int after) {
-	int hand[JOB_BRING_MAX];
-	for (int c = 0; c < jt->nbring; ++c) hand[c] = hand_over(t, face, jt, c);
-	int keep = ta_say(t, face, "I'll wait,then!");
+static int bring_script(TextArchive *t, const Settler *s, const JobTalk *jt, int after) {
+	int paid = paid_script(t, s, &jt->job), hand[JOB_BRING_MAX];
+	bool first = !s->intro;
+	for (int c = 0; c < jt->nbring; ++c) hand[c] = hand_over(t, jt, c, paid, first);
+	int keep = ta_say(t, s->face, s->keep);
 	int none = ta_script(t);
-	char w[128];
-	snprintf(w, sizeof w, "No %s chip in your Pack?|From your Pack,kid. Not your Folder!", element_name(jt->job.need));
-	bool first = true;
-	ta_pages(t, w, face, &first);
-	ta_ask_in(t, face, "Give up on it?\n", keep, true, true);
-	ta_pages(t, failed_words(&jt->job), face, &first);
+	ta_pages(t, s->none, s->face, &first);
+	ta_ask_in(t, s->face, s->give_up, keep, true, true);
+	ta_pages(t, s->failed, s->face, &first);
 	settled(t);
 	ta_end(t);
 	int i = ta_script(t);
-	if_flag(t, JOB_SETTLED_FLAG, after);
+	if (after >= 0) if_flag(t, JOB_SETTLED_FLAG, after);
+	first = true;
+	if (s->intro) ta_pages(t, s->intro, s->face, &first);
 	for (int c = 0; c < jt->nbring; ++c) {
 		/* (ts_check_pack_chip_code: one or more in the Pack) */
 		uint8_t has[] = { 0xEF, 0x09, (uint8_t)jt->bring_chip[c], (uint8_t)(jt->bring_chip[c] >> 8), (uint8_t)jt->bring_code[c], 1,
@@ -305,19 +333,48 @@ static int bring_script(TextArchive *t, int face, const JobTalk *jt, int after) 
 	return i;
 }
 
-static int settle_script(TextArchive *t, int face, const JobTalk *jt) {
-	int after = ta_say(t, face, says[jt->job.asker][SAY_AFTER]);
-	if (jt->job.kind == JOB_BRING) return bring_script(t, face, jt, after);
+/* the held request settled by `s`: a chip asked for, the pay, or a word
+ * where it was not done; `after` what is said once it is (-1 none) */
+static int settle(TextArchive *t, const Settler *s, const JobTalk *jt, int after) {
+	if (jt->job.kind == JOB_BRING) return bring_script(t, s, jt, after);
 	int i = ta_script(t);
-	if_flag(t, JOB_SETTLED_FLAG, after);
+	if (after >= 0) if_flag(t, JOB_SETTLED_FLAG, after);
 	bool first = true;
 	if (jt->job.state == JOB_DONE) {
-		ta_pages(t, done_words(&jt->job), face, &first);
+		ta_pages(t, s->done, s->face, &first);
 		give_pay(t, &jt->job, &first);
-	} else ta_pages(t, failed_words(&jt->job), face, &first);
+	} else ta_pages(t, s->failed, s->face, &first);
 	settled(t);
 	ta_end(t);
 	return i;
+}
+
+static int settle_script(TextArchive *t, int face, const JobTalk *jt) {
+	char none[128];
+	snprintf(none, sizeof none, "No %s chip in your Pack?|From your Pack,kid. Not your Folder!", element_name(jt->job.need));
+	Settler s = { face, done_words(&jt->job), failed_words(&jt->job), NULL, none, "Give up on it?\n", "I'll wait,then!" };
+	/* (thanked again where it was done; a request let go, let go again) */
+	const Job *j = &jt->job;
+	bool kept = j->kind == JOB_BRING || j->state == JOB_DONE;
+	return settle(t, &s, jt, ta_say(t, face, kept ? says[j->asker][SAY_AFTER] : failed_words(j)));
+}
+
+int job_courier_script(TextArchive *t, int face, const JobTalk *jt, const char *rest) {
+	static const char *const who[JOB_ASKERS] = { "THE NETBATTLER", "THE NETBATTLE CLUB", "THE MAN FROM THE LAB" };
+	const Job *j = &jt->job;
+	const char *name = who[j->asker < JOB_ASKERS ? j->asker : JOB_LAB];
+	char done[96], failed[96], intro[96], none[96], keep[160];
+	if (j->kind == JOB_BRING) snprintf(done, sizeof done, "I'LL RUN IT OVER TO ASTERLAND!|HE LEFT THIS HERE FOR THE TRADE!");
+	else snprintf(done, sizeof done, "DELIVERY,DELIVERY!|%s SENT THIS FOR YOU!", name);
+	snprintf(failed, sizeof failed, "MESSAGE,MESSAGE!|%s SAYS NOT TO WORRY!", name);
+	if (j->kind == JOB_BRING) snprintf(failed, sizeof failed, "OK! I'LL LET HIM KNOW!");
+	snprintf(intro, sizeof intro, "%s WANTS %s CHIP!", name, an_element(j->need));
+	for (char *c = intro; *c; ++c)
+		if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
+	snprintf(none, sizeof none, "NONE IN YOUR PACK!?|THE PACK,NOT THE FOLDER!");
+	snprintf(keep, sizeof keep, "I'LL BE RIGHT HERE!%s%s", rest && *rest ? "|" : "", rest ? rest : "");
+	Settler s = { face, done, failed, intro, none, "GIVE UP ON IT?\n", keep };
+	return settle(t, &s, jt, -1);
 }
 
 int job_script(TextArchive *t, int asker, int face, const char *plain) {

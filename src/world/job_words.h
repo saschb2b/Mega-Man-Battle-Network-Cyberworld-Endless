@@ -45,9 +45,16 @@ const char *job_bbs_post(const Job *j);
  * Mr.Prog's capitals. */
 const char *job_offer_brief(const Job *j);
 
+/* The courier in Lan's HP settling the held request in its asker's name
+ * (issue #841): the asker's pay handed over, the chip asked for taken from
+ * the Pack, or their word where it was not done; `rest` what he says after
+ * where the request is kept (NULL none). Its first script's index. */
+int job_courier_script(TextArchive *t, int face, const JobTalk *jt, const char *rest);
+
 /* MegaMan at home on the held request, now up for settling (`job`): its
- * reward waiting, or the asker to tell, and where they are. */
-const char *job_due_words(const Job *job);
+ * reward waiting, or the asker to tell, and where they are; in Lan's HP
+ * (`in_hp`), the courier who settles it there. */
+const char *job_due_words(const Job *job, bool in_hp);
 /* MegaMan in the Net: a request done, a vow broken, the vow's reminder. */
 const char *job_done_words(int asker);
 const char *job_broken_words(void);
