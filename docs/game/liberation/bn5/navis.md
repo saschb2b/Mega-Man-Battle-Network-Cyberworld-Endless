@@ -34,7 +34,7 @@ guides':
 | KnightMan | (none) | Takes no damage on the board; shields a Navi beside him |
 | MagnetMan | MagnetBarrier | The team takes no damage on the board until the next phase (**ROM**: every teammate's flag 0x40, cleared at the Darkloids' phase's end) |
 | ToadMan | LifeMelody | A teammate beside him liberates five ahead this phase |
-| Meddy | TwinLiberation | Battles at both ends of a line; a second Navi finishes it from the far end |
+| Meddy | TwinLiberation | Battles at both ends of a line; a second Navi finishes it from the far end (**ROM**: her battle frees nothing and arms the line of 2 to 12 dark or item panels with no enemy from the one she faces; the second Navi's TwinLiberation, a command in no mask, frees the whole line: [BN5's Liberation Missions](../../../rom/liberation.md), TwinLiberation) |
 
 Team ProtoMan's six (ProtoMan, GyroMan, NapalmMan, SearchMan, MagnetMan,
 Meddy) are the other version's; this ROM keeps their commands' names.

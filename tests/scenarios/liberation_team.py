@@ -115,6 +115,20 @@ c.insert(c.index(('do', 'board dark; wait 4')), ('expect', 'body=59'))
 scene('command/protoman', """A held Team ProtoMan Soul brings its own Navi: ProtoMan on the board in BN6's own body, his own WideSwrd
       by a battle fought as MegaMan in ProtoSoul on his HP.""", soul(64, ',god'), c)
 
+# (Team ProtoMan's other five: a HeelNavi's body, list 6's 0x43, no face of theirs in Team Colonel's ROM)
+c = commanded('GyroMan', 'BombLiberation', 'over', 'dark', None, ('moved', 'freed', 1), ('moved', 'orderpoints', -1))
+c.insert(c.index(('do', 'board over; wait 4')), ('expect', 'body=67'))
+scene('command/gyroman', """GyroSoul held: GyroMan on the board in a HeelNavi's body, his own BombLiberation freeing the dark panel he
+      flies over with no battle.""", soul(128, ',god', 6), c)
+c = commanded('NapalmMan', 'Napalm', 'dark', 'dark', 'soul=4')
+c.insert(c.index(('do', 'board dark; wait 4')), ('expect', 'body=67'))
+scene('command/napalmman', """NapalmSoul held: NapalmMan's own Napalm by a battle fought as MegaMan in NapalmSoul on his HP.""",
+      soul(512, ',god'), c)
+c = Course(('expect', 'mate1~Meddy'), *in_play('Meddy'))
+c.command('dark').add(('expect', 'command=Liberation'), ('do', 'press DOWN'), ('expect', 'command=Pass'))
+scene('command/meddy', """MeddySoul held: Meddy joins with no command of her own (TwinLiberation, two Navis' at the two ends of a
+      line, waits): her window holds Liberation and Pass.""", soul(2048), c.steps)
+
 c = Course(('expect', 'mate1~KnightMan'), *in_play('KnightMan'))
 c.command('dark').add(('expect', 'command=Liberation'), ('do', 'press DOWN'), ('expect', 'command=Pass'), ('do', 'press DOWN'),
                       ('expect', 'command=Liberation'))
