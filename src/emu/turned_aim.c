@@ -20,11 +20,14 @@ static HookAct row_start(HookRegs *r, void *user) {
 	return HOOK_JUMP;
 }
 
-/* (object_getEnemyDirection's first instruction, r5 the object: the way it faces, as object_getFrontDirection gives it) */
+/* (object_getEnemyDirection's first instruction, r5 the object: the way it faces, as object_getFrontDirection gives it,
+ * while MegaMan stands turned round; unturned, his battle runs as BN6's, his side's objects that face away by their own
+ * flip (DblBeast's) aimed by side as BN6 aims them) */
 static HookAct enemy_direction(HookRegs *r, void *user) {
 	(void)user;
-	uint32_t o = r->r[5], settings = hook_read32(BN6_BATTLE_SETTINGS);
+	uint32_t o = r->r[5], settings = hook_read32(BN6_BATTLE_SETTINGS), megaman = hook_read32(BN6_BATTLE_PLAYERS);
 	if (!settings || !turned_aim_mends(hook_read8(settings + BN6_SETTINGS_SIDES), hook_read8(o + BN6_T1_ALLIANCE))) return HOOK_CONTINUE;
+	if (!megaman || !(hook_read8(megaman + BN6_T1_FLIP) & 1)) return HOOK_CONTINUE;
 	r->r[0] = hook_read8(o + BN6_T1_FLIP) & 1 ? (uint32_t)-1 : 1u;
 	return HOOK_RETURN;
 }

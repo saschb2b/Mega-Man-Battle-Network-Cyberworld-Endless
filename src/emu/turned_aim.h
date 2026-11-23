@@ -14,10 +14,11 @@
  * - the way toward the enemy (BN6_ENEMY_DIRECTION) by the alliance alone,
  *   where object_getFrontDirection takes the flip too: a chip of DiveMan's
  *   and BN4's moved ones (their code calls it in BN4's place) flew right
- *   from MegaMan turned left. A hook answers the way the object faces.
+ *   from MegaMan turned left. A hook answers the way the object faces,
+ *   while MegaMan stands turned round (unturned, his battle's every way
+ *   toward the enemy as BN6's).
  * Both act for an object of MegaMan's side on a field none of BN6's three
- * plain ones, so every plain battle, and every foe's aim, runs as BN6's;
- * the way toward the enemy is unchanged for him unturned. */
+ * plain ones, so every plain battle, and every foe's aim, runs as BN6's. */
 #ifndef CW_TURNED_AIM_H
 #define CW_TURNED_AIM_H
 
