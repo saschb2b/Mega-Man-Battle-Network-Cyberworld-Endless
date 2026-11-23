@@ -1,0 +1,335 @@
+{
+ "about": "MeddySoul's two capsules on the Custom screen in both engines: MeddySoul united on the first Custom screen (souls5 20, souls6 bit 23) by Recov10 * given up for UNITE, as soul_meddy; L at t520 opens the second Custom screen, where BN5's Soul button stands as two capsules (elements 8 and 9 of types 6 and 7, BN5's 0x08023D1C: drawn from its table by MegaMan's HP, one RNG draw) and BN6's own elements 6 and 7 stand the same (src/emu/soulcapsule.c: the capsules BN6's 382-384 and the registry's 734 and 735); grey, no chip picked; the cursor walked over them, then OK. Every frame compared to t700, the trace holding elements 8 and 9 and the two capsules' entries. CanGard V1 at (6,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 700,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "346B"
+ ],
+ "deck5": [
+  "346B"
+ ],
+ "folder6": [
+  "349A"
+ ],
+ "deck6": [
+  "349A"
+ ],
+ "souls6": "800000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "",
+    20
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    20
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    20
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "",
+    20
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    20
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    20
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x06"
+    ],
+    [
+     700,
+     "0x06"
+    ]
+   ],
+   "hp": [
+    [
+     700,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own course: MeddySoul united from t1, his second Custom screen shows the capsules and closes; MegaMan never hit (safe).",
+ "souls5": "20"
+}
