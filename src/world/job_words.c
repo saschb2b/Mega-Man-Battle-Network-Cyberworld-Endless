@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 
+#include "bring_choice.h"
 #include "data.h"
 #include "flags.h"
 #include "script_kit.h"
@@ -259,15 +260,19 @@ static int offer_script(TextArchive *t, int face, const Job *j, bool lost) {
 	return i;
 }
 
-/* a chip handed over: chip c of the talk's, taken from the Pack, then the pay */
-static int hand_over(TextArchive *t, int face, const JobTalk *jt, int c) {
+/* the face the held request's asker settles it with, as their script was
+ * last made: theirs again after the Chip Trader's screen */
+static int bring_face = FACE_NONE;
+
+/* a chip handed over: `id` in `code`, taken from the Pack, then the pay */
+static int hand_over(TextArchive *t, int face, const JobTalk *jt, int id, int code) {
 	ChipInfo ci;
-	chip_info(jt->bring_chip[c], &ci);
+	chip_info(id, &ci);
 	int i = ta_script(t);
 	char line[48];
-	snprintf(line, sizeof line, "Lan handed over:\n\"%s %c\".", ci.name, jt->bring_code[c] == 26 ? '*' : 'A' + jt->bring_code[c]);
+	snprintf(line, sizeof line, "Lan handed over:\n\"%s %c\".", ci.name, code == 26 ? '*' : 'A' + code);
 	ta_page(t, FACE_NONE, line, true);
-	uint8_t take[] = { 0xF4, 0x11, (uint8_t)jt->bring_chip[c], (uint8_t)(jt->bring_chip[c] >> 8), (uint8_t)jt->bring_code[c], 1 };   /* ts_item_take_chip */
+	uint8_t take[] = { 0xF4, 0x11, (uint8_t)id, (uint8_t)(id >> 8), (uint8_t)code, 1 };   /* ts_item_take_chip */
 	ta_bytes(t, take, sizeof take);
 	bool first = false;
 	ta_pages(t, done_words(&jt->job), face, &first);
@@ -277,12 +282,41 @@ static int hand_over(TextArchive *t, int face, const JobTalk *jt, int c) {
 	return i;
 }
 
-/* a chip asked for: the first of the element's MegaMan holds that is in
- * the Pack as Lan talks; else where it has to be, and whether to let the
- * request go */
+/* ts_check_pack_chip_code: on to `to` where chip c of the talk's is in the Pack, one or more */
+static void if_packed(TextArchive *t, const JobTalk *jt, int c, int to) {
+	uint8_t has[] = { 0xEF, 0x09, (uint8_t)jt->bring_chip[c], (uint8_t)(jt->bring_chip[c] >> 8), (uint8_t)jt->bring_code[c], 1, (uint8_t)to, (uint8_t)to, 0xFF };
+	ta_bytes(t, has, sizeof has);
+}
+
+/* the chips that fit, more than one kind in the Pack: BN6's Chip Trader's
+ * screen for one, over them alone (bring_choice.c); its Yes and its B
+ * both go on in job_bring_after */
+static int pick_script(TextArchive *t, int face) {
+	int i = ta_script(t);
+	bool first = true;
+	ta_pages(t, "Whoa,you've got a few!|Which one'll you trade me,kid?", face, &first);
+	static const uint8_t trader[] = { 0xFB, 0x06, BRING_OPEN, 0xFF };   /* ts_start_chip_trader */
+	ta_bytes(t, trader, sizeof trader);
+	ta_wait(t);
+	ta_end(t);
+	return i;
+}
+
+/* a chip asked for: where one kind of those of the element MegaMan holds is
+ * in the Pack as Lan talks, that one handed over; where more, the player's
+ * pick of them (issue 842); where none, where it has to be, and whether to
+ * let the request go */
 static int bring_script(TextArchive *t, int face, const JobTalk *jt, int after) {
-	int hand[JOB_BRING_MAX];
-	for (int c = 0; c < jt->nbring; ++c) hand[c] = hand_over(t, face, jt, c);
+	bring_face = face;
+	int hand[JOB_BRING_MAX], first_of[JOB_BRING_MAX];
+	for (int c = 0; c < jt->nbring; ++c) hand[c] = hand_over(t, face, jt, jt->bring_chip[c], jt->bring_code[c]);
+	int pick = pick_script(t, face);
+	/* (chip c the first in the Pack: another after it, and it is a pick) */
+	for (int c = 0; c < jt->nbring; ++c) {
+		first_of[c] = ta_script(t);
+		for (int d = c + 1; d < jt->nbring; ++d) if_packed(t, jt, d, pick);
+		ta_jump(t, hand[c]);
+	}
 	int keep = ta_say(t, face, "I'll wait,then!");
 	int none = ta_script(t);
 	char w[128];
@@ -295,13 +329,21 @@ static int bring_script(TextArchive *t, int face, const JobTalk *jt, int after) 
 	ta_end(t);
 	int i = ta_script(t);
 	if_flag(t, JOB_SETTLED_FLAG, after);
-	for (int c = 0; c < jt->nbring; ++c) {
-		/* (ts_check_pack_chip_code: one or more in the Pack) */
-		uint8_t has[] = { 0xEF, 0x09, (uint8_t)jt->bring_chip[c], (uint8_t)(jt->bring_chip[c] >> 8), (uint8_t)jt->bring_code[c], 1,
-			(uint8_t)hand[c], (uint8_t)hand[c], 0xFF };
-		ta_bytes(t, has, sizeof has);
-	}
+	for (int c = 0; c < jt->nbring; ++c) if_packed(t, jt, c, first_of[c]);
 	ta_jump(t, none);
+	return i;
+}
+
+int job_bring_after(TextArchive *t, const JobTalk *jt, int id, int code) {
+	if (id > 0) return hand_over(t, bring_face, jt, id, code);
+	return ta_say(t, bring_face, "I'll wait,then!");
+}
+
+int job_bring_ask(TextArchive *t) {
+	int i = ta_script(t);
+	/* (as BN6's own "Add these 3?" asks: MegaMan's face, Yes and No both on, its answer the screen's to read) */
+	ta_ask_in(t, FACE_MEGAMAN, "Lan,trade this one?\n", 0xFF, false, false);
+	ta_end(t);
 	return i;
 }
 

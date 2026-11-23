@@ -87,7 +87,8 @@ offers NetBattles; not in a New 3DS's runs, which offer none (there for
 | `+0x16BC00`-`+0x16C000` | | Free (1,024 bytes; zone words) | |
 | `+0x16C000`-`+0x16E000` | `FREE_CROSSSELECT` | CROSSSELECT's ten Crosses: its flags' table, then Falzar's five rows' palettes and art | `crossselect.c` |
 | `+0x16E000`-`+0x16E100` | `FREE_PET_MENU` | The PET's start menu: BN6's icons' lists and heights grown by a slot, the Status icon loaded for Forms | `pet_menu.c` |
-| `+0x16E100`-`+0x170000` | | Free (7,936 bytes; zone words) | |
+| `+0x16E100`-`+0x16E200` | `FREE_BRING_ASK` | A Bring request's question on the Chip Trader's screen, an archive | `bring_choice.c` |
+| `+0x16E200`-`+0x170000` | | Free (7,680 bytes; zone words) | |
 | `+0x170000`-`+0x184000` | `FREE_XAREA` | Another game's net area ([Other games' ROMs](../../multirom/overview.md)): its tile set, a header of its own before its two blocks encoded again, and its palette as it is; the map its layers take over points at them | `netmap.c` |
 | `+0x184000`-`+0x1A0000` | | Free (114,688 bytes; zone world) | |
 | `+0x1A0000`-`+0x240000` | `FREE_SONGS` | Other games' songs ([Other games' ROMs](../../multirom/overview.md)): each song's sequence with its pointers moved, the voices it selects, their key splits, drum kits, samples and waves (a piece two songs share once); BN6's empty song slots from 0x26 to 0x33 point at them (issue #82's shared allocations: the slots above, 0x34-0x62, are the sounds the other games' families, Navis, Souls and chips copy, each sound at a fixed one: BN4's families' 0x34-0x3F, BN5's from 0x40). Every song the other games' areas play is copied the first time one is needed, in the areas' order, then their games' battle themes, so each has the same place in every session (a checkpoint's state holds the music player's pointers into it) | `xsong.c` |

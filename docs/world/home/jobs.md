@@ -52,7 +52,9 @@ At the next visit the asker settles it: the reward in BN6's own words
 ("MegaMan got: ..."), a chip handed over from the Pack (BN6's own count,
 which leaves out the Folder's copies), or a word where it was not done;
 until then L at home says where the reward waits, and no other request
-can be taken. The run's save holds the request (`RUN_MAGIC` "CWE9"; an
+can be taken. Where more than one kind of chip in the Pack fits, the
+player chooses which goes, on BN6's own Chip Trader screen ([The chip
+given](#the-chip-given-23-november-2026), below). The run's save holds the request (`RUN_MAGIC` "CWE9"; an
 older save continues with none). Not yet: the objects' comps as a busting
 errand.
 
@@ -122,3 +124,32 @@ starts on No. The addresses and flags are in [The real world and
 home](../../rom/world.md), The Request BBS; the statistics' requests taken
 and vows ([The run log](../../devtools/run-log.md)) will say whether the
 draft is read more.
+
+## The chip given (23 November 2026)
+
+A Bring request took the first chip of its element the Pack held, by
+BN6's ID order, and a player saw it take a chip he wanted to keep
+(agergo100, issue 842). Through the game-design skill: the request's
+price is a chip given up, and a price the game picks is a tax, not a
+choice; the player who chooses pays with the chip he needs least. It
+serves home's dialectic, prepare or press on, on the session loop
+between acts, and its patterns are error prevention (nothing given up
+unasked) and feedforward (the chips that fit shown, and only those).
+
+So where two kinds or more of the element's chips are in the Pack (a
+chip in a code is a kind; copies of one are one kind), the NetBattler
+says "Whoa,you've got a few!" and opens BN6's own Chip Trader screen for
+one chip, its counter "0/ 1", over the Pack's chips of his element alone
+(`src/world/bring_choice.c`): BN6's list, its card, its SORT, its put-in
+and take-back. With the chip put in, MegaMan asks "Lan,trade this one?"
+in the box where BN6's machine asks "Add these 3?"; Yes leaves the screen
+with none of BN6's trade done (no prize, no save), and back on the map
+the NetBattler takes that chip with BN6's own command, as before, and
+pays. B out of the screen takes nothing: "I'll wait,then!", and the
+request stays held, offered again at the next talk. One kind alone goes
+as before, with no screen: a choice of one is no choice. The Folder's
+copies stay out of it, as before: BN6's Chip Trader lists the Pack, and
+the hand-over's check counts the Pack's alone. The screen is the trade
+his offer names ("I'll trade you my ...!"), so its title is no stranger
+there. How the screen is driven is in [The real world and
+home](../../rom/world.md), The Chip Trader's screen as a Bring's choice.

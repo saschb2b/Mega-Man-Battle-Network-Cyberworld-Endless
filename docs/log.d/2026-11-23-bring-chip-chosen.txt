@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-23T22:30:00Z
+* **Update**: world/home/jobs.md (a Bring request's chip chosen on BN6's Chip Trader screen where more than one kind fits, The chip given; issue 842), rom/world.md (The Chip Trader's screen as a Bring's choice, its row), code/world.md (`bring_choice.c` in its row), code/emu.md (`bn6_trader.h` among the headers), engine/emulation/memory.md and engine/emulation/free-space.md (FREE_BRING_ASK, from the plan).
