@@ -495,11 +495,42 @@ static int half(int A, int B, const void *ctx) {
 /* The tile being picked, where it lies and what is round it. */
 typedef struct { const TileBook *books; int nbooks; const TileGrid *g; int tx, ty; const TileNeighbours *n; } TileAt;
 
-/* A void panel with floor on two opposite sides, not on both of the other
- * two: a gap one panel wide between two floors (issue 836). The originals show
+/* The axis a gap runs across at tile (tx, ty)'s panel (0: A, 1: B), -1
+ * none: its panel void, floor on two opposite sides, not on all four (a
+ * pit keeps its pick). */
+static int gap_axis(const TileAt *at, TileFloor floor, const void *ctx, int *A, int *B) {
+	int phase;
+	unsigned oa, ob;
+	tile_class(at->g, at->tx, at->ty, &phase, A, B);
+	tl_occupancy(floor, ctx, *A, *B, &oa, &ob);
+	unsigned occupied = oa | ob;
+	bool across_a = (occupied & 0x38) == 0x28, across_b = (occupied & 0x92) == 0x82;
+	return across_a == across_b ? -1 : across_b;
+}
+
+/* Whether a pair (its pixels `mask`) paints a gap's top as floor: of the
+ * tile's pixels on the gap's panel well past the reach of the faces and
+ * legs hanging from the floor above them, where the gap shows the
+ * background, it draws three in four. Mr. Weather Comp's slots do; the other areas' own pairs
+ * for the place draw the two floors' edges and leave it open. */
+#define GAP_SKY_LEAST 8
+#define GAP_PAST_FACES 8   /* (an edge's outline and the face's foot drawn past its reach) */
+static bool paints_gap(const TileAt *at, TileFloor floor, const void *ctx, int A, int B, uint64_t mask) {
+	const TileGrid *g = at->g;
+	uint64_t sky = ~tl_above_floor(g, at->tx, at->ty, floor, ctx, tl_reach_of(g->face, g->hang) + GAP_PAST_FACES);
+	for (int i = 0; i < 64; ++i) {
+		int PA, PB;
+		tl_pixel_panel(g, at->tx * 8 + i % 8, at->ty * 8 + i / 8, &PA, &PB);
+		if (PA != A || PB != B) sky &= ~(1ull << i);
+	}
+	int n = tl_popcount64(sky);
+	return n >= GAP_SKY_LEAST && 4 * tl_popcount64(sky & mask) > 3 * n;
+}
+
+/* A gap one panel wide between two floors (gap_axis; issue 836). The originals show
  * such a void only inside a field, Mr. Weather Comp's dark slots drawn as
  * sunken floor, so its pairs drew a gap between two pads or rooms as a
- * floor cut on the tiles' grid, sky through it. Each side is drawn as if
+ * floor cut on the tiles' grid, sky through it (paints_gap). Each side is drawn as if
  * the other were not there, as apart() draws two materials: its own edge,
  * the gap void; where both draw on a tile, the one in front. */
 static bool gap_pick(const TileAt *at, TileFloor floor, const void *ctx, TilePick *out) {
@@ -507,13 +538,9 @@ static bool gap_pick(const TileAt *at, TileFloor floor, const void *ctx, TilePic
 	const TileGrid *g = at->g;
 	const TileNeighbours *n = at->n;
 	int nbooks = at->nbooks, tx = at->tx, ty = at->ty, phase, A, B;
-	unsigned oa, ob;
+	int axis = gap_axis(at, floor, ctx, &A, &B), dist, off, off2;
+	if (axis < 0) return false;
 	tile_class(g, tx, ty, &phase, &A, &B);
-	tl_occupancy(floor, ctx, A, B, &oa, &ob);
-	unsigned occupied = oa | ob;
-	bool across_a = (occupied & 0x38) == 0x28, across_b = (occupied & 0x92) == 0x82;
-	if (across_a == across_b) return false;   /* (none, or a pit: floor on all four sides) */
-	int axis = across_b, dist, off, off2;
 	Half lo = { floor, ctx, A, B, axis, -1 }, hi = { floor, ctx, A, B, axis, 1 };
 	unsigned la, lb, ha, hb;
 	tl_occupancy(half, &lo, A, B, &la, &lb);
@@ -570,11 +597,13 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 			return true;
 		}
 	}
-	const TileAt at = { books, nbooks, g, tx, ty, n };
-	if (gap_pick(&at, floor, ctx, out)) return true;
 	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, false, seams, n, &dist, &off);
 	count(dist, c);
 	if (!c) return false;
+	/* a gap between two floors that its pair paints as floor: drawn apart */
+	const TileAt at = { books, nbooks, g, tx, ty, n };
+	int GA, GB;
+	if (gap_axis(&at, floor, ctx, &GA, &GB) >= 0 && paints_gap(&at, floor, ctx, GA, GB, c->mask) && gap_pick(&at, floor, ctx, out)) return true;
 	tiles_pick_off = off;
 	*out = pick_of(c);
 	return true;
