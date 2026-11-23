@@ -25,6 +25,16 @@ Encounter xguardian_encounter(int navi, int version);
  * none */
 int xguardian_named(int xrom, int id);
 
+/* Team ProtoMan's Navi BN5's net records pair with Team Colonel's `navi` (docs/game/team-protoman.md, Where they stand:
+ * ShadowMan's GyroMan, NumberMan's SearchMan, TomahawkMan's NapalmMan, KnightMan's MagnetMan, ToadMan's Meddy), 0 none
+ * (Colonel's waits for DarkProto, BN5's ProtoMan) */
+int xguardian_partner(int navi);
+/* Whether a partner may guard act `act` (0-based): from act 2 (no tournament's entrant: bracket.c's pool takes none) */
+bool xguardian_partners_at(int act);
+/* The guardian of a surface act `act` that BN5's area `area` (its number among the other games' areas) names `navi`: his
+ * partner in half the runs where one may guard it and is fought here, by a coin of the seed for each area, else `navi` */
+int xguardian_partnered(int navi, int act, int area);
+
 /* ... and BN4's Navi `navi` (xguardian_bn4.h's proved): whether he is fought here, installed at every version (V1, V2, V3,
  * SP), which BN4's ROM read brings; his battle as BN5's, at his moved id */
 bool xguardian_bn4_fightable(int navi);
@@ -50,7 +60,8 @@ int guardian_weakness(int navi);
  * his SP from the fourth (where BN6's give EX or SP: BN5 and BN4 have no
  * EX) where it plays in BN6's battles, else his V1; BN4's where his own
  * sits out, his BN6 kin's (xguardian_bn4_kin); its code into *code (the
- * folder's where the chip has it, else its *, else its first); 0 none */
+ * folder's where the chip has it, else its *, else its first); 0 none. Team ProtoMan's, whose Navi chips are not
+ * registered yet, give one of BN6's chips of his Soul's kind in its place (docs/game/team-protoman.md, The build) */
 int xguardian_chip(int navi, int depth, int *code);
 /* Whether BN6 chip `chip` is one of BN5's Navi chips of the six or BN4's of
  * its proved (V1, SP, DS: a guardian's reward row holds his) */

@@ -77,13 +77,6 @@ int lib_navi_guardian(int navi) {
 	return lib_mate_team(navi) ? GUARDIAN_TEAM_FIRST + navi - MATE_PROTOMAN : 0;
 }
 
-/* (Team ProtoMan's names, BN5's: the guardians' table names none of navis
- * 59-64 till they guard) */
-static const char *team_name(int navi) {
-	static const char *const names[] = { "ProtoMan", "GyroMan", "SearchMan", "NapalmMan", "MagnetMan", "Meddy" };
-	return names[navi - MATE_PROTOMAN];
-}
-
 int lib_team_held(uint8_t navi[LIB_HELD]) {
 	int n = 0;
 	if (XR[XROM_BN5_COLONEL_US].data && soulunite_ready())
@@ -102,9 +95,8 @@ int lib_team_held(uint8_t navi[LIB_HELD]) {
 static bool soul_navi(int navi) { return navi >= MATE_COLONEL && navi <= MATE_TOADMAN; }
 
 const char *lib_navi_name(int navi) {
-	if (lib_mate_team(navi)) return team_name(navi);
-	int c = lib_mate_cross(navi);
-	if (c) return guardian(c)->name;
+	int g = lib_navi_guardian(navi);
+	if (g) return guardian(g)->name;
 	return soul_navi(navi) ? guardian(GUARDIAN_OLDER_FIRST + navi - MATE_COLONEL)->name : "MegaMan";
 }
 

@@ -12,7 +12,7 @@ void folder_now(uint16_t folder[BN6_FOLDER_ENTRIES]);
 void folder_made_save(void);
 void folder_made_load(void);
 void note_folder_codes(void);
-/* The Souls the layer was made with (souls_layer) for its finds and stock
+/* The Souls the layer was made with (souls_layer_bn5) for its finds and stock
  * again on a CONTINUE, after souls_load (loot_souls.h) */
 void folder_souls_load(void);
 void own_folder_chips(void);

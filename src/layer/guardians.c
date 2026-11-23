@@ -53,6 +53,13 @@ static const Guardian guardians[] = {
 	[31] = { "BlizzardMan", "Darkloid of the Snow", GUARDIAN_NO_MUGSHOT, -1, 112, 184, 248 },
 	[32] = { "CloudMan", "Darkloid of the Storm", GUARDIAN_NO_MUGSHOT, -1, 200, 200, 216 },
 	[33] = { "CosmoMan", "Darkloid of the Stars", GUARDIAN_NO_MUGSHOT, -1, 144, 112, 224 },
+	/* BN5's Team ProtoMan (guardians.h GUARDIAN_TEAM_*), their Team Colonel partners' second guardians: Team Colonel's ROM
+	 * keeps no overworld sprite or face of theirs (guardian_older_sprite) (ProtoMan's own, DarkProto, his row once moved) */
+	[60] = { "GyroMan", "Ace of the Skies", GUARDIAN_NO_MUGSHOT, -1, 232, 200, 72 },
+	[61] = { "SearchMan", "The Silent Scope", GUARDIAN_NO_MUGSHOT, -1, 112, 152, 80 },
+	[62] = { "NapalmMan", "The Walking Arsenal", GUARDIAN_NO_MUGSHOT, -1, 232, 104, 48 },
+	[63] = { "MagnetMan", "Lord of Magnetism", GUARDIAN_NO_MUGSHOT, -1, 96, 120, 232 },
+	[64] = { "Meddy", "Nurse of the Old Net", GUARDIAN_NO_MUGSHOT, -1, 240, 136, 184 },
 	/* BN5's Nebula Navis, the deep's pool's (guardians.h GUARDIAN_NEBULA_*): no overworld sprite of theirs read yet */
 	[65] = { "LarkMan", "Talon of Nebula", GUARDIAN_NO_MUGSHOT, -1, 88, 104, 200 },
 	[66] = { "GridMan", "Bulldozer of Nebula", GUARDIAN_NO_MUGSHOT, -1, 232, 96, 72 },
@@ -99,6 +106,9 @@ int guardian_sprite(int navi) {
 int guardian_older_sprite(int navi) {
 	/* (BN5's lists 6 and 8: docs/rom/navis.md, BN5's Navis) */
 	static const uint8_t numbers[GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + 1] = { 69, 75, 71, 72, 73, 74 };
+	/* (Team ProtoMan's five none: Team Colonel's lists 6 and 8 point 64-68, the five before Colonel's 69, at one
+	 * placeholder sprite of 31 animations and the black face its other empty numbers point at, as Gregar's do for
+	 * Falzar's Navis: docs/rom/bn5-battles.md, BN5's Navis as guardians) */
 	/* (the Darkloids': BlizzardMan's 76 drawn on BN5's own board, mission
 	 * 1's, read in romlab; ShadeMan's, CloudMan's and CosmoMan's by their
 	 * palettes beside his, docs/rom/) */

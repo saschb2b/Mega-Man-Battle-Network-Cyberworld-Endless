@@ -3,7 +3,7 @@ type: Feature
 title: "Souls"
 description: "BN5's Souls (issue #69): a beaten BN5 Navi's Soul serves every battle of the run, UNITE on BN6's Custom screen giving up a chip of its kind, Chaos Unison with a DarkChip, kept in `run.souls`."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:04:04Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:35:13Z }
 ---
 
 # Souls (4 October 2026, issue #69; in every battle since issue #82)
@@ -119,7 +119,7 @@ points first marked as proposals among them.
   the kind the folder holds fewest of first (`src/core/loot_souls.c`). The
   counts stay; only which chips come changes, and DarkChips never come so.
   The Souls held as each layer is made are what its finds and stock lean
-  to (`souls_layer`, beside the checkpoint), so a Soul won on a layer
+  to (`souls_layer_bn5`, beside the checkpoint), so a Soul won on a layer
   counts from the next and a CONTINUE makes the same stock.
 - **Said where it happens:** at his Guardian Data MegaMan names the Soul,
   that it is with them every battle, the chip kind it takes (with one of

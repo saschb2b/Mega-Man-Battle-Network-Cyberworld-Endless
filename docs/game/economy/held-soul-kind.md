@@ -3,7 +3,7 @@ type: Feature
 title: "A held Soul's kind"
 description: "A held Soul leans the finds and stock to its kind (`src/core/loot_souls.c`): a quarter of Mystery Data's chips and a Net Dealer's fourth chip, the folder's scarcest kind, measured with `build.py economy`."
 tags: [game, economy]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:32:55Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:35:13Z }
 ---
 
 # A held Soul's kind (25 October 2026)
@@ -38,7 +38,7 @@ folder instead (`src/core/loot_souls.c`).
   BN4's twelve, each by its kind in BN5's numbering (`souls_lean`); BN4's
   GutsSoul, panel-cracking, has none of those kinds and leans nothing. A
   run holding only Team Colonel's leans as before.
-- **When:** the Souls held as the layer is made (`souls_layer`, kept beside
+- **When:** the Souls held as the layer is made (`souls_layer_bn5`, kept beside
   the checkpoint with the Souls), so a CONTINUE rebuilds the same stock; a
   Soul won on a layer counts from the next. A run that holds none draws
   nothing more: the plans' numbers above are as they were.

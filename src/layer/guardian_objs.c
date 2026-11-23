@@ -82,14 +82,14 @@ static int guardian_chip(const GuardianStage *g, int *code) {
 }
 
 /* What his Guardian Data says of the power it gives: a Cross's words
- * (powers.c), or BN5's guardian's Soul, for every battle of the run
+ * (powers.c), or BN5's guardian's Soul (Team Colonel's, Team ProtoMan's), for every battle of the run
  * (docs/game/meta/souls.md); BN4's gives none yet (docs/game/bosses/bn4-navis.md), nor do BN5's
  * Nebula Navis, their Navi chips their pay (docs/game/bosses/bn5-navis.md) */
 static const char *reward_power(int navi) {
 	/* (a form run: every guardian's pay, in the run's form, issue #774) */
 	if (run.form != RUN_FORM_MIX) return powers_reward_text(navi, layer.biome, run.depth);
 	if (guardian_bn4(navi) || guardian_nebula(navi)) return NULL;
-	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
+	return guardian_older(navi) || guardian_team(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
 }
 
 /* Where MegaMan meets guardian `g` (docs/game/bosses/sequence.md): in his

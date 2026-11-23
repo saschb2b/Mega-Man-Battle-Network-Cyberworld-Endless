@@ -70,7 +70,9 @@ int run_dress(int biome) {
 /* A surface act's: where an area of BN5's or BN4's dresses it and names a
  * Navi its records set there (NetAreaDef.xguard), in half the runs (a coin
  * of its own per area, beside the dress's: BN5's twelve numbers by the
- * first hash's bits, those from 12 by a second's, BN4's among them) */
+ * first hash's bits, those from 12 by a second's, BN4's among them); from
+ * act 2, his Team ProtoMan partner in half of those (xguardian_partnered,
+ * docs/game/team-protoman.md) */
 static int dressed_xguardian(int act, int biome) {
 	int a = run_dress(biome);
 	const NetAreaDef *x = a >= NET_AREAS ? net_area_def(a) : NULL;
@@ -79,6 +81,7 @@ static int dressed_xguardian(int act, int biome) {
 	uint32_t h = (run.seed ^ (k < 12 ? 0x47524431u : 0x47524432u)) * 2654435761u;   /* "GRD1", "GRD2" */
 	if (!(h >> (8 + b) & 1)) return 0;
 	int navi = xguardian_named(x->xrom - 1, x->xguard[1] && (h >> (20 + b) & 1) ? x->xguard[1] : x->xguard[0]);
+	navi = xguardian_partnered(navi, act, k);
 	return xguardian_fightable(navi) ? navi : 0;
 }
 
@@ -103,15 +106,19 @@ static bool deep_candidate(int navi, int act, int biome) {
 /* The deep acts' (the Undernet's and the Graveyard's areas, whatever
  * dresses them; docs/multirom/one-net.md: where they guard): both nets'
  * Navis that fit the act's band in one pool, each as likely, by a coin of
- * the seed and the act: one of BN5's, or of BN4's that its records set in
+ * the seed and the act: one of BN5's (Team Colonel's, their partners,
+ * Nebula's two), or of BN4's that its records set in
  * the area of BN4's dressing it (docs/game/bosses/bn4-navis.md), or 0,
  * BN6's own pick standing (its area's own favoured, as ever:
  * run.boss_order). None that guards a surface act of the run already. */
 static int deep_xguardian(int act, int biome) {
-	int n6 = 0, n5 = 0, cand[GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + GUARDIAN_NEBULA_LAST - GUARDIAN_NEBULA_FIRST + 4];
+	int n6 = 0, n5 = 0, cand[2 * (GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + 1) + GUARDIAN_NEBULA_LAST - GUARDIAN_NEBULA_FIRST + 3];
 	for (unsigned i = 0; i < sizeof navis; ++i) n6 += pacing_guardian_miss(navis[i], act, 0, false, navi_hp) == 0;
 	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi)
 		if (deep_candidate(navi, act, biome)) cand[n5++] = navi;
+	/* (and their Team ProtoMan partners, where a partner may guard the act: docs/game/team-protoman.md, Where they stand) */
+	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST && xguardian_partners_at(act); ++navi)
+		if (deep_candidate(xguardian_partner(navi), act, biome)) cand[n5++] = xguardian_partner(navi);
 	/* (and Nebula's two, LarkMan and GridMan, the deep's alone: no Soul, never a surface act's, the owner's call of 12 November
 	 * 2026, docs/game/bosses/bn5-navis.md) */
 	for (int navi = GUARDIAN_NEBULA_FIRST; navi <= GUARDIAN_NEBULA_LAST; ++navi)
