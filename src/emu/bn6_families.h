@@ -211,5 +211,16 @@
 #define BN6_ARM_VIRUSES_COUNT 31          /* ... BN6's records, the Navis' table after them (0x080191C8) */
 #define BN6_ARM_VIRUS_SIZE    0x44        /* ... a record: 34 points, BN5's 30 first (30-33 BN6's own: the fourth kind's 0x3C reads 30,
                                              the third's 0x95 31, 0x08010820 32, a freeze's ice block 33) */
+/* A virus's plain deletion, BN6's generic state, which a moved family's virus runs as BN6's own (tests/xdiff/legit/maps/
+ * deletion_end.json; docs/rom/virus-families.md): */
+#define BN6_VIRUS_DIE         0x0801664Eu /* the state (bn6f sub_801664E; BN5's twin 0x0801343A): its first frame spawns the dying's
+                                             sparks (BN6_DIE_SPARKS_SPAWN, kept at BN6_AI_DIE_SPARKS) and counts the virus's 0x20 frames */
+#define BN6_VIRUS_DIE_CLEAR   0x0801668Cu /* ... the count's end clears BN6_AI_DIE_SPARKS (movs r1,#0; ldr r0,[r5,#0x58]; str r1,[r0,
+                                             #0x74]) where BN5's (0x0801347C) ends the sparks through its BN6_DIE_SPARKS_END: BN6's
+                                             sparks see their word 0 and end themselves, let go a frame after BN5's */
+#define BN6_DIE_SPARKS_SPAWN  0x080E2DAAu /* the fourth kind's 0x11's spawner (BN5's 0x080E1BFE, the same bytes but its call): r7 the word
+                                             the sparks are kept in, their +0x60 its address, their life by r4 (0x20, 0x5A, 0x20) */
+#define BN6_DIE_SPARKS_END    0x080E2DC6u /* ... their end (r0 the sparks or 0: +8 set 8; BN5's 0x080E1C1A), which BN6_VIRUS_DIE never
+                                             calls (BN6's Navi dying, BN6_NAVI_DIE's next state, does: 0x08017180) */
 
 #endif

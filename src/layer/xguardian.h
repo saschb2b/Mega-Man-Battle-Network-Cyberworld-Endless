@@ -26,8 +26,8 @@ Encounter xguardian_encounter(int navi, int version);
 int xguardian_named(int xrom, int id);
 
 /* Team ProtoMan's Navi BN5's net records pair with Team Colonel's `navi` (docs/game/team-protoman.md, Where they stand:
- * ShadowMan's GyroMan, NumberMan's SearchMan, TomahawkMan's NapalmMan, KnightMan's MagnetMan, ToadMan's Meddy), 0 none
- * (Colonel's waits for DarkProto, BN5's ProtoMan) */
+ * ShadowMan's GyroMan, NumberMan's SearchMan, TomahawkMan's NapalmMan, KnightMan's MagnetMan, ToadMan's Meddy, Colonel's
+ * DarkProto, BN5's ProtoMan), 0 none */
 int xguardian_partner(int navi);
 /* Whether a partner may guard act `act` (0-based): from act 2 (no tournament's entrant: bracket.c's pool takes none) */
 bool xguardian_partners_at(int act);

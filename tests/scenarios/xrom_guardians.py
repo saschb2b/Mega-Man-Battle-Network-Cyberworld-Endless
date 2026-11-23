@@ -1,7 +1,7 @@
 """The older nets' Navis as an act's guardian: BN5's six, Team ProtoMan's
-five and Nebula's two, BN4's twelve. The door, his fight in BN6's engine
+six (ProtoMan as DarkProto) and Nebula's two, BN4's twelve. The door, his fight in BN6's engine
 under his own name, his deletion, his Guardian Data taken (five HPMemory,
-and the Soul of each of BN5's six and Team ProtoMan's five); and each of
+and the Soul of each of BN5's six and Team ProtoMan's six); and each of
 BN4's seen
 facing MegaMan on the map from either side of his arena (0.22.0: BN4
 draws four views where BN6 draws eight, and a guardian with MegaMan on his
@@ -14,16 +14,22 @@ IN_BATTLE = {'ShadowMan': 'ShadoMan', 'NumberMan': 'NumbrMan', 'TomahawkMan': 'T
              'WoodMan': 'WoodM', 'TopMan': 'TopM', 'BurnerMan': 'BurnM', 'SparkMan': 'SprkM'}
 BN5 = {24: 'Colonel', 25: 'ShadowMan', 26: 'NumberMan', 27: 'TomahawkMan', 28: 'KnightMan', 29: 'ToadMan'}
 NEBULA = {65: 'LarkMan', 66: 'GridMan'}
-# (Team ProtoMan's, their Team Colonel partners' second guardians: docs/game/team-protoman.md)
-TEAM = {60: 'GyroMan', 61: 'SearchMan', 62: 'NapalmMan', 63: 'MagnetMan', 64: 'Meddy'}
+# (Team ProtoMan's, their Team Colonel partners' second guardians, BN5's ProtoMan as DarkProto: docs/game/team-protoman.md)
+TEAM = {59: 'DarkProto', 60: 'GyroMan', 61: 'SearchMan', 62: 'NapalmMan', 63: 'MagnetMan', 64: 'Meddy'}
 # (... in battle by BN5's names, SearchMan's BN5's SerchMan where BN4's is SrchM)
-TEAM_IN_BATTLE = {'SearchMan': 'SerchM', 'NapalmMan': 'NapalmM', 'MagnetMan': 'MagnetM'}
+TEAM_IN_BATTLE = {'SearchMan': 'SerchM', 'NapalmMan': 'NapalmM', 'MagnetMan': 'MagnetM', 'DarkProto': 'DarkProt'}
 BN4 = {34: 'Roll', 35: 'GutsMan', 36: 'WindMan', 37: 'SearchMan', 38: 'FireMan', 39: 'ThunderMan', 43: 'JunkMan', 44: 'AquaMan',
        45: 'WoodMan', 46: 'TopMan', 48: 'BurnerMan', 50: 'SparkMan'}
 
 
-def start(biome, navi, seed, depth=3):
-    return f'CYBERWORLD_AUTOPILOT=1 --scene emu --seed {seed} --run-depth {depth} --net-biome {biome} --guardian {navi} --dev onehit,god,quiet'
+def start(biome, navi, seed, depth=3, hp=None):
+    return (f'CYBERWORLD_AUTOPILOT=1 --scene emu --seed {seed} --run-depth {depth} --net-biome {biome} --guardian {navi} '
+            f'--dev onehit,god,quiet' + (f',hp={hp}' if hp else ''))
+
+
+# (MegaMan's max HP where a guardian's one hit takes more than a new run's 100, which god mode's refill after the frame
+# cannot answer: DarkProto's slash)
+HP = {'DarkProto': 600}
 
 
 def fight(game, biome, navi, name, depth=3, shown=None):
@@ -32,8 +38,9 @@ def fight(game, biome, navi, name, depth=3, shown=None):
     # ProtoSoul's in all BN5's Souls (souls_held_bn5), apart from the six's; Nebula's two and BN4's have none to give)
     soul = 1 << (navi - 24) if navi in BN5 else 0
     team = 1 << (navi - 59) if navi in TEAM else 0
+    hp = HP.get(name)
     return dict(
-        START=start(biome, navi, 3, depth), NEEDS=(game,),
+        START=start(biome, navi, 3, depth, hp), NEEDS=(game,),
         GUARDS=f"{game.upper()}'s {name} guarding an act: fought in BN6's engine, deleted, his Guardian Data taken",
         STEPS=[
             ('expect', f'guardianfrom={game}'),
@@ -48,7 +55,7 @@ def fight(game, biome, navi, name, depth=3, shown=None):
             ('expect', f'guardian={name} beaten'),
             ('until', 'guardian~done', 6000),         # his Guardian Data taken
             ('expect', 'data=taken'),
-            ('expect', 'hp=200/200'),                 # its five HPMemory, and the full heal
+            ('expect', f'hp={hp}/{hp}' if hp else 'hp=200/200'),   # its five HPMemory (held at --dev hp's), and the full heal
             ('expect', f'soulsheld={soul:02x}'),      # ... and his Soul, where he has one
             ('expect', f'soulsbn5~{(team | soul << 6):03x} '),
         ])

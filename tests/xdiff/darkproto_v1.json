@@ -1,0 +1,11 @@
+{
+ "about": "DarkProto V1 (BN5's ProtoMan, 0x101; BN6's 0x1F0) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): Team ProtoMan's ProtoMan in BN6's engine as DarkProto, his own states (BN6's from 8), his objects (the first kind's 0x10, the third kind's 0x6B) through the dispatch, his shield and blade the chips' copies (the third kind's 0x2B and 0x69) and his afterimage LarkMan's (the fourth kind's 0x28), installed after the chips' code",
+ "kind": "differential",
+ "foes": "101@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}
