@@ -90,7 +90,8 @@ stands free; it was `CYBERWORLD_STATE_POS`'s line), `folder first Cannon A
 sum 6eff` the folder the next battle draws from (its first chip and a sum
 over all thirty), `foldercard own` whose picture that chip's card draws (its
 `own`, BN6's `blank`, or another chip's by name: Gregar's Falzar Gigas drew
-theirs, issue #731), `subchips minienrg 1 fullenrg 0 sneakrun 0 untrap 0`,
+theirs, issue #731), `cardpower 80` and `cardchip 516` the power Folder Edit's card last drew and
+its chip, as BN6 drew it (issue 835), `subchips minienrg 1 fullenrg 0 sneakrun 0 untrap 0`,
 `mail 3 unread 2`, and `request quick taken got 1 of 3 held 0 settled 0`
 the run's request ([Jobs](../world/home/jobs.md); on a layer too while
 one is held). The PET's screens of ours say theirs while they are up:

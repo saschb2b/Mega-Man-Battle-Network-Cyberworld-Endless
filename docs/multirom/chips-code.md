@@ -170,7 +170,17 @@ of. The registry's ids, records and art stay C1's (above).
     Navi chips' SP by BN5's fixed link powers, `UNIT_STUBS` answering the
     link bit 1 as BN6 keeps no deletion times of BN5's Navis, and DS by the
     side's battle counter 3), the rest a stub (power 0); a playing chip's record
-    takes BN6's entry (`xchips_power_of`), still computed and shown.
+    takes BN6's entry (`xchips_power_of`), still computed and shown. BN6's PET shows
+    such a power by another routine than the battle's: its card and its
+    pack's sort read a power past 1000 as one of BN6's own Navis' by
+    MegaMan's best time (`0x08010C76`), whose tables end with BN6's Navis,
+    and a moved SP's card read past them (CosmoMn SP's 6544, issue 835).
+    Both that routine and its twin are hooked (`src/emu/xchips_shown.c`):
+    a grown entry goes the battle's way, `0x080109A4` for side 0, the moved
+    routine itself, which gives the last power of the SP's row, as BN5's
+    and BN4's own cards show it for a save with no deletion time
+    ([The chip registry and BN5's chips' code](../rom/chips-code.md), A
+    moved SP's power in the PET).
   - *Subfamilies a unit plays*: a family's table of routines by
     subfamily (`SUB_TABLES`: the bombs', the misc family's) keeps the
     entries of the subfamilies its moved rows play (moved, Program
