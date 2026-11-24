@@ -6,7 +6,9 @@
 
 #include <string.h>
 
+#include "bn6.h"
 #include "look_apply.h"
+#include "rom.h"
 
 #define FIELD_SPRITE 0x37
 #define WALK 8          /* the field's first walking animation */
@@ -38,8 +40,15 @@ void looks_preview_start(LooksPreview *p) {
 void looks_preview_colours(LooksPreview *p, const Look *look) {
 	uint16_t pal[16];
 	static const int which[2] = { LOOK_SPRITE_FIELD, LOOK_SPRITE_BATTLE };
+	static const uint32_t own[2] = { BN6_LOOK_FIELD_PALS, BN6_LOOK_BATTLE_PALS };
 	for (int k = 0; k < 2; ++k) {
 		p->have[k] = look_palette_of(look, which[k], pal);
+		/* (none from the core: BN6's own, from the player's ROM) */
+		if (!p->have[k] && R.data) {
+			memcpy(p->pal[k], R.data + (own[k] - 0x08000000u), 32);
+			p->have[k] = true;
+			continue;
+		}
 		for (int i = 0; p->have[k] && i < 16; ++i) {
 			p->pal[k][2 * i] = (uint8_t)pal[i];
 			p->pal[k][2 * i + 1] = (uint8_t)(pal[i] >> 8);

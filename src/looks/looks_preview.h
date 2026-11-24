@@ -2,8 +2,8 @@
  * look, on a loop that shows him whole: his field sprite walking round all
  * eight directions, front, side and back, then his battle body standing,
  * firing the buster, throwing and firing a charged shot. Each sprite in its
- * own palette as the look makes it (look_palette_of), BN6's own where the
- * core gives none. The loop is run in the screen's update; the draw reads
+ * own palette as the look makes it (look_palette_of), BN6's own from the
+ * player's ROM where the core gives none. The loop is run in the screen's update; the draw reads
  * it. */
 #ifndef CW_LOOKS_PREVIEW_H
 #define CW_LOOKS_PREVIEW_H
