@@ -26,8 +26,10 @@ Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
   farthest from you are drawn in BN6's blue until they come nearer,
   never in wrong colours. In a
   NetBattle you see your MegaMan in your look and the other's in his, on
-  your screen and on his, with your own face in the emotion window. Game
-  and server both need this version (issue #854).
+  your screen and on his, with your own face in the emotion window. In
+  the week's DeepNet a crew's battle and a party's guardian show each
+  crewmate in his own look on every game. Game and server both need this
+  version (issues #854, #879).
 
 - **New: every starting folder on the setup's shelf.** The FOLDER row
   turns through all ten and counts the open ones. A locked folder can be
@@ -58,11 +60,6 @@ Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
   Advance came together in 1 battle in 100 with the old folder; now about
   1 in 11, at about Standard's damage. It still opens with any Program
   Advance used (issue #865).
-
-- **New: a crew's MegaMen wear their own looks on a shared field.** In
-  the week's DeepNet a crew's battle and a party's guardian show each
-  MegaMan in his own player's look, on every game. Full Synchro and the
-  emotion window's face keep BN6's colours there (issue #879).
 
 - **New: Team ProtoMan guards the net, and their Souls are MegaMan's.**
   With BN5 Team Colonel's ROM beside BN6's, from act 2 a coin of the seed
