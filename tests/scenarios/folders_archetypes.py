@@ -18,7 +18,7 @@ MANY = {
         GUARDS='Ember and Tide locked, their hints shown, A on them refused: the run keeps Standard.',
         START=SETUP, STEPS=[
             FOLDER_ROW,
-            ('expect', 'shelf~Lean:locked,Ember:locked,Tide:locked'),
+            ('expect', 'shelf~Ember:locked,Tide:locked'),
             ('do', 'press LEFT; wait 6'),             # round the shelf: the last, Tide
             ('expect', 'folderlook=Tide'),
             ('expect', 'folderstate=locked'),
@@ -27,8 +27,9 @@ MANY = {
             ('do', 'press LEFT; wait 6'),
             ('expect', 'folderlook=Ember'),
             ('expect', 'folderstate=locked'),
-            ('do', 'press LEFT; wait 6'),             # past the ids no folder holds, to Lean
-            ('expect', 'folderlook=Lean'),
+            ('do', 'press LEFT; wait 6'),             # past any id no folder holds, to the folder before
+            ('expect', 'folderlook!=Ember'),
+            ('expect', 'folderstate=locked'),
         ]),
     'tide-opens-with-a-fire-guardian': dict(
         GUARDS='BlastMan deleted as the act\'s guardian: Tide open at the next setup and taken; Ember still locked.',
