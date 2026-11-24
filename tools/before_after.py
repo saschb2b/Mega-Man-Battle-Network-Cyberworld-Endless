@@ -228,6 +228,9 @@ SCENES = [
     # his PC: "MegaMan isn't in the PET..." before, Lan's HP after)
     ('jackin-pet', ['--scene', 'town', '--seed', '2', '--input',
                     '40:,' + '4:A,6:,' * 46 + '30:,0:flags 5917 5917 0,30:,0:place -40 -8 7,10:,6:R,400:'], {}, 720),
+    # (0.24.0's, issue #864: the JACK-IN SETUP of a new profile at its Folder row, Right pressed: one folder and
+    # every shut one's deed listed before, the shelf turned to Blade after, locked with its hint)
+    ('setup-folder', ['--scene', 'setup', '--input', build.N24_SHELF + '6:RIGHT,10:,80:'], {}, 206),
 ]
 # (0.23.0's fixes, against 0.22.2, each the course of its fix's scenario to the moment that shows it: name, START,
 # STEPS (or OLD's and NEW's), the ROMs it NEEDS beside BN6's. Their 0.22.2 is built with #705's dev switch and step
