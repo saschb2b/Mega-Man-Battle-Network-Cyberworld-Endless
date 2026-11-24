@@ -404,6 +404,8 @@ static void value_draw(int x0, int y, const char *v, bool turns, const char *shu
 /* a RUN row: its name and value */
 static void run_row_draw(int x0, int y, int row) {
 	static const SetupWord names[RUN_ROWS] = { SW_NET, SW_FOLDER, SW_FORM, SW_CROSS, SW_THREAT };
+	/* (a RUN row's number, said so: the consoles' GCC read row_new's test as a row past them) */
+	if (row < 0 || row >= RUN_ROWS) return;
 	char v[16], count[16];
 	snprintf(v, sizeof v, "%d", S.c.threat);
 	int forms = 0, souls = 0;
