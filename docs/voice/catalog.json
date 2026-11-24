@@ -1214,6 +1214,59 @@
   "lock_words:ta_pcode_teller": {
    "line": 127
   },
+  "looks_screen_text:look_words": {
+   "comment": "(the look's channels in words: those coloured by name and colour, the plain ones together)",
+   "line": 80
+  },
+  "looks_screen_text:looks_ask_words": {
+   "header": "... its question before a look is replaced (\"Replace Look C?\"), Yes and No its own words",
+   "line": 131
+  },
+  "looks_screen_text:looks_channel_words": {
+   "header": "... on a channel: what it colours, and the colour it has",
+   "line": 104
+  },
+  "looks_screen_text:looks_colour_word": {
+   "header": "A colour's plain name (\"dark red\", \"grey\"), so no colour is told by its colour alone",
+   "line": 50
+  },
+  "looks_screen_text:looks_colour_word.hues": {
+   "line": 57
+  },
+  "looks_screen_text:looks_colour_words": {
+   "header": "... on a palette's colour (owned or tried on while locked), or its plain cell (colour -1)",
+   "line": 116
+  },
+  "looks_screen_text:looks_copy_row": {
+   "header": "The pop-up's row: \"Copy to B\"",
+   "line": 71
+  },
+  "looks_screen_text:looks_locked_words": {
+   "header": "... on a palette not owned, from the list: locked, and where it comes from",
+   "line": 122
+  },
+  "looks_screen_text:looks_popup_words": {
+   "header": "... on the pop-up's row: what A does there, and what the look it goes over holds now",
+   "line": 124
+  },
+  "looks_screen_text:looks_slot_words": {
+   "header": "The box on the looks' row: the look worn, channel by channel",
+   "line": 98
+  },
+  "looks_screen_text:looks_told_words": {
+   "header": "... what the pop-up did: copied (the look now worn, from `from`), or made plain",
+   "line": 138
+  },
+  "looks_screen_text:origins": {
+   "comment": "where each palette comes from (the routes: issue #854's table)",
+   "line": 34
+  },
+  "looks_screen_text:parts": {
+   "line": 17
+  },
+  "looks_screen_text:words": {
+   "line": 9
+  },
   "looks_text:names": {
    "line": 5
   },
@@ -2924,6 +2977,15 @@
    "speaker": "MegaMan",
    "stem": "library_text"
   },
+  "src/looks/looks_screen_text.c": {
+   "comment": "looks_screen_text.h. Where a palette comes from is said as the routes give it (issue #854: milestones, the home shop, a rare find), plainly, as KeyItem says what an item is. A colour's name is worked out from its hue, its saturation and its value, so every palette's sixteen have one.",
+   "domain": "Other",
+   "kind": "speech",
+   "lines": 40,
+   "shows": [],
+   "speaker": "MegaMan",
+   "stem": "looks_screen_text"
+  },
   "src/online/arena_text.c": {
    "comment": "The Arena's PET text (arena_text.h)",
    "domain": "Arena",
@@ -3229,7 +3291,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2625,
+  "boxes": 2665,
   "domains": {
    "Arena": {
     "files": [
@@ -3402,13 +3464,14 @@
      "src/layer/battler_words.c",
      "src/layer/fork_words.c",
      "src/layer/glitch_words.c",
+     "src/looks/looks_screen_text.c",
      "src/online/dive_words.c",
      "src/online/emote_strip_text.c",
      "src/update/update_text.c"
     ],
     "flagged": 37,
-    "lines": 450,
-    "speech": 426
+    "lines": 490,
+    "speech": 466
    },
    "Powers": {
     "files": [
@@ -3607,13 +3670,13 @@
     "words_per_box": 5.6
    },
    "MegaMan": {
-    "bangs_per_box": 0.02,
+    "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 914,
+    "boxes": 935,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
-    "end_bang": 0.54,
-    "end_dots": 0.11,
+    "end_bang": 0.53,
+    "end_dots": 0.1,
     "openers": [
      "The",
      "Lan",
@@ -3622,7 +3685,7 @@
      "He",
      "Let's"
     ],
-    "stutters": "1 box in 152",
+    "stutters": "1 box in 156",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -3664,7 +3727,7 @@
     "words_per_box": 5.4
    }
   },
-  "lines": 2401,
+  "lines": 2441,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3962,13 +4025,13 @@
     "words_per_box": 4.0
    },
    "MegaMan": {
-    "bangs_per_box": 0.02,
+    "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 914,
+    "boxes": 935,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
-    "end_bang": 0.54,
-    "end_dots": 0.11,
+    "end_bang": 0.53,
+    "end_dots": 0.1,
     "openers": [
      "The",
      "Lan",
@@ -3977,7 +4040,7 @@
      "He",
      "Let's"
     ],
-    "stutters": "1 box in 152",
+    "stutters": "1 box in 156",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -4232,7 +4295,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1699
+  "speech": 1739
  },
  "version": 1,
  "conversations": [
@@ -4911,6 +4974,20 @@
   {"container":"liberation_words:lib_label_enemy_phase","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_label_enemy_phase","line":189,"lines":["liberation_words:lib_label_enemy_phase:0"],"speakers":["Mr.Prog"],"title":"Lib label enemy phase","when":""},
   {"container":"liberation_words:lib_label_player_phase","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_label_player_phase","line":189,"lines":["liberation_words:lib_label_player_phase:0"],"speakers":["Mr.Prog"],"title":"Lib label player phase","when":""},
   {"container":"liberation_words:lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_faced_label","line":194,"lines":["liberation_words:lib_faced_label:caseLIB_ITEM.0","liberation_words:lib_faced_label:caseLIB_RING.0","liberation_words:lib_faced_label:caseLIB_TRAP.0","liberation_words:lib_faced_label:caseLIB_CLEAN.0"],"speakers":["MegaMan"],"title":"What MegaMan faces, for the menu's information","when":"What MegaMan faces, for the menu's information: a panel's kind (liberation_board.h's LIB_*), or a unit's name"},
+  {"container":"looks_screen_text:words","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:words","line":10,"lines":["looks_screen_text:words:8","looks_screen_text:words:0"],"speakers":["MegaMan"],"title":"Words","when":""},
+  {"container":"looks_screen_text:parts","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:parts","line":17,"lines":["looks_screen_text:parts:0","looks_screen_text:parts:1","looks_screen_text:parts:2"],"speakers":["MegaMan"],"title":"Parts","when":""},
+  {"container":"looks_screen_text:origins","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:origins","line":35,"lines":["looks_screen_text:origins:0","looks_screen_text:origins:1","looks_screen_text:origins:2","looks_screen_text:origins:3","looks_screen_text:origins:4","looks_screen_text:origins:5","looks_screen_text:origins:6","looks_screen_text:origins:7","looks_screen_text:origins:8","looks_screen_text:origins:9","looks_screen_text:origins:10","looks_screen_text:origins:11"],"speakers":["MegaMan"],"title":"Where each palette comes from","when":"where each palette comes from (the routes: issue #854's table)"},
+  {"container":"looks_screen_text:looks_colour_word","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_colour_word","line":54,"lines":["looks_screen_text:looks_colour_word:0","looks_screen_text:looks_colour_word:1"],"speakers":["MegaMan"],"title":"A colour's plain name","when":"A colour's plain name (\"dark red\", \"grey\"), so no colour is told by its colour alone"},
+  {"container":"looks_screen_text:looks_colour_word.hues","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_colour_word.hues","line":58,"lines":["looks_screen_text:looks_colour_word.hues:0.dark","looks_screen_text:looks_colour_word.hues:3.dark","looks_screen_text:looks_colour_word.hues:3.pale","looks_screen_text:looks_colour_word.hues:4.dark","looks_screen_text:looks_colour_word.hues:5.pale","looks_screen_text:looks_colour_word.hues:8.dark"],"speakers":["MegaMan"],"title":"Looks colour word: hues","when":""},
+  {"container":"looks_screen_text:looks_copy_row","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_copy_row","line":71,"lines":["looks_screen_text:looks_copy_row:0"],"speakers":["MegaMan"],"title":"The pop-up's row","when":"The pop-up's row: \"Copy to B\""},
+  {"container":"looks_screen_text:look_words","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:look_words","line":91,"lines":["looks_screen_text:look_words:0","looks_screen_text:look_words:1"],"speakers":["MegaMan"],"title":"Look words","when":"(the look's channels in words: those coloured by name and colour, the plain ones together)"},
+  {"container":"looks_screen_text:looks_slot_words","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_slot_words","line":101,"lines":["looks_screen_text:looks_slot_words:0"],"speakers":["MegaMan"],"title":"The box on the looks' row","when":"The box on the looks' row: the look worn, channel by channel"},
+  {"container":"looks_screen_text:looks_channel_words","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_channel_words","line":108,"lines":["looks_screen_text:looks_channel_words:0","looks_screen_text:looks_channel_words:1"],"speakers":["MegaMan"],"title":"Looks channel words","when":"... on a channel: what it colours, and the colour it has"},
+  {"container":"looks_screen_text:looks_colour_words","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_colour_words","line":117,"lines":["looks_screen_text:looks_colour_words:0","looks_screen_text:looks_colour_words:1"],"speakers":["MegaMan"],"title":"Looks colour words","when":"... on a palette's colour (owned or tried on while locked), or its plain cell (colour -1)"},
+  {"container":"looks_screen_text:looks_locked_words","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_locked_words","line":122,"lines":["looks_screen_text:looks_locked_words:0"],"speakers":["MegaMan"],"title":"Looks locked words","when":"... on a palette not owned, from the list: locked, and where it comes from"},
+  {"container":"looks_screen_text:looks_popup_words","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_popup_words","line":127,"lines":["looks_screen_text:looks_popup_words:0","looks_screen_text:looks_popup_words:1"],"speakers":["MegaMan"],"title":"Looks popup words","when":"... on the pop-up's row: what A does there, and what the look it goes over holds now"},
+  {"container":"looks_screen_text:looks_ask_words","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_ask_words","line":132,"lines":["looks_screen_text:looks_ask_words:0","looks_screen_text:looks_ask_words:1"],"speakers":["MegaMan"],"title":"Looks ask words","when":"... its question before a look is replaced (\"Replace Look C?\"), Yes and No its own words"},
+  {"container":"looks_screen_text:looks_told_words","domain":"Other","file":"src/looks/looks_screen_text.c","id":"looks_screen_text:looks_told_words","line":139,"lines":["looks_screen_text:looks_told_words:0","looks_screen_text:looks_told_words:1"],"speakers":["MegaMan"],"title":"Looks told words","when":"... what the pop-up did: copied (the look now worn, from `from`), or made plain"},
   {"container":"update_text:words","domain":"Other","file":"src/update/update_text.c","id":"update_text:words","line":9,"lines":["update_text:words:1","update_text:words:2","update_text:words:3","update_text:words:4","update_text:words:5","update_text:words:6","update_text:words:7","update_text:words:8","update_text:words:9","update_text:words:10","update_text:words:11","update_text:words:12","update_text:words:13","update_text:words:15","update_text:words:16","update_text:words:17","update_text:words:19","update_text:words:23","update_text:words:24","update_text:words:27","update_text:words:30","update_text:words:31","update_text:words:32","update_text:words:34","update_text:words:35","update_text:words:36","update_text:words:37","update_text:words:38","update_text:words:0"],"speakers":["MegaMan"],"title":"Words","when":"(in UpdateWord's order, its name beside each)"},
   {"container":"update_text:update_setting_note","domain":"Other","file":"src/update/update_text.c","id":"update_text:update_setting_note","line":60,"lines":["update_text:update_setting_note:0"],"speakers":["MegaMan"],"title":"Settings.ini's comment before the updates line, where one is added","when":"settings.ini's comment before the updates line, where one is added"},
   {"container":"update_text:update_pending_note","domain":"Other","file":"src/update/update_text.c","id":"update_text:update_pending_note","line":66,"lines":["update_text:update_pending_note:0"],"speakers":["MegaMan"],"title":"Update pending note","when":"... before the update_pending line"},
@@ -6612,6 +6689,46 @@
   {"boxes":[{"pages":[["Some of the beast's","power..."]],"speaker":"MegaMan","text":"Some of the beast's power..."},{"pages":[["He left it","behind,Lan!"]],"speaker":"MegaMan","text":"He left it behind,Lan!"}],"container":"super_reward_words","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:super_reward_words:1","kind":"speech","line":98,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Some of the beast's power...|@M He left it behind,Lan!","text_hash":"5f16af33d0cb"},
   {"boxes":[{"pages":[["He dropped data","again,Lan!"]],"speaker":"MegaMan","text":"He dropped data again,Lan!"},{"pages":[["Another GigaChip!"]],"speaker":"MegaMan","text":"Another GigaChip!"}],"container":"super_reward_words","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:super_reward_words:2","kind":"speech","line":99,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M He dropped data again,Lan!|@M Another GigaChip!","text_hash":"c84ce15d455d"},
   {"boxes":[{"pages":[["Bass dropped this as","he went..."]],"speaker":"MegaMan","text":"Bass dropped this as he went..."},{"pages":[["Lan,it's GigaChip","data!"]],"speaker":"MegaMan","text":"Lan,it's GigaChip data!"}],"container":"super_reward_words","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:super_reward_words:3","kind":"speech","line":100,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Bass dropped this as he went...|@M Lan,it's GigaChip data!","text_hash":"4614de2028ee"},
+  {"boxes":[{"pages":[["All plain"]],"speaker":"MegaMan","text":"All plain"}],"container":"words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:words:8","kind":"speech","line":10,"speaker":"MegaMan","speakers":["MegaMan"],"text":"All plain","text_hash":"37b31b8f1536"},
+  {"boxes":[{"pages":[["a word for each","LooksWord"]],"speaker":"MegaMan","text":"a word for each LooksWord"}],"container":"words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:words:0","kind":"speech","line":12,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a word for each LooksWord","text_hash":"5f35e56641e5"},
+  {"boxes":[{"pages":[["his helmet,arms and","legs"]],"speaker":"MegaMan","text":"his helmet,arms and legs"}],"container":"parts","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:parts:0","kind":"speech","line":17,"speaker":"MegaMan","speakers":["MegaMan"],"text":"his helmet,arms and legs","text_hash":"f6df1ab31ec7"},
+  {"boxes":[{"pages":[["his bodysuit"]],"speaker":"MegaMan","text":"his bodysuit"}],"container":"parts","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:parts:1","kind":"speech","line":17,"speaker":"MegaMan","speakers":["MegaMan"],"text":"his bodysuit","text_hash":"2c5e5fe0ebec"},
+  {"boxes":[{"pages":[["his fins and emblem"]],"speaker":"MegaMan","text":"his fins and emblem"}],"container":"parts","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:parts:2","kind":"speech","line":17,"speaker":"MegaMan","speakers":["MegaMan"],"text":"his fins and emblem","text_hash":"24eef419cb83"},
+  {"boxes":[{"pages":[["Every MegaMan has","these."]],"speaker":"MegaMan","text":"Every MegaMan has these."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:0","kind":"speech","line":35,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Every MegaMan has these.","text_hash":"e0d1452ab1e1"},
+  {"boxes":[{"pages":[["Earned in the","Undernet."]],"speaker":"MegaMan","text":"Earned in the Undernet."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:1","kind":"speech","line":36,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Earned in the Undernet.","text_hash":"d1d49c507857"},
+  {"boxes":[{"pages":[["Earned when the Nest","falls."]],"speaker":"MegaMan","text":"Earned when the Nest falls."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:2","kind":"speech","line":37,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Earned when the Nest falls.","text_hash":"9b37609916cc"},
+  {"boxes":[{"pages":[["Earned with Chaud's","respect."]],"speaker":"MegaMan","text":"Earned with Chaud's respect."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:3","kind":"speech","line":38,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Earned with Chaud's respect.","text_hash":"858fede617dd"},
+  {"boxes":[{"pages":[["Earned against","Nebula's Darkloids."]],"speaker":"MegaMan","text":"Earned against Nebula's Darkloids."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:4","kind":"speech","line":39,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Earned against Nebula's Darkloids.","text_hash":"ba5b85f62186"},
+  {"boxes":[{"pages":[["Earned in the","tournament."]],"speaker":"MegaMan","text":"Earned in the tournament."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:5","kind":"speech","line":40,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Earned in the tournament.","text_hash":"57f454259a24"},
+  {"boxes":[{"pages":[["Earned at the","highest threat."]],"speaker":"MegaMan","text":"Earned at the highest threat."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:6","kind":"speech","line":41,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Earned at the highest threat.","text_hash":"db5dbe84ace9"},
+  {"boxes":[{"pages":[["Sold at AsterLand's","counter."]],"speaker":"MegaMan","text":"Sold at AsterLand's counter."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:7","kind":"speech","line":42,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Sold at AsterLand's counter.","text_hash":"c3e25b66e198"},
+  {"boxes":[{"pages":[["Sold at AsterLand's","counter."]],"speaker":"MegaMan","text":"Sold at AsterLand's counter."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:8","kind":"speech","line":43,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Sold at AsterLand's counter.","text_hash":"c3e25b66e198"},
+  {"boxes":[{"pages":[["Sold at AsterLand's","counter."]],"speaker":"MegaMan","text":"Sold at AsterLand's counter."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:9","kind":"speech","line":44,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Sold at AsterLand's counter.","text_hash":"c3e25b66e198"},
+  {"boxes":[{"pages":[["Found in Mystery","Data now and then."]],"speaker":"MegaMan","text":"Found in Mystery Data now and then."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:10","kind":"speech","line":45,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Found in Mystery Data now and then.","text_hash":"7c08e1cebe43"},
+  {"boxes":[{"pages":[["Found on a Glitch","layer."]],"speaker":"MegaMan","text":"Found on a Glitch layer."}],"container":"origins","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:origins:11","kind":"speech","line":46,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Found on a Glitch layer.","text_hash":"cf42ac4322a2"},
+  {"boxes":[{"pages":[["light grey"]],"speaker":"MegaMan","text":"light grey"}],"container":"looks_colour_word","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_colour_word:0","kind":"speech","line":54,"speaker":"MegaMan","speakers":["MegaMan"],"text":"light grey","text_hash":"82dc76621156"},
+  {"boxes":[{"pages":[["dark grey"]],"speaker":"MegaMan","text":"dark grey"}],"container":"looks_colour_word","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_colour_word:1","kind":"speech","line":54,"speaker":"MegaMan","speakers":["MegaMan"],"text":"dark grey","text_hash":"fc6859882367"},
+  {"boxes":[{"pages":[["dark red"]],"speaker":"MegaMan","text":"dark red"}],"container":"looks_colour_word.hues","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_colour_word.hues:0.dark","kind":"speech","line":58,"note":"(the hue in degrees, by its largest channel)","speaker":"MegaMan","speakers":["MegaMan"],"text":"dark red","text_hash":"c35a178905a3"},
+  {"boxes":[{"pages":[["dark green"]],"speaker":"MegaMan","text":"dark green"}],"container":"looks_colour_word.hues","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_colour_word.hues:3.dark","kind":"speech","line":59,"note":"(the hue in degrees, by its largest channel)","speaker":"MegaMan","speakers":["MegaMan"],"text":"dark green","text_hash":"1ee79b9ee073"},
+  {"boxes":[{"pages":[["pale green"]],"speaker":"MegaMan","text":"pale green"}],"container":"looks_colour_word.hues","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_colour_word.hues:3.pale","kind":"speech","line":59,"note":"(the hue in degrees, by its largest channel)","speaker":"MegaMan","speakers":["MegaMan"],"text":"pale green","text_hash":"934e61733ce6"},
+  {"boxes":[{"pages":[["dark teal"]],"speaker":"MegaMan","text":"dark teal"}],"container":"looks_colour_word.hues","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_colour_word.hues:4.dark","kind":"speech","line":59,"note":"(the hue in degrees, by its largest channel)","speaker":"MegaMan","speakers":["MegaMan"],"text":"dark teal","text_hash":"2582a7a9ae3c"},
+  {"boxes":[{"pages":[["sky blue"]],"speaker":"MegaMan","text":"sky blue"}],"container":"looks_colour_word.hues","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_colour_word.hues:5.pale","kind":"speech","line":59,"note":"(the hue in degrees, by its largest channel)","speaker":"MegaMan","speakers":["MegaMan"],"text":"sky blue","text_hash":"ca4864c63415"},
+  {"boxes":[{"pages":[["dark red"]],"speaker":"MegaMan","text":"dark red"}],"container":"looks_colour_word.hues","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_colour_word.hues:8.dark","kind":"speech","line":60,"speaker":"MegaMan","speakers":["MegaMan"],"text":"dark red","text_hash":"c35a178905a3"},
+  {"boxes":[{"pages":[["Copy to {looks_slot_name}"]],"speaker":"MegaMan","text":"Copy to {looks_slot_name}"}],"container":"looks_copy_row","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_copy_row:0","kind":"speech","line":71,"placeholders":[{"name":"looks_slot_name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Copy to {looks_slot_name}","text_hash":"6d7111b1f24c"},
+  {"boxes":[{"pages":[["As he always is."]],"speaker":"MegaMan","text":"As he always is."}],"container":"look_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:look_words:0","kind":"speech","line":91,"speaker":"MegaMan","speakers":["MegaMan"],"text":"As he always is.","text_hash":"c4f55dc01226"},
+  {"boxes":[{"pages":[["plain."]],"speaker":"MegaMan","text":" plain."}],"container":"look_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:look_words:1","kind":"speech","line":95,"speaker":"MegaMan","speakers":["MegaMan"],"text":" plain.","text_hash":"667d89c9c302"},
+  {"boxes":[{"pages":[["Look {looks_slot_name}.","{w}"]],"speaker":"MegaMan","text":"Look {looks_slot_name}. {w}"}],"container":"looks_slot_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_slot_words:0","kind":"speech","line":101,"placeholders":[{"name":"looks_slot_name","spec":"%s"},{"name":"w","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look {looks_slot_name}. {w}","text_hash":"66cd60a21b2e"},
+  {"boxes":[{"pages":[["{first}{p}. As he","always is."]],"speaker":"MegaMan","text":"{first}{p}. As he always is."}],"container":"looks_channel_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:looks_channel_words:0","kind":"speech","line":108,"placeholders":[{"name":"first","spec":"%c"},{"name":"p","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{first}{p}. As he always is.","text_hash":"92f57989b461"},
+  {"boxes":[{"pages":[["{first}{p} in","{col},{looks_colour_word}."]],"speaker":"MegaMan","text":"{first}{p} in {col},{looks_colour_word}."}],"container":"looks_channel_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:looks_channel_words:1","kind":"speech","line":113,"placeholders":[{"name":"first","spec":"%c"},{"name":"p","spec":"%s"},{"name":"col","spec":"%s"},{"name":"looks_colour_word","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{first}{p} in {col},{looks_colour_word}.","text_hash":"608a61b75ad7"},
+  {"boxes":[{"pages":[["His own colour,as he","always is."]],"speaker":"MegaMan","text":"His own colour,as he always is."}],"container":"looks_colour_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:looks_colour_words:0","kind":"speech","line":117,"speaker":"MegaMan","speakers":["MegaMan"],"text":"His own colour,as he always is.","text_hash":"8a162788ca6d"},
+  {"boxes":[{"pages":[["{looks_palette_name}","{colour},{looks_colour_word}.","Locked. {origin}"]],"speaker":"MegaMan","text":"{looks_palette_name} {colour},{looks_colour_word}. Locked. {origin}"}],"container":"looks_colour_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_colour_words:1","kind":"speech","line":119,"placeholders":[{"name":"looks_palette_name","spec":"%s"},{"name":"colour","spec":"%d"},{"name":"looks_colour_word","spec":"%s"},{"name":"origin","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{looks_palette_name} {colour},{looks_colour_word}. Locked. {origin}","text_hash":"55064c9c465c"},
+  {"boxes":[{"pages":[["{looks_palette_name} is locked.","{origin}"]],"speaker":"MegaMan","text":"{looks_palette_name} is locked. {origin}"}],"container":"looks_locked_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_locked_words:0","kind":"speech","line":122,"placeholders":[{"name":"looks_palette_name","spec":"%s"},{"name":"origin","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{looks_palette_name} is locked. {origin}","text_hash":"2f4a449faa04"},
+  {"boxes":[{"pages":[["Look {looks_slot_name} now.","{w}"]],"speaker":"MegaMan","text":"Look {looks_slot_name} now. {w}"}],"container":"looks_popup_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"fragment":true,"id":"looks_screen_text:looks_popup_words:0","kind":"speech","line":127,"placeholders":[{"name":"looks_slot_name","spec":"%s"},{"name":"w","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look {looks_slot_name} now. {w}","text_hash":"34735b1f4312"},
+  {"boxes":[{"pages":[["Look {looks_slot_name} back","to his own colours."]],"speaker":"MegaMan","text":"Look {looks_slot_name} back to his own colours."}],"container":"looks_popup_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:looks_popup_words:1","kind":"speech","line":128,"placeholders":[{"name":"looks_slot_name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look {looks_slot_name} back to his own colours.","text_hash":"853e752ac137"},
+  {"boxes":[{"pages":[["Replace Look","{looks_slot_name}?"]],"speaker":"MegaMan","text":"Replace Look {looks_slot_name}?"}],"container":"looks_ask_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:looks_ask_words:0","kind":"speech","line":132,"placeholders":[{"name":"looks_slot_name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Replace Look {looks_slot_name}?","text_hash":"dc54d8d83bda"},
+  {"boxes":[{"pages":[["Clear Look {looks_slot_name}?"]],"speaker":"MegaMan","text":"Clear Look {looks_slot_name}?"}],"container":"looks_ask_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:looks_ask_words:1","kind":"speech","line":133,"placeholders":[{"name":"looks_slot_name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Clear Look {looks_slot_name}?","text_hash":"a3dd374da92a"},
+  {"boxes":[{"pages":[["Look {looks_slot_name} is now","Look {looks_slot_name}'s.","MegaMan wears it."]],"speaker":"MegaMan","text":"Look {looks_slot_name} is now Look {looks_slot_name}'s. MegaMan wears it."}],"container":"looks_told_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:looks_told_words:0","kind":"speech","line":139,"placeholders":[{"name":"looks_slot_name","spec":"%s"},{"name":"looks_slot_name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look {looks_slot_name} is now Look {looks_slot_name}'s. MegaMan wears it.","text_hash":"aa5c1f8dbb16"},
+  {"boxes":[{"pages":[["Look {looks_slot_name} is","back to his own","colours."]],"speaker":"MegaMan","text":"Look {looks_slot_name} is back to his own colours."}],"container":"looks_told_words","domain":"Other","file":"src/looks/looks_screen_text.c","flags":[],"id":"looks_screen_text:looks_told_words:1","kind":"speech","line":140,"placeholders":[{"name":"looks_slot_name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look {looks_slot_name} is back to his own colours.","text_hash":"3ed17ab63b11"},
   {"boxes":[{"pages":[["HP left"]],"speaker":"Screen","text":"HP left"}],"container":"arena_hp_left","domain":"Arena","file":"src/online/arena_text.c","flags":[],"id":"arena_text:arena_hp_left:0","kind":"screen","line":9,"speaker":"Screen","speakers":["Screen"],"text":"HP left","text_hash":"1cb5d064879d"},
   {"boxes":[{"pages":[["Chips used"]],"speaker":"Screen","text":"Chips used"}],"container":"arena_chips_used","domain":"Arena","file":"src/online/arena_text.c","flags":[],"id":"arena_text:arena_chips_used:0","kind":"screen","line":9,"speaker":"Screen","speakers":["Screen"],"text":"Chips used","text_hash":"840addd170fb"},
   {"boxes":[{"pages":[["Sending..."]],"speaker":"Screen","text":"Sending..."}],"container":"arena_coming","domain":"Arena","file":"src/online/arena_text.c","flags":[],"id":"arena_text:arena_coming:0","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"Sending...","text_hash":"c338c191ab1e"},

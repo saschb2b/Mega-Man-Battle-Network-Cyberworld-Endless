@@ -6,22 +6,15 @@
 
 #include <stdio.h>
 
-static const char *const words[LW_COUNT] = {
-	[LW_TITLE] = "COLOURS",
-	[LW_LOOK] = "Look",
-	[LW_LOOK_CAPS] = "LOOK",
-	[LW_PLAIN] = "PLAIN",
-	[LW_LOCKED] = "LOCKED",
-	[LW_INFORMATION] = "INFORMATION",
-	[LW_KEYS] = "L/R",
-	[LW_PAGES] = "PALETTE",
-	[LW_ALL_PLAIN] = "All plain",
+static const char *const words[] = {
+	"COLOURS", "Look", "LOOK", "PLAIN", "LOCKED", "INFORMATION", "L/R", "PALETTE", "All plain",   /* (LooksWord's order) */
 };
+_Static_assert(sizeof words / sizeof *words == LW_COUNT, "a word for each LooksWord");
 
 const char *looks_word(LooksWord w) { return (unsigned)w < LW_COUNT ? words[w] : ""; }
 
 static const char *const channels[LOOK_CHANNELS] = { "Armour", "Suit", "Accent" };
-static const char *const parts[LOOK_CHANNELS] = { "his helmet, arms and legs", "his bodysuit", "his fins and emblem" };
+static const char *const parts[LOOK_CHANNELS] = { "his helmet,arms and legs", "his bodysuit", "his fins and emblem" };
 
 const char *looks_channel_name(int c) { return c >= 0 && c < LOOK_CHANNELS ? channels[c] : ""; }
 static const char *part(int c) { return parts[c >= 0 && c < LOOK_CHANNELS ? c : 0]; }
@@ -38,19 +31,19 @@ const char *looks_band_name(int p) {
 }
 
 /* where each palette comes from (the routes: issue #854's table) */
-static const char *const origins[LOOK_PALETTES] = {
-	[LOOK_CLASSIC] = "Every MegaMan has these.",
-	[LOOK_UNDERNET] = "Earned in the Undernet.",
-	[LOOK_GREGAR] = "Earned when the Nest falls.",
-	[LOOK_PROTOMAN] = "Earned with Chaud's respect.",
-	[LOOK_NEBULA] = "Earned against Nebula's Darkloids.",
-	[LOOK_TOURNAMENT] = "Earned in the tournament.",
-	[LOOK_HAZARD] = "Earned at the highest threat.",
-	[LOOK_CENTRAL] = "Sold at AsterLand's counter.",
-	[LOOK_SEASIDE] = "Sold at AsterLand's counter.",
-	[LOOK_SKY] = "Sold at AsterLand's counter.",
-	[LOOK_MYSTERY] = "Found in Mystery Data, now and then.",
-	[LOOK_GLITCH] = "Found on a Glitch layer.",
+static const char *const origins[LOOK_PALETTES] = {   /* (LookPalette's order) */
+	"Every MegaMan has these.",   /* LOOK_CLASSIC */
+	"Earned in the Undernet.",   /* LOOK_UNDERNET */
+	"Earned when the Nest falls.",   /* LOOK_GREGAR */
+	"Earned with Chaud's respect.",   /* LOOK_PROTOMAN */
+	"Earned against Nebula's Darkloids.",   /* LOOK_NEBULA */
+	"Earned in the tournament.",   /* LOOK_TOURNAMENT */
+	"Earned at the highest threat.",   /* LOOK_HAZARD */
+	"Sold at AsterLand's counter.",   /* LOOK_CENTRAL */
+	"Sold at AsterLand's counter.",   /* LOOK_SEASIDE */
+	"Sold at AsterLand's counter.",   /* LOOK_SKY */
+	"Found in Mystery Data now and then.",   /* LOOK_MYSTERY */
+	"Found on a Glitch layer.",   /* LOOK_GLITCH */
 };
 static const char *origin(int p) { return p >= 0 && p < LOOK_PALETTES ? origins[p] : ""; }
 
@@ -92,36 +85,38 @@ static void look_words(char *out, size_t n, const Look *look) {
 		if (look->palette[c] == LOOK_NONE) { plain_of[plains++] = c; continue; }
 		char col[24];
 		colour_of(col, sizeof col, look, c);
-		at += (size_t)snprintf(out + at, at < n ? n - at : 0, "%s%s %s, %s.", at ? " " : "", looks_channel_name(c), col,
+		at += (size_t)snprintf(out + at, at < n ? n - at : 0, "%s%s %s,%s.", at ? " " : "", looks_channel_name(c), col,
 			looks_colour_word(looks_colour(look->palette[c], look->colour[c])));
 	}
-	if (plains == LOOK_CHANNELS) { snprintf(out, n, "as he always is."); return; }
+	if (plains == LOOK_CHANNELS) { snprintf(out, n, "As he always is."); return; }
 	if (!plains || at >= n) return;
 	at += (size_t)snprintf(out + at, n - at, " %s", looks_channel_name(plain_of[0]));
-	for (int k = 1; k < plains && at < n; ++k) at += (size_t)snprintf(out + at, n - at, "%s%s", k == plains - 1 ? " and " : ", ", looks_channel_name(plain_of[k]));
+	for (int k = 1; k < plains && at < n; ++k) at += (size_t)snprintf(out + at, n - at, "%s%s", k == plains - 1 ? " and " : ",", looks_channel_name(plain_of[k]));
 	if (at < n) snprintf(out + at, n - at, " plain.");
 }
 
 void looks_slot_words(char *out, size_t n, int slot, const Look *look) {
 	char w[160];
 	look_words(w, sizeof w, look);
-	snprintf(out, n, "Look %s: %s", looks_slot_name(slot), w);
+	snprintf(out, n, "Look %s. %s", looks_slot_name(slot), w);
 }
 
 void looks_channel_words(char *out, size_t n, int c, const Look *look) {
+	const char *p = part(c);
+	char first = (char)(p[0] >= 'a' && p[0] <= 'z' ? p[0] - 32 : p[0]);
 	if (look->palette[c] == LOOK_NONE) {
-		snprintf(out, n, "%s: %s, as he always is.", looks_channel_name(c), part(c));
+		snprintf(out, n, "%c%s. As he always is.", first, p + 1);
 		return;
 	}
 	char col[24];
 	colour_of(col, sizeof col, look, c);
-	snprintf(out, n, "%s: %s, in %s, %s.", looks_channel_name(c), part(c), col, looks_colour_word(looks_colour(look->palette[c], look->colour[c])));
+	snprintf(out, n, "%c%s in %s,%s.", first, p + 1, col, looks_colour_word(looks_colour(look->palette[c], look->colour[c])));
 }
 
 void looks_colour_words(char *out, size_t n, int palette, int colour, bool owned) {
-	if (colour < 0) snprintf(out, n, "His own colour, as he always is.");
-	else if (owned) snprintf(out, n, "%s %d, %s. %s", looks_palette_name(palette), colour + 1, looks_colour_word(looks_colour(palette, colour)), origin(palette));
-	else snprintf(out, n, "%s %d, %s. Locked: %s", looks_palette_name(palette), colour + 1, looks_colour_word(looks_colour(palette, colour)), origin(palette));
+	if (colour < 0) snprintf(out, n, "His own colour,as he always is.");
+	else if (owned) snprintf(out, n, "%s %d,%s. %s", looks_palette_name(palette), colour + 1, looks_colour_word(looks_colour(palette, colour)), origin(palette));
+	else snprintf(out, n, "%s %d,%s. Locked. %s", looks_palette_name(palette), colour + 1, looks_colour_word(looks_colour(palette, colour)), origin(palette));
 }
 
 void looks_locked_words(char *out, size_t n, int palette) { snprintf(out, n, "%s is locked. %s", looks_palette_name(palette), origin(palette)); }
@@ -129,7 +124,7 @@ void looks_locked_words(char *out, size_t n, int palette) { snprintf(out, n, "%s
 void looks_popup_words(char *out, size_t n, int slot, int row, const Look *there) {
 	char w[160];
 	look_words(w, sizeof w, there);
-	if (row < LOOK_SLOTS - 1) snprintf(out, n, "Look %s now: %s", looks_slot_name((slot + 1 + row) % LOOK_SLOTS), w);
+	if (row < LOOK_SLOTS - 1) snprintf(out, n, "Look %s now. %s", looks_slot_name((slot + 1 + row) % LOOK_SLOTS), w);
 	else snprintf(out, n, "Look %s back to his own colours.", looks_slot_name(slot));
 }
 
