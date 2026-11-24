@@ -38,7 +38,7 @@ const char *looks_colour_word(uint16_t bgr555);
 
 /* "3/12": the palettes owned */
 void looks_count_words(char *out, size_t n, int owned, int all);
-/* The pop-up's row: "Copy to B" */
+/* The pop-up's row: "COPY TO B" */
 void looks_copy_row(char *out, size_t n, int to);
 
 /* The box on the looks' row: the look worn, channel by channel */

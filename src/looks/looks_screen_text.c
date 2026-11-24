@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 static const char *const words[] = {
-	"COLOURS", "Look", "LOOK", "PLAIN", "LOCKED", "INFORMATION", "L/R", "PALETTE", "All plain",   /* (LooksWord's order) */
+	"COLOURS", "Look", "LOOK", "PLAIN", "LOCKED", "INFORMATION", "L/R", "PALETTE", "ALL PLAIN",   /* (LooksWord's order) */
 };
 _Static_assert(sizeof words / sizeof *words == LW_COUNT, "a word for each LooksWord");
 
@@ -68,7 +68,7 @@ const char *looks_colour_word(uint16_t c) {
 
 void looks_count_words(char *out, size_t n, int owned, int all) { snprintf(out, n, "%d/%d", owned, all); }
 
-void looks_copy_row(char *out, size_t n, int to) { snprintf(out, n, "Copy to %s", looks_slot_name(to)); }
+void looks_copy_row(char *out, size_t n, int to) { snprintf(out, n, "COPY TO %s", looks_slot_name(to)); }
 
 /* (a channel's colour in words: "Classic 14" or "plain") */
 static void colour_of(char *out, size_t n, const Look *l, int c) {

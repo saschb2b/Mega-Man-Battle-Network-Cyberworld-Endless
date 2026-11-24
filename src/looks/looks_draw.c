@@ -204,7 +204,8 @@ static void popup(int x, int y, const LooksView *v) {
 		SDL_Rect at = looks_popup_rect(r);
 		if (r < LOOKS_POPUP_ROWS - 1) looks_copy_row(row, sizeof row, (v->slot + 1 + r) % LOOK_SLOTS);
 		else snprintf(row, sizeof row, "%s", looks_word(LW_ALL_PLAIN));
-		look_text(x + at.x + POP_IN, y + at.y, row, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+		/* (in capitals, as SELECT's EDIT, EQUIP and CHG NAME) */
+		look_caps(x + at.x + POP_IN, y + at.y + 4, row, LOOK_TEXT, LOOK_SHADE);
 		if (r == v->popup) look_cursor(x + at.x + 1, y + at.y + 2);
 	}
 }
