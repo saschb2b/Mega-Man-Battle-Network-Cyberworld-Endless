@@ -3,7 +3,7 @@
 Come and talk: runs, folders, NetBattles, help and ideas on the game's
 Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
 
-## Unreleased
+## 0.24.0 (2026-11-25)
 
 - **New: MegaMan in colours of your own.** Colours, a new entry of the
   PET's menu, opens a screen where his armour, his suit and his gold each
