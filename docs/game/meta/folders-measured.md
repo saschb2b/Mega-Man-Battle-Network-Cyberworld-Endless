@@ -360,5 +360,5 @@ The autopilot (this build, seeds 1-12 at threat 1, fresh data folders):
 - **Navi** reached the deepest of the four (layer 9 once) and lost the
   least in act 1's battles (2 HP), BblStar1 its most used chip (21%) as
   the shell's hold. The autopilot sent DiveMan 27 times, BlastMan 26 and
-  CircusMan 11 in 144 runs' worth of battles; act 1's guardian fell 4
+  CircusMan 11 over its 12 runs; act 1's guardian fell 4
   times in 12.
