@@ -6,6 +6,7 @@
 #include <stddef.h>
 
 #include "lab_set.h"
+#include "looks.h"
 #include "run.h"
 
 /* What the profile has heard of the starting folders still locked
@@ -194,6 +195,20 @@ typedef struct {
 	uint8_t last_form, last_soul;
 	uint8_t form_best[4];
 	uint16_t souls_won[2];
+	/* MegaMan's look (issue #854, docs/game/looks.md; looks_profile.c): the
+	 * palettes owned (a bit each; Classic's always), the slot worn, whether
+	 * the looks are kept (0: a profile saved before them, which takes
+	 * Classic and BN6's own colours in every slot), the three looks */
+	uint16_t looks_owned;
+	uint8_t look_slot, looks_kept;
+	Look looks[LOOK_SLOTS];
+	/* the looks' routes (docs/game/looks.md): the run (its seed) whose rare
+	 * find (Mystery or Glitch) was picked up, the palettes MegaMan has
+	 * announced (a bit each), that run's palette and whether Dad's mail on
+	 * the colours was sent; a profile saved before reads them 0 */
+	uint32_t look_find_run;
+	uint16_t looks_told;
+	uint8_t look_find, looks_mailed;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

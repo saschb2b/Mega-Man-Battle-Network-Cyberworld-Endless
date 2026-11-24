@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "arena_looks.h"
 #include "arena_seats.h"
 #include "arena_team_client.h"
 #include "bn6.h"
@@ -46,6 +47,8 @@ bool square_bout_build(void) {
 	/* (the bout's seed its match, the same on both games and every
 	 * spectator; arenaseedoff=N moves it on this side alone, a mutation) */
 	uint32_t seed = SA.match + (uint32_t)dev.arena_seed_off;
+	/* (the two MegaMen's looks, the same on both games: arenalook=MINE/THEIRS until the Square carries the peer's) */
+	arena_looks_bout(side, SA.four ? NULL : dev.arena_look);
 	SA.arena = arena_new_bout(R.data, ROM_SIZE, loadout, &SA.link.link, seed, SA.kept);
 	SA.kept = NULL;
 	if (!SA.arena) return false;

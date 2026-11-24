@@ -1,9 +1,0 @@
-{
-  "branch": "looks-netbattle",
-  "what": "MegaMan's look (issue 854, step 4): each side's look in a NetBattle, the same on both linked cores",
-  "takes": {},
-  "units": [
-    "MegaMan's look: a NetBattle's two sides"
-  ],
-  "run": false
-}

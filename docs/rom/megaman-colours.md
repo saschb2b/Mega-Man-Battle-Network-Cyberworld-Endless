@@ -3,7 +3,7 @@ type: ROM Map
 title: "MegaMan's colours"
 description: "Where BN6 Gregar keeps MegaMan's colours (his battle, field, mugshot and emotion-window palettes), which indexes form his shade ramps, where a form takes them over, and how the sprite renderer shares its OBJ palette slots: the measuring behind each profile's look (issue #854)."
 tags: [rom, graphics, megaman, look]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
@@ -126,7 +126,16 @@ the same sprite and `BN6_LOOK_PALETTE_PICK` reads no side, so one palette
 recolours both; a look per side needs the pick to answer by the object's
 side, into the block's spare palettes (0x19-0x1A, 0x1E-0x1F, 0x23-0x24,
 0x28-0x29, never read by BN6) or a grown copy: an install both games make
-alike, keyed by the core's side and not by which player is local.
+alike, keyed by the core's side and not by which player is local. That is
+how [Looks in a NetBattle](../online/arena/looks.md) does it, on these:
+
+| Data | Offset | How it was found / verified |
+| --- | --- | --- |
+| The spare palettes (`BN6_LOOK_PAL_SPARE`, `BN6_LOOK_PAL_SPARES`) | battle palettes 0x19, 0x1A, 0x1E, 0x1F, 0x23, 0x24, 0x28, 0x29 of `BN6_LOOK_BATTLE_PALS` | Zero in the ROM. Verified unread: the pick adds 0, 1 or 4 to a base, the form table's bytes and the tints' bases miss them (above), and all eight marked in both cores of a NetBattle (`CYBERWORLD_ARENA_LOOKS_PROBE=1`, way in and battle, 3,653 frames a core) were never in OBJ palette RAM. |
+| The pick's end (`BN6_LOOK_PICK_END`) | `0x0801009E` | `adds r0,r4,#0; pop {r4,r7,pc}` at the end of `BN6_LOOK_PALETTE_PICK`, where every path but the other Navi's (`0x08010096`) meets with the palette in r4 and the object in r5 (capstone). A hook there met both sides' MegaMen on each core every frame of a NetBattle (5,879 and 5,674 calls). |
+| The form's second reader (`BN6_LOOK_FORM_READ2`, `BN6_LOOK_FORM_READ2_SET`) | `0x080BF516`, its palette set `0x080BF51A` | `ldr r1,=BN6_FORM_PALETTES` after `bl 0x080136CC` read the side's form (r0) for an object drawn as MegaMan (`0x080BF4FC`), then `ldrb r0,[r1,r0]` (`BN6_FORM_PALETTE_READ2`, which `soullook.c` hooks) and `bl` sprite_setPalette (capstone; one of `BN6_FORM_PALETTES`'s four readers). Not met in a NetBattle of buster shots. |
+| The face's copy (`BN6_LOOK_FACE_COPY`) | `0x0801CC2A` | `ldr r1,=` the slot after r0 = the faces' palettes (`BN6_FACE_PALS_REF`) + 0x20 x r4 (the face), then the 0x20-byte copy (capstone). r5 the emotion window, its `BN6_FACE_OWNER` the object whose face it shows: alliance 0 on the first GBA and 1 on the second, every frame (5,677 calls each), so an object's alliance is the cable's side on both GBAs. |
+
 
 ## The spike
 
