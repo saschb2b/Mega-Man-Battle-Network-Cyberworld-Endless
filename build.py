@@ -3037,8 +3037,8 @@ WHOLE_ROMS_A += ('team-darkproto-card', 'team-meddy-map', 'soul-proto-unite', 's
 N24_MAP_CLIP = n24_script(N24_LAYER + 'wait 20; press SELECT; wait 50; hold RIGHT 40; hold UP+RIGHT 40; hold LEFT 40; wait 20; press SELECT; wait 40')[0]
 N24_PAY_CLIP = n24_script(N24_COURIER + 'press A; wait 40; ' * 5 + 'press A; wait 60')[0]
 CLIPS += [
-    ('map-stays-open', N24_SECOND.split(), {}, N24_MAP_CLIP, 660, 920),
-    ('courier-pays', '--scene home --seed 7 --run-depth 10 --dev job=3,jobstate=2'.split(), {}, N24_PAY_CLIP, 1290, 1620),
+    ('map-stays-open', N24_SECOND.split(), {}, N24_MAP_CLIP, 620, 890),
+    ('courier-pays', '--scene home --seed 7 --run-depth 10 --dev job=3,jobstate=2'.split(), {}, N24_PAY_CLIP, 1264, 1650),
 ]
 README_GIFS.update({'map-stays-open': (None, 15), 'courier-pays': (None, 15)})
 
