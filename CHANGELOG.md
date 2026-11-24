@@ -11,15 +11,15 @@
   the start. Six palettes come with milestones a profile reaches (the
   Undernet, the Cybeast's fall, Chaud's respect, a Darkloid, the
   tournament, the top threat rung), three are sold at AsterLand's counter
-  for 6000 zenny each, and two hide in the net, one run in a while: a
-  Mystery Data's ColrData, or a Glitch layer's. A palette you don't own
+  for 6000 zenny each, and two hide in the net: a Mystery Data's ColrData
+  between layers 4 and 7, or a Glitch layer's. A palette you don't own
   yet shows where it comes from, and a profile gets the milestones it
   already holds at its next start (issue #854).
 
 - **New: other players see your MegaMan in your colours.** In the Net
   Square your look travels with your name, and the players around you are
-  drawn in theirs; a look changed there shows to the others at once. Where
-  a part of the Square has no room left for one more set of colours (the
+  drawn in theirs. Where a part of the Square has no room left for one
+  more set of colours (the
   plaza takes three besides yours), the players farthest from you are
   drawn in BN6's blue until they come nearer, never in wrong colours. In a
   NetBattle you see your MegaMan in your look and the other's in his, on
