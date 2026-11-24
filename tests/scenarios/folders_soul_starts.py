@@ -35,8 +35,6 @@ def battle(form):
     then the game quit and CONTINUEd, the folder kept"""
     return [
         ('expect', f'runform={form}'),
-        ('until', 'screen=map', 1200),
-        ('repeat', 'mash A 60; wait 30', 'chat=closed'),
         ('do', 'foes 01@52'),
         ('until', 'phase=custom', 1200),
         ('expect', f'folder~sum {SUM[form]}'),
@@ -54,4 +52,4 @@ MANY = {}
 for form in SUM:
     slug = form.lower().replace(' ', '-')
     MANY[f'setup-{slug}'] = dict(START='--scene setup --dev folders,forms', NEEDS=NEEDS[form], STEPS=setup(form))
-    MANY[f'battle-{slug}'] = dict(START=f'--scene emu --seed 3 --dev quiet,form={FORM[form]}', NEEDS=NEEDS[form], STEPS=battle(form))
+    MANY[f'battle-{slug}'] = dict(START=f'layer --seed 15 --net-biome 0 --dev quiet,form={FORM[form]}', NEEDS=NEEDS[form], STEPS=battle(form))
