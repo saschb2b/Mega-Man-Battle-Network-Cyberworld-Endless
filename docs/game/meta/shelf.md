@@ -3,7 +3,7 @@ type: Design
 title: "The shelf of starting folders"
 description: "The setup's FOLDER row shows all six starting folders (issue #864): open, locked with a hint at the kind of deed, or heard (its milestone said plainly) once a bystander's rumor or the BBS's floor post told it; the summary's closest unlock follows the same rule."
 tags: [game, meta, setup]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T17:28:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:10:00Z }
 sources:
   - id: issue-864
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/864"
