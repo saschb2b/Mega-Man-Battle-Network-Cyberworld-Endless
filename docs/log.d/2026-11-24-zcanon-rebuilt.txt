@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T20:40:00Z
+* **Update**: game/meta/decisions.md (Z-Canon rebuilt from BN6's Program Advance preset one tier down: its 30, what was left out, measured, through the lens), game/meta/design.md (Z-Canon's row), game/meta/folders-measured.md (the rebuilt Z-Canon measured), game/meta/all-star-helper.md (Z-Canon's recipes), game/fidelity.md (Z-Canon as Capcom's preset trimmed).

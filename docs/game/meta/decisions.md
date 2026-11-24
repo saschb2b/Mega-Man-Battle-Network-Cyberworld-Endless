@@ -78,7 +78,7 @@ something Standard keeps.
 
 | Folder | Its 30 | What it plays like | What it gives up | Opens |
 | --- | --- | --- | --- | --- |
-| Z-Canon | Cannon A A B B C, CrakShot A x2, TankCan1 A, DublShot C x2, Rflectr1 C x2, AirShot * x2, MiniBomb B x2, AreaGrab B x2, HolyPanl B, Barrier A x2, Recov10 A x2 * x2, Atk+10 * x3, PanlGrab * x2 | GigaCan1 (Cannon A, B, C in a row) waits in every draw; the rest are shots in its codes | The design's few answers behind cover: two MiniBombs its only throw (that its shots stop at the first foe in the row is assumed from play, not measured) | A Program Advance used, any, in any run |
+| Z-Canon (rebuilt 24 November 2026, below) | Cannon A A B B C, FireBrn1 F G G H H, FireHit1 D D E E F, Sword S, WideSwrd S, LongSwrd S, AreaGrab \* x2, Barrier \* x2, Recov10 \* x4, Atk+10 \* x4 | Three Program Advances of codes in a row (GigaCan1, WideBrn1, FlmHook1) and LifeSrd's three once each; a hand holds a recipe's part or two and waits for the rest | Reach and codes: FireBrn1 and FireHit1 hit close, nothing throws over cover, and nine codes split its hands where Standard's five join | A Program Advance used, any, in any run |
 | Busting | TankCan1 R x4, HiCannon L x3, WideSwrd L x3, Sword L x3, MiniBomb L x3 R x2, Thunder R x3, Barrier R x2, AreaGrab * x2, PanlGrab *, Atk+10 * x4 | The heaviest chips act 1 allows, in two codes; Thunder holds a foe for TankCan1's wind-up | No Recovery chip: every heal is the net's (a Mr.Prog's, a find's). No LongSwrd, so LifeSword stays Blade's | An act cleared with no Recovery chip used in it (its guardian deleted; the Secret Area's master ends no act) |
 | Lean | Cannon B x5, MiniBomb B x5, Vulcan1 B x5, Thunder B x5, AreaGrab B x4, Atk+10 * x3, Recov10 * x3 | Seven kinds, all in B or *: any five chips make a hand, every turn | Every chip weak and near the same; and the code lean (phase two) brings its finds in B too, so a strong find off B breaks the hands it is built on | Layer 10 reached in any run (the best depth, so a veteran's profile has it) |
 
@@ -99,8 +99,8 @@ The game-design reasoning, the part the design left open:
   battle at most, so Busting's cost is in its chips too: TankCan1's
   wind-up, Sword and WideSwrd's reach, and no LongSwrd. Lean's chips are
   Standard's weakest kinds; its five-chip turns are the power, its lack
-  of anything sharp the cost. Z-Canon's Cannons are 40 each, GigaCan1 the
-  payoff of a draw.
+  of anything sharp the cost. Z-Canon's parts are 40 to 70 each, a
+  Program Advance (300) the payoff of a hand held for it.
 - **Milestones that teach the style** (the design's rule, never a count):
   a Program Advance is what Z-Canon is for, a dry act is Busting's whole
   run, and layer 10 is the middle of the net, where Lean's weak chips
@@ -119,3 +119,41 @@ with a folder of GigaCan1 and one of Recov10 (`--dev folder=320`,
 `folder=154`): the profile's bit and act written as each ran. `--dev
 folders` opens every folder for a capture of the setup
 ([the dev menu](../../devtools/dev-menu.md)).
+
+## Z-Canon rebuilt (24 November 2026)
+
+The first Z-Canon (Cannon A A B B C and shots in their codes) almost
+never showed what it was for: GigaCan1 formed in 1 battle in 100, and its
+hand was the weakest of the six ([Starting folders measured](folders-measured.md)).
+The owner's call on issue #865 rebuilt it from BN6's own Program Advance
+preset (its fifth, given by a Soul Injection's script) one tier down.
+
+- **What BN6's preset holds:** M-Cannon R S T, FireBrn2 S T U, FireHit2
+  R S T (GigaCan3, WideBrn2, FlmHook2), Sword, WideSwrd and LongSwrd S
+  three times each (LifeSrd), GrasSeed \* x3, AreaGrab S x2, BusterUp \*
+  x4, Roll R, Roll2 R, Roll3 R: twice Standard's hand.
+- **Taken a tier down:** Cannon A B C (GigaCan1), FireBrn1 F G H
+  (WideBrn1), FireHit1 D E F (FlmHook1), each recipe checked in BN6's
+  table (`0x02BA60`: kind 0, one chip three times in codes in a row) and
+  each code in the chips' records (`0x021DA8`). Two of every code but the
+  last of each line, so five of a kind stay the most, and a hand holding
+  two parts finds the third more often.
+- **Left out of the preset:** the GrasSeeds (grass then fire is the
+  Ember sketch's, an archetype of ours, so the two stay apart), Roll's
+  three (a Navi chip a folder may hold once; Roll alone is no recipe),
+  BusterUp, and LifeSrd's nine swords cut to three: with nine in S, LifeSrd
+  formed in 5% of battles and the folder played as Blade with fire. In
+  their place the support Standard keeps, in \* so any recipe's part makes
+  a hand with them: Recov10 x4, Atk+10 x4, Barrier x2, AreaGrab x2.
+- **Measured** (`tools/folder_hands.py`, 4000 draws): turn 1 113 (Standard
+  128), three turns 324 (303), a Program Advance in 9 battles in 100 (the
+  first Z-Canon 1): GigaCan1 3.6, FlmHook1 2.5, WideBrn1 2.4, LifeSrd
+  0.3. Under the greedy pick that holds nothing back; a player who keeps
+  his parts forms more.
+- **Through the lens.** The dialectic stays the meta layer's, what you
+  bring against what you find: Z-Canon brings a combo and finds reach.
+  Its cost is now honest in the hand rather than in rarity: nine codes,
+  so a turn spent waiting for a recipe's last part is a turn of small
+  hits, and its close chips leave a foe behind cover to the Cannons. A
+  promise of a combo, not a habit: one battle in eleven, which the shelf's
+  words say ("Three Program Advances", never "every draw").

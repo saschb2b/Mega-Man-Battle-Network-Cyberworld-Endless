@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Z-Canon rebuilt: three Program Advances.** The folder is now BN6's own
+  Program Advance folder one tier down: Cannon A B C for GigaCan1,
+  FireBrn1 F G H for WideBrn1, FireHit1 D E F for FlmHook1, and LifeSrd's
+  three swords in S, with Standard's kind of support in \*. A Program
+  Advance came together in 1 battle in 100 with the old folder; now about
+  1 in 11, at about Standard's damage. It still opens with any Program
+  Advance used (issue #865).
+
 - **New: colors for MegaMan, earned.** Six come with milestones a
   profile reaches (the Undernet, the Cybeast's fall, Chaud's respect, a
   Darkloid, the tournament, the top threat rung), three are sold at

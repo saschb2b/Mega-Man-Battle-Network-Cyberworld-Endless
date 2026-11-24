@@ -54,7 +54,7 @@ const FolderInfo *meta_folder(int folder) { return meta_folder_words(folder); }
 #define C(id, code) CHIP_ENTRY((id), (code) == '*' ? 26 : (code) - 'A')
 enum { SWORD = 71, WIDESWRD = 72, LONGSWRD = 73, AREAGRAB = 163, PANLGRAB = 162, RECOV10 = 154, ATK10 = 192, BARRIER = 178,
 	THUNDER = 30, ELCPULS1 = 34, DOLTHDR1 = 31, CANNON = 1, VULCAN1 = 5, MINIBOMB = 54, AIRSHOT = 4, BUSTERUP = 175,
-	HICANNON = 2, TANKCAN1 = 12, CRAKSHOT = 89, DUBLSHOT = 90, RFLECTR1 = 131, HOLYPANL = 168 };
+	HICANNON = 2, TANKCAN1 = 12, DUBLSHOT = 90, FIREBRN1 = 20, FIREHIT1 = 107 };
 static const uint16_t blade[30] = {
 	/* LifeSword's three in S, a spare in L; AreaGrab to close in, nothing
 	 * that reaches the back */
@@ -79,15 +79,19 @@ static const uint16_t storm[30] = {
 	C(ATK10, '*'), C(ATK10, '*'), C(BUSTERUP, '*'),
 };
 static const uint16_t zcanon[30] = {
-	/* GigaCan1's three Cannons (A, B, C in a row) and shots in their
-	 * codes that stop at the first thing in the row; two MiniBombs the only
-	 * throw over cover */
+	/* BN6's Program Advance preset one tier down (docs/game/meta/decisions.md,
+	 * issue #865): three recipes of three chips in codes in a row (GigaCan1
+	 * from Cannon A B C, WideBrn1 from FireBrn1 F G H, FlmHook1 from FireHit1
+	 * D E F, BN6's table at 0x02BA60), two of each code but one so that five
+	 * of a kind stay the most, and LifeSrd's three in S once each; the rest
+	 * in * so any part of a recipe makes a hand */
 	C(CANNON, 'A'), C(CANNON, 'A'), C(CANNON, 'B'), C(CANNON, 'B'), C(CANNON, 'C'),
-	C(CRAKSHOT, 'A'), C(CRAKSHOT, 'A'), C(TANKCAN1, 'A'), C(DUBLSHOT, 'C'), C(DUBLSHOT, 'C'),
-	C(RFLECTR1, 'C'), C(RFLECTR1, 'C'), C(AIRSHOT, '*'), C(AIRSHOT, '*'),
-	C(MINIBOMB, 'B'), C(MINIBOMB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(HOLYPANL, 'B'),
-	C(BARRIER, 'A'), C(BARRIER, 'A'), C(RECOV10, 'A'), C(RECOV10, 'A'), C(RECOV10, '*'), C(RECOV10, '*'),
-	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(PANLGRAB, '*'), C(PANLGRAB, '*'),
+	C(FIREBRN1, 'F'), C(FIREBRN1, 'G'), C(FIREBRN1, 'G'), C(FIREBRN1, 'H'), C(FIREBRN1, 'H'),
+	C(FIREHIT1, 'D'), C(FIREHIT1, 'D'), C(FIREHIT1, 'E'), C(FIREHIT1, 'E'), C(FIREHIT1, 'F'),
+	C(SWORD, 'S'), C(WIDESWRD, 'S'), C(LONGSWRD, 'S'),
+	C(AREAGRAB, '*'), C(AREAGRAB, '*'), C(BARRIER, '*'), C(BARRIER, '*'),
+	C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'),
+	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'),
 };
 static const uint16_t busting[30] = {
 	/* the heaviest of each kind a first act allows, in L and R: TankCan1

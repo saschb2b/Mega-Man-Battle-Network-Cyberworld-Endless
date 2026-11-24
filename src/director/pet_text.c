@@ -409,7 +409,7 @@ static int bbs_posts(Post *out) {
 	static const Post told[FOLDER_COUNT] = {
 		[FOLDER_BLADE] = { 0x19, "SwordNut", "Deleted my first guardian. Next dive,my whole folder was swords!" },
 		[FOLDER_STORM] = { FACE_NAVI, "Zapper", "Took down an Aqua guardian. Ever since,I dive with Elec chips. ZAP!" },
-		[FOLDER_ZCANON] = { 0x14, "CannonKid", "Pulled off my first Program Advance! Next dive I had Cannons in A,B and C!" },
+		[FOLDER_ZCANON] = { 0x14, "CannonKid", "Pulled off my first Program Advance! Next dive my folder was packed with combos!" },
 		[FOLDER_BUSTING] = { FACE_HEEL, "NoHeals", "Cleared a whole area without one Recovery chip. Next dive,heavy hitters only!" },
 		[FOLDER_LEAN] = { FACE_TECH, "TenDown", "Made it ten layers down! Now any five of my chips make a hand." },
 	};

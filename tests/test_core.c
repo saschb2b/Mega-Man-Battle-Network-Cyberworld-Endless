@@ -5433,8 +5433,8 @@ static void test_folders(void) {
 	/* (the folders' chips' codes as BN6's records hold them, at 0x021DA8 + id x
 	 * 0x2C, read from the ROM: docs/rom/chips.md) */
 	static const struct { int id; const char *codes; } bn6_codes[] = {
-		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 12, "AGR" }, { 30, "BRS*" }, { 31, "AEQ" }, { 34, "JLS" },
-		{ 54, "BLR*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 131, "ACP*" },
+		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 12, "AGR" }, { 20, "FGH*" }, { 30, "BRS*" }, { 31, "AEQ" }, { 34, "JLS" },
+		{ 54, "BLR*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 107, "DEF" }, { 131, "ACP*" },
 		{ 154, "ADL*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 175, "*" }, { 178, "AFR*" }, { 192, "*" },
 	};
 	Profile profile_was = profile;
@@ -5444,7 +5444,9 @@ static void test_folders(void) {
 		const char *name = meta_folder(f)->name;
 		CHECK(c && meta_folder(f)->opens, "folders: %s has no chips or no milestone", name);
 		if (!c) continue;
-		int count[512] = { 0 }, kinds = 0, recov = 0, cannons = 0, off_lean = 0;
+		/* (Z-Canon's three recipes of codes in a row, BN6's table at 0x02BA60: GigaCan1 from Cannon A B C, WideBrn1
+		 * from FireBrn1 F G H, FlmHook1 from FireHit1 D E F; a bit per code each) */
+		int count[512] = { 0 }, kinds = 0, recov = 0, cannons = 0, burners = 0, hits = 0, off_lean = 0;
 		for (int k = 0; k < 30; ++k) {
 			int id = (int)chip_entry_id(c[k]), code = (int)chip_entry_code(c[k]);
 			const char *given = NULL;
@@ -5454,10 +5456,14 @@ static void test_folders(void) {
 			kinds += !count[id]++;
 			recov += id >= 154 && id <= 161;
 			cannons |= id == 1 && code <= 2 ? 1 << code : 0;
+			burners |= id == 20 && code >= 5 && code <= 7 ? 1 << (code - 5) : 0;
+			hits |= id == 107 && code >= 3 && code <= 5 ? 1 << (code - 3) : 0;
 			off_lean += code != 1 && code != 26;
 		}
 		for (int id = 0; id < 512; ++id) CHECK(count[id] <= 5, "folders: %s holds %d of chip %d", name, count[id], id);
-		if (f == FOLDER_ZCANON) CHECK(cannons == 7, "folders: Z-Canon lacks a Cannon in A, B or C (%#x)", cannons);
+		if (f == FOLDER_ZCANON)
+			CHECK(cannons == 7 && burners == 7 && hits == 7, "folders: Z-Canon lacks a recipe's code (Cannon %#x, FireBrn1 %#x, FireHit1 %#x)",
+				cannons, burners, hits);
 		if (f == FOLDER_BUSTING) CHECK(recov == 0, "folders: Busting holds %d Recovery chips", recov);
 		if (f == FOLDER_LEAN) CHECK(kinds <= 7 && !off_lean, "folders: Lean has %d kinds, %d chips outside B and *", kinds, off_lean);
 	}
