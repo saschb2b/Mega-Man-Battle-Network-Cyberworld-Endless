@@ -21,7 +21,7 @@ MANY = {
         START=START,
         STEPS=[
             *OPEN,
-            ('expect', 'look=A armour plain suit plain accent plain'),
+            ('expect', 'look=-,-,- slot 0'),
             ('expect', 'looks~at look list'),
             ('do', 'press DOWN; wait 8'),
             ('expect', 'looks~at armour list page Classic'),
@@ -29,14 +29,14 @@ MANY = {
             ('expect', 'looks~at armour grid page Classic cell plain'),
             ('do', 'press UP; wait 8; press RIGHT; wait 8'),
             ('expect', 'looks~cell 13'),
-            ('expect', 'look~armour plain'),                     # the cursor alone: nothing picked yet
+            ('expect', 'look=-,-,- slot 0'),                     # the cursor alone: nothing picked yet
             ('do', 'press A; wait 8'),
             ('expect', 'looks~at armour list'),
-            ('expect', 'look=A armour Classic/13 suit plain accent plain'),
+            ('expect', 'look=0.13,-,- slot 0'),
             ('repeat', 'press B; wait 40', 'screen=pet', 4),
-            ('expect', 'look~armour Classic/13'),
+            ('expect', 'look=0.13,-,- slot 0'),
             ('repeat', 'press B; wait 40', 'screen=town', 6),
-            ('expect', 'look~armour Classic/13'),
+            ('expect', 'look=0.13,-,- slot 0'),
         ]),
     'locked': dict(
         GUARDS="The colours screen: a palette the profile does not own pages in as locked, and A on its colour buzzes, the look as it was.",
@@ -47,9 +47,9 @@ MANY = {
             ('expect', 'looks~page Undernet locked'),
             ('do', 'press A; wait 8; press UP; wait 8; press A; wait 8'),
             ('expect', 'looks~grid page Undernet locked cell 12'),     # still in the grid: nothing picked
-            ('expect', 'look=A armour plain suit plain accent plain'),
+            ('expect', 'look=-,-,- slot 0'),
             ('do', 'press B; wait 8'),
             ('expect', 'looks~at armour list'),
-            ('expect', 'look~armour plain'),
+            ('expect', 'look=-,-,- slot 0'),
         ]),
 }

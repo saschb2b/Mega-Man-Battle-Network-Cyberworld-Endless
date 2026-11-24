@@ -232,17 +232,7 @@ void looks_screen_draw(void) {
 	look_fade_in(P.core_x, P.core_y, CORE_W, CORE_H, S.v.t);
 }
 
-/* (a channel's colour: PALETTE/N, or plain) */
-static void colour_words(FILE *f, const Look *l, int c) {
-	if (l->palette[c] == LOOK_NONE) fprintf(f, " %s plain", c == 0 ? "armour" : c == 1 ? "suit" : "accent");
-	else fprintf(f, " %s %s/%d", c == 0 ? "armour" : c == 1 ? "suit" : "accent", looks_palette_name(l->palette[c]), l->colour[c]);
-}
-
 void looks_screen_describe(FILE *f) {
-	Look worn = looks_worn();
-	fprintf(f, "look %c", 'A' + looks_slot());
-	for (int c = 0; c < LOOK_CHANNELS; ++c) colour_words(f, &worn, c);
-	fprintf(f, "\n");
 	if (!S.shown) return;
 	const LooksView *v = &S.v;
 	int c = v->row > 0 ? v->chan[v->row - 1] : -1;

@@ -43,6 +43,9 @@ the Square's social layer.
   plain body.
 - **The screen** is an entry of the PET's start menu ([the PET's start
   menu](pet-menu.md)).
+- **Classic only at first:** the other palettes come by milestones, the
+  home shop ([the home shop](../world/home/home-shop.md)) and rare finds,
+  each once.
 
 ## Built
 
@@ -60,14 +63,81 @@ byte saying they are kept. A profile saved before looks reads that byte 0
 and takes Classic owned, every slot BN6's own colours and slot 0, once.
 `looks_grant` gives a palette and saves the profile; `looks_set` stores a
 valid look in a slot (the screen offers owned palettes alone);
-`looks_worn` is the selected slot's look, or the dev switch's for the
-session.
+`looks_worn` is the selected slot's look. A slot set or selected calls the
+apply below through a callback it registered (`looks_on_change`), so the
+look on him changes at once.
 
-**The apply** (`src/emu/look_apply.h`): `look_apply` writes a look onto his
-plain palettes in the core's ROM copy, which BN6 reads raw each frame;
-`look_palette_of` gives a look's sixteen colours for one of his sprites,
-for a peer's MegaMan and a NetBattle's two sides. In this first part both
-are declared and do nothing: BN6's colours stand.
+**The apply** (`src/emu/look_apply.c`): BN6 reads MegaMan's palettes raw
+from the core's ROM copy every frame ([MegaMan's
+colours](../rom/megaman-colours.md)), so `look_apply` writes a look there:
+the battle body's palettes 0, 1 (paled) and 4 (Full Synchro), the field's
+palette 0, the mugshot's and the emotion window's face 0 (through the word
+`soullook.c` repoints). Each art has its own indexes for a channel:
+
+| Art | Armour | Suit | Accent | Never touched |
+| --- | --- | --- | --- | --- |
+| Battle (0, 1, 4) | 2-5 | 6-9 | 11 | 1 outline, 10 glints, 12 emblem, 13-15 skin |
+| Field | 2-5 | 6-8 | 10 | 1 outline, 9 white, 11 red, 12-15 skin |
+| Mugshot | 1-3 (the helmet) | (not drawn) | 11 | the green behind, red, skin, black |
+| Emotion face | 11-13 (the helmet) | (not drawn) | (none) | 1-2, the window's border and fill |
+
+BN6's own bytes are read from the player's ROM image, never from what was
+written, so a look is computed afresh each time and a channel at
+`LOOK_NONE` is BN6's bytes again. It is applied as the game's scene starts
+(a run's start, a CONTINUE: `game_hooks.c`), and again when the worn look
+changes. A Cross, a Soul and BeastOut draw palettes of their own and keep
+their colours; the plain body takes the look again the frame the form ends.
+`look_palette_of` gives the same sixteen colours for any look and art,
+for a peer's MegaMan in the Square and a NetBattle's two sides.
+
+### How a pick colours a ramp
+
+A pick sets a channel's average. The mean hue, saturation and value of
+BN6's ramp (from the plain palette) become the pick's, and each shade
+keeps its place around that mean: its hue offset from the mean; its
+saturation scaled by the pick's over the mean's; its value levelled (below
+the mean scaled toward black, above it toward full, so a light pick keeps
+its highlights). A blue near BN6's own gives his ramp back, a pale pick a
+pale ramp, a deep one a deep ramp. A **grey, white or black** pick has no
+saturation, so every shade loses its own and its hue no longer matters:
+the ramp comes out as BN6's shading in grey, from the pick's value (white
+a near-white ramp shaded to grey, black a near-black one). A single index
+(the accent) takes the pick itself. The arithmetic is integer, so both
+games of a NetBattle compute the same bytes on any system.
+
+### The accent
+
+The accent channel is the gold of the helmet's fins and the emblem's ring
+(battle 11, field 10, the mugshot's 11): a few pixels, but a capture with a
+cyan accent against BN6's gold showed it reading in battle and on the
+field, so it ships as channel 2. The emblem's red stays BN6's.
+
+### The palettes
+
+Twelve of sixteen colours, ours, authored as RGB in `looks.c`: each runs
+lights, mids, darks and an accent or two, coloured for where it is earned
+(Classic a spread around BN6's blue; Undernet violets and ash; Gregar the
+Cybeast's oranges and bone; ProtoMan red, white and silver; Nebula dark
+violets with red and cyan glows; Tournament gold, silver, bronze and
+banners; Hazard yellow and black, rust and toxic green; Central Town brick,
+park and sky; Seaside aqua, sand and coral; Sky blues from dawn to night;
+Mystery the crystals' greens, blues and violets; Glitch pure colours and
+static greys). `python3 tools/looks_sheet.py OUT.png [FRAMES]` draws them
+as a contact sheet, with whole frames of the game beside them.
+
+### For tests and the other parts
+
+- `--dev look=P.C,P.C,P.C` sets the worn slot's look and saves it, a
+  channel `-` for BN6's own (`3.2,4.4,5.1`: ProtoMan's red armour,
+  Nebula's violet suit, Tournament's gold). A CONTINUE without the switch
+  keeps it.
+- The state in words: `look P.C,P.C,P.C slot N`, then `lookseen` with the
+  arts whose looked palette the frame's OBJ palettes hold (`battle`,
+  `field`, `mugshot`, `face`, `pale`, `synchro`; `none`).
+- `tests/scenarios/look_worn.py`: the look set and seen on arrival's chat
+  box, the field, the Custom screen and a battle; HeatCross in BN6's own
+  colours (`lookseen none`), the look back in the next battle, and kept by
+  a quit and CONTINUE.
 
 ## The colours screen
 
@@ -134,7 +204,6 @@ Each change is applied in the screen's update (`look_apply`, never in its
 draw), so the field behind the PET and the chat box's face wear it as soon
 as the screen closes. The second screen (the 3DS's bottom, a phone's
 panel) shows nothing of it: it keeps what it shows under the PET. The
-state in words has `look A armour Classic/13 suit plain accent plain`
-(the look worn, always) and, while the screen is up, `looks at armour grid
-page Classic cell 13`; the scenario `tests/scenarios/home_looks.py` picks a
+state in words has the core's `look` line (the look worn, above) and,
+while the screen is up, `looks at armour grid page Classic cell 13`; the scenario `tests/scenarios/home_looks.py` picks a
 colour and tries a locked one ([Scenarios](../devtools/scenarios.md)).

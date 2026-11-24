@@ -2,8 +2,17 @@
 
 ## Unreleased
 
+- **New: MegaMan in colours of his own, the engine's part.** His plain
+  body takes a look: the armour, the suit and the gold each coloured from
+  one of twelve palettes (Classic, Undernet, Gregar, ProtoMan, Nebula,
+  Tournament, Hazard, Central Town, Seaside, Sky, Mystery, Glitch), on the
+  field, in battle, in a chat box and on the Custom screen, BN6's shading
+  kept. A Cross, a Soul or BeastOut keeps its own colours. A profile keeps
+  three looks; the PET's screen to pick them and the ways to earn the
+  palettes follow (issue #854).
+
 - **New: MegaMan in colours of your own.** Colours, a new entry of the
-  PET's start menu, opens a screen where his armour and suit take any
+  PET's start menu, opens a screen where his armour, suit and gold take any
   colour of the palettes you own, previewed on MegaMan as the cursor
   moves; three looks are kept, A to C. Palettes you don't own yet show
   where they come from (epic #854).

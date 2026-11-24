@@ -22,9 +22,9 @@ bool looks_screen_update(void);
 void looks_screen_draw(void);
 /* Put away at once: the game's scene left */
 void looks_screen_shut(void);
-/* The state in words: `look SLOT armour PALETTE/N suit plain ...` always
- * (the look worn), and while it is up `looks at ROW grid|list page PALETTE
- * cell N`; reads only */
+/* The state in words while it is up: `looks at ROW grid|list page PALETTE
+ * [locked] [cell N|plain]` (the look worn is the core's `look` line,
+ * looks_describe); reads only */
 void looks_screen_describe(FILE *f);
 
 #endif
