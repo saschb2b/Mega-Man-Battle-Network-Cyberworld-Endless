@@ -3,7 +3,7 @@ type: ROM Map
 title: "Chips, folders and the Library"
 description: "Addresses of BN6's chips: the chip records, names and descriptions, Navi chips, folders and chips owned, the Library, Program Advances, the All * helper, Chip Traders and the BugFrag Trader's trade."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T23:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:30:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
