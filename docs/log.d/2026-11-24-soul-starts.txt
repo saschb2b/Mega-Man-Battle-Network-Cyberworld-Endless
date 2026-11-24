@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T22:30:00Z
+* **Update**: game/meta/forms.md (Each game's start: a SOUL BN5 run's Standard folder is BN5's NEW GAME folder, a SOUL BN4 run's BN4's, read from their ROMs, BN4's AirShot A and Vulcan1 V as AirShot * and Vulcan1 S), game/meta/decisions.md (the owner's call of 24 November 2026), game/fidelity.md (its row), game/meta/folders-measured.md (the outcome, BN4's start drawn with the swap), rom/chips.md (Other games' folders: the run's reader), multirom/bn4-chips.md (the start's chips and the two codes not moved), code/core.md (`xchips_folder.c`), devtools/dev-menu.md (`folders` opens the Soul forms too).

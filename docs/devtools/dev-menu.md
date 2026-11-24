@@ -75,7 +75,9 @@ included, so an autopilot run shows on the friend list and a capture of
 Options' Game page has its Discord line:
 [Discord's presence](../engine/discord.md)), `folders`
 (every starting folder open in the profile: the setup's Folder row turns
-through all six, [Decisions and phase one](../game/meta/decisions.md)), `heard=BITS`
+through all six, [Decisions and phase one](../game/meta/decisions.md);
+and both Soul forms, which the FORM row of `forms` then offers where
+their ROMs are read, [MegaMan's forms](../game/meta/forms.md)), `heard=BITS`
 (the starting folders heard of, `1 << FOLDER_*`: `heard=2` Blade, its
 plain milestone on the setup's shelf) and `shelf` (the shelf seen, as after a
 first setup, so a layer's whisper may tell how a locked folder opens; both

@@ -120,6 +120,14 @@ with a folder of GigaCan1 and one of Recov10 (`--dev folder=320`,
 folders` opens every folder for a capture of the setup
 ([the dev menu](../../devtools/dev-menu.md)).
 
+## Each game's start (24 November 2026)
+
+The owner's call on issue 865: BN5's and BN4's NEW GAME folders
+([Starting folders measured](folders-measured.md), 3) are not shelf
+entries. With FORM on SOUL BN5 or SOUL BN4 the Standard folder is that
+game's start, read from its ROM; the other folders are the same in every
+form. Built in [MegaMan's forms](forms.md), Each game's start.
+
 ## Z-Canon rebuilt (24 November 2026)
 
 The first Z-Canon (Cannon A A B B C and shots in their codes) almost

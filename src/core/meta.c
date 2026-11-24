@@ -18,8 +18,10 @@
 #include "pacing.h"
 #include "powers.h"
 #include "rivals.h"
+#include "rom.h"
 #include "run.h"
 #include "save.h"
+#include "xchips_folder.h"
 #include "xchips_registry.h"
 
 /* Each folder opens with a milestone that teaches its style and that a
@@ -126,6 +128,13 @@ const uint16_t *meta_folder_chips(int folder) {
 	case FOLDER_LEAN: return lean;
 	default: return NULL;
 	}
+}
+
+const uint16_t *meta_start_chips(int folder, int form) {
+	static uint16_t own[XFOLDER_ENTRIES];
+	int game = folder != FOLDER_STANDARD ? -1 : form == RUN_FORM_SOUL_BN5 ? XROM_BN5_COLONEL_US : form == RUN_FORM_SOUL_BN4 ? XROM_BN4_RED_SUN_US : -1;
+	if (game < 0) return meta_folder_chips(folder);
+	return xfolder_start(game, own, NULL) ? own : NULL;
 }
 
 /* ---- the milestones a battle reaches (Z-Canon's and Busting's) ---- */
