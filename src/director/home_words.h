@@ -49,13 +49,12 @@ const char *home_back_words(int clock);
 const char *home_back_question(void);
 /* ... and before a way on through a link. */
 const char *home_on_question(void);
-/* The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2), the most valuable
- * first, a box each: the pay waiting with asker `reward` (jobs.h, -1
- * none), else the `n_offers` requests posted on AsterLand's BBS, new
+/* The courier in Lan's HP (docs/world/home/lans-hp.md, piece 2), a box
+ * each (a held request he settles, job_courier_script): the `n_offers` requests posted on AsterLand's BBS, new
  * after an act, simply up at the run's first visit (`first`), what each
  * asks and pays a box each (`offers`, boxes apart by '|'), and what
  * AsterLand's SubChip seller has in stock: `unlockers` Unlockers,
  * RushFood, a WWW-ID. "" for none. */
-const char *home_courier_words(int reward, const char *offers, int n_offers, bool first, int unlockers, bool rush_food, bool www_id);
+const char *home_courier_words(const char *offers, int n_offers, bool first, int unlockers, bool rush_food, bool www_id);
 
 #endif

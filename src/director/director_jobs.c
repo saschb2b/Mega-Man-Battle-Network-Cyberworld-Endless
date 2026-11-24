@@ -18,11 +18,11 @@
 #include "debug.h"
 #include "director.h"
 #include "director_folder.h"
+#include "director_home.h"
 #include "director_state.h"
 #include "emu.h"
 #include "flags.h"
 #include "job_words.h"
-#include "layer_objs.h"
 #include "mapslot.h"
 #include "request_bbs.h"
 #include "run.h"
@@ -144,7 +144,7 @@ void home_jobs_bring(void) {
 	if (cinema_busy() || !on_map()) return;
 	static TextArchive t;
 	ta_begin(&t);
-	int i = job_bring_after(&t, &job_talk[run.job.asker], due == BRING_CHOSEN ? id : 0, code);
+	int i = job_bring_after(&t, &job_talk[run.job.asker], home_in_hp(), due == BRING_CHOSEN ? id : 0, code);
 	if (talk_archive(&t, i)) {
 		if (emu_debug_on()) fprintf(stderr, "jobs: the bring's choice %s chip %d code %d\n", due == BRING_CHOSEN ? "took" : "kept", id, code);
 		due = BRING_NONE;
@@ -213,7 +213,7 @@ void home_jobs_words(void) {
 const char *home_jobs_status(const char *words) {
 	static char buf[512];
 	if (!run.job.kind || !jobs_due(&run.job, run.depth) || flag_get(JOB_SETTLED_FLAG)) return words;
-	snprintf(buf, sizeof buf, "%s|%s", words, job_due_words(&run.job));
+	snprintf(buf, sizeof buf, "%s|%s", words, job_due_words(&run.job, home_in_hp()));
 	return buf;
 }
 

@@ -778,7 +778,9 @@ and the man from the lab in the town. Win battles without a scratch or
 in ten seconds each, search every Mystery Data of a layer, hand over a
 chip of an element from the Pack, or vow to take no Mr.Prog's patch
 until the guardian falls. Lan takes one or none, as BN6's Request BBS
-has it, and the one who asked pays at the next visit. On a second
+has it, and the one who asked pays at the next visit: the Mr.Prog in
+Lan's HP hands it over in their name, or they do, where they stand in
+the town, for whoever goes to them first. On a second
 screen, the PET at home names the hour, the request held and how far
 along it is, and the ways on.
 

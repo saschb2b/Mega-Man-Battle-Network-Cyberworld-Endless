@@ -37,9 +37,10 @@ extern JobTalk job_talk[JOB_ASKERS];
  * words where it has no job to talk of. */
 int job_script(TextArchive *t, int asker, int face, const char *plain);
 /* After BN6's Chip Trader's screen opened for the held Bring request
- * (bring_choice.h): `id` in `code` chosen there and handed over, then the
- * pay; or, `id` 0, nothing chosen and the request kept. Its script in `t`. */
-int job_bring_after(TextArchive *t, const JobTalk *jt, int id, int code);
+ * (bring_choice.h), by its asker or by the courier in Lan's HP (`in_hp`):
+ * `id` in `code` chosen there and handed over, then the pay; or, `id` 0,
+ * nothing chosen and the request kept. Its script in `t`. */
+int job_bring_after(TextArchive *t, const JobTalk *jt, bool in_hp, int id, int code);
 /* MegaMan's question on that screen, once its chip is put in: script 0 of
  * `t`, Yes and No both going on, the screen reading the answer. */
 int job_bring_ask(TextArchive *t);
@@ -52,9 +53,16 @@ const char *job_bbs_post(const Job *j);
  * Mr.Prog's capitals. */
 const char *job_offer_brief(const Job *j);
 
+/* The courier in Lan's HP settling the held request in its asker's name
+ * (issue #841): the asker's pay handed over, the chip asked for taken from
+ * the Pack, or their word where it was not done; `rest` what he says after
+ * where the request is kept (NULL none). Its first script's index. */
+int job_courier_script(TextArchive *t, int face, const JobTalk *jt, const char *rest);
+
 /* MegaMan at home on the held request, now up for settling (`job`): its
- * reward waiting, or the asker to tell, and where they are. */
-const char *job_due_words(const Job *job);
+ * reward waiting, or the asker to tell, and where they are; in Lan's HP
+ * (`in_hp`), the courier who settles it there. */
+const char *job_due_words(const Job *job, bool in_hp);
 /* MegaMan in the Net: a request done, a vow broken, the vow's reminder. */
 const char *job_done_words(int asker);
 const char *job_broken_words(void);
