@@ -199,15 +199,20 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   the band as the Library's entries; KeyItem's INFORMATION box under
   them.
 - The colours screen ([MegaMan's look](../game/looks.md)) puts BN6's own
-  MegaMan in STATUS's slot, in his palettes as the look makes them, on a
-  loop (walking round all eight ways, then his battle stance and attacks), beside
-  the list in its window (the look worn between Options' pointers, each
-  channel's colour in a swatch framed white) and the palette's window,
-  its name between the Library's green arrows and its sixteen colours a
-  4x4 grid with PLAIN under it, EQUIP's orange corners the grid's cursor
-  (a grid has no row for the arrow) and a white frame the colour worn, as
-  STATUS frames its slot; a locked palette dimmed with LOCKED across it,
-  its origin in KeyItem's INFORMATION box.
+  MegaMan in STATUS's slot, his chat face in the NAVIGATOR box's outline
+  over his body, each in its palette as the look makes it, the body on a
+  loop (walking round all eight ways, then his battle stance and
+  attacks); beside it the list in its window (LOOK A on its band, the
+  look worn between Options' pointers, each channel's colour in a swatch
+  framed white) and the palette's window, its short name between the
+  Library's green arrows, its sixteen colours a 4x4 grid with PLAIN under
+  it and FOLDER EDIT's count pill of the palettes owned, EQUIP's orange
+  corners in the cells' gutters the grid's cursor (a grid has no row for
+  the arrow; the list's arrow held still and dim meanwhile) and a white
+  frame the colour worn, as STATUS frames its slot; a locked palette
+  dimmed with LOCKED in PLAIN's place; ChipFolder's SELECT pop-up for a
+  look's copy, its question in the INFORMATION box with Yes and No behind
+  the green triangle, No chosen; `L/R:PALETTE` on the band.
 - One key's hint on the band where the key does something unguessed:
   the Jukebox's `START:REPEAT` (the mode), Options' `START:DEFAULT` (a
   page's lines back, on pages that have such lines), the reconnect
