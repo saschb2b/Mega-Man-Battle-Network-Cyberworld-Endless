@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-24T18:10:00Z
-* **Update**: game/looks.md (the look applied onto his palettes: each art's indexes by channel, how a pick colours a ramp and a grey, white or black one, the accent shipped, the palettes' themes, the dev switch, the state's `look` and `lookseen` lines and the scenario), code/tools.md (`tools/looks_sheet.py`).

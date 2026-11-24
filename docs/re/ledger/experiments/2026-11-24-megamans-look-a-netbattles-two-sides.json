@@ -1,0 +1,8 @@
+{
+  "feature": "MegaMan's look",
+  "date": "2026-11-24",
+  "name": "A NetBattle's two sides, each in his player's look",
+  "result": "All eight spare palettes of his battle block marked in both Arena cores, no hook: never in OBJ palette RAM through a way in and a battle (3,653 frames a core). Two looks written there and BN6's palette pick, its form's second reader and the emotion face's copy answered by the object's alliance: both GBAs drew each MegaMan in his player's look and each its own player's face (0x28 on the first GBA, 0x29 on the second), 489 rollbacks with every one of 54 hashes agreed. The face's owner is alliance 1 on the second GBA: an object's alliance is the cable's side on both, not 0 for each GBA's own player.",
+  "meaning": "A look per side is a write both games make alike into every core's ROM copy plus three stateless hooks; the looks folded into the pair's hash make two games given different looks part before the first frame.",
+  "link": "../online/arena/looks.md"
+}

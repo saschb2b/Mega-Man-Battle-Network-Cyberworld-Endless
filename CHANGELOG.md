@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **New: in a NetBattle each MegaMan wears his own player's look.** Both
+  players' looks go into both linked GBAs of both games before the
+  battle starts, so you see your MegaMan in yours and the other's in
+  his, on your screen and on his, with your own face in the emotion
+  window. A Cross, a Soul and Beast Out keep their own colours. Until
+  the Square carries the other player's look, NetBattles stay in BN6's
+  colours on both sides (issue #854).
+
 - **Fixed: more chips strike the way MegaMan faces when he turns round.**
   On a liberation's Surrounded field, turned left with L, SandWrm,
   BurnSqr, TenguMan's chip, AirRaid and Magnum, and BN4's GutsMan,

@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-24T16:25:00Z
-* **Create**: game/looks.md (MegaMan's look, issue #854: the design as decided and step 2's model, profile and apply interface). **Update**: game/index.md (its line), code/core.md (`looks.c`, `looks_text.c`, `looks_profile.c`), code/emu.md (`look_apply.c`).

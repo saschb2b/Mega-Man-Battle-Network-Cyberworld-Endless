@@ -3,7 +3,7 @@ type: Design
 title: "MegaMan's look"
 description: "Each profile's MegaMan in colours of its own, on Warframe's model (issue #854): three channels of his plain body (armour, suit, accent) each coloured from one of twelve palettes the profile owns, earned by milestones, the home shop and rare finds, looks only; the owner's calls of 24 November 2026 and what is built."
 tags: [game, design, meta, megaman]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
 sources:
   - id: issue
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/854"
@@ -124,6 +124,20 @@ park and sky; Seaside aqua, sand and coral; Sky blues from dawn to night;
 Mystery the crystals' greens, blues and violets; Glitch pure colours and
 static greys). `python3 tools/looks_sheet.py OUT.png [FRAMES]` draws them
 as a contact sheet, with whole frames of the game beside them.
+
+### In a NetBattle
+
+Each player's MegaMan wears that player's look on both GBAs of both games
+([Looks in a NetBattle](../online/arena/looks.md)): both looks, computed by
+`look_palette_of` from BN6's own bytes, go into eight palettes of his
+battle block BN6 never picks, in every Arena core before it starts, and
+three hooks answer BN6's picks of his palette by the object's side. Both
+MegaMen and each GBA's own emotion face take their player's look; a Cross,
+a Soul and BeastOut keep their colours; the looks are in the pair's hash,
+so two games given different ones part before the first frame. Until the
+Square's wire carries the peer's look, a NetBattle keeps BN6's colours on
+both sides (`--dev arenalook=MINE/THEIRS` gives them for tests); the stands
+and two MegaMen a side keep BN6's.
 
 ### For tests and the other parts
 

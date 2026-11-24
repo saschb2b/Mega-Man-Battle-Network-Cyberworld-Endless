@@ -8,6 +8,7 @@
 * [The stands](stands.md) - The stands (issue #128, protocol v7): a NetBattle watched for real by rebuilding its pair from both players' keys (`arena_watch.c`, `stands.py`), the catch-up, the referee's report and cheers every game gets, and the three-game proof.
 * [Team NetBattles](teams.md) - Team NetBattles (epic #167, protocol v12): relay teams of two, Team up and Split up on a card, the captains' blind order, the winner staying on with his HP, the wire (`teams.py`), the four-game proof.
 * [A NetBattle through a dropped link](dropped-link.md) - A NetBattle of two that survives a dropped link (issue #180, protocol v21): the server holds the battle with the place, each game keeps its keys and asks for the ones the link lost (ARENA_HASH's 0xFFFFFFFC), the battle fought to its end with every hash agreeing.
+* [Looks in a NetBattle](looks.md) - Each player's MegaMan in his own look in a NetBattle (issue #854): both looks written into every Arena core's spare battle palettes before it starts, BN6's three picks of his palette answered by the object's side, the looks in the pair's hash, measured through rollbacks and a mutation that parts the games.
 * [Not yet](not-yet.md) - What the Arena has not yet done or tried: two a side's open points, teams of three, battle sound, NaviCust effects, rollback between devices, the stands on phones, Battle mode, the browser with a screen.
 
 # Subdirectories

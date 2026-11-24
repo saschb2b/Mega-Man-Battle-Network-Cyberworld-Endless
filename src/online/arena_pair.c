@@ -34,6 +34,7 @@
 #include <mgba/internal/gba/sio/lockstep.h>
 #include <mgba-util/vfs.h>
 
+#include "arena_looks.h"
 #include "arena_souls.h"
 #include "arena_team.h"
 #include "arena_seats.h"
@@ -86,6 +87,8 @@ static uint8_t *rom_copy(const uint8_t *rom, size_t size, bool bn5) {
 	memcpy(copy, rom, size);
 	memset(copy + size, 0xFF, EMU_ROM_SIZE - size);
 	if (bn5) xlog_apply(copy, EMU_ROM_SIZE);
+	/* (each player's look in his MegaMan's palettes BN6 never picks: the same on every core; arena_looks.h) */
+	if (bn5) arena_looks_rom(copy, EMU_ROM_SIZE);
 	return copy;
 }
 
@@ -229,7 +232,8 @@ static bool attach(ArenaPair *p, unsigned side) {
 /* full rules: BN5's hooks on the core's own table, after its state (a hook in RAM stands on what the state put there), and
  * its player's Souls for UNITE; --dev arena2v2's hooks (arena_team.h) */
 static bool installs(struct mCore *core, unsigned side, unsigned souls) {
-	return xlog_hook_core(core) && soulunite_held_core(core, souls) && (!arena_seats_on() || arena_team_hooks(core, side));
+	return xlog_hook_core(core) && soulunite_held_core(core, souls) && (!arena_seats_on() || arena_team_hooks(core, side)) &&
+		(arena_seats_on() || arena_looks_hooks(core, side));
 }
 
 /* (plain: no hook and no install's hooks on its cores, no idle halt: arena_pair_open_plain) */
@@ -361,6 +365,7 @@ bool arena_pair_step(ArenaPair *p, const uint16_t keys[ARENA_LOOKAHEAD][2], bool
 		if (both_crossed(p, target)) {
 			++p->relative;
 			arena_souls_carry(p->core, p->carried);
+			for (unsigned k = 0; k < 2; ++k) arena_looks_probe_frame(p->core[k], k);
 			return true;
 		}
 	}
@@ -432,6 +437,10 @@ static uint64_t pair_hash(ArenaPair *p, bool sound) {
 	uint64_t made = xlog_hash();
 	hash_word(&hash, (uint32_t)made);
 	hash_word(&hash, (uint32_t)(made >> 32));
+	/* (the players' looks the cores' palettes were made with: two games given different ones part at the first hash) */
+	uint64_t looks = arena_looks_hash(UINT64_C(14695981039346656037));
+	hash_word(&hash, (uint32_t)looks);
+	hash_word(&hash, (uint32_t)(looks >> 32));
 	/* (--dev arena2v2: the partners' folders, which their decks are drawn from and no core's state holds) */
 	if (p->team) {
 		uint64_t folders = arena_team_custom_hash(UINT64_C(14695981039346656037));
