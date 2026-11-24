@@ -47,7 +47,7 @@
 #define BN6_LOOK_FIELD_BLUE_FIRST 2       /* one seven-shade blue ramp, 2-8: 2-5 the armour's, 6-8 the suit's, */
 #define BN6_LOOK_FIELD_BLUE_LAST 8        /* ... 9 white, 10 gold, 11 the emblem's red, 12-15 skin */
 #define BN6_LOOK_FIELD_SUIT_FIRST 6       /* ... 2-5 the armour's shades, 6-8 the suit's */
-#define BN6_LOOK_FIELD_GOLD   10
+#define BN6_LOOK_FIELD_GOLD   10          /* the field's gold, the helmet's stripe and fins: the look's accent */
 #define BN6_LOOK_FIELD_INDEX  0x02000AA5u /* u8 the palette he takes on the field (bn6f eStruct2000aa0 +5, 0 in play) */
 #define BN6_LOOK_FIELD_INDEX_SET 0x0809E770u /* ldrb r0,[r7,#5] then sprite_setPalette (BN6_SPRITE_PALETTE_SET), each frame */
 /* In a chat box: the mugshot, sprite list 8's 0x37 */
@@ -56,7 +56,7 @@
 #define BN6_LOOK_MUGSHOT_PAL  0x084EDD1Cu /* ... its one palette: 1-3 the helmet's blue (1 its outline), 4-7 the green behind */
 #define BN6_LOOK_MUGSHOT_BLUE_FIRST 1     /* ... him, 8 red, 11 gold, 9 and 13-15 skin, 12 black: its own layout, */
 #define BN6_LOOK_MUGSHOT_BLUE_LAST 3      /* ... not the field's or the battle's */
-#define BN6_LOOK_MUGSHOT_GOLD 11
+#define BN6_LOOK_MUGSHOT_GOLD 11          /* the mugshot's gold, the helmet's side pieces: the look's accent */
 /* The emotion window (the battle's and the Custom screen's face): face 0's
  * palette in BN6_FACE_PALS, which soullook.c copies and repoints
  * (BN6_FACE_PALS_REF), so it is read through that word */
