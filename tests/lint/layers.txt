@@ -30,6 +30,7 @@ core.base = core/rom.* core/rng.c core/game.h
 # the ROM's tables: chips, programs, foes, the other games' records and registry
 core.data = core/data.* core/chips.* core/chip_pool.* core/foes.h core/library_pages*
 core.data = core/xchips* core/xprograms.* core/xrecords.*
+core.data = core/looks.* core/looks_text.c
 
 # Options and its panels, drawn in the PET's look
 core.options = core/options* core/controls* core/touch_art.* core/pet_panel.h

@@ -380,7 +380,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | R in the town away from the port: where the PC is; R on a layer: the way home, past the guardian | `src/director/lesson_words.c` |
 | A Cross won, one the run can't carry, the Graveyard's call to the beast, Dad's CybeastButton after the Cybeast | `src/director/powers_words.c` |
 | The PET: mails, BBS, records, the Library's words | `src/director/pet_text.c` |
-| The colours screen: its labels, the channels, the look worn, where a palette comes from | `src/looks/looks_text.c` |
+| The colours screen: its labels, the channels, the look worn, where a palette comes from | `src/looks/looks_screen_text.c` |
 | The guardians: meeting, rematch, revenge, defeat, their tips, rumors, Souls | `src/layer/guardian_lines.c` |
 | The super bosses: Bass's and the Cybeast's meetings by their record, last words, tips, their data's words and title cards | `src/layer/super_lines.c` |
 | The Net Dealer, the NaviCust vendor, ProtoMan's terms, a rumor, the invisible path's hint, a ScrtData, a Spin | `src/layer/layer_words.c` |

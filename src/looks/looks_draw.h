@@ -1,6 +1,7 @@
 /* The colours screen's picture (looks_screen.h), in BN6's PET screens' look
  * (pet_look.h; docs/engine/ui.md): the band with the screen's name; STATUS's
- * slot holding BN6's own MegaMan in the look's colours; the list in a
+ * slot holding BN6's own MegaMan in the look's colours, on a loop
+ * (looks_preview.h); the list in a
  * window, the look worn between Options' orange pointers and each channel
  * with its colour; the palette's window, its name between the Library's
  * green page arrows, its sixteen colours in a 4x4 grid and the plain cell
@@ -14,6 +15,7 @@
 #include <stdint.h>
 
 #include "looks.h"
+#include "looks_preview.h"
 
 #define LOOKS_PLAIN LOOK_COLOURS   /* the grid's cell under its sixteen: the channel as BN6 draws it */
 #define LOOKS_ROWS (1 + LOOK_CHANNELS)
@@ -30,7 +32,7 @@ typedef struct {
 	bool grid;                    /* the cursor in the grid */
 	int page;                     /* the palette shown */
 	int cell;                     /* the grid's cursor, 0-15 or LOOKS_PLAIN */
-	uint8_t preview[32];          /* his battle palette in the look's colours (GBA BGR555) */
+	LooksPreview preview;         /* BN6's MegaMan in the look, on its loop */
 } LooksView;
 
 void looks_draw_view(int x, int y, const LooksView *v);

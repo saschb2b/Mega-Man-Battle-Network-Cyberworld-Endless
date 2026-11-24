@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #include "gfx.h"
-#include "looks_text.h"
+#include "looks_screen_text.h"
 #include "pet_look.h"
 
 #define W 240
@@ -70,13 +70,14 @@ SDL_Rect looks_page_rect(bool right) {
 static SDL_Color channel_colour(const LooksView *v, int c) {
 	static const int mid[LOOK_CHANNELS] = { 3, 7, 11 };   /* (battle palette 0: the armour's ramp 2-5, the suit's 6-9, the gold 11) */
 	if (v->look.palette[c] != LOOK_NONE) return colour(looks_colour(v->look.palette[c], v->look.colour[c]));
-	return colour((uint16_t)(v->preview[2 * mid[c]] | v->preview[2 * mid[c] + 1] << 8));
+	const uint8_t *pal = v->preview.pal[1];
+	return v->preview.have[1] ? colour((uint16_t)(pal[2 * mid[c]] | pal[2 * mid[c] + 1] << 8)) : LOOK_PAGE;
 }
 
 /* STATUS's slot with BN6's MegaMan standing in it, in the look's colours */
 static void slot(int x, int y, const LooksView *v) {
 	SDL_Rect f = look_slot(x + SLOT_X, y + TOP, SLOT_W, MID_H);
-	sprite_draw_palette(sprite_get(SPR_BATTLE, 0), 0, 0, f.x + f.w / 2 - 2, f.y + f.h - 14, false, v->preview);
+	looks_preview_draw(&v->preview, f.x + f.w / 2 - 2, f.y + f.h - 16);
 	char s[8];
 	snprintf(s, sizeof s, "%s", looks_slot_name(v->slot));
 	look_title(f.x + (f.w - look_title_width(s)) / 2, f.y + f.h - 10, s, LOOK_PAGE);

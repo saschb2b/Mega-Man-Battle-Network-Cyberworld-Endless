@@ -199,7 +199,8 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   the band as the Library's entries; KeyItem's INFORMATION box under
   them.
 - The colours screen ([MegaMan's look](../game/looks.md)) puts BN6's own
-  MegaMan in STATUS's slot, in his palette as the look makes it, beside
+  MegaMan in STATUS's slot, in his palettes as the look makes them, on a
+  loop (walking round all eight ways, then his battle stance and attacks), beside
   the list in its window (the look worn between Options' pointers, each
   channel's colour in a swatch framed white) and the palette's window,
   its name between the Library's green arrows and its sixteen colours a

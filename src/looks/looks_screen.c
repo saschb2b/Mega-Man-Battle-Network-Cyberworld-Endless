@@ -22,14 +22,8 @@ static struct {
 
 /* the look as it stands into the game, and the preview's colours from it */
 static void apply(void) {
-	LooksView *v = &S.v;
-	look_apply(&v->look);
-	uint16_t pal[16];
-	look_palette_of(&v->look, LOOK_ART_BATTLE, pal);
-	for (int i = 0; i < 16; ++i) {
-		v->preview[2 * i] = (uint8_t)pal[i];
-		v->preview[2 * i + 1] = (uint8_t)(pal[i] >> 8);
-	}
+	look_apply(&S.v.look);
+	looks_preview_colours(&S.v.preview, &S.v.look);
 }
 
 /* the channel under the list's cursor, -1 on the looks' row */
@@ -188,11 +182,11 @@ static void taps(void) {
 void looks_screen_open(void) {
 	memset(&S.v, 0, sizeof S.v);
 	LooksView *v = &S.v;
-	for (int c = 0; c < LOOK_CHANNELS; ++c)
-		if (looks_channel_live(c)) v->chan[v->n_chan++] = c;
+	for (int c = 0; c < LOOK_CHANNELS; ++c) v->chan[v->n_chan++] = c;
 	v->slot = looks_slot();
 	v->look = looks_get(v->slot);
 	v->page = LOOK_CLASSIC;
+	looks_preview_start(&v->preview);
 	apply();
 	S.shown = true;
 	S.letting_go = false;
@@ -227,6 +221,7 @@ bool looks_screen_update(void) {
 		else list_keys();
 		if (S.shown) taps();
 	}
+	looks_preview_step(&S.v.preview);
 	++S.v.t;
 	return true;
 }

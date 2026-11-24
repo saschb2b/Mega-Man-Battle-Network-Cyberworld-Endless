@@ -3,8 +3,8 @@
  * INFORMATION box says of the cursor's place, in the PET's own plain voice
  * as KeyItem's (docs/voice/rules.md); and each palette's one line on where
  * it comes from, shown while it is locked. */
-#ifndef CW_LOOKS_TEXT_H
-#define CW_LOOKS_TEXT_H
+#ifndef CW_LOOKS_SCREEN_TEXT_H
+#define CW_LOOKS_SCREEN_TEXT_H
 
 #include <stdbool.h>
 #include <stddef.h>

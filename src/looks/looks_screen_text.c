@@ -1,7 +1,7 @@
-/* looks_text.h. Where a palette comes from is said as the routes give it
+/* looks_screen_text.h. Where a palette comes from is said as the routes give it
  * (issue #854: milestones, the home shop, a rare find), plainly, as
  * KeyItem says what an item is. */
-#include "looks_text.h"
+#include "looks_screen_text.h"
 
 #include <stdio.h>
 
