@@ -9,19 +9,20 @@
 #include "looks_got_words.h"
 
 /* (his word where it came from: a reaction and the place, six words or so) */
-static const char *const came[LOOK_PALETTES] = {
-	[LOOK_UNDERNET] = "Lan,the Undernet... I kept its colors!",
-	[LOOK_GREGAR] = "We beat the beast,Lan! I kept its colors!",
-	[LOOK_PROTOMAN] = "ProtoMan's colors! Chaud won't like this! Hehe.",
-	[LOOK_NEBULA] = "A Darkloid's colors... Spooky,huh,Lan?",
-	[LOOK_TOURNAMENT] = "Champion colors,Lan! We won it all!",
-	[LOOK_HAZARD] = "We made it through the worst,Lan! Look!",
-	[LOOK_CENTRAL] = "Colors from home! Thanks,Lan!",
-	[LOOK_SEASIDE] = "Colors from home! Thanks,Lan!",
-	[LOOK_SKY] = "Colors from home! Thanks,Lan!",
-	[LOOK_MYSTERY] = "Lan,look! The Mystery colors! For me!",
-	[LOOK_GLITCH] = "Whoa! The Glitch colors! They flicker!",
-};
+static const char *came(int p) {
+	static const char *const home = "Colors from home! Thanks,Lan!";
+	switch (p) {
+	case LOOK_UNDERNET: return "Lan,the Undernet... I kept its colors!";
+	case LOOK_GREGAR: return "We beat the beast,Lan! I kept its colors!";
+	case LOOK_PROTOMAN: return "ProtoMan's colors! Chaud won't like this! Hehe.";
+	case LOOK_NEBULA: return "A Darkloid's colors... Spooky,huh,Lan?";
+	case LOOK_TOURNAMENT: return "Champion colors,Lan! We won it all!";
+	case LOOK_HAZARD: return "We made it through the worst,Lan! Look!";
+	case LOOK_MYSTERY: return "Lan,look! The Mystery colors! For me!";
+	case LOOK_GLITCH: return "Whoa! The Glitch colors! They flicker!";
+	default: return p >= LOOK_CENTRAL && p <= LOOK_SKY ? home : NULL;
+	}
+}
 
 const char *looks_got_words(unsigned palettes, unsigned found) {
 	static char words[1024];
@@ -33,7 +34,7 @@ const char *looks_got_words(unsigned palettes, unsigned found) {
 	if (n > 2) k += snprintf(words + k, sizeof words - (size_t)k, "@M Lan! I've got new colors!");
 	for (int p = LOOK_CLASSIC + 1; p < LOOK_PALETTES && k < (int)sizeof words - 80; ++p) {
 		if (!(palettes >> p & 1)) continue;
-		if (n <= 2 && came[p]) k += snprintf(words + k, sizeof words - (size_t)k, "%s@M %s", k ? "|" : "", came[p]);
+		if (n <= 2 && came(p)) k += snprintf(words + k, sizeof words - (size_t)k, "%s@M %s", k ? "|" : "", came(p));
 		if (!(found >> p & 1)) k += snprintf(words + k, sizeof words - (size_t)k, "%s@N %s", k ? "|" : "", looks_got_box(p));
 	}
 	return words;

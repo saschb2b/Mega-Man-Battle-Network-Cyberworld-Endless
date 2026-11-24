@@ -201,8 +201,16 @@ extern bool layer_objs_undernet_server;
 extern bool layer_objs_dark_first;
 extern bool layer_objs_duel_later;
 
-/* The run's rare find of colours on this layer (layer_looks.c;
- * looks_routes.h): its palette where the layer is the find's, -1 none. */
+/* The key items a layer's Mystery Data hold beyond their rolls
+ * (layer_looks.c): the run's Spin of colour c, a ScrtData, and the run's
+ * rare find of colours (looks_routes.h): its palette where the layer is
+ * the find's (-1 none), its Mystery Data (the best blue one, the last of
+ * the best, never a purple one, the Spin's or the RegUp's; -1 none), and
+ * its ColrData put in one, its palette returned. */
+void layer_spin_content(uint8_t out[8], int colour);
+void layer_fragment_content(uint8_t out[8]);
 int layer_look_find(void);
+int layer_look_md(int spin_md, int reg_md);
+int layer_look_put(MysteryData *m, int palette);
 
 #endif
