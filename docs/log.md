@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-24
+* **Update**: rom/pet-and-second-screen.md (the PET menu's labels: tile 0x2FF is BN6's blank on the Chip Folder's screens, Forms' word kept out of the video memory, the `blanktile` line), game/pet-menu.md (Forms' label's tiles the engine's own).
 * **Update**: engine/emulation/fast-forward.md (The music: the song at its own pace on the engine's MP2K while fast, followed and handed back, through the core's ring at the core's DirectSound's line, measured), engine/emulation/index.md (its line), GUIDE.md (Fast forward: the music at its own pace, `fast_music`), rom/sound.md (the carried music's row: SoundInfo's DMA count, ring and samples a frame, read as fast forward takes the song), code/gfx-and-audio.md (`music_fast.c`, `music_game.h`).
 
 ## 2026-11-23

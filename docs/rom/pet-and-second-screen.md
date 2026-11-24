@@ -3,7 +3,7 @@ type: ROM Map
 title: "The PET and the second screen"
 description: "Addresses behind the PET menu, its labels and KeyItem and E-Mail words, the KeyItem screen's cursor for the NetPass, and every panel the second screen reads (chips, shops, NaviCustomizer, battle, Library, E-Mail)."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T00:40:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
