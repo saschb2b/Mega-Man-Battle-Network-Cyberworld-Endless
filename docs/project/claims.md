@@ -3,7 +3,7 @@ type: Process
 title: "Claims"
 description: "What each branch in flight may take of the numbers branches share (chip ids, enemy ids, AI numbers, list numbers, song slots, free-space spans, units of work, `Run`): a file a branch in `docs/project/claims/`, written before the branch starts and held apart by `tools/claims.py`."
 tags: [project, process, git]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T21:31:59Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
 sources:
   - { id: notes, title: "The sessions' shared notes of 11 November 2026 (bn4-units-claims.md, team-protoman-claims.md): who moves which unit, which list numbers, rooms and song slots each takes", resource: "the sessions' notes folder on the owner's machine, outside the repository" }
 ---
