@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T20:10:00Z
+* **Update**: game/meta/shelf.md (the shelf's bit sets sixteen bits wide, room for the folders issue 865 adds).

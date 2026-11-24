@@ -28,7 +28,7 @@ int meta_folders_open(void) {
 
 void meta_folder_hear(int folder) {
 	if (folder <= FOLDER_STANDARD || folder >= FOLDER_COUNT || heard(folder)) return;
-	profile.shelf.heard |= (uint8_t)(1u << folder);
+	profile.shelf.heard |= (uint16_t)(1u << folder);
 	profile_save();
 }
 
@@ -60,8 +60,8 @@ void meta_shelf_run_over(void) {
 	if (!s->floor_at || finished - (s->floor_at - 1) < SHELF_FLOOR_RUNS) return;
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f) {
 		if (meta_folder_state(f) != SHELF_LOCKED) continue;
-		s->heard |= (uint8_t)(1u << f);
-		s->floored |= (uint8_t)(1u << f);
+		s->heard |= (uint16_t)(1u << f);
+		s->floored |= (uint16_t)(1u << f);
 		s->floor_at = (uint16_t)(finished < 0xFFFE ? finished + 1 : 0xFFFF);
 		return;
 	}

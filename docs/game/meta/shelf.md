@@ -85,7 +85,11 @@ knows](what-megaman-knows.md)): in the profile, `Profile.shelf`
 (unread since 19 October 2026). A profile of before holds other data
 there; `shelf.kept` reads `SHELF_KEPT` once they are the shelf's, and
 `profile_load` clears them once (nothing heard, the floor's count not
-begun). The profile's size and every other field stand.
+begun). The profile's size and every other field stand. Its two bit sets
+are sixteen bits each, a bit per folder (`1 << FOLDER_*`), so the shelf
+holds up to sixteen; the first shelf's byte-wide sets, never released,
+held eight, and a profile that kept them starts its shelf afresh
+(issue #865).
 
 ## The summary
 
