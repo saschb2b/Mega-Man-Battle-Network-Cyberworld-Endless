@@ -117,7 +117,7 @@ static bool text_step(const char *tok, InputStep *s) {
 	else if (!strncmp(tok, "by ", 3)) snprintf(s->by, sizeof s->by, "%s", tok + 3);
 	/* (on a dark layer's board, beside the nearest panel of a kind: director_dev_board) */
 	else if (!strncmp(tok, "board ", 6)) snprintf(s->board, sizeof s->board, "%s", tok + 6);
-	/* (MegaMan's look worn for the session, "P,P,P,C,C,C" or "plain": looks_set_override) */
+	/* (MegaMan's look, "P,P,P,C,C,C" or "plain", into the slot worn: dev_look) */
 	else if (!strncmp(tok, "look ", 5)) snprintf(s->look, sizeof s->look, "%s", tok + 5);
 	else if (!strncmp(tok, "cross ", 6)) s->cross = (int)strtol(tok + 6, NULL, 0);
 	else if (!strncmp(tok, "folder ", 7)) s->folder = (int)strtol(tok + 7, NULL, 0);

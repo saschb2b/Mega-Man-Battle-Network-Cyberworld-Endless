@@ -87,9 +87,8 @@ int square_looks_install(void) {
 	uint32_t block_room = 4 + PALETTES * BN6_LOOK_PAL_SIZE;
 	uint32_t sprite = emu_read32(list_entry(PUPPET_MEGAMAN)), frames = 0, anims;
 	uint16_t bn6[16];
-	Look plain = look_plain();
-	if (sprite >> 31 || !(anims = copy_frames(sprite, copy, COPY_MOST - block_room, &frames)) ||
-	    !look_palette_of(&plain, LOOK_SPRITE_FIELD, bn6)) {
+	for (int i = 0; i < 16; ++i) bn6[i] = (uint16_t)get16(R.data + (BN6_LOOK_FIELD_PALS - BUS) + 2 * i);
+	if (sprite >> 31 || !(anims = copy_frames(sprite, copy, COPY_MOST - block_room, &frames))) {
 		fprintf(stderr, "square looks: BN6's MegaMan not as measured; the peers in BN6's colours\n");
 		return PUPPET_MEGAMAN;
 	}
@@ -161,7 +160,9 @@ static void pick(const OnlineSnapshot *shown, int n, int x, int y, int part, con
 static void colour_slot(int i, const OnlinePeer *p) {
 	Look l = S.shown[i] ? peer_look(p) : look_plain();
 	uint16_t c[16];
-	if (!look_palette_of(&l, LOOK_SPRITE_FIELD, c) || !memcmp(c, S.colours[1 + i], sizeof c)) return;
+	/* (BN6's own where the look has no field palette: palette 0's, as installed) */
+	if (!look_palette_of(&l, LOOK_SPRITE_FIELD, c)) memcpy(c, S.colours[0], sizeof c);
+	if (!memcmp(c, S.colours[1 + i], sizeof c)) return;
 	uint8_t b[BN6_LOOK_PAL_SIZE];
 	for (int k = 0; k < 16; ++k) put16(b + 2 * k, c[k]);
 	emu_write(S.block + (uint32_t)(1 + i) * BN6_LOOK_PAL_SIZE, b, sizeof b);

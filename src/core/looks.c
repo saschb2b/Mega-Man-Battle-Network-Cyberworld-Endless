@@ -25,9 +25,13 @@ Look look_plain(void) {
 static Look override;
 static bool overridden;
 
-void looks_set_override(const Look *look) {
-	overridden = look != NULL;
-	if (look) override = *look;
+int looks_slot(void) { return 0; }
+
+bool looks_set(int slot, const Look *look) {
+	if (slot || !look_valid(look)) return false;
+	overridden = true;
+	override = *look;
+	return true;
 }
 
 Look looks_worn(void) {

@@ -211,8 +211,8 @@ void reconnect_preview_draw(void);
 const char *devtools_boot_from(void);
 
 /* "P,P,P,C,C,C" (a palette and a colour a channel, 255 BN6's own) or
- * "plain": MegaMan's look worn for the session, as the PET's screen would
- * set one (the Square sends it as it changes, square_looks.h); the remote
+ * "plain": MegaMan's look, into the slot worn (the profile saved), as the
+ * PET's screen would set it (the Square sends it as it changes, square_looks.h); the remote
  * and scripted step "look SPEC" (look_dev.c) */
 void dev_look(const char *spec);
 
