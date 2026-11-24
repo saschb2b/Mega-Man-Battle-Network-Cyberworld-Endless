@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-24T11:00:00Z
-* **Update**: world/level-design/generator.md (Mr. Weather Comp's gaps one panel wide between two floors, which its tiles painted as its maps' sunken slot, drawn as the two floors apart, TILES_GAPS_APART; issue 836).
