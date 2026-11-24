@@ -16,6 +16,7 @@
 #include "arena_carry.h"
 #include "arena_folder.h"
 #include "arena_format.h"
+#include "arena_looks.h"
 #include "arena_report.h"
 #include "arena_team_client.h"
 #include "arena_view.h"
@@ -164,6 +165,8 @@ static void bout(ArenaKept *kept) {
 	uint32_t seed = dev.arena_seed ? (uint32_t)dev.arena_seed + S.bouts : 0;
 	printf("arena: bout %u: delay %u frames, the local link's lag %u ticks, MegaMan %s, seed %u\n", S.bouts + 1, link->delay, lag,
 		loadout[0] ? "carried from the checkpoint" : "the game's start's", (unsigned)seed);
+	/* (arenalook=MINE/THEIRS: the two MegaMen's looks, I the first GBA) */
+	arena_looks_bout(0, dev.arena_look);
 	S.arena = arena_new_bout(R.data, ROM_SIZE, loadout, link, seed, kept);
 	/* (the stands' report read as the Square's battles read it, said in the log at the end) */
 	arena_report_begin(1);

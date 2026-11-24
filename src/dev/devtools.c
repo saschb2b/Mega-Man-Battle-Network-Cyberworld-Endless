@@ -104,6 +104,7 @@ void devtools_parse(const char *spec) {
 				dev.glitch_look[dev.glitch_looks++] = *a == 'x' ? -1 - atoi(a + 1) : atoi(a);
 		/* (kept past this call: copies of their own) */
 		else if (!strncmp(t, "online=", 7)) { static char url[200]; snprintf(url, sizeof url, "%s", t + 7); dev.online = url; }
+		else if (!strncmp(t, "arenalook=", 10)) { static char look[32]; snprintf(look, sizeof look, "%s", t + 10); dev.arena_look = look; }
 		else if (!strncmp(t, "onlinename=", 11)) { static char name[17]; snprintf(name, sizeof name, "%s", t + 11); dev.online_name = name; }
 	}
 	if (dev.speed < 1) dev.speed = 1;

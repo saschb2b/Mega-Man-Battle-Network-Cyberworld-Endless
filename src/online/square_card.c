@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "arena_looks.h"
 #include "arena_team_client.h"
 #include "arena_view.h"
 #include "bn6.h"
@@ -89,6 +90,8 @@ void square_arena_describe(FILE *f) {
 		fprintf(f, "challenge from %s\n", name ? name : "?");
 	} else fprintf(f, "challenge none\n");
 	fprintf(f, "arena %s\n", (unsigned)SA.stage < sizeof stages / sizeof *stages ? stages[SA.stage] : "other");
+	/* (the two MegaMen's looks the bout's cores were made with, arena_looks.h) */
+	fprintf(f, "arenalooks %s\n", arena_looks_on() ? "on" : "none");
 	square_team_describe(f);
 	/* (the battle's link through a drop, v21: down now, my keys sent again, the others' asked for) */
 	if (SA.link.match) fprintf(f, "arenalink %s resent %u asks %u\n", SA.link_down ? "down" : "up", (unsigned)SA.link.resent, (unsigned)SA.link.asks);
