@@ -3,7 +3,7 @@ type: ROM Map
 title: "MegaMan's colours"
 description: "Where BN6 Gregar keeps MegaMan's colours (his battle, field, mugshot and emotion-window palettes), which indexes form his shade ramps, where a form takes them over, and how the sprite renderer shares its OBJ palette slots: the measuring behind each profile's look (issue #854)."
 tags: [rom, graphics, megaman, look]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:25:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
