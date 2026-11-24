@@ -451,6 +451,46 @@ the session building it, and is his to turn over.
 | One with no MegaMan | His name and his ring where he stands | Nothing (as built: the plates and the map named someone the picture did not show); a count only ("+1 here"), which says nothing of where he is |
 | More objects | Not here: BN6 runs 16 NPC objects, and moving the Mystery Data out of them, or a MegaMan drawn another way, is work of its own (issue #755's follow-up) | Raising the 16 (every loop over BN6's array, and the RAM after it) |
 
+## Each in his own look (24 November 2026)
+
+[Issue #878](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/878),
+found filming 0.24.0's trailer: on a layer each game drew every MegaMan
+in its own player's [look](../game/looks.md), Sol's game all four divers
+in Sol's orange, Nova's all four in Nova's violet. The divers' puppets
+drew BN6's own field MegaMan, whose palette the local look recolours.
+
+The looks already travelled: the server keeps a player's LOOK past the
+portal and puts it in every SNAPSHOT, the dive's rooms' as the Square's
+(protocol v30, [Peers' looks](square/looks.md)); the dive's link now sends
+MegaMan's own again whenever it begins or comes back (a CONTINUE into a
+dive, a dropped link) and as it changes (`dive_link.c`), so no wire
+changed. What changed is the drawing, the Square's way: the divers'
+puppets draw one copy of BN6's field MegaMan made in the layer's room as
+it is built, a palette a puppet (`look_sprite.c`, which the Square's
+peers use too), each given his diver's look's colours or BN6's own
+(`dive_looks.c`).
+
+A layer's room for looks is no fixed number, as a part of the Square's
+is: each layer has its own Mr.Progs, Mystery Data, traces and guardian.
+So it is read off BN6's renderer
+([MegaMan's colours](../rom/megaman-colours.md), The OBJ palette slots)
+each frame the field shows as itself (no card or fade over it): the slots
+BN6 gave, less those holding a diver's colours, are the layer's own, and
+the mode's limit (12) less those is what the divers' looks share with
+MegaMan's. The least seen since the last pick is the next pick's, so a
+sprite that comes and goes is counted while it shows. The crew are drawn
+in their looks first, then the nearest (the Square's pick, held 90
+frames, a diver keeping his look against one 24 units nearer); the rest
+in BN6's own blue, never in a stale slot's colours, and should BN6 mark a
+puppet stale after all, the room is one look smaller for ten seconds. A
+layer with no room left for the copy (5.6 KB) draws the divers as before.
+
+The state says it: `divelooks NAME P.P.P/C.C.C drawn|classic|none`
+for each diver in the room, `divelookroom` and `divelookstale`
+(`tests/scenarios/online_dive_looks.py`: three games in three looks on
+one layer, each seeing the other two in theirs, and a look changed there
+reaching the others).
+
 ## Nothing over BN6's screens (22 November 2026)
 
 Issue #781, from the second play of the dive: our drawing over the

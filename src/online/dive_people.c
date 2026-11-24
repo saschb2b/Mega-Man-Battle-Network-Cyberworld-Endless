@@ -15,11 +15,13 @@
 #include "dive_comings.h"
 #include "dive_crew.h"
 #include "dive_dots.h"
+#include "dive_looks.h"
 #include "dive_seats.h"
 #include "dive_traces.h"
 #include "floor_ring.h"
 #include "gfx.h"
 #include "layer_objs.h"
+#include "look_sprite.h"
 #include "map_label.h"
 #include "npc.h"
 #include "pixfont.h"
@@ -43,6 +45,7 @@ typedef struct {
 	int x, y, z;
 	char name[ONLINE_NAME_BYTES + 1];
 	bool drawn;
+	Look look;   /* as his game sent it (protocol v30) */
 } Who;
 
 static struct {
@@ -58,13 +61,14 @@ static struct {
 } P;
 
 static int dev_room;   /* diveroom=N: N puppets at most, 0 as the layer leaves */
+static int sprite = PUPPET_MEGAMAN;   /* the list-6 number the puppets draw: the looks' copy (dive_looks.h) */
 
 void dive_people_dev_room(int most) { dev_room = most; }
 
 static void make_puppets(NpcList *npcs, int most) {
 	if (dev_room > 0 && most > dev_room) most = dev_room;
 	while (P.made < most && npcs->n < BN6_NPC_COUNT) {
-		uint32_t at = puppet_make(6, PUPPET_MEGAMAN);
+		uint32_t at = puppet_make(6, sprite);
 		if (!at) break;
 		npcs->script[npcs->n++] = at;
 		P.script[P.made++] = at;
@@ -77,7 +81,10 @@ static void more(NpcList *npcs) {
 	P.seed = run.layer_seed;
 	P.arrived = SDL_GetTicks();
 	P.depth = run.depth;
-	if (npcs->n >= BN6_NPC_COUNT || !npc_need_sprite(npcs, 6, PUPPET_MEGAMAN)) return;
+	if (npcs->n >= BN6_NPC_COUNT) return;
+	/* (each in his own look: a copy of BN6's MegaMan with a palette a puppet, issue #878) */
+	sprite = dive_looks_install(DIVE_PEOPLE);
+	if (!npc_need_sprite(npcs, 6, sprite)) return;
 	/* (a full crew's MegaMen first, then the week's traces, a slot or two
 	 * where the layer leaves them: dive_traces.h; then the others: a layer
 	 * with its guardian had given the traces its last slots, and a crew
@@ -99,7 +106,10 @@ static bool here(void) { return director_on_layer() && P.seed == run.layer_seed 
 
 void dive_people_on(bool on) {
 	layer_objs_more = on ? more : NULL;
-	if (!on) memset(&P, 0, sizeof P);
+	if (!on) {
+		memset(&P, 0, sizeof P);
+		dive_looks_reset();
+	}
 	/* (and their dots on the layer's map, issue #728) */
 	dive_dots_on(on);
 }
@@ -226,6 +236,22 @@ void dive_people_draw(bool chat) {
 	}
 }
 
+/* each diver in the room with his look as the wire says it and how he is drawn (issue #878): `divelooks NAME P.P.P/C.C.C
+ * drawn|classic|none, ...` (none: no MegaMan of his on the layer), then the layer's room and the stale ones */
+static void divers_looks_describe(FILE *f) {
+	fputs("divelooks", f);
+	for (int i = 0; here() && i < P.nwho; ++i) {
+		const Who *w = &P.who[i];
+		int drawn = -1;
+		for (int k = 0; k < P.made; ++k)
+			if (P.id[k] == w->id) drawn = dive_looks_shown(k);
+		const Look *l = &w->look;
+		fprintf(f, "%s %s %u.%u.%u/%u.%u.%u %s", i ? "," : "", w->name, l->palette[0], l->palette[1], l->palette[2], l->colour[0],
+			l->colour[1], l->colour[2], drawn > 0 ? "drawn" : drawn == 0 ? "classic" : "none");
+	}
+	fprintf(f, "\ndivelookroom %d\ndivelookstale %d\n", dive_looks_room(), dive_looks_stale());
+}
+
 void dive_people_describe(FILE *f) {
 	Tag tags[DIVE_PEOPLE];
 	int n = tags_now(tags);
@@ -253,7 +279,25 @@ void dive_people_describe(FILE *f) {
 	for (int i = 0, j = 0; here() && i < P.nwho; ++i)
 		if (!P.who[i].drawn) fprintf(f, "%s%s%s", j++ ? " " : ": ", P.who[i].name, dive_crew_has(P.who[i].id) ? "*" : "");
 	fputc('\n', f);
+	divers_looks_describe(f);
 	dive_dots_describe(f);
+}
+
+/* each puppet's diver in his own look, as the layer has room (dive_looks.h) */
+static void looks(const OnlineSnapshot *s, int n) {
+	DiveLookPuppet lp[DIVE_PEOPLE];
+	for (int k = 0; k < P.made; ++k) {
+		lp[k] = (DiveLookPuppet){ .script = P.script[k], .look = look_plain() };
+		for (int i = 0; i < n && P.id[k]; ++i) {
+			const OnlinePeer *p = &s->peers[i];
+			if (p->id != P.id[k]) continue;
+			lp[k].id = p->id;
+			lp[k].look = look_sprite_wire(p->look);
+			lp[k].distance = abs((int)p->x - bn6_player_x()) + abs((int)p->y - bn6_player_y());
+			lp[k].crew = dive_crew_has(p->id);
+		}
+	}
+	dive_looks_frame(lp, P.made);
 }
 
 void dive_people_frame(const OnlineSnapshot *s) {
@@ -275,6 +319,7 @@ void dive_people_frame(const OnlineSnapshot *s) {
 		Who *w = &P.who[i];
 		*w = (Who){ .id = p->id, .x = (int)p->x, .y = (int)p->y, .z = (int)p->z };
 		memcpy(w->name, p->name, sizeof w->name);
+		w->look = look_sprite_wire(p->look);
 		for (int k = 0; k < P.made; ++k) w->drawn |= P.id[k] == p->id;
 	}
 	claims_begin(WRITER);
@@ -284,5 +329,6 @@ void dive_people_frame(const OnlineSnapshot *s) {
 			if (s->peers[i].id == P.id[k]) peer = &s->peers[i];
 		place(k, peer);
 	}
+	looks(s, n);
 	claims_end();
 }

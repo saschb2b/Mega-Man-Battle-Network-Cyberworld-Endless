@@ -22,6 +22,7 @@
 #include "online_mail.h"
 #include "online_transport.h"
 #include "run.h"
+#include "square_looks.h"
 #include "square_week.h"
 #include "weekly.h"
 
@@ -51,6 +52,7 @@ static struct {
 	uint32_t again_at;
 	unsigned tries;
 	uint32_t alone_at;       /* the server's refusal: the dive alone from then, its word shown, 0 none */
+	bool look_due;           /* MegaMan's look to send again (protocol v30): a link begun or back, issue #878 */
 } L;
 
 /* CONTINUE into a dive (issue #759): the dive taken up with no link, the
@@ -68,6 +70,7 @@ static void link_up(uint16_t week, uint32_t seed) {
 	dive_band_reset();
 	L.week = week;
 	L.seed = seed;
+	L.look_due = true;
 	dive_people_on(true);
 }
 
@@ -238,6 +241,7 @@ static void back_or_down(const OnlineSnapshot *s, uint32_t now) {
 	if (!again) return;
 	memset(&L.room, 0, sizeof L.room);
 	dive_crew_reset();
+	L.look_due = true;
 	fprintf(stderr, "dive: the link back; the layer's room entered again\n");
 }
 
@@ -305,7 +309,12 @@ void dive_link_frame(void) {
 	}
 	bool heard = s.connected && !L.down_since;
 	if (!heard) unheard(now);
-	else dive_band_frame(now, true, s.player_id);
+	else {
+		dive_band_frame(now, true, s.player_id);
+		/* (MegaMan's look, which the others draw him in: again after a link begun or back, else as it changes) */
+		square_looks_send(L.look_due);
+		L.look_due = false;
+	}
 	/* (the party at a guardian's door, and its fight; the crew's battles) */
 	dive_party_frame(&s, L.room);
 	dive_join_frame();
