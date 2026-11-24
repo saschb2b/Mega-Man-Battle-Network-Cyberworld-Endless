@@ -89,7 +89,7 @@
  * NetBattles): his battle block's palettes BN6 never picks, each side's look
  * written there in the Arena's cores, and the places BN6 picks his palette */
 #define BN6_LOOK_PAL_SPARE    { 0x19, 0x1A, 0x1E, 0x1F, 0x23, 0x24, 0x28, 0x29 } /* zero in the ROM, never drawn (measured) */
-#define BN6_LOOK_PAL_SPARES   8
+#define BN6_LOOK_PAL_SPARES   8           /* ... how many */
 #define BN6_LOOK_PICK_END     0x0801009Eu /* adds r0,r4,#0 at the pick's end: r4 the palette (0, 1 or 4 in no form), r5 the object */
 #define BN6_LOOK_FORM_READ2   0x080BF516u /* ldr r1,=BN6_FORM_PALETTES: an object drawn as MegaMan (0x080BF4FC), r0 its side's form, */
 #define BN6_LOOK_FORM_READ2_SET 0x080BF51Au /* ... its palette set (bl sprite_setPalette, r0 the palette) */

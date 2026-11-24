@@ -26,7 +26,6 @@
 #include "bn6.h"
 #include "devtools.h"
 #include "emu.h"
-#include "gfx.h"
 #include "platform.h"
 #include "protocol.h"
 #include "rom.h"
