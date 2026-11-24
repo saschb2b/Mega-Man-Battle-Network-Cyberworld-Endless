@@ -68,6 +68,13 @@ so two peers at one distance do not trade it back and forth. Should BN6
 still mark a peer's sprite stale (an effect more than measured), the
 part's room is one look smaller for ten seconds.
 
+## On a dive's layer
+
+The shared dive's divers are drawn in their looks the same way, through
+the same copy (`look_sprite.c`, made in the layer's room), the room read
+off BN6's renderer on each layer rather than measured once
+([The shared dive](../shared-dive.md), Each in his own look).
+
 ## For the Arena
 
 `peer_looks.c` keeps the look each player of the Square was last seen in,

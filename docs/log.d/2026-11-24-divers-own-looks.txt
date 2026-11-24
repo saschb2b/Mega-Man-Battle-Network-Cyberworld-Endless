@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T23:00:00Z
+* **Update**: online/shared-dive.md (Each in his own look: the divers on a layer drawn in their own looks, the room read off BN6's renderer, issue #878), online/square/looks.md (On a dive's layer), code/online.md (look_sprite.c, dive_looks.c), GUIDE.md (MegaMan's colours: the divers on the DeepNet in their looks).
