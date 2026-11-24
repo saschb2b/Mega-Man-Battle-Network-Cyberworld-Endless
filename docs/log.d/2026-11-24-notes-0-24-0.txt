@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-24T23:30:00Z
+* **Creation**: releases/v0.24.0.md (the players' notes of 0.24.0: MegaMan's colours, the folders' shelf and five folders, Team ProtoMan, the week's DeepNet dived as a crew, the fixes, each pictured), releases/overview.md (its line).
