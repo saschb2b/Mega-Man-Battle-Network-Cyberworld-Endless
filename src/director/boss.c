@@ -613,6 +613,8 @@ bool boss_exit_open(void) { return B.state == B_NONE || B.state >= B_OPEN; }
 
 bool boss_beaten(void) { return B.state >= B_AFTER; }
 
+bool boss_bracket_won(void) { return B.g.bracket && B.round > 2; }
+
 bool boss_cinematic(void) { return B.state >= B_ENTER && B.state <= B_LOGOUT && B.state != B_FIGHT; }
 
 bool boss_reward_waiting(void) { return B.state == B_REWARD; }

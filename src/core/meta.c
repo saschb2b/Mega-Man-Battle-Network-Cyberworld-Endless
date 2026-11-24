@@ -11,6 +11,8 @@
 #include "battle_data.h"
 #include "bn6.h"
 #include "chip_pool.h"
+#include "looks.h"
+#include "looks_routes.h"
 #include "meta_text.h"
 #include "net.h"
 #include "pacing.h"
@@ -318,8 +320,10 @@ int meta_spin_colour(void) {
 	return n ? missing[spin_hash(run.seed ^ 0x5B1Du) % (uint32_t)n] : 0;
 }
 
+int meta_spin_depth(void) { return 4 + (int)(spin_hash(run.seed) % 5u); }
+
 bool meta_spin_here(void) {
-	return run.side_kind == LAYER_NORMAL && run.depth == 4 + (int)(spin_hash(run.seed) % 5u) && meta_spin_colour() > 0;
+	return run.side_kind == LAYER_NORMAL && run.depth == meta_spin_depth() && meta_spin_colour() > 0;
 }
 
 void meta_spin_found(int colour) {
@@ -508,6 +512,11 @@ void meta_run_over(bool won) {
 	open_crosses(true);
 	open_forms(true);
 	earn_marks(won);
+	/* (and MegaMan's colours for what it earned, the disc's Hazard among
+	 * them: docs/game/looks-earning.md, Earning; he says so at the next start) */
+	unsigned colours = looks_milestones();
+	for (int p = 0; p < LOOK_PALETTES; ++p)
+		if (colours >> p & 1) say("the %s colors", looks_palette_name(p));
 	profile_save();
 }
 

@@ -98,19 +98,6 @@ static bool program_had(int program) {
 	return false;
 }
 
-/* The run's Spin, a key item as a ScrtData is: the NaviCust turns programs
- * of colour c with key item 0x4F + c (bn6f sub_8136364). */
-static void spin_content(uint8_t out[8], int colour) {
-	const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, (uint8_t)(0x4F + colour), 0, 0, 0 };
-	for (int i = 0; i < 8; ++i) out[i] = c[i];
-}
-
-/* A ScrtData, as the game's key item Mystery Data hold one. */
-static void fragment_content(uint8_t out[8]) {
-	const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_SECRET_DATA, 0, 0, 0 };
-	for (int i = 0; i < 8; ++i) out[i] = c[i];
-}
-
 typedef struct {
 	int x, y, z, cat, sprite, script, gone_flag;
 	bool floor;
@@ -266,6 +253,7 @@ typedef struct {
 	bool fragment, fragment_placed, key_here;
 	const ShopItem *stock;
 	int nstock;
+	int look_palette, look_md;   /* the run's rare find of colours here (looks_routes.h), -1 none; its Mystery Data */
 } MysteryPlan;
 
 /* The plan's RegUp: its MB and Mystery Data, where the layer has one
@@ -273,6 +261,7 @@ typedef struct {
 static void plan_regup(MysteryPlan *p) {
 	p->reg_mb = layer_regup(run.depth, run.side_kind);
 	p->reg_md = p->reg_mb ? regup_md(p->spin_md) : -1;
+	p->look_md = p->look_palette >= 0 ? layer_look_md(p->spin_md, p->reg_md) : -1;
 }
 
 static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p, LayerObjs *out) {
@@ -280,7 +269,7 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	m->type = mystery_colour(o);
 	if (i == p->spin_md) {
 		if (m->type == MYSTERY_GREEN) m->type = MYSTERY_BLUE;
-		spin_content(m->content, p->spin_colour);
+		layer_spin_content(m->content, p->spin_colour);
 		out->spin_colour = p->spin_colour;
 		if (emu_debug_on()) fprintf(stderr, "spin: colour %d in the Mystery Data at %d %d\n", p->spin_colour, m->x, m->y);
 	} else if (i == p->reg_md) {
@@ -292,7 +281,7 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 		p->fragment = false;
 		p->fragment_placed = true;
 		if (m->type == MYSTERY_GREEN) m->type = MYSTERY_BLUE;
-		fragment_content(m->content);
+		layer_fragment_content(m->content);
 	} else if (o->param == MD_PURPLE) {
 		purple_content(m->content, p->stock, p->nstock);
 		if (emu_debug_on()) fprintf(stderr, "purple: chip %d code %d (tier %d) in the Mystery Data at %d %d\n", m->content[4] | m->content[5] << 8,
@@ -301,8 +290,9 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 		static const uint8_t key[8] = { 4, 0x20, 0xFF, 0xFF, SUB_UNLOCKER, 0, 0, 0 };
 		p->key_here = false;
 		memcpy(m->content, key, 8);
-	} else if (mystery_content(o, m->content)) {
-		m->type = MYSTERY_BLUE;
+	} else {
+		if (mystery_content(o, m->content)) m->type = MYSTERY_BLUE;
+		if (i == p->look_md) out->look_palette = layer_look_put(m, p->look_palette);
 	}
 	if (emu_debug_on()) fprintf(stderr, "mystery: kind %d value %d code %d at %d %d\n", m->content[0], m->content[4] | m->content[5] << 8, m->content[3], m->x, m->y);
 	if (out->nmd < 16) {
@@ -505,6 +495,7 @@ static void install_begin(Install *in) {
 	out->fragment_found = -1;
 	out->spin_found = -1;
 	out->spin_colour = out->nmd = 0;
+	out->look_palette = -1;
 	for (int i = 0; i < OBJ_KINDS; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;
@@ -529,7 +520,8 @@ static void install_begin(Install *in) {
 	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
 	 * docs/game/meta/spins.md: one a run, a colour the profile lacks, kept for good) */
 	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
-	in->plan = (MysteryPlan){ spin_colour ? best_mystery() : -1, spin_colour, -1, -1, fragment, false, false, NULL, 0 };
+	in->plan = (MysteryPlan){ spin_colour ? best_mystery() : -1, spin_colour, -1, -1, fragment, false, false, NULL, 0, -1, -1 };
+	in->plan.look_palette = layer_look_find();   /* (the run's rare find of colours: layer_looks.c) */
 	in->spin_first = meta_spins() == 0;
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */

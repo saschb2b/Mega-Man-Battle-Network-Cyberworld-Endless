@@ -75,6 +75,9 @@ int boss_foe(void);
 /* The tournament's bracket in a state's words: bracket, round, roundfoe,
  * roundchips (director_describe) */
 void boss_bracket_describe(FILE *f);
+/* The layer's tournament won: its final's Navi deleted (MegaMan's
+ * Tournament colors: docs/game/looks-earning.md, Earning) */
+bool boss_bracket_won(void);
 
 /* His course in the state's words: his version, whether he is known, his
  * Guardian Data (hidden, fresh, waiting, taken) and the exit pad; in his
