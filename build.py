@@ -2897,6 +2897,96 @@ CLIPS += [
     ('desk-jack-in', ['--scene', 'town', '--seed', '2'], {}, N22_ROOM + '0:place -24 8 7,30:,6:R,300:', 540, 800),
 ]
 README_GIFS.update({'net-climb': (None, 10), 'net-climb-ladder': (None, 10), 'glitch-copy-bodies': (None, 12), 'desk-jack-in': (None, 15)})
+# 0.24.0 (media a): MegaMan's colours (docs/game/looks.md), the setup's shelf of starting folders
+# (docs/game/meta/shelf.md) and issue #865's folders
+# (Lan's room, Dad's call paged, START, down the PET's left column to Colours, A: the Colours screen up by 712)
+N24_COLOURS = N22_ROOM + '6:START,40:,' + '6:DOWN,6:,' * 5 + '10:,6:A,60:,'
+N24_KEY = '6:%s,9:,'
+# (a look picked a channel at a time, every palette owned (looks=4094): Armour, R to ProtoMan's page, up the
+# grid from PLAIN and across to its red, A; Suit, R to the Undernet's, its indigo; Accent, L to Glitch's, its
+# cyan; the look the pictures after it wear, 3.2,1.5,11.7)
+N24_PICK = (N24_KEY % 'DOWN' + N24_KEY % 'A' + N24_KEY % 'R' * 3 + N24_KEY % 'UP' * 4 + N24_KEY % 'RIGHT' * 2 + '20:,' + N24_KEY % 'A' +
+            N24_KEY % 'DOWN' + N24_KEY % 'A' + N24_KEY % 'R' + N24_KEY % 'UP' * 3 + N24_KEY % 'RIGHT' + '20:,' + N24_KEY % 'A' +
+            N24_KEY % 'DOWN' + N24_KEY % 'A' + N24_KEY % 'L' + N24_KEY % 'UP' * 3 + N24_KEY % 'RIGHT' * 3 + '20:,' + N24_KEY % 'A' + '90:')
+N24_TOWN = ['--scene', 'town', '--seed', '2']
+N24_LOOK = '3.2,1.5,11.7'
+# (seed 1's first layer in that look, its arrival paged; a Mettaur's battle at once (0:foes), the Custom screen
+# OKed with no chip; with HeatCross brought (--setup's CROSS 1), Up and A on the Custom screen first)
+N24_WORN = ['--scene', 'emu', '--seed', '1', '--run-depth', '1', '--dev', f'quiet,god,look={N24_LOOK}']
+N24_FIGHT = '30:,0:foes 01@52,330:,%s6:START,20:,6:A,400:'
+# (a first layer's arrival paged and the run's opening gift taken, its first offer: MegaMan free by 602)
+N24_ARRIVE = '150:,' + '4:A,6:,' * 30 + '20:,6:A,60:,6:A,60:,'
+# (a Practice NetBattle between two cores of one machine, both scripted (docs/devtools/arena.md): the first
+# MegaMan in that look, the other in Hazard's yellow, black and red (arenalook's twelve hex digits a look, the
+# three palettes then their colours); BN5's ROM beside BN6's, as every NetBattle's rules ask)
+N24_ARENA = ['--scene', 'emu', '--dev', 'quiet,arena,arenaboth,arenaseed=7,arenalook=03010B020507/060606010B04']
+WHOLE_ROMS_A += ('netbattle-looks',)
+# (the JACK-IN SETUP at its Folder row, by 132; Right turns the shelf)
+N24_SHELF = '60:,6:DOWN,20:,6:DOWN,40:,'
+
+
+def n24_shelf(name, turns, dev=None):
+    return (name, ['--scene', 'setup'] + (['--dev', dev] if dev else []) + ['--input', N24_SHELF + '6:RIGHT,10:,' * turns + '80:'],
+            [(190 + 16 * turns, name)], {})
+
+
+# (a run's first layer with a starting folder, --setup's FOLDER (9 Ember, 3 Z-Canon): the arrival paged, the
+# opening gift's first offer taken, a Mettaur's battle at once, its first hand on the Custom screen)
+def n24_hand(folder, seed, dev='god,quiet'):
+    return ['--scene', 'emu', '--seed', str(seed), '--net-biome', '0', '--setup', f'short,{folder},0,0', '--dev', dev]
+
+
+N24_HAND = '150:,' + '4:A,6:,' * 30 + '20:,6:A,60:,6:A,60:,30:,0:foes %s@52,330:,'
+# (seed 1's Ember hand, AirShot *, GrasSeed F, FireHit1 D, FireBrn1 F, AreaGrab F: the second and the fourth, OK,
+# then A for each)
+N24_EMBER = '30:,6:RIGHT,14:,6:A,14:,6:RIGHT,10:,6:RIGHT,14:,6:A,20:,6:START,14:,6:A,200:,6:A,90:,6:A,200:'
+# (a battle of one buster shot (onehit): OK with no chip, B until the Mettaur is gone, RESULT paged, and the
+# next battle's first hand; 1136 frames)
+N24_NEXT = '6:START,14:,6:A,200:,' + '4:B,8:,' * 10 + '4:A,6:,' * 34 + '120:,0:foes 01@52,330:,'
+# (seed 3's Z-Canon run: its fifth battle's first hand is Atk+10 *, Cannon A, Cannon B, Atk+10 *, Cannon C, up
+# by 5480 (a hand follows the battles before it, not the seed alone: four won with a buster shot first); the
+# three Cannons picked in order, OK, GigaCan1 forms, A fires it)
+N24_ZCANON = (N24_HAND % '01' + N24_NEXT * 4 + '30:,6:RIGHT,14:,6:A,20:,6:RIGHT,14:,6:A,20:,6:RIGHT,10:,6:RIGHT,14:,6:A,40:,'
+              '6:START,14:,6:A,330:,6:A,200:')
+SCREENSHOTS += [
+    # (MegaMan's colours, issue #854: the Colours screen with the look picked; a palette not owned yet on a new
+    # profile, Undernet's page and its colour's line; the look worn in a chat box, on the field, on the Custom
+    # screen and in a battle; HeatCross in its own colours over it; a NetBattle's two MegaMen, each in his look)
+    ('colours', N24_TOWN + ['--dev', 'looks=4094', '--input', N24_COLOURS + N24_PICK], [(1250, 'colours')], {}),
+    ('colours-locked', N24_TOWN + ['--input', N24_COLOURS + N24_KEY % 'DOWN' + N24_KEY % 'R' + N24_KEY % 'A' + N24_KEY % 'UP' + '80:'],
+     [(820, 'colours-locked')], {}),
+    ('colours-worn', N24_WORN + ['--input', N24_ARRIVE + N24_FIGHT % ''],
+     [(190, 'colours-chat'), (620, 'colours-field'), (900, 'colours-custom'), (1200, 'colours-battle')], {}),
+    ('colours-cross', N24_WORN + ['--setup', 'short,0,0,0,1', '--input', N24_ARRIVE + N24_FIGHT % '6:UP,30:,6:A,60:,'],
+     [(1400, 'colours-cross')], {}),
+    ('netbattle-looks', N24_ARENA, [(510, 'netbattle-looks')], {}),
+    # (the setup's shelf, issue #864: a new profile's FOLDER row on Standard, open, 1/10; Right, Blade locked
+    # with its hint; Blade heard of (heard=2), its deed said plainly)
+    n24_shelf('shelf-open', 0), n24_shelf('shelf-locked', 1), n24_shelf('shelf-heard', 1, 'heard=2'),
+    # (issue #865's folders on the shelf, every one open (folders): Z-Canon rebuilt, Steady, Navi, Ember, Tide)
+    n24_shelf('shelf-zcanon', 3, 'folders'), n24_shelf('shelf-steady', 6, 'folders'), n24_shelf('shelf-navi', 7, 'folders'),
+    n24_shelf('shelf-ember', 8, 'folders'), n24_shelf('shelf-tide', 9, 'folders'),
+    # (Ember's first hand, GrasSeed under the cursor; the grass laid under a Mettaur3; FireBrn1 on it. Z-Canon's
+    # hand with Cannon A, B and C in it; GigaCan1 formed)
+    ('folder-ember-hand', n24_hand(9, 1) + ['--input', N24_HAND % '03' + N24_EMBER],
+     [(1010, 'folder-ember-hand'), (1392, 'folder-ember-grass'), (1432, 'folder-ember-fire')], {}),
+    ('folder-zcanon-hand', n24_hand(3, 3, 'god,quiet,onehit') + ['--input', N24_ZCANON],
+     [(5550, 'folder-zcanon-hand'), (5800, 'folder-zcanon-advance')], {}),
+]
+SCREENSHOT_SHEETS.update({
+    'shelf-states': [[('shelf-open', 'Open'), ('shelf-locked', 'Locked: a hint'), ('shelf-heard', 'Heard in the Net')]],
+    'shelf-folders': [[('shelf-steady', 'Steady'), ('shelf-navi', 'Navi')], [('shelf-ember', 'Ember'), ('shelf-tide', 'Tide')]],
+})
+CLIPS += [
+    # (the Colours screen: the three channels picked, the preview following the cursor)
+    ('colours-pick', N24_TOWN + ['--dev', 'looks=4094'], {}, N24_COLOURS + N24_PICK, 700, 1280),
+    # (Ember's first hand at a Mettaur3: GrasSeed F and FireBrn1 F picked, OK; the seed lays grass under it, the
+    # flame burns it for double)
+    ('folder-ember', n24_hand(9, 1), {}, N24_HAND % '03' + N24_EMBER, 990, 1490),
+    # (Z-Canon: Cannon A, B and C picked in order, OK, the Program Advance forming and fired)
+    ('folder-zcanon', n24_hand(3, 3, 'god,quiet,onehit'), {}, N24_ZCANON, 5540, 6130),
+]
+README_GIFS.update({'colours-pick': (None, 15), 'folder-ember': (None, 15), 'folder-zcanon': (None, 15)})
 
 
 def clips(only=None):

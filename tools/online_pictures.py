@@ -253,6 +253,59 @@ def sample(scene, game, i):
     return Image.open(os.path.join(WORK, f'{scene}-{game}', f'{i:04d}.png')).convert('RGB')
 
 
+# ---- 0.24.0 (media a): pictures a course plays ----
+
+# docs/screenshots/NAME.png of a course of tools/scenarios.py's steps with its
+# cast (tools/scenarios_online.py: a server of this machine and other games,
+# as tests/scenarios/online_looks.py plays them): the state is waited on by
+# its words, not the clock, and the picture is the frame the first game
+# stands on at the course's end.
+# (MegaMan's look in the Net Square, issue #854, docs/online/square/looks.md:
+# four players in the plaza, each in a look of his own (the dev step's
+# "P,P,P,C,C,C"), seen by Kei, whose own is build.py's N24_LOOK; the plaza's
+# room is three looks besides one's own)
+LOOKS_HOME = '--scene home --run-depth 7 --seed 3 --dev quiet,online={server},onlinename='
+LOOKS_PEERS = (('mira', '6,6,6,1,11,4', '52 124 5'), ('dex', '10,10,10,3,6,11', '-46 142 7'), ('rio', '2,2,2,2,5,9', '-4 84 3'))
+
+
+def looks_course():
+    import scenarios_online as cast
+    steps = cast.into_square()
+    for game, look, place in LOOKS_PEERS:
+        steps += cast.into_square(game) + [(f'@{game}', 'do', f'look {look}; place {place}; wait 10')]
+    steps += [('do', 'look 3,1,11,2,5,7; place -4 120 1; wait 10')]
+    for game, look, _ in LOOKS_PEERS:
+        p = look.split(',')
+        steps += cast.soon(f'peerlooks~{game.capitalize()} {".".join(p[:3])}/{".".join(p[3:])} drawn', '', 600)
+    return dict(start=LOOKS_HOME + 'Kei', server=True, files={'netpass.ini': cast.SEEN_SQUARE},
+                games={game: LOOKS_HOME + '{name}' for game, _, _ in LOOKS_PEERS}, steps=steps + [('do', 'wait 240')])
+
+
+COURSES = {'online-looks': looks_course}
+
+
+def course_shot(name):
+    """The course's games played to its end; the first game's frame there."""
+    import cw_pictures as pics
+    import scenarios
+    s = COURSES[name]()
+    roms = scenarios.have_roms()
+    h = os.path.join(scenarios.WORK, 'pictures--' + name)
+    cast = scenarios.online.Cast(h, s, scenarios.rom_folder(roms, ()), scenarios.start, scenarios.step_run)
+    at, step = 0, ('start', s['start'])
+    try:
+        cast.start()
+        for at, step in enumerate(s['steps'], 1):
+            cast.step(step)
+        cast.pumps[''].hold()
+        _, _, shots, _, _ = scenarios.cw.batch(h, 'shot', record=False)
+        return pics.game(pics.load(shots[-1][1]))
+    except scenarios.Failed as e:
+        sys.exit(f'{name}: step {at} {step!r}: {e.args[0]}\n' + (e.args[1] if len(e.args) > 1 else ''))
+    finally:
+        cast.close()
+
+
 def screenshots(names):
     out = os.path.join(ROOT, 'docs', 'screenshots')
     for name in names:
@@ -295,11 +348,14 @@ def main(argv, kinds=('screenshots', 'clips'), keep=None, encode=None):
     of them where none is named; `encode` build.py's encode_clip)."""
     keep = '--keep' in argv if keep is None else keep
     names = [a for a in argv if not a.startswith('--')]
-    pool = ((SHOTS.keys() | DIVE_SHOTS.keys() | set(BROWSER) if 'screenshots' in kinds else set())
+    pool = ((SHOTS.keys() | DIVE_SHOTS.keys() | COURSES.keys() | set(BROWSER) if 'screenshots' in kinds else set())
             | (CLIPS.keys() | DIVE_CLIPS.keys() if 'clips' in kinds else set()))
     names = sorted(n for n in pool if not names or n in names)
     dives = [n for n in names if n in DIVE_SHOTS or n in DIVE_CLIPS]
-    scenes = [n for n in names if n not in BROWSER and n not in dives]
+    for name in [n for n in names if n in COURSES]:
+        course_shot(name).save(os.path.join(ROOT, 'docs', 'screenshots', f'{name}.png'), optimize=True)
+        print('screenshot', name)
+    scenes = [n for n in names if n not in BROWSER and n not in dives and n not in COURSES]
     if scenes:
         footage(scenes, keep)
     if dives:
