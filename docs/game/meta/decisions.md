@@ -120,6 +120,65 @@ with a folder of GigaCan1 and one of Recov10 (`--dev folder=320`,
 folders` opens every folder for a capture of the setup
 ([the dev menu](../../devtools/dev-menu.md)).
 
+## Issue 865's archetypes (24 November 2026)
+
+The owner's calls of 24 November 2026 on issue #865 put two folders of
+ours on the shelf first, Ember and Tide (Breaker after, Kindred only with
+Soul runs, Grove cut). Each is held to the designed three's rules above:
+BN6's commons in codes its records give, five of a chip at most, a cost
+against Standard, and a milestone that teaches the style. Their ids are 9
+and 10 (6-8 BN6's presets', 11 kept for Breaker), and a profile's
+`folder_feats` bit 0x20 is Ember's; Tide needs none.
+
+BN6's rules they lean on are read in its battle code
+([Sources](../../research/sources.md), the archetypes' element rules):
+a Fire hit on a body standing on grass adds its damage once more and burns
+the grass plain; Aqua hits a Fire body for double (BN6's weakness table:
+Fire takes double from Aqua, Aqua from Elec, Elec from Wood, Wood from
+Fire); an Aqua hit on a body on ice freezes it and the ice turns plain,
+and a Break hit on a frozen body does double; an Elec hit on a bubbled
+body does double.
+
+| Folder | Its 30 | What it plays like | What it gives up | Opens |
+| --- | --- | --- | --- | --- |
+| Ember | GrasSeed F x4 \*, FireBrn1 F x2 G H \*, FireHit1 D E F x2, BurnSqr1 H x2, Cannon \* x2, AirShot \*, MiniBomb \* x2, AreaGrab F x2, Barrier F x2, Recov10 \* x3, Atk+10 \* x2 | Grass laid under a foe, then fire on it for double; F's hands hold both halves. WideBrn1 (FireBrn1 F G H) and FlmHook1 (FireHit1 D E F) in reach. HeatCross's partner: its charge feeds Fire chips | A pick spent on the seed before the payoff, and the grass burns with the first Fire hit; FireBrn1, FireHit1 and BurnSqr1 reach a panel or two ahead, so only the Cannons, the AirShot and the bombs reach the back | A guardian deleted in HeatCross, or Beast Out in it, in any run |
+| Tide | TrnArrw1 A x4, BblStar1 T x4, IceSeed A x2 \*, Cannon A x3, CrakShot T x2 A, AirShot \* x2, MiniBomb \* x2, AreaGrab \* x2, Barrier A x2, Recov10 A x3, Atk+10 \* x2 | Storm's counterpart: Aqua in two codes, double on a Fire body (BlastMan, HeatMan, the Fire viruses). A bubble holds a foe for the next shot, an Aqua hit on IceSeed's ice freezes it | One element: everything else takes plain hits, near Standard's; an Elec guardian hits its Navi's weak side as hard as ever | A Fire guardian deleted (HeatMan or BlastMan), in any run |
+
+The game-design reasoning:
+
+- **One dialectic, the meta layer's,** what you bring against what you
+  find. Ember brings a two-step turn and finds foes that will not stand
+  on its grass; Tide brings one element and finds whatever element the
+  net sends. A first act with each plays unlike the six: Ember's opening
+  turn is a seed before any damage, Tide's best turns hang on a Fire foe
+  or a held one.
+- **Costed power, not more of it.** Modelled as Standard is
+  ([Starting folders measured](folders-measured.md), Ember and Tide), Tide's
+  hands are Standard's and Ember's lie between Standard's and Blade's,
+  until a seed lands under the foe: the grass's double is its payoff and
+  its whole cost is to set it first.
+- **Milestones that teach the style.** Tide's mirrors Storm's: the element
+  that its chips answer, met as a guardian (BlastMan, a common act-1
+  guardian, makes it a first or second run's). Ember's is the Cross whose
+  charge its Fire chips feed: HeatMan falls in act 2, his Cross comes
+  with the next run, and a guardian deleted in it opens the folder that
+  makes HeatCross a plan. Of the proposal's two, WideBrn1 formed was
+  passed over: three FireBrn1 in F, G and H in one hand before Ember
+  exists is rarer than GigaCan1 was in the old Z-Canon built for it (1
+  battle in 100). Z-Canon's rebuild (below) holds the same two Fire
+  recipes; Ember's own is the grass, which no other folder lays.
+- **Old profiles:** Tide reads the guardians' records, so a profile that
+  deleted HeatMan or BlastMan has it at its next start. Ember reads the
+  form each guardian's last battle was won in (`rivals.sav` keeps it), so
+  a profile whose HeatCross win is still that guardian's last has it too;
+  from this build the profile keeps the bit once any guardian falls.
+- **The code lean** ([Phase two](phase-two.md)) brings finds in a folder's
+  codes. Ember's F brings Fire again (FireBrn1, FireHit1, FireSwrd) and
+  Vulcan2, WaveArm1, LilBolr1, Recov120; its H brings Sword and WideSwrd.
+  Tide's A brings Cannon, TankCan1, Rflectr1 and Elec (DolThdr1,
+  ElcPuls2), which a bubble doubles; its T brings MachGun1 and BN6's
+  second Fire tier (FireBrn2, FireHit2, BurnSqr2), off its element.
+
 ## Each game's start (24 November 2026)
 
 The owner's call on issue 865: BN5's and BN4's NEW GAME folders

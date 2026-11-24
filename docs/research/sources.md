@@ -623,6 +623,37 @@ text). BN6 itself, **verified** in the ROM: his battle sprite keeps a
 palette per Cross, Full Synchro's, a pale twin and four tints by a
 NaviStats byte no code was found writing ([MegaMan's colours](../rom/megaman-colours.md)).
 
+## The archetypes' element rules (24 November 2026)
+
+What issue #865's Ember and Tide folders lean on ([Decisions and phase
+one](../game/meta/decisions.md), Issue 865's archetypes), **verified** in
+bn6f's damage step (`sub_3007218`, IWRAM code at Falzar `0x03007218`,
+Gregar 4 lower: r6 the body hit, r7 the attacker), which sums
+`1 + weakness + second weakness + frozen Break + Elec on a bubble` times
+the hit's damage and adds the grass's bonus on top, so each bonus adds
+the damage once more (a Fire hit on a Wood body on grass does three
+times):
+
+- *Fire on grass:* `applyHeatOnGrassDamage_300766c` (Gregar `0x03007668`)
+  reads the body's panel (type 6) and a Fire hit's element and adds the
+  damage again; `sub_3007708` (Gregar `0x03007704`) sets a grass panel
+  plain after a Fire attack object hits it.
+- *The weakness wheel:* `getPrimaryElementWeaknessMultipler_3007432`, its
+  5x5 table (Gregar `0x03007440`, defender by attacker): Fire takes double
+  from Aqua, Aqua from Elec, Elec from Wood, Wood from Fire, nothing else.
+- *Ice:* `sub_3007460` (Gregar `0x0300745C`): an Aqua hit on a body on ice
+  (type 7) sets the ice plain and freezes the body (status 0x50, 150
+  frames); no doubling there. An Elec hit on ice: **not found** (only the
+  bubble's check reads Elec), so no bonus is assumed.
+- *Break on a frozen body:* `sub_30074BA` (Gregar `0x030074B6`): double,
+  and the freeze ends.
+- *Elec on a bubble:* `applyElecOnBubbleMultipler_30074a2` (Gregar
+  `0x0300749E`): double.
+- *A Wood body on grass heals* (`sub_801A186`, `0x0801A1D2` in both
+  versions), a point at a time.
+
+MMKB's BN6 pages agree on each, by memory, not checked line by line.
+
 ## Sound settings (2 November 2026)
 
 For Options' Audio ([The sound out](../engine/sound-out.md)):

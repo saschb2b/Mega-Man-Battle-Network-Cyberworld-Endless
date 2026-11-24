@@ -5498,12 +5498,18 @@ static void test_folders(void) {
 		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 12, "AGR" }, { 20, "FGH*" }, { 30, "BRS*" }, { 31, "AEQ" }, { 34, "JLS" },
 		{ 54, "BLR*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 107, "DEF" }, { 131, "ACP*" },
 		{ 154, "ADL*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 175, "*" }, { 178, "AFR*" }, { 192, "*" },
+		/* (issue #865's archetypes: Ember's and Tide's) */
+		{ 24, "AFK" }, { 27, "BET" }, { 68, "AFS*" }, { 69, "ALR*" }, { 76, "FOZ" }, { 110, "HPV" },
 		{ 298, "*" },   /* (CrakOut, moved: the registry's row's codes, BN5's record's) */
 	};
 	test_soul_starts(bn6_codes, sizeof bn6_codes / sizeof *bn6_codes);
 	Profile profile_was = profile;
 	Run run_was = run;
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f) {
+		if (!meta_folder_exists(f)) {
+			CHECK(!meta_folder_chips(f) && !meta_folder_open(f), "folders: id %d holds no folder but opens or holds chips", f);
+			continue;
+		}
 		const uint16_t *c = meta_folder_chips(f);
 		const char *name = meta_folder(f)->name;
 		CHECK(c && meta_folder(f)->opens, "folders: %s has no chips or no milestone", name);
@@ -5580,6 +5586,7 @@ static void test_folders(void) {
 	 * lines) */
 	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {
 		char g[96];
+		if (!meta_folder_exists(f)) continue;
 		meta_goal_words(g, sizeof g, GOAL_FOLDER, f);
 		CHECK(strlen(g) <= 56, "folders: the goal line \"%s\" past 56 letters", g);
 		meta_goal_words(g, sizeof g, GOAL_FOLDER_HINT, f);
@@ -5592,6 +5599,26 @@ static void test_folders(void) {
 	bool told = false;
 	for (int i = 0; i < n; ++i) told |= !strcmp(said[i], "the Z-Canon folder");
 	CHECK(told && (profile.setup_new & SETUP_NEW_FOLDER), "folders: the summary did not say Z-Canon");
+	/* issue #865's archetypes, from blank guardians' records (no saves
+	 * here): Tide opens with a Fire guardian deleted (HeatMan, BlastMan),
+	 * Ember with any guardian deleted in HeatCross, or Beast Out in it; a
+	 * record of before opens it while that battle is the guardian's last,
+	 * and the profile keeps it once a guardian falls */
+	rivals_load();
+	memset(&profile, 0, sizeof profile);
+	CHECK(!meta_folder_open(FOLDER_EMBER) && !meta_folder_open(FOLDER_TIDE), "folders: Ember or Tide open on a new profile");
+	rival_result(6, RIVAL_MEGAMAN_WON, &(RivalEnd){ 0, 100, 400 }, 1);
+	CHECK(!meta_folder_open(FOLDER_TIDE) && meta_folder_open(FOLDER_STORM), "folders: an Aqua guardian opened Tide, or not Storm");
+	rival_result(12, RIVAL_MEGAMAN_WON, &(RivalEnd){ BN6_FORM_CROSS_BEAST + 3, 100, 400 }, 1);
+	CHECK(meta_folder_open(FOLDER_TIDE) && !meta_folder_open(FOLDER_EMBER), "folders: BlastMan deleted, Tide shut or Ember open (SlashCross)");
+	rival_result(13, RIVAL_MEGAMAN_WON, &(RivalEnd){ BN6_FORM_CROSS_BEAST + BN6_FORM_HEAT_CROSS, 100, 400 }, 2);
+	CHECK(meta_folder_open(FOLDER_EMBER), "folders: a guardian deleted in HeatCross's Beast Out left Ember shut");
+	meta_guardian_deleted();
+	rival_result(13, RIVAL_NAVI_WON, NULL, 3);
+	CHECK((profile.folder_feats & FEAT_HEAT_GUARDIAN) && meta_folder_open(FOLDER_EMBER), "folders: Ember not kept past the guardian's next battle");
+	memset(&profile, 0, sizeof profile);
+	CHECK(!meta_folder_open(FOLDER_EMBER), "folders: Ember open with no guardian's last battle won in HeatCross");
+	rivals_load();
 	profile = profile_was;
 	run = run_was;
 }

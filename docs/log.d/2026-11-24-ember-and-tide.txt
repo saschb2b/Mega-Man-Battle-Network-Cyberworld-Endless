@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T21:00:00Z
+* **Update**: game/meta/decisions.md (issue 865's archetypes: Ember and Tide, their 30, what each plays like and gives up, their milestones, the code lean), game/meta/design.md (their rows), game/meta/shelf.md (the row passes ids no folder holds), game/meta/folders-measured.md (Ember's and Tide's hands and autopilot runs), research/sources.md (BN6's element and panel rules, read in its damage step), code/tools.md (folder_hands.py reads every table, --grass).

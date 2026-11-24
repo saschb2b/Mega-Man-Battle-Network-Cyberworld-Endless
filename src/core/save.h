@@ -218,6 +218,8 @@ enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
 enum { BTLR_CARD_HELD = 1 };
 enum { HEARD_CHAUD = 1, HEARD_DEALER = 2, HEARD_FIRST_DIVE = 4, HEARD_KEPT = 0x80 /* the byte is kept: a profile of before is judged once */ };
 enum { FEAT_PA = 1 /* a Program Advance used: Z-Canon */, FEAT_DRY_ACT = 2 /* an act cleared without a Recovery chip: Busting */ };
+/* (issue #865's archetypes, bits 5-7) */
+enum { FEAT_HEAT_GUARDIAN = 0x20 /* a guardian deleted in HeatCross: Ember */ };
 #define RUN_OPEN 0xA5
 enum { BEAST_OPEN = 1, BEAST_TAUGHT = 2, BEAST_OLD_TOLD = 4 /* (unused since the guest core left runs) */ };
 

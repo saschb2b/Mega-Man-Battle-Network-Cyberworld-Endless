@@ -9,22 +9,28 @@
 
 #include "run.h"
 
-/* (in the folders' order, FOLDER_STANDARD first) */
+/* (in the folders' order, FOLDER_STANDARD first; an id no folder holds
+ * left blank, its name NULL: meta_folder_exists) */
 static const FolderInfo folders[FOLDER_COUNT] = {
-	{ "Standard", "BN6's own starting folder", NULL, NULL, NULL },
+	[FOLDER_STANDARD] = { "Standard", "BN6's own starting folder", NULL, NULL, NULL },
 	/* (each hint points at the kind of deed, in the folder's own spirit,
 	 * never the deed: issue #864's directions) */
-	{ "Blade", "Swords in S for LifeSword. Nothing reaches the back", "delete any guardian", "when something big falls", "Swords, up close" },
-	{ "Storm", "Elec chips: double on Aqua, plain on the rest", "delete an Aqua guardian", "where lightning strikes hardest",
+	[FOLDER_BLADE] = { "Blade", "Swords in S for LifeSword. Nothing reaches the back", "delete any guardian", "when something big falls", "Swords, up close" },
+	[FOLDER_STORM] = { "Storm", "Elec chips: double on Aqua, plain on the rest", "delete an Aqua guardian", "where lightning strikes hardest",
 		"Elec chips for Aqua foes" },
-	{ "Z-Canon", "Three Program Advances. Most of it hits close", "use a Program Advance",
+	[FOLDER_ZCANON] = { "Z-Canon", "Three Program Advances. Most of it hits close", "use a Program Advance",
 		"when chips work as one, in order", "Three Program Advances" },
-	{ "Busting", "Heavy hitters in L and R. No Recovery chips", "clear an act with no Recov", "for an act with no safety net",
+	[FOLDER_BUSTING] = { "Busting", "Heavy hitters in L and R. No Recovery chips", "clear an act with no Recov", "for an act with no safety net",
 		"Heavy hitters, no Recovery" },
-	{ "Lean", "Seven kinds in B or *: whole hands, little else", "reach layer 10", "deep down in the Net", "Any five chips make a hand" },
+	[FOLDER_LEAN] = { "Lean", "Seven kinds in B or *: whole hands, little else", "reach layer 10", "deep down in the Net", "Any five chips make a hand" },
+	/* (issue #865's archetypes, ids 9-11) */
+	[FOLDER_EMBER] = { "Ember", "Grass first, then Fire on it for double. Short reach", "delete a guardian in HeatCross",
+		"in the heat of a big fight", "Fire chips on grass" },
+	[FOLDER_TIDE] = { "Tide", "Aqua chips: double on Fire, plain on the rest", "delete a Fire guardian", "where the flames burn hottest",
+		"Aqua chips for Fire foes" },
 };
 
-const FolderInfo *meta_folder_words(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }
+const FolderInfo *meta_folder_words(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : FOLDER_STANDARD]; }
 
 /* (BN4's AirShot A and Vulcan1 V are codes BN6's records lack: in the
  * nearest they hold, xfolder_code) */
