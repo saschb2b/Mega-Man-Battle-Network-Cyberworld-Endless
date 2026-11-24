@@ -326,6 +326,8 @@ played again beside it so a change of build shows).
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Standard | 12 | 5 | 8 | 1030 | 40 | 128, 2.5 | 303, 4, 6.5, 0.00 |
 | Z-Canon, rebuilt | 10 | 9 | 12 | 1110 | 40 | 113, 2.6 | 324, 12, 7.1, 0.09 |
+| Steady | 12 | 7 | 6 | 1285 | 120 | 148, 2.5 | 359, 21, 6.3, 0.04 |
+| Navi | 13 | 3 | 12 | 830 | 40 | 124, 3.1 | 302, 10, 7.8, 0.00 |
 
 - **Z-Canon** now forms a Program Advance in 9 battles in 100 under the
   greedy pick (GigaCan1 3.6, FlmHook1 2.5, WideBrn1 2.4, LifeSrd 0.3),
@@ -337,6 +339,8 @@ The autopilot (this build, seeds 1-12 at threat 1, fresh data folders):
 | --- | --- | --- | --- | --- |
 | Standard | 3.4 (3 3 3 6 3 5 3 3 3 3 3 3) | 2 of 11 | 10, 2 | 549, 3.4, 4 |
 | Z-Canon, rebuilt | 2.9 (3 3 3 3 3 2 3 3 3 3 3 3) | 0 of 11 | 11, 1 | 511, 3.4, 6 |
+| Steady | 3.4 (3 3 3 5 3 5 6 2 3 2 3 3) | 3 of 10 | 8, 4 | 354, 2.6, 6 |
+| Navi | 4.0 (3 3 3 9 3 6 5 4 3 3 3 3) | 4 of 12 | 10, 2 | 329, 3.3, 2 |
 
 - **Z-Canon's act 1 under the autopilot** clears its virus battles a
   little faster than Standard's and loses its guardian every time (the
@@ -348,4 +352,13 @@ The autopilot (this build, seeds 1-12 at threat 1, fresh data folders):
   sends what he holds. 0 of 11 against 2 of 11 is inside the autopilot's
   noise (the six ranged from 2 of 11 to 10 of 12), so no wall is shown;
   the players' statistics per folder are the measure that settles it.
-
+- **Steady** kills its act-1 battles fastest of the three (354 frames)
+  with the fewest chips, HiCannon and Cannon half its uses, and beats
+  the guardian 3 times in 10; it lost four runs in virus battles, its
+  thin hands leaving the autopilot a single chip some turns. Above
+  Standard in the hands, not in the runs: no walkover.
+- **Navi** reached the deepest of the four (layer 9 once) and lost the
+  least in act 1's battles (2 HP), BblStar1 its most used chip (21%) as
+  the shell's hold. The autopilot sent DiveMan 27 times, BlastMan 26 and
+  CircusMan 11 in 144 runs' worth of battles; act 1's guardian fell 4
+  times in 12.
