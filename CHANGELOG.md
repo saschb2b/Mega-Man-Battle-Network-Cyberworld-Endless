@@ -19,9 +19,9 @@
 - **New: other players see your MegaMan in your colours.** In the Net
   Square your look travels with your name, and the players around you are
   drawn in theirs. Where a part of the Square has no room left for one
-  more set of colours (the
-  plaza takes three besides yours), the players farthest from you are
-  drawn in BN6's blue until they come nearer, never in wrong colours. In a
+  more set of colours (the plaza takes three besides yours), the players
+  farthest from you are drawn in BN6's blue until they come nearer,
+  never in wrong colours. In a
   NetBattle you see your MegaMan in your look and the other's in his, on
   your screen and on his, with your own face in the emotion window. Game
   and server both need this version (issue #854).
