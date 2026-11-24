@@ -3,7 +3,7 @@ type: Design
 title: "The PET's start menu"
 description: "The PET's start menu of ours (issue #793): BN6's own menu laid out again as one grid of two columns from BN6's own pieces (its buttons, labels, icons, panel, PLACE and EXIT), EXIT its last place, over the field darkened as BN6 darkens it, its list folded so BN6's press counts hold, BN6's menu run underneath to open each entry as BN6 opens it; the owner's calls and four rounds of reviews."
 tags: [game, pet, ui]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T00:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:40:00Z }
 sources:
   - id: issue-793
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/793"
