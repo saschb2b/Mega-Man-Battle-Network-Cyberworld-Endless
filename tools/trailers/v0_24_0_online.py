@@ -238,8 +238,9 @@ def _crew(who):
 # on layer 1 together as above, the dev menu's Next guardian (2200: layer 3, before DiveMan's arena), its arrival
 # paged with B, each put by the arena's way in (`by arena`, 2760 + 60 a game), his words there paged with A, walked
 # in; Sol, first, leads, and takes the party in with A at 3300: DiveMan's card (about 3400), his words (paged with
-# A from 3500), the field from about 4200. Every game 600 HP, and DiveMan at his own HP for the three (partyhpper=0:
-# 500, not 1500), so that the party can win: no god, no one-hit. Kai and Nova play as the Arena's bot (partybot=1:
+# A from 3500), the field from about 4200. Every MegaMan at the build's HP and DiveMan at his times the party (1500
+# for three), as a player meets him: an honest fight, which the three lose (about sample 2000 of party-a); DELETED!
+# is the solo win (guardian-win). Kai and Nova play as the Arena's bot (partybot=1:
 # the first Custom screen, charged shots, a chip now and then, but it never opens the Custom screen again); Sol is
 # played by a loop that opens it (L) when it fills, takes chips (A, RIGHT) to OK, and uses them (A)
 _NEXT_GUARDIAN = '4:SELECT,6:SELECT+R,20:,' + '6:DOWN,6:,' * 8 + '6:A,'

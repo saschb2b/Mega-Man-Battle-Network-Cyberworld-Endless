@@ -229,7 +229,7 @@ def segments():
             # (the door waits for the crew, counting down; PARTY OF 3!)
             Shot('THE DOOR', "THE GUARDIAN'S DOOR WAITS FOR THE CREW", [(0, 'party-a', 224, 1), (2, 'party-a', 276, 1)]),
             # (three MegaMen against DiveMan at three times his HP)
-            Shot('ONE FIELD', 'HIS HP TIMES THE PARTY, 3 ON ONE FIELD', [(0, 'party-a', 1000, 1)]),
+            Shot('ONE FIELD', 'HIS HP TIMES THE PARTY, 3 ON ONE FIELD', [(0, 'party-a', 1024, 1)]),
             # (Kai's own Custom screen, then his view of the same fight)
             Shot('OWN SCREENS', 'EACH ON HIS OWN SCREEN, HIS OWN CHIPS', [(0, 'party-b', 0, 1), (2, 'party-b', 300, 1)]),
             # (a guardian deleted: one MegaMan in his look, the nearest the build comes to the party's win)
