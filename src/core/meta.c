@@ -507,6 +507,7 @@ void meta_run_over(bool won) {
 	 * has room for three) */
 	open_beast(true);
 	open_folders(true);
+	meta_shelf_run_over();
 	/* the Spin this run found (the NaviCust's, for good) */
 	if (profile.spin_run == run.seed && profile.spin_colour >= 1 && profile.spin_colour <= 6) {
 		static char spin[24];
@@ -547,8 +548,10 @@ const char *meta_next_goal(void) {
 	static char goal[96];
 	/* (the summary's information box: its words in meta_text.c) */
 	if (!meta_endless_open()) return meta_goal_words(goal, sizeof goal, GOAL_ENDLESS, 0);
+	/* (the shelf's rule: the hint while the folder is unheard, its milestone once heard) */
 	for (int f = 1; f < FOLDER_COUNT; ++f)
-		if (!meta_folder_open(f) && meta_folder(f)->opens) return meta_goal_words(goal, sizeof goal, GOAL_FOLDER, f);
+		if (!meta_folder_open(f) && meta_folder(f)->opens)
+			return meta_goal_words(goal, sizeof goal, meta_folder_state(f) == SHELF_HEARD ? GOAL_FOLDER : GOAL_FOLDER_HINT, f);
 	bool cross = false;
 	for (int n = 1; n <= META_CROSSES; ++n) cross |= meta_cross_open(n);
 	if (!cross) return meta_goal_words(goal, sizeof goal, GOAL_CROSS, 0);

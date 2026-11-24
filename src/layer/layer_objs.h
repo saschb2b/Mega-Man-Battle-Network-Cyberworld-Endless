@@ -19,6 +19,9 @@
 /* Event flags the layer's choices set (Yes), one per choice. */
 #define LAYER_FLAG_BASE 0x1440
 #define LAYER_MAX_CHOICES 8
+/* A choice that is no object's: the whisper of a starting folder said
+ * (LayerObjs.folder_told; the director keeps it as heard) */
+#define CHOICE_WHISPER OBJ_KINDS
 /* A choice's words said on the layer (LAYER_TOLD_BASE + its index), and
  * the flame of darkness's: a later talk is a box and the question
  * (ScriptsChoice; session 78). Past the Net Square's flags (0x1480-0x14D0,
@@ -93,6 +96,8 @@ typedef struct {
 	int trader_kind;           /* the layer's trader's script in the game's trader archive (TraderKind), -1 none (for --talk) */
 	int dark_flame;            /* the flame of darkness's script, -1 none (for --talk) */
 	int dark_flame_obj;        /* ... and the layer object it stands in place of, -1 none */
+	int whisper;               /* the second bystander's rumor (rumor_lines.c), its script, -1 none (for --talk) */
+	int folder_told;           /* ... the starting folder it tells how to open (FOLDER_*), 0 none: heard once said */
 	ShopItem dealer[SHOP_MAX_ITEMS], programs[SHOP_MAX_ITEMS];   /* the shops' stock */
 	int ndealer, nprograms;
 	int nmd;                   /* the Mystery Data placed, each one's MYSTERY_* colour and layer.obj index (its flag MAPSLOT_MD_FLAG + its index) */
@@ -126,6 +131,14 @@ int lib_prize_chip(int tier, int depth, int *code);
 /* ... the chip of par tier `tier` BN5's Darkloid of AI `ai` pays as his
  * own (bn5.h BN5_NAVI_SHADEMAN on: his SP, then his V1), 0 where none plays */
 int lib_darkloid_prize(int ai, int tier);
+
+/* (layer_whisper.c) A choice of `type` that is a line heard, not a Yes
+ * (the act's guardian named, a starting folder told): its flag, cleared,
+ * which the director watches. */
+int layer_heard_flag(LayerObjs *out, int type);
+/* ... the second bystander's whisper (rumor_lines.c), its script, -1 none:
+ * a starting folder's milestone heard once said (out->folder_told) */
+int layer_whisper_talk(TextArchive *text, LayerObjs *out, int who);
 
 /* The layer's shop stock written (again after a state load, whose RAM
  * holds the shop data as it was saved: `saved`, what was bought there

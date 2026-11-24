@@ -11,12 +11,17 @@
 
 /* (in the folders' order, FOLDER_STANDARD first) */
 static const FolderInfo folders[FOLDER_COUNT] = {
-	{ "Standard", "BN6's own starting folder", NULL },
-	{ "Blade", "Swords in S for LifeSword. Nothing reaches the back", "delete any guardian" },
-	{ "Storm", "Elec chips: double on Aqua, plain on the rest", "delete an Aqua guardian" },
-	{ "Z-Canon", "Cannons in A, B and C for GigaCan1. Little hits behind cover", "use a Program Advance" },
-	{ "Busting", "Heavy hitters in L and R. No Recovery chips", "clear an act with no Recov" },
-	{ "Lean", "Seven kinds in B or *: whole hands, little else", "reach layer 10" },
+	{ "Standard", "BN6's own starting folder", NULL, NULL, NULL },
+	/* (each hint points at the kind of deed, in the folder's own spirit,
+	 * never the deed: issue #864's directions) */
+	{ "Blade", "Swords in S for LifeSword. Nothing reaches the back", "delete any guardian", "when something big falls", "Swords, up close" },
+	{ "Storm", "Elec chips: double on Aqua, plain on the rest", "delete an Aqua guardian", "where lightning strikes hardest",
+		"Elec chips for Aqua foes" },
+	{ "Z-Canon", "Cannons in A, B and C for GigaCan1. Little hits behind cover", "use a Program Advance",
+		"when chips work as one, in order", "Cannons that make GigaCan1" },
+	{ "Busting", "Heavy hitters in L and R. No Recovery chips", "clear an act with no Recov", "for an act with no safety net",
+		"Heavy hitters, no Recovery" },
+	{ "Lean", "Seven kinds in B or *: whole hands, little else", "reach layer 10", "deep down in the Net", "Any five chips make a hand" },
 };
 
 const FolderInfo *meta_folder_words(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }
@@ -46,6 +51,11 @@ const char *meta_goal_words(char *buf, size_t n, MetaGoal goal, int arg) {
 		if (!f->opens) break;
 		/* (its milestone, as the setup lists it, made a sentence) */
 		snprintf(buf, n, "%c%s to open the %s folder.", f->opens[0] - 'a' + 'A', f->opens + 1, f->name);
+		return buf;
+	case GOAL_FOLDER_HINT:
+		/* (locked and not yet heard: the shelf's hint, made a sentence) */
+		if (!f->hint) break;
+		snprintf(buf, n, "The %s folder opens %s.", f->name, f->hint);
 		return buf;
 	}
 	return "";
