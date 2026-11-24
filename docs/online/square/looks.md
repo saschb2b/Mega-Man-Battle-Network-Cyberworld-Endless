@@ -3,7 +3,7 @@ type: Feature
 title: "Peers' looks"
 description: "Each player's MegaMan look in the Net Square (issue #854, protocol v30): sent as LOOK after each WELCOME and as it changes, carried in SNAPSHOT, the peers drawn in it through one copy of BN6's field sprite with a palette a peer slot, as many looks as the part has free OBJ palette slots (the plaza three besides one's own), the nearest first, the rest in BN6's own colours; `peer_looks_of` for the Arena."
 tags: [online, megaman, looks]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T23:00:00Z }
 sources:
   - id: issue
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/854"
@@ -67,6 +67,13 @@ frames, a peer keeping his look against one up to 24 world units nearer,
 so two peers at one distance do not trade it back and forth. Should BN6
 still mark a peer's sprite stale (an effect more than measured), the
 part's room is one look smaller for ten seconds.
+
+## On a dive's layer
+
+The shared dive's divers are drawn in their looks the same way, through
+the same copy (`look_sprite.c`, made in the layer's room), the room read
+off BN6's renderer on each layer rather than measured once
+([The shared dive](../shared-dive.md), Each in his own look).
 
 ## For the Arena
 

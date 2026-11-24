@@ -1,6 +1,7 @@
 /* Who is who on a party's field (issue #713; docs/online/shared-dive.md,
  * Who is who): each MegaMan of the party marked by his feet with his
- * diver's name, cut to what a panel holds, the player's own behind the
+ * diver's name, cut to what a panel holds, beside him where it covers no
+ * other MegaMan (issue #886), the player's own behind the
  * PET's arrow in its orange, the others in the crew's colour, a partner's
  * HP under his name in BN6's own digits (hp_plate.h); and a partner's
  * own HP box over BN6's, which shows the lead's. Our own drawing over the
@@ -41,7 +42,11 @@ void party_marks_draw(struct mCore *field, unsigned mine, unsigned n);
 void party_marks_down(bool spent);
 /* ... in the state's words (online_describe.h): "hpbox own" or "bn6",
  * each seat's mark ("markK own" or "crew", its left and top on the
- * picture, its width, its tag) and whether any two meet ("marks N apart") */
+ * picture, its width, its tag), its whole plate and his body ("plateK X Y
+ * W H seat X Y W H", issue #886), whether any two marks meet ("marks N
+ * apart|MEET") and whether any plate meets a MegaMan or another plate
+ * ("plates N clear|COVER"); "held" for both while none is drawn, the
+ * battle's clock standing (BATTLE START!, the pause) */
 void party_marks_describe(FILE *f, struct mCore *field, unsigned mine, unsigned n);
 
 #endif

@@ -24,10 +24,13 @@ Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
   drawn in theirs. Where a part of the Square has no room left for one
   more set of colours (the plaza takes three besides yours), the players
   farthest from you are drawn in BN6's blue until they come nearer,
-  never in wrong colours. In a
+  never in wrong colours. On the week's DeepNet the other divers on
+  your layer wear their looks the same way, your crew first. In a
   NetBattle you see your MegaMan in your look and the other's in his, on
-  your screen and on his, with your own face in the emotion window. Game
-  and server both need this version (issue #854).
+  your screen and on his, with your own face in the emotion window. In
+  the week's DeepNet a crew's battle and a party's guardian show each
+  crewmate in his own look on every game. Game and server both need this
+  version (issues #854, #879).
 
 - **New: every starting folder on the setup's shelf.** The FOLDER row
   turns through all ten and counts the open ones. A locked folder can be
@@ -122,8 +125,8 @@ Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
 
 - **New: a partner's HP in BN6's own digits.** On a party's field and in the
   Arena's two a side, your ally's HP stands under his name in BN6's
-  battle digits, where BN6 puts an enemy's: orange while it falls, green
-  while it rises.
+  battle digits, beside him as BN6 puts an enemy's, never over another
+  MegaMan of the crew: orange while it falls, green while it rises.
 
 - **New: fast forward keeps the music at its own pace.** While the game
   runs fast, the song plays on as it would at BN6's speed instead of

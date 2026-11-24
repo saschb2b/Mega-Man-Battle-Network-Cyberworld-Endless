@@ -3122,7 +3122,9 @@ WHOLE_ROMS_A += ('team-darkproto-card', 'team-meddy-map', 'soul-proto-unite', 's
 # three games on a local server at the clock's pace, tests/scenarios/online_week.py's and online_crew_view.py's
 # courses played by tools/scenarios_online.py's cast (alpha, beta and gamma from Lan's HP, seed 120's Square, the
 # full NetPass), a picture taken at the moment wanted, as tools/online_pictures.py's dive takes are; a retake
-# draws another net)
+# draws another net. The crew's battles, dive-crew-battle*.png, are the last `shot` of each game in
+# tests/scenarios/online_party_marks.py's crew-of-two (Beta's: dive-crew-battle, Alpha's: -lead) and crew-of-three
+# (Alpha's: -three), kept by CW_SCENARIO_SHOTS=DIR build.py scenarios online-party-marks/crew-of at 2x, halved)
 # (the map opened by a press, MegaMan walked under it, the next press closing it; the courier's pay, his boxes paged)
 N24_MAP_CLIP = n24_script(N24_LAYER + 'wait 20; press SELECT; wait 50; hold RIGHT 40; hold UP+RIGHT 40; hold LEFT 40; wait 20; press SELECT; wait 40')[0]
 N24_PAY_CLIP = n24_script(N24_COURIER + 'press A; wait 40; ' * 5 + 'press A; wait 60')[0]

@@ -45,4 +45,10 @@ bool dive_crew_has(uint32_t session);
  * offer and alone to dive_join.h. */
 void dive_crew_mail(const uint8_t *m, size_t n);
 
+/* The crew's plates under BN6's HP box as dive_crew_view.c draws them, on
+ * the 240x160 picture: their column's left, top, width and height; false
+ * where there are none. Here, where what stands on a layer reads the
+ * crew, so that the divers' names keep off them (issue #886) */
+bool dive_crew_view_box(int *x, int *y, int *w, int *h);
+
 #endif

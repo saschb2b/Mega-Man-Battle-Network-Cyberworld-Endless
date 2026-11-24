@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T17:28:20Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T23:00:00Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -451,6 +451,47 @@ the session building it, and is his to turn over.
 | One with no MegaMan | His name and his ring where he stands | Nothing (as built: the plates and the map named someone the picture did not show); a count only ("+1 here"), which says nothing of where he is |
 | More objects | Not here: BN6 runs 16 NPC objects, and moving the Mystery Data out of them, or a MegaMan drawn another way, is work of its own (issue #755's follow-up) | Raising the 16 (every loop over BN6's array, and the RAM after it) |
 
+## Each in his own look (24 November 2026)
+
+[Issue #878](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/878),
+found filming 0.24.0's trailer: on a layer each game drew every MegaMan
+in its own player's [look](../game/looks.md), Sol's game all four divers
+in Sol's orange, Nova's all four in Nova's violet. The divers' puppets
+drew BN6's own field MegaMan, whose palette the local look recolours.
+
+The looks already travelled: the server keeps a player's LOOK past the
+portal and puts it in every SNAPSHOT, the dive's rooms' as the Square's
+(protocol v30, [Peers' looks](square/looks.md)); the dive's link now sends
+MegaMan's own again whenever it begins or comes back (a CONTINUE into a
+dive, a dropped link) and as it changes (`dive_link.c`), so no wire
+changed. What changed is the drawing, the Square's way: the divers'
+puppets draw one copy of BN6's field MegaMan made in the layer's room as
+it is built, a palette a puppet (`look_sprite.c`, which the Square's
+peers use too), each given his diver's look's colours or BN6's own
+(`dive_looks.c`).
+
+A layer's room for looks is no fixed number, as a part of the Square's
+is: each layer has its own Mr.Progs, Mystery Data, traces and guardian.
+So it is read off BN6's renderer
+([MegaMan's colours](../rom/megaman-colours.md), The OBJ palette slots)
+each frame the field shows as itself (no card or fade over it): the slots
+BN6 gave, less those holding a diver's colours, are the layer's own, and
+the mode's limit (12) less those is what the divers' looks share with
+MegaMan's. The least seen since the last pick is the next pick's, so a
+sprite that comes and goes is counted while it shows. The crew are drawn
+in their looks first, then the nearest (the Square's pick, held 90
+frames, a diver keeping his look against one 24 units nearer); the rest
+in BN6's own blue, never in a stale slot's colours, and should BN6 mark a
+puppet stale after all, the room is one look smaller for ten seconds. A
+layer with no room left for the copy (5.6 KB) draws the divers as before.
+
+The state says it: `divelooks NAME P.P.P/C.C.C drawn|classic|none`
+for each diver in the room, `divelookroom` and `divelookstale`
+(`tests/scenarios/online_dive_looks.py`: three games in three looks on
+one layer, each seeing the other two in theirs, and a look changed there
+reaching the others; and with `--dev divelooks=1`, a layer with room
+for one look besides MegaMan's own, the other two drawn in BN6's blue).
+
 ## Nothing over BN6's screens (22 November 2026)
 
 Issue #781, from the second play of the dive: our drawing over the
@@ -484,9 +525,10 @@ state's `cover` line names it.
   arrival's two seconds are counted from the card's end.
 - **The plates:** six pixels between a crewmate's layer and his HP
   ("L1 100/100").
-- **The field's marks:** where a mark and its HP would reach BN6's chip
-  name at the picture's foot (the field's bottom row), they stand over
-  the MegaMan's head, the name over the HP as everywhere.
+- **The field's marks:** a mark and its HP never reach BN6's chip name
+  at the picture's foot; on the field's bottom row they take another spot
+  beside the MegaMan ([A crew in one column](#who-is-who-on-a-partys-field-21-november-2026),
+  issue #886).
 - **A dropped link:** while it is down (dropped, tried again, or given
   up) the crew is put away, the puppets, names, rings, dots and plates
   none, until the room's divers are heard again; the band's
@@ -543,7 +585,12 @@ the field once it closed.
   is. Divers on one spot, as at a layer's arrival, have their names a
   row over each other, and those the picture's top leaves no row for
   are counted on the topmost ("Beta +2"). With BN6's chat box open the
-  names over it stay and none is drawn on it. MegaMan's own name is not
+  names over it stay and none is drawn on it. The crew's plates under
+  BN6's HP box are kept clear the same way (issue #886, a name piled on
+  the plates in 0.24.0's `dive-crew.gif`): a name that would meet them
+  is not drawn, and a pile stops under them, counted on the name under
+  it (`dive_crew_view_box`; the scenario
+  `online-crew-view/names-under-plates`). MegaMan's own name is not
   shown, as in the Square. The state says `tags N: NAMES`. Seen headless
   on a local server (the scenario `online-week/dive-together` holds
   `tags` on both games): Beta's name going with his MegaMan as he walked
@@ -1068,6 +1115,50 @@ marks apart, the joiner's HP box his own, every 60th frame's hash agreed.
 Not yet seen over the server: a guardian's door (the same drawing, on the
 same field).
 
+**A crew in one column** (24 November 2026, [issue
+#886](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/886),
+seen in 0.24.0's pictures): the crew stands a row each in the lead's
+column ([Viruses'
+aim](#viruses-aim-in-a-crews-battle-22-november-2026)), and a plate
+under one MegaMan's feet lay over the MegaMan in the row below, so that
+with three the lower two were mostly hidden and "Beta 100" read as
+Gamma's. A MegaMan stands 47 pixels tall on rows 24 apart: no spot under
+or over one is clear of the next in his column. **The call**, through
+the game-design skill's interface layer (a spatial label on the actor,
+read mid-fight while the number changes; no plate over an actor it does
+not name): each plate, a partner's name over his HP or the player's own
+name behind the PET's arrow, takes the first of four spots that covers
+no MegaMan's body, no plate placed before it and none of BN6's own
+pieces: under his feet, where BN6 writes an enemy's HP; in front of him,
+its foot on his feet' line in the next column; behind him; over his
+head. A plate keeps to the player's half of the picture (never over an
+enemy), under BN6's gauge, beside its HP box and emotion window, over
+its chip name and the joiner's band at the foot. Where no spot is clear,
+the one that covers least. The player's own is placed first, then the
+partners by seat. In the lead's column of three every plate stands in
+front of its MegaMan, its foot on his feet' line; with four, the one
+behind the lead keeps his under his feet. A plate moves only when
+someone steps to another panel. None stands while the battle's clock
+holds (BATTLE START! across the field at each turn's start, where a
+top-row plate in front of its MegaMan stood, and the pause), as the
+duel's clock hides. Chosen over the name over the head with the HP
+beside the feet (the name lay on the MegaMan a row up and on BN6's chip
+icons over each head), and over the names and HP in a strip under BN6's
+emotion window with a letter by each MegaMan (no strip of three lines in
+BN6's digits fits between the emotion window, the chip icons over a
+top-row MegaMan and the field; and a letter to look up is a step more
+than a name beside him). The Arena's two a side keeps its own marks
+(`arena_team_view.c`), unchanged. The state says each plate's box and
+its MegaMan's (`plateK X Y W H seat X Y W H`) and whether any plate
+meets a MegaMan or another plate (`plates N clear|COVER`; `held` while
+none is drawn).
+
+Seen headless with the dev's field of two, three and four and over a
+local server with a crew of two, three and four games (Alpha, Beta, Gamma
+and Delta; the scenarios `online-party-marks/dev-field-four`,
+`crew-of-two`, `crew-of-three` and `crew-of-four`): on every game every
+MegaMan whole, each plate beside its own, `plates N clear`.
+
 **His own Custom screen and his results** (22 November 2026,
 [issue #757](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/757),
 found by the friction hunt's play of the whole dive): BN6's own screens
@@ -1121,6 +1212,47 @@ crewmate's next battle busy, and he was never in it. Every button held as
 a held battle hands the game back (a crew's, the Square's NetBattle) is
 now kept from it until let go (`online_visit_keys`, as the Battle Lab's
 screen does), the d-pad walking on.
+
+## Looks on the field (24 November 2026)
+
+Each diver's MegaMan wears his own player's look ([MegaMan's
+look](../game/looks.md), epic #854) on a party's field, a crew's join-in
+battle and a guardian's alike, on every game of the party
+([issue #879](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/879)).
+Filming the 0.24.0 trailer found that crewmates in different looks never
+shared a field: `look_apply.c` writes the worn look into the core's ROM
+copy, the field was built from that copy, and by the battle's first
+Custom screen each game's palette RAM held its own look, so the ready's
+hashes differed ("the fields went apart before the first frame"), the
+joiners went back to their maps and each fought the guardian alone.
+
+- **Built from BN6's own colours.** The field's ROM copy has BN6's
+  palettes put back wherever the game's look was written
+  (`look_rom_plain`, every art `look_apply` writes), so it is the same on
+  every game whatever each wears.
+- **Each seat's look with his MegaMan.** A carried MegaMan's bytes take
+  his look where it is not BN6's (the loadout's flag 4, six bytes after
+  its tail: `arena_wire.c`; within protocol v30, which no release before
+  0.24.0 speaks), so every game of the party knows every seat's.
+- **Into the spare palettes, answered by seat** (`party_looks.c`), as
+  [a NetBattle's](arena/looks.md) are answered by side: each seat's plain
+  body and its pale twin in two of the battle block's eight palettes BN6
+  never picks (seat n's in the spares 2n and 2n + 1), and the pick's end
+  and the form's second reader hooked on the field's core, the seat an
+  object is read from side 0's slots (the slot an enemy's routine has
+  traded in traded back). Four seats take all eight, so Full Synchro and
+  the emotion window's face are BN6's on the field. A seat in BN6's
+  colours takes no palette and no hook.
+- **Held equal.** The looks are in the ROM's palettes the field draws, so
+  two games that disagree on a seat's look part at the ready's hash, as
+  before; agreeing, they fight on with every hash agreed.
+- **Checked** by `online-week/crew-battle-in-looks` and
+  `online-week/guardian-in-looks` (three games over a local server, each
+  in another look): every seat's hash agrees, and the state's
+  `partylooks` says each seat's look is in the field's OBJ palettes.
+
+On the layer itself every MegaMan is still drawn in the game's own look,
+not the diver's: the looks travel in the Square and onto the field only.
 
 ## Comings and goings (22 November 2026)
 
@@ -1270,9 +1402,9 @@ small, in one place, and covers nothing it needs to read):
   the engine's pixel font had made the two numbers of one frame look
   different; [Sprites, fonts and pictures](../rom/graphics.md), The HP
   under an enemy); MegaMan's own is the HP box. The name stays in the
-  pixel font: BN6 has no letters of that size for it. On the field's
-  bottom row the name and HP over his head end where the mark of one two
-  rows up begins, the digits being a line taller. A crewmate fighting his own battle: his plate's HP
+  pixel font: BN6 has no letters of that size for it. Where under his feet would cover
+  the MegaMan below him, the name and HP stand in front of him or
+  elsewhere beside him (Who is who, A crew in one column). A crewmate fighting his own battle: his plate's HP
   falls as he is hit, read from his battle.
 - **Later, each its own issue**: a second screen's page (`src/second/`,
   [issue #729](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/729)),

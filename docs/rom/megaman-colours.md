@@ -3,7 +3,7 @@ type: ROM Map
 title: "MegaMan's colours"
 description: "Where BN6 Gregar keeps MegaMan's colours (his battle, field, mugshot and emotion-window palettes), which indexes form his shade ramps, where a form takes them over, and how the sprite renderer shares its OBJ palette slots: the measuring behind each profile's look (issue #854)."
 tags: [rom, graphics, megaman, look]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:25:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
@@ -167,7 +167,9 @@ recolours both; a look per side needs the pick to answer by the object's
 side, into the block's spare palettes (0x19-0x1A, 0x1E-0x1F, 0x23-0x24,
 0x28-0x29, never read by BN6) or a grown copy: an install both games make
 alike, keyed by the core's side and not by which player is local. That is
-how [Looks in a NetBattle](../online/arena/looks.md) does it, on these:
+how [Looks in a NetBattle](../online/arena/looks.md) does it, on these. A shared dive's field (one core, up to four MegaMen on side 0)
+takes the same spares and the same two picks answered by seat instead of side
+([The shared dive](../online/shared-dive.md), Looks on the field; issue #879):
 
 | Data | Offset | How it was found / verified |
 | --- | --- | --- |
