@@ -585,7 +585,12 @@ the field once it closed.
   is. Divers on one spot, as at a layer's arrival, have their names a
   row over each other, and those the picture's top leaves no row for
   are counted on the topmost ("Beta +2"). With BN6's chat box open the
-  names over it stay and none is drawn on it. MegaMan's own name is not
+  names over it stay and none is drawn on it. The crew's plates under
+  BN6's HP box are kept clear the same way (issue #886, a name piled on
+  the plates in 0.24.0's `dive-crew.gif`): a name that would meet them
+  is not drawn, and a pile stops under them, counted on the name under
+  it (`dive_crew_view_box`; the scenario
+  `online-crew-view/names-under-plates`). MegaMan's own name is not
   shown, as in the Square. The state says `tags N: NAMES`. Seen headless
   on a local server (the scenario `online-week/dive-together` holds
   `tags` on both games): Beta's name going with his MegaMan as he walked
