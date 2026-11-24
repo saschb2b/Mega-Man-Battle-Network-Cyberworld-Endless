@@ -274,6 +274,25 @@ PLAYS = [
     ('guardian-slide', '--scene emu --seed 3 --run-depth 3 --guardian 1 --dev onehit,quiet,sliprun', SLID, ()),
     ('liberation-body', '--scene emu --seed 5 --run-depth 5 --dev dark,souls=1', NEXT_AS_COLONEL, ('bn5',)),
 ]
+# 0.24.0 (media b)
+# (0.24.0's fixes against 0.23.0, each one scripted run of build.py's (N24B, its SCREENSHOTS) in both builds: seed
+# 4's second layer's Security Cube, over its panel's edge before and on its middle after (#735); GolmHit1 with
+# MegaMan turned left on a Surrounded field, the fist behind him before and on the foe he faces after (#838);
+# CosmoMn SP's card in Folder Edit, 6544 before and 80 after (#835); ColonelDS's row in the Pack, nine letters and
+# the next row a cell late before, ColonlDS after (#732); HubBatc's card, ColForce's picture before and BN6's blank
+# after (#731). A name with bn5 runs on the whole ROM folder.)
+def n24b(name, shot=-1):
+    _, args, shots, env = build.N24B[name]
+    return args, env, shots[shot][0]
+
+
+SCENES += [
+    ('security-cube', next(e for e in build.SCREENSHOTS if e[0] == 'lock-cube')[1], {}, 660),
+    ('golmhit-turned', *n24b('golmhit-turned-left')),
+    ('bn5-cosmoman-card', *n24b('card-cosmoman-sp')),
+    ('bn5-colonelds-pack', *n24b('pack-colonlds')),
+    ('hubbatc-card', *n24b('card-hubbatc')),
+]
 # (--clips: the same walk in both builds as moving pictures, OLD's on the
 # left, docs/clips/NAME.webm, .mp4, .png and .gif (build.py's README_GIFS
 # names its rate); 0.21.1's: an area's first layer as the weak autopilot
