@@ -101,6 +101,7 @@
 #include "xchips_code.h"
 #include "xchips_moved.h"
 #include "xchips_pas.h"
+#include "xchips_folder.h"
 #include "xchips_record.h"
 #include "xchips_registry.h"
 #include "xchips_text.h"
@@ -5429,14 +5430,77 @@ static void test_preset_nine(void) {
  * Recovery chip, Lean's seven kinds in B or *); and the designed three's
  * milestones: a Program Advance used, an act cleared without a Recovery
  * chip, layer 10, each in any run. */
+typedef struct { int id; const char *codes; } FolderCodes;
+static const FolderCodes *soul_codes;
+static size_t soul_ncodes;
+static int soul_run_of(int id) { return id; }
+static void soul_codes_of(int id, uint8_t out[4]) {
+	memset(out, 0xFF, 4);
+	for (size_t q = 0; q < soul_ncodes; ++q)
+		if (soul_codes[q].id == id)
+			for (int k = 0; k < 4 && soul_codes[q].codes[k]; ++k) out[k] = (uint8_t)(soul_codes[q].codes[k] == '*' ? 26 : soul_codes[q].codes[k] - 'A');
+}
+
+/* The Soul forms' starts (docs/game/meta/forms.md, Each game's start):
+ * BN5's and BN4's NEW GAME folders, as numbers (the run's chip ids, each
+ * game's own codes; docs/game/meta/folders-measured.md, 3), as
+ * xfolder_as_run takes them: each a legal BN6 folder after it, 30 chips,
+ * five of a chip at most, every code one BN6's record gives, and only
+ * BN4's AirShot A and Vulcan1 V moved, to * and S (the line names them) */
+static void test_soul_starts(const FolderCodes *codes, size_t ncodes) {
+#define E(id, c, n) { id, c, n }
+	static const struct { int id; char code; int n; } bn5[] = {
+		E(1, 'A', 2), E(1, 'B', 2), E(4, '*', 3), E(5, 'D', 3), E(54, 'B', 2), E(54, 'L', 2), E(71, 'S', 4), E(72, 'S', 2),
+		E(298, '*', 2), E(154, 'A', 2), E(154, 'L', 2), E(163, 'S', 1), E(175, '*', 1), E(192, '*', 2),
+	}, bn4[] = {
+		E(1, 'A', 2), E(1, 'B', 2), E(4, 'A', 3), E(5, 'V', 3), E(54, 'B', 2), E(54, 'L', 2), E(71, 'S', 4), E(72, 'S', 2),
+		E(298, '*', 3), E(154, 'A', 2), E(154, 'L', 2), E(163, 'S', 1), E(192, '*', 2),
+	};
+#undef E
+	soul_codes = codes;
+	soul_ncodes = ncodes;
+	static const uint8_t airshot[4] = { 26, 0xFF, 0xFF, 0xFF }, vulcan[4] = { 1, 3, 18, 26 }, cannon[4] = { 0, 1, 2, 26 }, two[4] = { 1, 3, 0xFF, 0xFF };
+	CHECK(xfolder_code(airshot, 0) == 26 && xfolder_code(vulcan, 21) == 18 && xfolder_code(vulcan, 3) == 3 && xfolder_code(cannon, 26) == 26,
+		"soul starts: AirShot A as *, Vulcan1 V as S, Vulcan1 D and Cannon * kept");
+	CHECK(xfolder_code(two, 2) == 1 && xfolder_code(two, 26) == 3, "soul starts: a tie to the earlier letter, a * the record lacks to its nearest");
+	for (int g = 0; g < 2; ++g) {
+		const char *game = g ? "BN4" : "BN5";
+		uint16_t in[XFOLDER_ENTRIES], out[XFOLDER_ENTRIES];
+		int k = 0, rows = g ? (int)(sizeof bn4 / sizeof *bn4) : (int)(sizeof bn5 / sizeof *bn5);
+		for (int r = 0; r < rows; ++r) {
+			int id = g ? bn4[r].id : bn5[r].id, n = g ? bn4[r].n : bn5[r].n;
+			char c = g ? bn4[r].code : bn5[r].code;
+			for (int i = 0; i < n && k < XFOLDER_ENTRIES; ++i) in[k++] = chip9_entry((unsigned)id, c == '*' ? 26u : (unsigned)(c - 'A'));
+		}
+		CHECK(k == XFOLDER_ENTRIES, "soul starts: %s's has %d chips", game, k);
+		int swapped = -1, count[1024] = { 0 };
+		CHECK(xfolder_as_run(in, soul_run_of, soul_codes_of, out, &swapped), "soul starts: %s's has a chip the run lacks", game);
+		CHECK(swapped == (g ? 6 : 0), "soul starts: %s's moved %d codes", game, swapped);
+		for (int i = 0; i < XFOLDER_ENTRIES; ++i) {
+			int id = (int)chip_entry_id(out[i]), code = (int)chip_entry_code(out[i]);
+			uint8_t rec[4];
+			soul_codes_of(id, rec);
+			CHECK(rec[0] != 0xFF && memchr(rec, code, 4), "soul starts: %s's chip %d in a code BN6 does not give it (%d)", game, id, code);
+			CHECK(++count[id] <= 5, "soul starts: %s's holds more than five of chip %d", game, id);
+		}
+	}
+	CHECK(meta_start_chips(FOLDER_STANDARD, RUN_FORM_CROSS) == NULL && meta_start_chips(FOLDER_BLADE, RUN_FORM_SOUL_BN5) == meta_folder_chips(FOLDER_BLADE),
+		"soul starts: CROSS keeps BN6's Standard, another folder its own in a Soul form");
+	CHECK(strstr(meta_standard_about(RUN_FORM_SOUL_BN4), "AirShot in *") && strstr(meta_standard_about(RUN_FORM_SOUL_BN4), "Vulcan1 in S")
+		&& strstr(meta_standard_about(RUN_FORM_SOUL_BN5), "BN5") && !strcmp(meta_standard_about(RUN_FORM_CROSS), meta_folder(FOLDER_STANDARD)->about),
+		"soul starts: the Standard line names its game and BN4's swaps");
+}
+
 static void test_folders(void) {
 	/* (the folders' chips' codes as BN6's records hold them, at 0x021DA8 + id x
 	 * 0x2C, read from the ROM: docs/rom/chips.md) */
-	static const struct { int id; const char *codes; } bn6_codes[] = {
+	static const FolderCodes bn6_codes[] = {
 		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 12, "AGR" }, { 30, "BRS*" }, { 31, "AEQ" }, { 34, "JLS" },
 		{ 54, "BLR*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 131, "ACP*" },
 		{ 154, "ADL*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 175, "*" }, { 178, "AFR*" }, { 192, "*" },
+		{ 298, "*" },   /* (CrakOut, moved: the registry's row's codes, BN5's record's) */
 	};
+	test_soul_starts(bn6_codes, sizeof bn6_codes / sizeof *bn6_codes);
 	Profile profile_was = profile;
 	Run run_was = run;
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f) {

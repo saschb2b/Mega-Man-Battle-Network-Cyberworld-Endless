@@ -145,8 +145,13 @@ void devtools_veteran(void) {
 	/* (the worn slot's look, saved: a CONTINUE without the switch keeps it) */
 	if (dev_look_on) looks_set(looks_slot(), &dev_look_set);
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
-	/* (a bit a folder but the Standard's, every one meta.h has) */
-	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
+	/* (a bit a folder but the Standard's, every one meta.h has; and the
+	 * Soul forms, which the setup offers where their ROMs are read) */
+	if (dev.folders) {
+		profile.folders_open |= 0xFFFEu;
+		profile.forms_open |= (uint8_t)(1u << RUN_FORM_SOUL_BN5 | 1u << RUN_FORM_SOUL_BN4);
+		profile_save();
+	}
 	/* (library=N: every Nth chip id held, for the Library's pages' pictures;
 	 * not saved by this, as when the screen filled them as it opened) */
 	for (int id = dev.library; dev.library > 0 && id < META_LIBRARY_IDS; id += dev.library) meta_library_add(id);

@@ -54,6 +54,14 @@ all three ROMs the catalogue held 130 chips, 15 of them BN4's own; with
 BN6 and BN4, 93 and the same 15. It has grown since by itself, as more of
 BN4's rows came to play (84 in 0.21.0, its dark chips left out).
 
+**BN4's NEW GAME folder, a SOUL BN4 run's start** (24 November 2026,
+[MegaMan's forms](../game/meta/forms.md), Each game's start): its chips
+are the run's by `xchips_bn4_paid` as the finds' are; its two codes
+BN6's records lack, AirShot A and Vulcan1 V, were not moved (two rows
+of their own, each one more chip the catalogue would hold) but play in
+the nearest code BN6 gives, AirShot \* and Vulcan1 S, the setup's line
+naming both.
+
 Two decisions the design left open, taken with the game-design skill.
 **The catalogue holds the chips BN6 names too**, as BN5's does: fifteen
 chips of BN4's own taking half of an area's finds would be the same

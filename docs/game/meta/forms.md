@@ -1,7 +1,7 @@
 ---
 type: Design
 title: "MegaMan's forms"
-description: "MegaMan's form for a run (issue #774): CROSS, SOUL BN5 or SOUL BN4, one system a run, chosen on the setup's FORM row; every guardian pays in the run's form by his kind, else a power the run lacks; the Soul forms opened by their games' Navis; one power brought; SoulT+1 in place of BeastOut; the week's form."
+description: "MegaMan's form for a run (issue #774): CROSS, SOUL BN5 or SOUL BN4, one system a run, chosen on the setup's FORM row; every guardian pays in the run's form by his kind, else a power the run lacks; the Soul forms opened by their games' Navis; one power brought; SoulT+1 in place of BeastOut; a Soul form's Standard folder its game's own start; the week's form."
 tags: [game, meta]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:59:04Z }
 ---
@@ -101,6 +101,48 @@ in CROSS. The mix keeps today's rule
   chip lean to the kinds of every Soul the run holds, Team ProtoMan's and
   BN4's as Team Colonel's did ([A held Soul's kind](../economy/held-soul-kind.md));
   a CROSS run holds none and leans nothing.
+
+## Each game's start (24 November 2026, issue 865)
+
+The owner's call: BN5's and BN4's NEW GAME folders are no shelf entries;
+each is the start a SOUL BN5 or SOUL BN4 run brings where the setup's
+FOLDER row says Standard. The other folders (Blade, Storm and the rest)
+stay as they are in any form, and CROSS keeps BN6's own Standard.
+
+- **Fidelity, not power.** The dialectic is this page's, what you bring
+  against what you find: the folder follows the form, so a Soul run opens
+  as its game did. Measured by `tools/folder_hands.py`
+  ([Starting folders measured](folders-measured.md), 3), the starts hand
+  less than Standard: BN5's 112 damage on turn one and 267 over three
+  turns against Standard's 128 and 304 (0.88), BN4's as a run plays it
+  (the swap below) 115 and 283 (0.90 and 0.93).
+- **Read from the ROMs as the run starts**, where each game's GiveFolder
+  finds folder 0 (`BN5_FOLDER_TABLE`'s first, `BN4_FOLDERS`' first;
+  `src/core/xchips_folder.c`), each chip the run's chip of it (BN5's by
+  the registry, BN4's by `xchips_bn4_paid`: CrakOut is the registry's 298
+  in both). No list of theirs is kept in our tables; `test_folders` holds
+  the two as numbers. Where the folder cannot be read the run keeps BN6's
+  Standard; a Soul form is offered only where its ROMs are read.
+- **BN4's two codes BN6 lacks** are swapped to the nearest code BN6's
+  record gives, never silently: AirShot A x3 to AirShot \* (its record
+  holds \* alone), Vulcan1 V x3 to Vulcan1 S (B D S \*). Moving a BN4
+  AirShot and Vulcan1 of their own would be two registry rows, each one
+  more chip the loot rolls; the swap moves no band and claims no id. The
+  setup's line for Standard says so: "BN4's own starting folder. AirShot
+  in \*, Vulcan1 in S".
+- **The setup** keeps the word Standard on the FOLDER row (BN6's folder
+  screens name a folder, not its game); its line names the game's start,
+  and the FORM row's note in a Soul form with Standard chosen reads
+  "BN5's Souls and folder" ("BN4's"). The state's `folderline` says it.
+- **The pack and the Library** take the start as any starting folder's
+  ([The meta layer's design](design.md), 1): its chips counted in the pack
+  in place of BN6's Standard, marked as given, in the Library
+  (`set_start_folder`, `meta_start_chips`).
+- **Old runs and profiles:** the folder is written into the game once, as
+  the run begins; a run saved before keeps the folder its state holds, and
+  `Run` and the profile are unchanged (the run already holds its folder
+  and its form). `tests/scenarios/folders_soul_starts.py` plays each form's
+  setup, first Custom screen and CONTINUE.
 
 ## The week's net
 

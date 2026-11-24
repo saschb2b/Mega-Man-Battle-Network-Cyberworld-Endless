@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **New: a Soul run starts with its own game's folder.** With the FORM
+  row on SOUL BN5 the Standard folder is BN5's own NEW GAME folder, on
+  SOUL BN4 BN4's, read from your ROMs: CrakOut in place of CrakShot, a
+  third AirShot, BN4's without BusterUp. BN4's AirShot A and Vulcan1 V
+  are codes BN6 never gives, so they come as AirShot * and Vulcan1 S, and
+  the setup says so. Neither start is stronger than BN6's; CROSS and every
+  other folder stay as they were (issue 865).
+
 - **New: in a NetBattle each MegaMan wears his own player's look.** Both
   players' looks go into both linked GBAs of both games before the
   battle starts, so you see your MegaMan in yours and the other's in

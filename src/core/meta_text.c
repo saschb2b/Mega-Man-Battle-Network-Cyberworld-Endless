@@ -21,6 +21,14 @@ static const FolderInfo folders[FOLDER_COUNT] = {
 
 const FolderInfo *meta_folder_words(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }
 
+/* (BN4's AirShot A and Vulcan1 V are codes BN6's records lack: in the
+ * nearest they hold, xfolder_code) */
+const char *meta_standard_about(int form) {
+	if (form == RUN_FORM_SOUL_BN5) return "BN5's own starting folder";
+	if (form == RUN_FORM_SOUL_BN4) return "BN4's own starting folder. AirShot in *, Vulcan1 in S";
+	return folders[FOLDER_STANDARD].about;
+}
+
 /* (MegaMan's forms by system, as the owner named them, issue #774; the
  * mix, an older save's run, by what it holds) */
 const char *meta_form_name(int form) {
