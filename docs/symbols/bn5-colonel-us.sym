@@ -503,6 +503,12 @@
 0801D448 django_sp_powers_by_turn
 0801D62C BN5_FIND_ROWS
 0801D6AC obstacles_sprites_by_nameid_from_0xcd
+0801D814 other_games_folders.six_table_0x08134a20_six
+0801D850 other_games_folders.six_table_0x08134a20_six_2
+0801D9F4 other_games_folders.six_table_0x08134a20_six_3
+0801DA30 other_games_folders.six_table_0x08134a20_six_4
+0801DA6C other_games_folders.six_table_0x08134a20_six_5
+0801DAA8 other_games_folders.six_table_0x08134a20_six_6
 0801DC7C dark_soul_bn6.0_call
 0801DF0C dark_soul_bn6.by
 0801E210 BN5_CHIP_RECORDS
@@ -1132,6 +1138,8 @@
 08126CA8 objects_routines
 08126D4C BN5_LIB_BONUS_ICONS
 08126D68 objects_routines_0x08126ca8
+081348F0 BN5_GIVE_FOLDER
+08134A20 BN5_FOLDER_TABLE
 0813D628 BN5_NCP_RECORDS
 0813EFC4 BN5_NCP_RECORD
 0813FAF8 BN5_NAVICUST_COMPILE

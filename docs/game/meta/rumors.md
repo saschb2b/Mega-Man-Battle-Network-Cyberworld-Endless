@@ -3,7 +3,7 @@ type: Feature
 title: "Rumors"
 description: "Rumors (`src/layer/rumor_lines.c`): one bystander a layer passes a true rumor, a Program Advance recipe for the folder's chips or a secret the profile has yet to find; the Endless Net BBS mail and town talk."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T17:28:00Z }
 ---
 
 # Rumors (3 October 2026)
@@ -32,13 +32,21 @@ that).
   beats ProtoMan's time (until his first clearance), that some floor can't
   be seen (from the second act), that every layer before a guardian hides a
   RegUp (until the first is found).
+- **How a starting folder opens**, in a friend's words ("My buddy deleted
+  a guardian! / Next dive,his whole folder was swords!"), while the folder
+  is locked on the setup's shelf and not yet heard, and once the setup has
+  shown the shelf; said, the folder is heard, its plain milestone on the
+  setup and the summary ([The shelf of starting folders](shelf.md)).
 - A secret one layer in three while one is left, a recipe else.
 - **The Endless Net BBS**, a mail in the PET ([The PET](../pet.md)): netizens'
   threads, more as the profile goes deeper (a guardian met, the second
   act, a Spin, a duel won, the Nest), NEW with each new post. Each is
   true, or a joke that says so: the GigaChip under Central Town's LevBus
   ("I checked. Gum wrapper."), Mr.Famous finishing the Endless Net
-  blindfolded ("It's endless. Nobody finishes it.").
+  blindfolded ("It's endless. Nobody finishes it."). The shelf's floor posts there
+  too: a starting folder still locked and unheard three finished runs
+  after the setup first showed the shelf is told plainly in a poster's
+  words, a folder every three runs ([The shelf of starting folders](shelf.md)).
 - **The towns** trade the same talk (`src/world/town.c`): the LevBus's
   GigaChip, the Academy's hunt for Program Advances, Higsby's back room, Mr.
   Famous's boasts, Dr. Wily blamed for everything, the NaviCust's secret

@@ -147,6 +147,11 @@ bool guardian_heard(void) {
 
 bool director_guardian_heard(void) { return guardian_heard(); }
 
+/* (issue #864: the folder the layer's whisper told is heard, the profile's) */
+void layer_whisper_heard(void) {
+	if (D.objs.folder_told) meta_folder_hear(D.objs.folder_told);
+}
+
 /* The next battle's enemies, for the game's encounter roll. */
 void set_encounter(const Encounter *e, bool force) {
 	D.foes = e->nfoes;

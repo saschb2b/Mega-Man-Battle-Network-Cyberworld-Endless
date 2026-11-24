@@ -27,6 +27,7 @@ typedef enum {
 	SW_FORM_CROSS_NOTE, SW_FORM_BN5_NOTE, SW_FORM_BN4_NOTE, SW_FORM_MORE,
 	SW_START_REST_NOTE, SW_SOUL_NONE_NOTE, SW_SOUL_GUARDIANS_NOTE,
 	SW_SOULT, SW_SOULT_NOTE,   /* the BeastOut helper's name and note in a Soul form: SoulT+1's turn */
+	SW_LOCKED,         /* a folder of the shelf not yet open: its tag on the FOLDER row (issue #864) */
 	SW_COUNT
 } SetupWord;
 const char *setup_word(SetupWord w);
@@ -38,7 +39,11 @@ const char *setup_cross_note(char *buf, size_t n, const char *strong, const char
 /* a form's record, its best threat rung won (-1 none) */
 const char *setup_form_best(char *buf, size_t n, int rung);
 const char *setup_helper_note(char *buf, size_t n, const char *about, const char *more);
-/* a folder still shut, and how it opens */
-const char *setup_shut_folder(char *buf, size_t n, const char *name, const char *opens);
+/* The FOLDER row's count, the folders open of `all` ("3/6"); a
+ * locked folder's line under its note, the kind of deed from its `hint`;
+ * and once heard, the deed itself from its `opens` (issue #864) */
+const char *setup_folder_count(char *buf, size_t n, int open, int all);
+const char *setup_folder_hint(char *buf, size_t n, const char *hint);
+const char *setup_folder_heard(char *buf, size_t n, const char *opens);
 
 #endif

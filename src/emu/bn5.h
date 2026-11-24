@@ -85,9 +85,10 @@
 #define BN5_CHIP_POWERS   0x0800E728u /* the computed powers' routines by power - 1000 (BN6_CHIP_POWERS'), 76 of them, read at 0x0800E70E */
 #define BN5_CHIP_POWERS_COUNT 76          /* ... its entries (1000-1075), BN6 growing its own table with those a helper moves */
 #define BN5_CHIP_RECORDS  0x01E210u   /* (ROM offset) its chips' records, 0x2C each in BN6's ChipData layout: +0..3 the chip's four codes (0-25 A-Z, 26 *, 0xFF none) */
+#define BN5_GIVE_FOLDER   0x081348F0u /* GiveFolder, BN6's (BN6_GIVE_FOLDER) by its bytes: r0 the folder and its slot, its preset from BN5_FOLDER_TABLE */
+#define BN5_FOLDER_TABLE  0x08134A20u /* ... the six presets' addresses, 0x3C bytes each as BN6's: 0 the NEW GAME folder (0x0801D814; docs/rom/chips.md, Other games' folders) */
 #define BN5_PA_STAR_LIMIT 0x080252B2u /* a Program Advance of one chip in codes in a row: cmp r2, #1, one * of its three at most, as BN6's (BN6_PA_STAR_LIMIT) */
-/* its DarkChips (docs/rom/bn5-battles.md, BN5 guest battles; .build research):
- * ids 187-198, folder chips as any, at most three in a folder (one of each) */
+/* its DarkChips (docs/rom/bn5-battles.md, BN5 guest battles; .build research): ids 187-198, folder chips as any, at most three in a folder (one of each) */
 #define BN5_DARK_FIRST    187
 #define BN5_COMPACT       0x080250EAu /* the deck's compaction at each Custom screen, after the worried rule (0x08025118): replaced by the shelf (its deck BN5_BATTLE_DECK) */
 #define BN5_DARK_USED     0x0203E542u /* + side * 8: set to 1 as a DarkChip is used, cleared at battle start; gone as the battle leaves (latched) */
@@ -193,8 +194,7 @@
 #define BN5_DARK_AFTER_END 0x0802CA68u /* ... the end of its routines and their table, the bytes the port reads */
 #define BN5_DARK_AFTER_CRC 0x25D4DB46u /* ... their CRC32, the port's source */
 #define BN5_SOUL_KINDS    0x08024BE4u /* a byte per Soul 1-12 (its Navi's AI index): the chip kind it unites with (the UNITE check 0x08024B2C) */
-/* Its Souls (docs/game/meta/souls.md; docs/rom/bn5-battles.md, BN5's
- * Souls): the Custom screen's UNITE command, its Double Soul */
+/* Its Souls (docs/game/meta/souls.md; docs/rom/bn5-battles.md, BN5's Souls): the Custom screen's UNITE command, its Double Soul */
 #define BN5_UNITE_CHECK   0x08024B2Cu /* the check of the last chip picked: its kind (BN5_CHIP_KIND) a Soul's, that Soul's flag set, not used this battle */
 #define BN5_SOUL_FLAGS    0x08024BF4u /* a byte per Soul 1-12: its event flag, 0xFF none (Team ProtoMan's six in this version) */
 #define BN5_TOOLKIT_FLAGS 0x44        /* eToolkit +0x44: its event flags (0x020029F8), flag f in byte f >> 3, bit 0x80 >> (f & 7) */

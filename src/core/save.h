@@ -9,6 +9,19 @@
 #include "looks.h"
 #include "run.h"
 
+/* What the profile has heard of the starting folders still locked
+ * (meta_shelf.c): a bit each (1 << FOLDER_*), heard from a bystander or
+ * from the floor's post on the BBS; those the floor told; profile.runs + 1
+ * as the floor's count of finished runs began (the shelf first shown, or
+ * its last post), 0 not yet; SHELF_KEPT once these bytes are the shelf's
+ * (a profile of before held other data in them, cleared once) */
+typedef struct {
+	uint8_t heard, floored;
+	uint16_t floor_at;
+	uint32_t kept;
+} FolderShelf;
+#define SHELF_KEPT 0x464C4853u   /* "SHLF" */
+
 typedef struct {
 	int runs;
 	int best_depth;
@@ -50,10 +63,11 @@ typedef struct {
 	uint32_t library_run;     /* the run library_start was counted for (its seed) */
 	uint8_t setup_new;        /* the setup's rows with an option the last summary announced (SETUP_NEW_*, meta.h) */
 	uint8_t area_before, guardian_before;   /* the run before the last one's first area and guardian (+ 1) */
-	/* (unused: the virus families MegaMan had battled in any run, which his
-	 * warnings read; strategy is the BBS's, and the warnings went in the
-	 * voice sweep of 19 October 2026; kept for the profile's layout) */
-	uint32_t families_fought[2];
+	/* the shelf of starting folders (issue #864, docs/game/meta/shelf.md;
+	 * meta_shelf.c), in the eight bytes that held the virus families
+	 * MegaMan had battled (unread since the voice sweep of 19 October
+	 * 2026): read only once `kept` says they are the shelf's */
+	FolderShelf shelf;
 	uint8_t gem_taught;       /* (unused: the battlefield's Mystery Data is BN6's own, unexplained for its players; kept for the profile's layout) */
 	/* the NaviCust's Spins found in the net, a bit per colour 1-6 (bit
 	 * c - 1: docs/game/meta/), and the run that found one (its seed) with that
