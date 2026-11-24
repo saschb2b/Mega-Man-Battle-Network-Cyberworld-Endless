@@ -6,8 +6,8 @@
  * over the field as it stood on the map, darkened as BN6's PET darkens it;
  * the panel cut into one strip the grid's width, PLACE's name onto the
  * band's right stripe. The grid, the strip and the screen's foot stand an
- * equal gap apart. Forms' button is Save's with Forms' label tiles of the
- * labels' copy (pet_options.c) in palette 15, its icon BN6's Status icon
+ * equal gap apart. Forms' button is Save's with Forms' word's tiles, the
+ * engine's own (pet_options.c), in palette 15, its icon BN6's Status icon
  * (pet_menu_install). What BN6 lights (its cursor's row, EXIT's pulse) and
  * fades it keeps, BN6's cursor set to ours (pet_menu.c). */
 #include "pet_menu.h"
@@ -126,7 +126,8 @@ static void button(uint32_t *px, const uint16_t *map, int ink, uint16_t ink_to, 
 	for (int i = 0; i < 2 * 9; ++i) {
 		uint16_t e = map[i];
 		TileLook l = { pal, e >> 12, (e & 0x400) != 0, ink, ink_to };
-		tile(px, vram + (e & 0x3FF) * 32u, &l, dx + i % 9 * 8, dy + i / 9 * 8);
+		const uint8_t *own = pet_options_forms_tile(e & 0x3FF);   /* (Forms' word's: the engine's, not BN6's) */
+		tile(px, own ? own : vram + (e & 0x3FF) * 32u, &l, dx + i % 9 * 8, dy + i / 9 * 8);
 	}
 }
 
