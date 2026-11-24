@@ -3,7 +3,7 @@ type: Process
 title: "Run it"
 description: "`--dev arena`: the Arena started in the title's place against a scripted second player over a local link, and its options (`arenadelay`, `arenalag`, `arenawindow`, `arenabusy`, `arenahp`, `arenaseed`, `arenaagain`, `arenaboth`) for tests and captures."
 tags: [online, arena]
-generated: { by: claude-code/unrecorded, at: 2026-10-21T22:25:49Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
 ---
 
 # Run it

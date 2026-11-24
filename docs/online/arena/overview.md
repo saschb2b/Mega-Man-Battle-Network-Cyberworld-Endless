@@ -3,7 +3,7 @@ type: Overview
 title: "The Arena"
 description: "The Arena folder: BN6's Practice NetBattle between players, each client running both linked cores with only keys crossing: its engine, smoothed delay, rollback, the way in, the stands, Team NetBattles, two a side."
 tags: [online, arena]
-generated: { by: claude-code/unrecorded, at: 2026-10-18T13:19:48Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
 ---
 
 # The Arena
