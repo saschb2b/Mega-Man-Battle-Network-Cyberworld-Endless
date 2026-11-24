@@ -1,0 +1,10 @@
+{
+  "branch": "looks-core",
+  "what": "MegaMan's look (issue 854, step 2): the model, the twelve palettes' colours, the three looks in the profile, the look written onto his palettes in the core's ROM copy",
+  "takes": {},
+  "units": [
+    "MegaMan's look: model and palettes (src/core/looks)",
+    "MegaMan's look: applied in the core (src/emu/look_apply)"
+  ],
+  "run": false
+}
