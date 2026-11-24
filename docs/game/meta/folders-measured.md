@@ -3,7 +3,7 @@ type: Analysis
 title: "Starting folders measured"
 description: "Issue 865's groundwork: the six starting folders measured (hands drawn, the autopilot's runs), BN6's five other preset folders and BN5's and BN4's starting folders read from their ROMs and judged as a run's start, and five archetypes of ours sketched; numbers for the owner's calls, no folder changed."
 tags: [game, meta, folders, measurement]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:40:00Z }
 sources:
   - id: roms
     resource: "BN6 Gregar's, BN5 Team Colonel's and BN4 Red Sun's ROMs, read by tools/folder_hands.py"
@@ -317,3 +317,38 @@ needed a battle read), its hint and words on issue 864's shelf, a test
 row in `test_folders`, and a loot table: the code lean reads the
 folder's codes as each layer is made, so a folder in A and T makes runs
 find A and T ([Phase two](phase-two.md)).
+
+## 5. After: the folders built from BN6's presets
+
+What the owner's calls built ([Decisions and phase one](decisions.md),
+Z-Canon rebuilt), measured as above (`tools/folder_hands.py`, 4000
+draws; the autopilot on this build over seeds 1-12 at threat 1, Standard
+played again beside it so a change of build shows).
+
+| Folder | Kinds | Codes | In `*` | Attack power | Heal | Turn 1: damage, chips | Three turns: damage, heal, chips, PAs |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Standard | 12 | 5 | 8 | 1030 | 40 | 128, 2.5 | 303, 4, 6.5, 0.00 |
+| Z-Canon, rebuilt | 10 | 9 | 12 | 1110 | 40 | 113, 2.6 | 324, 12, 7.1, 0.09 |
+
+- **Z-Canon** now forms a Program Advance in 9 battles in 100 under the
+  greedy pick (GigaCan1 3.6, FlmHook1 2.5, WideBrn1 2.4, LifeSrd 0.3),
+  where the first Z-Canon formed 1, at Standard's damage within a tenth.
+
+The autopilot (this build, seeds 1-12 at threat 1, fresh data folders):
+
+| Folder | Layer reached, mean (each seed) | Act-1 guardian won | Deaths: guardian, virus battle | Act-1 virus battles: frames, chips used, HP lost |
+| --- | --- | --- | --- | --- |
+| Standard | 3.4 (3 3 3 6 3 5 3 3 3 3 3 3) | 2 of 11 | 10, 2 | 549, 3.4, 4 |
+| Z-Canon, rebuilt | 2.9 (3 3 3 3 3 2 3 3 3 3 3 3) | 0 of 11 | 11, 1 | 511, 3.4, 6 |
+
+- **Z-Canon's act 1 under the autopilot** clears its virus battles a
+  little faster than Standard's and loses its guardian every time (the
+  first Z-Canon won 4 of 12, Standard 2 of 11 on both builds). The
+  autopilot fires the largest legal hand from where it stands: FireHit1
+  (21% of its chip uses) reaches one panel and FireBrn1 two, which it
+  does not walk into range for; Cannon is 33%. It formed GigaCan1 twice
+  in 132 battles, where the hand model says 9 in 100 for a player who
+  sends what he holds. 0 of 11 against 2 of 11 is inside the autopilot's
+  noise (the six ranged from 2 of 11 to 10 of 12), so no wall is shown;
+  the players' statistics per folder are the measure that settles it.
+

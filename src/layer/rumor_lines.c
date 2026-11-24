@@ -141,7 +141,7 @@ static const char *folder_line(int folder) {
 	switch (folder) {
 	case FOLDER_BLADE: return "My buddy deleted a guardian!|Next dive,his whole folder was swords!";
 	case FOLDER_STORM: return "Did you hear? Delete an Aqua guardian...|...and you dive with Elec chips! Zap!";
-	case FOLDER_ZCANON: return "A pal pulled off a Program Advance!|Now he dives with Cannons in A,B and C!";
+	case FOLDER_ZCANON: return "A pal pulled off a Program Advance!|Now his folder's packed with combos!";
 	case FOLDER_BUSTING: return "Clear a whole area,no Recovery chips...|...and your next folder hits like a truck!";
 	case FOLDER_LEAN: return "Somebody dove ten layers down!|Now any five of his chips make a hand!";
 	default: return NULL;

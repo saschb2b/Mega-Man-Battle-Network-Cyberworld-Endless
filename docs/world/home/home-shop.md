@@ -3,7 +3,7 @@ type: Feature
 title: "6. The home shop"
 description: "The home shop: AsterLand's clerk opens BN6's Order Service, one order a visit at twice a Net Dealer's price, sorted on START by BN6's seven keys (`order_sort.c`), beside the SubChip seller."
 tags: [world, home]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T01:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:47:40Z }
 ---
 
 # 6. The home shop
@@ -29,7 +29,10 @@ text, session 69, and from a step before it nothing, session 70;
 `indoors_counter`), L in AsterLand says where orders and SubChips are,
 and the shopper stands at the NEW case, out of the SubChip seller's way.
 One order a visit: after it the clerk says so until the
-next visit. The SubChip seller (BN6's, the white-coated man of its SubChip
+next visit. While the profile lacks one of the home's three palettes
+(Central Town, Seaside, Sky), his greeting ends in BN6's options, an order
+or MegaMan's colors, each 6000 zenny ([MegaMan's palettes, earned](../../game/looks-earning.md),
+The home shop); with all three owned he opens his orders as before. The SubChip seller (BN6's, the white-coated man of its SubChip
 shops' window) stands beside him with BN6's Central Town shop (`0x0F`)
 restocked for the run: the keys the act ahead's locks want (Unlockers,
 RushFood, a WWW-ID), then MiniEnrg, FullEnrg, SneakRun and Untrap at BN6's

@@ -3,7 +3,7 @@ type: Design
 title: "The meta layer's design"
 description: "The meta layer's design: what you bring against what you find, the loop stack, variety not power, and its pieces: starting folders, Cross starts, the threat staircase, helpers, the Library, gates, routes, run length."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T17:28:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:40:00Z }
 ---
 
 # The meta layer's design
@@ -91,7 +91,7 @@ milestone that teaches its style, never by a count to grind.
 | Standard | BN6's own starting folder | None | Always |
 | Blade | Swords, WideSwrd, LongSwrd, StepSwrd | No ranged chips: guardians in the back row need planning | Finish a guardian with a sword |
 | Storm | Elec chips around DolThdr and ElcPuls | One element: only Aqua foes take double | Delete an Aqua guardian with an Elec chip |
-| Z-Canon | Cannons in codes A, B and C: BN6's Program Advance ready to draw | Few answers to viruses behind cover | Use any Program Advance in a run |
+| Z-Canon | BN6's Program Advance folder one tier down: Cannon, FireBrn1 and FireHit1 in codes in a row | Reach and codes: most of it hits close, and nine codes split its hands | Use any Program Advance in a run |
 | Busting | Heavy hitters, no Recovery chips | Every heal comes from the net | Clear an act without a Recovery chip |
 | Lean | Few kinds of chip, codes aligned for big hands | Little coverage | Reach layer 10 |
 

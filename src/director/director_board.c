@@ -246,6 +246,7 @@ void soult_sync(void) {
  * says is for; the run's Spin, from its Mystery Data, which the profile
  * keeps and MegaMan says what it does. */
 void item_given(int item) {
+	looks_item_given(item, D.objs.look_palette);
 	if (item >= SCRIPTS_REG_UP1 && item <= SCRIPTS_REG_UP1 + 2) D.reg_due = true;
 	if (item == SCRIPTS_SECRET_DATA) {
 		int n = key_item(SCRIPTS_SECRET_DATA);
@@ -262,6 +263,8 @@ void item_given(int item) {
 
 void spin_watch(void) {
 	if (D.spin_due && talk_script(D.objs.archive, D.objs.spin_found)) D.spin_due = false;
+	/* (and MegaMan's palettes got: docs/game/looks-earning.md, Earning) */
+	if (!D.spin_due) looks_due_frame();
 }
 
 /* MegaMan's words on Reg memory as a RegUp is found (issue #51): what it

@@ -260,3 +260,9 @@ picks a colour, tries a locked one and copies a look over another
 Not yet: a palette's exact way to earn it named (the routes' work), and a
 mark on what is new since the last visit (the profile does not yet keep
 what was seen).
+
+## Earning
+
+How each palette is earned, as built (the six milestones, AsterLand's
+three, the two rare finds, MegaMan's word and Dad's Colors mail):
+[MegaMan's palettes, earned](looks-earning.md).

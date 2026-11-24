@@ -34,6 +34,8 @@ ACADEMY = OUT + [step for spot, hold, at in (
 FOLK = ((108, -132), (100, -116), (60, -160), (-188, -60), (-108, -100), (-164, 132))
 WALKERS = ('132 212 7', '84 -228 5')
 PAGED = ('repeat', 'press A; wait 20', 'chat=closed', 40)
+# (the home's three palettes owned: AsterLand's clerk then offers his orders alone, looks_shop.py his colors)
+HOME_COLORS = (1 << 7) | (1 << 8) | (1 << 9)
 
 
 def talk(x, y):
@@ -87,7 +89,7 @@ MANY = {
         ]),
     'aster-order': dict(
         GUARDS="AsterLand's Order Service: an order costs its price and puts its chip in the pack, the visit's order is made, and the clerk takes no second one.",
-        START=dev('zenny=20000'),
+        START=dev(f'zenny=20000,looks={HOME_COLORS}'),
         STEPS=ASTER + [
             ('expect', 'order=open'),
             ('keep', 'chips'),
@@ -107,7 +109,7 @@ MANY = {
         ]),
     'aster-order-no-zenny': dict(
         GUARDS="AsterLand's Order Service with no zenny: nothing is ordered, the pack and the visit's order as they were.",
-        START=ROOM,
+        START=dev(f'looks={HOME_COLORS}'),
         STEPS=ASTER + [
             ('expect', 'zenny=0'),
             ('keep', 'chips order zenny'),

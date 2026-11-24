@@ -147,6 +147,9 @@ int meta_spin_colour(void);
 /* Whether the current layer holds this run's Spin: one normal layer of 4-8,
  * by the run's seed. */
 bool meta_spin_here(void);
+/* The normal layer (4-8, from the run's seed) that holds the run's Spin
+ * where the profile lacks one. */
+int meta_spin_depth(void);
 /* This run's Spin picked up: the profile keeps it. */
 void meta_spin_found(int colour);
 /* "pink", for colour 1-6. */

@@ -1,0 +1,1 @@
+The run's rare find of MegaMan's colors (issue 854, docs/game/looks-earning.md): on one layer a run, a Glitch layer or an act's first or last layer of 4-7, the best blue Mystery Data's rolled content is swapped for a ColrData where the profile lacks that palette; its other data roll as before.
