@@ -218,7 +218,7 @@ MANY = {
         ]),
     'courier-bring-handed': dict(
         GUARDS="Issue #841: a Wood chip in the Pack, the NetBattler's request settled in Lan's HP: the chip goes through the courier, the NetBattler's trade comes back, and the board opens.",
-        START=home(7, 10, 'job=4,pack=60'),                     # (a chip of each of the first 60 in the Pack: WoodDrgn, 49, among them)
+        START=home(7, 10, 'job=4,pack=37'),                     # (a chip of each of the first 37 in the Pack: one Wood kind, RiskyHoney1 B, 37, handed over with no pick; two or more open the Chip Trader's screen, home_bring_choice.py)
         STEPS=ARRIVED + [
             ('expect', 'request~bring taken'),
         ] + COURIER + [
