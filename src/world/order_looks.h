@@ -1,5 +1,5 @@
 /* AsterLand's clerk sells MegaMan's home palettes beside the Order Service
- * (docs/world/home/home-shop.md; docs/game/looks.md, Earning), in BN6's own
+ * (docs/world/home/home-shop.md; docs/game/looks-earning.md, Earning), in BN6's own
  * chat box: its options, its Yes and No, its zenny taken. */
 #ifndef CW_ORDER_LOOKS_H
 #define CW_ORDER_LOOKS_H

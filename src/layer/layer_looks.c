@@ -1,5 +1,5 @@
 /* layer_objs.h's layer_look_find: whether the run's rare find of colours
- * lies on the layer being made (docs/game/looks.md, Earning). */
+ * lies on the layer being made (docs/game/looks-earning.md, Earning). */
 #include "layer_objs.h"
 
 #include "looks.h"

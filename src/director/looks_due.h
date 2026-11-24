@@ -1,4 +1,4 @@
-/* The palettes' moments on the map (docs/game/looks.md, Earning): the
+/* The palettes' moments on the map (docs/game/looks-earning.md, Earning): the
  * milestones looked for, AsterLand's sales granted, and MegaMan's word on
  * each palette got, said once a talk can start. */
 #ifndef CW_LOOKS_DUE_H

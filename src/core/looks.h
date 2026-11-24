@@ -1,4 +1,4 @@
-/* MegaMan's look (issue #854, docs/game/looks.md): colour channels on his
+/* MegaMan's look (issue #854, docs/game/looks-earning.md): colour channels on his
  * plain body, each coloured from one of the palettes the profile owns. A
  * look is six bytes (a palette and a colour per channel), what a profile
  * keeps three of and what the Square's wire carries. Looks only: nothing

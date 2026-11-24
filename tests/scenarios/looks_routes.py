@@ -1,4 +1,4 @@
-"""MegaMan's palettes earned (issue #854; docs/game/looks.md, Earning): a
+"""MegaMan's palettes earned (issue #854; docs/game/looks-earning.md, Earning): a
 milestone the profile holds grants its palette once, MegaMan's word and
 BN6's "MegaMan got:" box said once; the run's rare find, a ColrData in a
 Mystery Data, grants its palette, and a run whose profile owns it holds

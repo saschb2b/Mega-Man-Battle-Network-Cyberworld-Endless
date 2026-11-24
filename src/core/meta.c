@@ -512,7 +512,7 @@ void meta_run_over(bool won) {
 	open_forms(true);
 	earn_marks(won);
 	/* (and MegaMan's colours for what it earned, the disc's Hazard among
-	 * them: docs/game/looks.md, Earning; he says so at the next start) */
+	 * them: docs/game/looks-earning.md, Earning; he says so at the next start) */
 	unsigned colours = looks_milestones();
 	for (int p = 0; p < LOOK_PALETTES; ++p)
 		if (colours >> p & 1) say("the %s colors", looks_palette_name(p));

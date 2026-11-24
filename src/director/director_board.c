@@ -263,7 +263,7 @@ void item_given(int item) {
 
 void spin_watch(void) {
 	if (D.spin_due && talk_script(D.objs.archive, D.objs.spin_found)) D.spin_due = false;
-	/* (and MegaMan's palettes got: docs/game/looks.md, Earning) */
+	/* (and MegaMan's palettes got: docs/game/looks-earning.md, Earning) */
 	if (!D.spin_due) looks_due_frame();
 }
 

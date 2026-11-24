@@ -1,4 +1,4 @@
-"""MegaMan's colors at AsterLand's counter (issue #854; docs/game/looks.md,
+"""MegaMan's colors at AsterLand's counter (issue #854; docs/game/looks-earning.md,
 Earning; docs/world/home/home-shop.md): the clerk offers the home's
 palettes the profile lacks beside his orders, a sale takes its price and
 grants the palette at once, the got box says so, and the palette is not

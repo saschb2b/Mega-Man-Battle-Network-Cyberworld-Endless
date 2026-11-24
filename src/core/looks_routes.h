@@ -1,4 +1,4 @@
-/* How a profile earns MegaMan's palettes (issue #854, docs/game/looks.md,
+/* How a profile earns MegaMan's palettes (issue #854, docs/game/looks-earning.md,
  * Earning): six by milestones the profile already records, three at the
  * home shop for the run's zenny, two as a rare find, one a run at most.
  * Each ends in looks_grant (looks.h). Looks only: nothing here changes how
@@ -28,7 +28,7 @@ bool looks_milestone(int palette);
 /* ---- the home shop (docs/world/home/home-shop.md) ---- */
 
 /* A palette's price at AsterLand's counter, in zenny: about a third act's
- * earnings, three quarters of a Mega chip's order (docs/game/looks.md,
+ * earnings, three quarters of a Mega chip's order (docs/game/looks-earning.md,
  * Earning, the price measured) */
 #define LOOKS_SHOP_PRICE 6000
 #define LOOKS_SHOP_COUNT 3   /* Central Town, Seaside, Sky */

@@ -1,5 +1,5 @@
 /* looks_routes.h: the three ways a profile earns a palette (issue #854,
- * docs/game/looks.md, Earning). */
+ * docs/game/looks-earning.md, Earning). */
 #include "looks_routes.h"
 
 #include "looks.h"

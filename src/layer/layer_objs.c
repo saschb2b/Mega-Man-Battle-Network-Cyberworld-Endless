@@ -106,7 +106,7 @@ static void spin_content(uint8_t out[8], int colour) {
 	for (int i = 0; i < 8; ++i) out[i] = c[i];
 }
 
-/* The run's rare find of colours (docs/game/looks.md, Earning): a key
+/* The run's rare find of colours (docs/game/looks-earning.md, Earning): a key
  * item of the run's own, ColrData, whose pick-up grants its palette. */
 static void colour_content(uint8_t out[8]) {
 	const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_COLOR_DATA, 0, 0, 0 };
@@ -280,7 +280,7 @@ typedef struct {
 /* The find's Mystery Data: the best blue one, the last of the best, never
  * a purple one, the Spin's or the RegUp's; -1 none. Its content is rolled
  * as any other's and then swapped for the find, so a profile that owns the
- * palette finds the same layer otherwise (docs/game/looks.md, Earning). */
+ * palette finds the same layer otherwise (docs/game/looks-earning.md, Earning). */
 static int look_md(const MysteryPlan *p) {
 	int best = -1;
 	for (int i = 0, k = 0; i < layer.nobj && k < 16; ++i) {

@@ -225,7 +225,7 @@ static bool mail_of(int navi) { return guardian_mailed(navi); }
 enum { MAIL_REPORT = 19, MAIL_RECORDS = 20, MAIL_CODES = 21, MAIL_BBS = 22, MAIL_LAB = 23, MAIL_LOOKS = 24, MAIL_LAST = MAIL_LOOKS };
 
 /* (the profile owns a palette past Classic: Dad's mail on the colours,
- * docs/game/looks.md, Earning) */
+ * docs/game/looks-earning.md, Earning) */
 static bool looks_there(void) { return (profile.looks_owned & ~1u) != 0; }
 
 /* `s` into a mail's pages: lines of twenty letters at most, three a page,

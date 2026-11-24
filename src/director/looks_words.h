@@ -1,4 +1,4 @@
-/* What is said as MegaMan gets a palette (looks_words.c; docs/game/looks.md,
+/* What is said as MegaMan gets a palette (looks_words.c; docs/game/looks-earning.md,
  * Earning; docs/voice/rules.md). */
 #ifndef CW_LOOKS_WORDS_H
 #define CW_LOOKS_WORDS_H
