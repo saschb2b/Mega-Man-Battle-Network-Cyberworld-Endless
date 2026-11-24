@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-24",
+  "what": "MegaMan's colours mapped (src/emu/bn6_look.h; docs/rom/megaman-colours.md): his battle sprite's 43 palettes (BN6_LOOK_BATTLE_PALS 0x081DE160), the field's (0x08437C34), the mugshot's (0x084EDD1C), the emotion face's through BN6_FACE_PALS_REF, the battle palette's pick by form (0x0801002C), the field's index (0x02000AA5), and the renderer's OBJ palette slots given by content (0x03006108, its limit 0x020098A8 by mode)."
+}

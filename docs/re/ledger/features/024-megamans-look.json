@@ -1,0 +1,8 @@
+{
+  "name": "MegaMan's look",
+  "state": "proven",
+  "now": "Measured (epic #854, step 1): his battle, field, mugshot and emotion-window palettes and their ramps (two blue channels, armour and suit, in battle and on the field; the helmet alone in the mugshot and the face), the code that picks his battle palette by form, and BN6's renderer giving OBJ palette slots by content (12 on the maps, 10 in battle; the Square's plaza 9 of 12 given). A throwaway spike rotated the armour's hue in the ROM copy: field, chat box, battle and emotion face recoloured, HeatCross in its own colours, the look back after it.",
+  "left": "Step 2 onward: the channels and Classic in the profile, the PET screen; the Square's peers each in a sprite of their own; a per-side palette for NetBattles.",
+  "updated": "2026-11-24",
+  "link": "../rom/megaman-colours.md"
+}
