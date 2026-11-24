@@ -81,7 +81,7 @@ void looks_item_given(int item, int palette) {
 	if (items >= BN6_EWRAM && items < BN6_EWRAM_END) emu_write8(items + SCRIPTS_COLOR_DATA, 0);
 }
 
-void looks_describe(FILE *f) {
+void looks_routes_describe(FILE *f) {
 	unsigned owned = 0;
 	for (int p = 0; p < LOOK_PALETTES; ++p)
 		if (looks_owned(p)) owned |= 1u << p;

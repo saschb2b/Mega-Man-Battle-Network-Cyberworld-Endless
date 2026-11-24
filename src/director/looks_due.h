@@ -14,6 +14,6 @@ void looks_item_given(int item, int palette);
 /* A headless run's state: `looksowned` the palettes owned and `lookstold`
  * those said (a bit each, 1 << LookPalette), `lookfind` the run's rare
  * find (-1 none), `lookdepth` the layer a Mystery find lies on. */
-void looks_describe(FILE *f);
+void looks_routes_describe(FILE *f);
 
 #endif

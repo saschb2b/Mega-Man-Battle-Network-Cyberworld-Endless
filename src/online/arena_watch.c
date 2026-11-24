@@ -18,6 +18,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_boot.h"
+#include "arena_looks.h"
 #include "arena_loadout.h"
 #include "arena_pair.h"
 #include "arena_seats.h"
@@ -188,6 +189,8 @@ static void build(ArenaWatch *w) {
 	/* (a 2v2: the partners' MegaMen seats 2 and 3's, as every player's game sets them) */
 	if (w->seats > 2) arena_seats_partners(carried + 2);
 	arena_seats_set(w->seats > 2);
+	/* (the players' looks are not carried to the stands yet: a bout where they wear none, BN6's colours, as the Square has them) */
+	arena_looks_set(NULL, NULL);
 	w->boot = arena_boot_new(w->rom, w->size, carried);
 	if (!w->boot) { fail(w, "too little memory for the two PETs"); return; }
 	if (arena_boot_stage(w->boot) == ARENA_BOOT_FAILED) { fail(w, arena_boot_error(w->boot)); return; }

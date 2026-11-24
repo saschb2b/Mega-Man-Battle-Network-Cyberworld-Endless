@@ -188,11 +188,10 @@ typedef struct {
 	uint16_t looks_owned;
 	uint8_t look_slot, looks_kept;
 	Look looks[LOOK_SLOTS];
-	/* ... and how its palettes are earned (docs/game/looks-earning.md, Earning;
-	 * looks_routes.h): the run (its seed) that picked up its rare find and
-	 * that palette, so a run finds one at most and a checkpoint before the
-	 * find gives the same again; the palettes MegaMan has said he got (a
-	 * bit each), and whether Dad's mail on the colours has come */
+	/* the looks' routes (docs/game/looks.md): the run (its seed) whose rare
+	 * find (Mystery or Glitch) was picked up, the palettes MegaMan has
+	 * announced (a bit each), that run's palette and whether Dad's mail on
+	 * the colours was sent; a profile saved before reads them 0 */
 	uint32_t look_find_run;
 	uint16_t looks_told;
 	uint8_t look_find, looks_mailed;

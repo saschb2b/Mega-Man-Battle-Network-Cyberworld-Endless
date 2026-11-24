@@ -91,6 +91,7 @@ typedef struct {
 	int arena_hp;   /* arenahp=N: the carried MegaMan's max HP made N there (the installer seen in the battle; a Net Square battle's too) */
 	int arena_seed; /* arenaseed=N: --dev arena's bout seed (arena_boot_seed: BN6's random words as the bout begins; 0 none, its own) */
 	int arena_again; /* arenaagain=N: --dev arena fights N bouts more after the first, each from the kept pair (arena_keep), its seed one more */
+	const char *arena_look; /* arenalook=MINE[/THEIRS]: a NetBattle's two looks, 12 hex digits each (a Look's six bytes), until the Square carries them (arena_looks.h) */
 	int arena_seed_off; /* arenaseedoff=N: a Net Square bout's seed N more on this side alone (a mutation: the two games' readies apart) */
 	int arena_carry; /* arenacarry=N: --dev arena's carried MegaMan goes in with N HP of his max, as a Team NetBattle's winner does (written on both GBAs at the Custom screen) */
 	int arena_roll; /* arenaroll=N: --dev arena rolls back N frames every N, the game's state checked (arena_roll.h, issue #128); 0 the game's hash said alone; -1 none */

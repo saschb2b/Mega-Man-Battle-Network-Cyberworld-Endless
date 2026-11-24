@@ -81,10 +81,33 @@ static bool dev_switch(const char *t) {
 	return false;
 }
 
+static Look dev_look_set;
+static bool dev_look_on;
+
+/* `--dev look=`'s words: its first channel `first`, the next two taken
+ * from the tokens after it while they read as channels (the commas split
+ * them), a token that does not left in `*rest` for the switches */
+static void dev_look(const char *first, char **rest) {
+	char words[32];
+	snprintf(words, sizeof words, "%s", first);
+	for (int c = 1; c < LOOK_CHANNELS; ++c) {
+		char *t = strtok(NULL, ",");
+		if (!t) break;
+		size_t a = strspn(t, "0123456789"), b = a && t[a] == '.' ? strspn(t + a + 1, "0123456789") : 0;
+		if (strcmp(t, "-") && !(b && !t[a + 1 + b])) { *rest = t; break; }
+		size_t n = strlen(words);
+		snprintf(words + n, sizeof words - n, ",%s", t);
+	}
+	if (looks_parse(words, &dev_look_set)) dev_look_on = true;
+	else fprintf(stderr, "dev: look=%s is no look (P.C,P.C,P.C, - for BN6's own)\n", words);
+}
+
 void devtools_parse(const char *spec) {
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", spec);
-	for (char *t = strtok(buf, ","); t; t = strtok(NULL, ",")) {
+	char *rest = NULL;
+	for (char *t = strtok(buf, ","); t; t = rest ? rest : strtok(NULL, ",")) {
+		rest = NULL;
 		/* (statistics=ask|on|off, statsurl=URL: analytics.h) */
 		if (dev_switch(t) || analytics_dev(t)) continue;
 		if (!strncmp(t, "hp=", 3)) { dev.hp = atoi(t + 3); dev.hp_now = strchr(t, '/') ? atoi(strchr(t, '/') + 1) : 0; }
@@ -97,6 +120,9 @@ void devtools_parse(const char *spec) {
 			dev.folder_n = *end == '/' ? atoi(end + 1) : 30;
 		}
 		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint16_t)strtoul(t + 6, NULL, 0);
+		/* (look=P.C,P.C,P.C: MegaMan's look for the session, not saved, the
+		 * channels after the first the next tokens; docs/game/looks.md) */
+		else if (!strncmp(t, "look=", 5)) dev_look(t + 5, &rest);
 		/* (glitchlook=3+x0: BN6's Green Area, then BN5's first, as --net-biome
 		 * names them; another game's kept as -1 - N, glitch_look.c) */
 		else if (!strncmp(t, "glitchlook=", 11))
@@ -104,6 +130,7 @@ void devtools_parse(const char *spec) {
 				dev.glitch_look[dev.glitch_looks++] = *a == 'x' ? -1 - atoi(a + 1) : atoi(a);
 		/* (kept past this call: copies of their own) */
 		else if (!strncmp(t, "online=", 7)) { static char url[200]; snprintf(url, sizeof url, "%s", t + 7); dev.online = url; }
+		else if (!strncmp(t, "arenalook=", 10)) { static char look[32]; snprintf(look, sizeof look, "%s", t + 10); dev.arena_look = look; }
 		else if (!strncmp(t, "onlinename=", 11)) { static char name[17]; snprintf(name, sizeof name, "%s", t + 11); dev.online_name = name; }
 	}
 	if (dev.speed < 1) dev.speed = 1;
@@ -115,6 +142,8 @@ void devtools_parse(const char *spec) {
 }
 
 void devtools_veteran(void) {
+	/* (the worn slot's look, saved: a CONTINUE without the switch keeps it) */
+	if (dev_look_on) looks_set(looks_slot(), &dev_look_set);
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
 	/* (palettes owned and told, as earned in runs before: Classic always) */
 	if (dev.looks) { profile.looks_owned = (uint16_t)(dev.looks | 1); profile.looks_told = (uint16_t)dev.looks; profile_save(); }

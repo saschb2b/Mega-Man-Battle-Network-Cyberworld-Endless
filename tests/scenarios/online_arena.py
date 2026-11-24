@@ -15,6 +15,9 @@ NEEDS = ('bn5', 'bn4')   # (a NetBattle takes the NetPass's full set on both gam
 FIGHT = online.HOME + ',arenaboth,arenadelay=6,arenahp=200'
 FIGHT_WEAK = online.HOME + ',arenaboth,arenadelay=6,arenahp=5'
 CAST = dict(NEEDS=NEEDS, SERVER=True, FILES={'netpass.ini': online.SEEN_FULL})
+# (issue #854: each MegaMan in his player's look, given by the dev switch until the Square carries the peer's: Alpha's
+# armour red and suit green, Beta's armour yellow, suit purple and accent green; each game names its own look first)
+LOOK_A, LOOK_B, LOOK_C = '0306FF0207FF', '06040B010309', '0B0B0B050507'
 # (both in the plaza, Alpha within A's reach of Beta and facing him: BN6's talk probe reaches 8 ahead, a peer within 24 of it)
 MEET = online.course(
     online.into_square(),
@@ -49,6 +52,27 @@ MANY = {
         ('@beta', 'repeat', 'press B; wait 10', 'visit=square', 20),
         ('@beta', 'expect', 'bout=lost against Alpha won 0 lost 1'),
     )),
+    # (both games' cores take both looks before they start: the battle fought to its end, every hash agreed)
+    'netbattle-looks': dict(CAST, START=FIGHT + f',arenalook={LOOK_A}/{LOOK_B}', GAMES={'beta': FIGHT_WEAK + f',arenalook={LOOK_B}/{LOOK_A}'},
+        STEPS=online.course(
+            MEET, CHALLENGE,
+            soon('arena=battle', '', 1500),
+            soon('arena=battle', 'beta', 600),
+            ('expect', 'arenalooks=on'),
+            ('@beta', 'expect', 'arenalooks=on'),
+            soon('arena=over', '', 6000),
+            ('expect', 'arenacard=won'),
+            soon('arena=over', 'beta', 600),
+            ('@beta', 'expect', 'arenacard=lost'),
+        )),
+    # (the mutation: Beta given another look for Alpha, his cores' palettes apart: the games part before the first frame)
+    'netbattle-looks-apart': dict(CAST, START=FIGHT + f',arenalook={LOOK_A}/{LOOK_B}', GAMES={'beta': FIGHT_WEAK + f',arenalook={LOOK_B}/{LOOK_C}'},
+        STEPS=online.course(
+            MEET, CHALLENGE,
+            soon('arenastop=apart', '', 1500),
+            soon('arenastop=apart', 'beta', 600),
+            ('expect', 'bouts=0'),
+        )),
     'challenge-turned-down': dict(CAST, START=online.HOME, GAMES={'beta': online.HOME}, STEPS=online.course(
         MEET, CHALLENGE,
         soon('challenge~to Beta'),

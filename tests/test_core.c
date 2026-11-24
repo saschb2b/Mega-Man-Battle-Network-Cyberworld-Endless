@@ -253,14 +253,12 @@ static void test_looks(void) {
 	bad = l;
 	bad.colour[2] = 0;
 	CHECK(!look_valid(&bad) && !looks_set(3, &l), "a channel half LOOK_NONE refused, and a slot past the last");
-	looks_set_override(&bad);
-	w = looks_worn();
-	CHECK(!memcmp(&w, &l, sizeof w), "an invalid override is not worn");
-	Look dev = { { LOOK_GLITCH, LOOK_GLITCH, LOOK_GLITCH }, { 0, 1, 2 } };
-	looks_set_override(&dev);
-	w = looks_worn();
-	CHECK(!memcmp(&w, &dev, sizeof w), "the dev switch's look worn over the slot's");
-	looks_set_override(NULL);
+	Look parsed;
+	CHECK(looks_parse("11.0,-,5.15", &parsed) && parsed.palette[0] == LOOK_GLITCH && parsed.palette[1] == LOOK_NONE &&
+	      parsed.colour[1] == LOOK_NONE && parsed.colour[2] == 15, "the dev switch's look read");
+	CHECK(looks_parse("3.2", &parsed) && parsed.palette[1] == LOOK_NONE, "a dev look of one channel");
+	CHECK(!looks_parse("12.0", &parsed) && !looks_parse("1.16", &parsed) && !looks_parse("1.2,x", &parsed) && !looks_parse("1.2,3.4,5.6,7.8", &parsed),
+	      "words that are no look refused");
 	/* (the bytes a save writes, read back as profile_load reads them) */
 	static uint8_t bytes[sizeof(Profile)];
 	memcpy(bytes, &profile, sizeof profile);
