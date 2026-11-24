@@ -143,6 +143,8 @@
 #define BN6_EDITOR_LIST_IN    0x081224D4u /* ... the list into the folder (eToolkit +0x48): an entry made of each item, code << 9 | id */
 #define BN6_PRESET_FOLDERS    0x080213ACu /* the preset folders GiveFolder copies, 0x3C bytes each: two here, */
 #define BN6_PRESET_FOLDERS2   0x0802158Cu /* ... and four here (docs/rom/chips.md, Chip folders) */
+#define BN6_GIVE_FOLDER       0x081394F4u /* GiveFolder (bn6f's, found by its bytes): r0 the folder (low four bits) and its slot (the next four), its preset from BN6_FOLDER_TABLE */
+#define BN6_FOLDER_TABLE      0x08139644u /* ... the six presets' addresses it indexes by the folder: 0 the NEW GAME folder, 1-5 the story's (docs/rom/chips.md, Chip folders) */
 #define BN6_CHIP_NAME_OF      0x08027D10u /* a chip's name: r0 its archive, r1 its entry, by id > 255 of two (the archives' words at 0x08027D2C, its literal at +0x18) */
 #define BN6_CHIP_DESC_OF      0x08027D34u /* ... its description (0x08027D50, its literal at +0x18) */
 #define BN6_PACK_MARK_STORE   0x08006E80u /* encryption_applyPack's strb r1,[r7,r0]: a chip's mark written, by id */

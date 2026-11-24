@@ -325,6 +325,8 @@
 #define BN4_CHIP_FAMILY   0x0B        /* a chip record's +0xB: its attack family */
 #define BN4_CHIP_COUNT    389         /* ids 0-388 */
 #define BN4_GET_CHIP      0x080190D0u /* getChip: BN6's (0x08021AA4) found by its bytes, its literal BN4_CHIP_RECORDS */
+#define BN4_GIVE_FOLDER   0x08043154u /* its GiveFolder: r7 the folder (low four bits) and slot, the preset BN4_FOLDERS + folder x 0x3C copied by 0x080190E0 */
+#define BN4_FOLDERS       0x08017CC8u /* ... its twelve presets in a row, 0x3C bytes each as BN6's: 0 the NEW GAME folder (docs/rom/chips.md, Other games' folders) */
 #define BN4_CHIP_NAMES    0x087481D8u /* text archive: the chips' names, ids 0-255 (letters and digits spelt as BN6's) */
 #define BN4_CHIP_NAMES_HI 0x08748C14u /* ... ids 256 on */
 #define BN4_ENEMY_NAMES   0x0874A780u /* text archive: the enemies' names by id (a Navi's four versions in a row from 128) */
