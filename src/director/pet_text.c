@@ -398,6 +398,17 @@ static int bbs_posts(Post *out) {
 	/* (Bass waits in the Secret Area once it has been cleared: docs/game/bosses/super-bosses.md,
 	 * Super bosses) */
 	if (profile.marks & MARK_SECRET) POST(FACE_HEEL, "Lurker", "A cloaked Navi in the Secret Area! It deleted a copy in one blow... then went still as stone.");
+	/* (the shelf's floor: a starting folder still locked three finished
+	 * runs on, told here plainly, NEW with the post; docs/game/meta/shelf.md) */
+	static const Post told[FOLDER_COUNT] = {
+		[FOLDER_BLADE] = { 0x19, "SwordNut", "Deleted my first guardian. Next dive,my whole folder was swords!" },
+		[FOLDER_STORM] = { FACE_NAVI, "Zapper", "Took down an Aqua guardian. Ever since,I dive with Elec chips. ZAP!" },
+		[FOLDER_ZCANON] = { 0x14, "CannonKid", "Pulled off my first Program Advance! Next dive I had Cannons in A,B and C!" },
+		[FOLDER_BUSTING] = { FACE_HEEL, "NoHeals", "Cleared a whole area without one Recovery chip. Next dive,heavy hitters only!" },
+		[FOLDER_LEAN] = { FACE_TECH, "TenDown", "Made it ten layers down! Now any five of my chips make a hand." },
+	};
+	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f)
+		if (meta_folder_floored(f)) out[n++] = told[f];
 	#undef POST
 	return n;
 }

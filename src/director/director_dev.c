@@ -189,7 +189,7 @@ static bool dev_gift(const char *name) {
  * false for another. */
 static bool dev_say(const char *name) {
 	if (!strcmp(name, "status")) talk_start(status_words(), FACE_MEGAMAN);
-	else if (!strcmp(name, "rumor")) { if (rumors_line()) talk_start(rumors_line(), FACE_NAVI); }
+	else if (!strcmp(name, "rumor")) { if (rumors_line(NULL)) talk_start(rumors_line(NULL), FACE_NAVI); }
 	else if (!strcmp(name, "narrate")) {
 		const char *boxes = getenv("CYBERWORLD_NARRATE");
 		if (boxes && *boxes) talk_start(boxes, FACE_DAD);
@@ -226,6 +226,7 @@ static void dev_talks(void) {
 		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
 		else if (!strcmp(name, "spin")) script = D.objs.spin_found;
 		else if (!strcmp(name, "dark")) script = D.objs.dark_flame;
+		else if (!strcmp(name, "whisper")) script = D.objs.whisper;
 		else if (dev_say(name) || dev_gift(name)) return;
 		/* (a trader talks from the game's own trader archive) */
 		if (!strcmp(name, "trader") || !strcmp(name, "bugtrader")) {

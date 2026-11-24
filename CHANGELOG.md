@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **New: every starting folder on the setup's shelf.** The FOLDER row
+  turns through all six and counts the open ones. A locked folder can be
+  looked at, not taken: what it plays like, and a hint at what opens it,
+  never the deed itself. The answer is out there in the Net: a bystander
+  may tell how one opens, and from then on the setup says it plainly. Stuck
+  for three runs, the Endless Net BBS posts one. The summary's closest
+  unlock follows the same rule (issue #864). Thanks to Baron Solomon for
+  the idea.
+
 - **New: fast forward keeps the music at its own pace.** While the game
   runs fast, the song plays on as it would at BN6's speed instead of
   hurrying along with the game, and when fast forward stops the game

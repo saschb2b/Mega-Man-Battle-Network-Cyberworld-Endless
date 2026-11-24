@@ -466,9 +466,21 @@ static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, i
 	dark_rumor_due = false;
 	if (dark >= 0 && emu_debug_on()) fprintf(stderr, "rumor: BN6's own words on DarkChips, bystander %d\n", said);
 	if (dark >= 0) return dark;
-	const char *whisper = said == 1 ? rumors_line() : NULL;
+	int folder = 0;
+	const char *whisper = said == 1 ? rumors_line(&folder) : NULL;
 	if (whisper && emu_debug_on()) fprintf(stderr, "rumor: %s\n", whisper);
-	return whisper ? ta_say(text, who, whisper) : -1;
+	if (!whisper) return -1;
+	/* (a starting folder's rumor: heard once said, the director watching
+	 * its flag as a choice's; docs/game/meta/shelf.md) */
+	if (folder && out->nchoices < LAYER_MAX_CHOICES) {
+		int flag = LAYER_FLAG_BASE + out->nchoices;
+		out->choice[out->nchoices].type = CHOICE_WHISPER;
+		out->choice[out->nchoices++].flag = flag;
+		flag_clear(flag);
+		out->folder_told = folder;
+		return out->whisper = ta_say_flag(text, who, whisper, flag);
+	}
+	return out->whisper = ta_say(text, who, whisper);
 }
 
 /* Layer object i, a Mystery Data: the map's next one (16 at most), or
@@ -523,6 +535,8 @@ static void install_begin(Install *in) {
 	memset(out->lib_body, 0, sizeof out->lib_body);
 	out->trader_kind = -1;
 	out->dark_flame = out->dark_flame_obj = -1;
+	out->whisper = -1;
+	out->folder_told = 0;
 	layer_objs_official_level = 0;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */

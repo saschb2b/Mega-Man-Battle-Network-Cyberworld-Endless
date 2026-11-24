@@ -54,7 +54,7 @@ _Static_assert(offsetof(Profile, library_run) == 108, "Profile.library_run save 
 _Static_assert(offsetof(Profile, setup_new) == 112, "Profile.setup_new save offset changed");
 _Static_assert(offsetof(Profile, area_before) == 113, "Profile.area_before save offset changed");
 _Static_assert(offsetof(Profile, guardian_before) == 114, "Profile.guardian_before save offset changed");
-_Static_assert(offsetof(Profile, families_fought) == 116, "Profile.families_fought save offset changed");
+_Static_assert(offsetof(Profile, shelf) == 116 && sizeof(FolderShelf) == 8, "Profile.shelf (was families_fought) save offset changed");
 _Static_assert(offsetof(Profile, gem_taught) == 124, "Profile.gem_taught save offset changed");
 _Static_assert(offsetof(Profile, spins) == 125, "Profile.spins save offset changed");
 _Static_assert(offsetof(Profile, spin_colour) == 126, "Profile.spin_colour save offset changed");
