@@ -52,8 +52,7 @@
 #define BN4_DYING         0x0801052Du
 #define BN4_PRESTEP       0x080137BCu /* a family's update's first call (Billy's 0x080B9568) */
 #define BN4_STATE_RUNNER  0x08013C48u /* its second: r0 the family's state table, run by CurAction (+9) */
-/* A family's state table opens with BN4's generic states 0-5 (BN5's 0-5 as BN5's families' do; BN6's 0-5 of the same places,
- * tools/bn4_twins.py GENERIC4), its own from 6 (Billy's 0x080B9580: 6-9) */
+/* A family's state table opens with BN4's generic states 0-5 (BN5's 0-5 as BN5's families' do; BN6's 0-5 of the same places, tools/bn4_twins.py GENERIC4), its own from 6 (Billy's 0x080B9580: 6-9) */
 #define BN4_STATE_GENERIC_0 0x0800FCADu
 #define BN4_STATE_GENERIC_1 0x0801013Bu
 #define BN4_STATE_GENERIC_2 0x0801014Du
@@ -132,8 +131,7 @@
                                        * 0x08012DAE (BN6_COLL_PANEL_BYTE, +0xC: 0x0801A04C's 0x0800E994 at 0x0801A062) */
 #define BN4_COLL_COUNTER  0x0B        /* ... u8, its counter time (its window to be countered), set by 0x0800AFBC at 0x0800AFD6
                                        * (BN6_COLL_COUNTER, +0xD: its twin 0x0800E9DC at 0x0800E9F6) */
-/* (the hit pass: BN4's from 0x08012BC0, its twin BN6's from 0x081D7830, store by store: r7 the attacker's collision data, r6 the
- * struck's) */
+/* (the hit pass: BN4's from 0x08012BC0, its twin BN6's from 0x081D7830, store by store: r7 the attacker's collision data, r6 the struck's) */
 #define BN4_COLL_HIT_KIND 0x07        /* ... u8 set by 0x08012F74 (BN6_COLL_HIT_KIND, +9: 0x0801A140); the thunder's init gives 3 in both */
 #define BN4_COLL_HIT_BITS 0x0D        /* ... u8 the struck's hit bits, the attacker's +0xC ORed in at 0x08012C40-0x08012C46 (BN6_COLL_HIT) */
 #define BN4_COLL_STATUS_GIVEN 0x0E    /* ... u8 the status a hit gives, from its object's +6 (0x08013212), passed at 0x08012BEC
