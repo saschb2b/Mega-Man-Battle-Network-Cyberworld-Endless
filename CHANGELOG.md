@@ -1,5 +1,8 @@
 # Changelog
 
+Come and talk: runs, folders, NetBattles, help and ideas on the game's
+Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
+
 ## Unreleased
 
 - **New: MegaMan in colours of your own.** Colours, a new entry of the
