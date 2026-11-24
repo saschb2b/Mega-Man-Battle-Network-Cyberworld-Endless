@@ -49,6 +49,7 @@ static const char *const words[] = {
 	"Souls from the guardians we delete",   /* SW_SOUL_GUARDIANS_NOTE */
 	"SoulT+1",   /* SW_SOULT */
 	"Each unison a turn longer, from the first battle",   /* SW_SOULT_NOTE */
+	"LOCKED",   /* SW_LOCKED */
 };
 const char *setup_word(SetupWord w) {
 	_Static_assert(sizeof words / sizeof *words == SW_COUNT, "a word for each SetupWord");
@@ -75,7 +76,19 @@ const char *setup_helper_note(char *buf, size_t n, const char *about, const char
 	return buf;
 }
 
-const char *setup_shut_folder(char *buf, size_t n, const char *name, const char *opens) {
-	snprintf(buf, n, "%s: %s", name, opens);
+const char *setup_folder_count(char *buf, size_t n, int open, int all) {
+	snprintf(buf, n, "%d/%d", open, all);
+	return buf;
+}
+
+/* (the kind of deed, never the deed: "Opens when something big falls") */
+const char *setup_folder_hint(char *buf, size_t n, const char *hint) {
+	snprintf(buf, n, "Opens %s", hint);
+	return buf;
+}
+
+/* (heard: the deed, as the summary says it, "Delete any guardian to open it") */
+const char *setup_folder_heard(char *buf, size_t n, const char *opens) {
+	snprintf(buf, n, "%c%s to open it", opens[0] >= 'a' && opens[0] <= 'z' ? opens[0] - 'a' + 'A' : opens[0], opens + 1);
 	return buf;
 }

@@ -22,7 +22,6 @@
 #include "npc.h"
 #include "npc_lines.h"
 #include "rivals.h"
-#include "rumor_lines.h"
 #include "rush.h"
 #include "save.h"
 #include "trader.h"
@@ -350,11 +349,7 @@ static int rumor_talk(TextArchive *text, LayerObjs *out, int face) {
 	if (!guardian_rumor(navi)) return -1;
 	/* (heard, MegaMan names him for the rest of the act: the director
 	 * watches the flag as a choice) */
-	int flag = LAYER_FLAG_BASE + out->nchoices;
-	out->choice[out->nchoices].type = OBJ_NPC;
-	out->choice[out->nchoices++].flag = flag;
-	flag_clear(flag);
-	return ta_say_flag(text, face, rumor_words(navi), flag);
+	return ta_say_flag(text, face, rumor_words(navi), layer_heard_flag(out, OBJ_NPC));
 }
 
 /* The layer's last bystander, whose place a flame of darkness takes (the
@@ -456,9 +451,7 @@ static int bystander_talk(TextArchive *text, LayerObjs *out, int i, int first, i
 	dark_rumor_due = false;
 	if (dark >= 0 && emu_debug_on()) fprintf(stderr, "rumor: BN6's own words on DarkChips, bystander %d\n", said);
 	if (dark >= 0) return dark;
-	const char *whisper = said == 1 ? rumors_line() : NULL;
-	if (whisper && emu_debug_on()) fprintf(stderr, "rumor: %s\n", whisper);
-	return whisper ? ta_say(text, who, whisper) : -1;
+	return said == 1 ? layer_whisper_talk(text, out, who) : -1;
 }
 
 /* Layer object i, a Mystery Data: the map's next one (16 at most), or
@@ -514,6 +507,7 @@ static void install_begin(Install *in) {
 	memset(out->lib_body, 0, sizeof out->lib_body);
 	out->trader_kind = -1;
 	out->dark_flame = out->dark_flame_obj = -1;
+	out->whisper = -1, out->folder_told = 0;
 	layer_objs_official_level = 0;
 	/* the element that answers this act: its guardian's weakness, else its
 	 * viruses' (the Net Dealer stocks a chip of it and says so) */

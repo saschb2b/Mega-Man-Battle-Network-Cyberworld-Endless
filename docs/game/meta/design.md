@@ -3,7 +3,7 @@ type: Design
 title: "The meta layer's design"
 description: "The meta layer's design: what you bring against what you find, the loop stack, variety not power, and its pieces: starting folders, Cross starts, the threat staircase, helpers, the Library, gates, routes, run length."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T22:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T17:28:00Z }
 ---
 
 # The meta layer's design
@@ -230,7 +230,9 @@ them a use.
   then the title's marks) and what is closest, a whole sentence in
   KeyItem's information box ("Delete any guardian to open the Blade
   folder"; a playtester read the old "Win a short net: the endless net"
-  as cut off). Its "Viruses deleted" counts every virus deleted, in a
+  as cut off). For a folder, since 24 November 2026, the hint while it is
+  locked and unheard ("The Blade folder opens when something big falls."),
+  the plain sentence once heard ([The shelf of starting folders](shelf.md)). Its "Viruses deleted" counts every virus deleted, in a
   battle lost or run from too. A Cross that won't fit
   beside the run's says, at its first win, that the next dive can start
   with it.

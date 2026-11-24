@@ -132,9 +132,25 @@ static const char *pa_line(uint32_t seed) {
 /* ---- Secrets: each said only while the profile has yet to find it ----
  * (BN6's own compression codes, and its buttons, a bystander never
  * teaches: the voice sweep, docs/voice/sweep/net.md) */
-static const char *secret_line(uint32_t seed) {
-	const char *say[4];
-	int n = 0;
+
+/* A starting folder still locked on the setup's shelf, as a friend's
+ * story told it: the deed said plainly, since a rumor is how a folder is
+ * heard (issue #864, docs/game/meta/shelf.md); each true of what the
+ * folder holds. */
+static const char *folder_line(int folder) {
+	switch (folder) {
+	case FOLDER_BLADE: return "My buddy deleted a guardian!|Next dive,his whole folder was swords!";
+	case FOLDER_STORM: return "Did you hear? Delete an Aqua guardian...|...and you dive with Elec chips! Zap!";
+	case FOLDER_ZCANON: return "A pal pulled off a Program Advance!|Now he dives with Cannons in A,B and C!";
+	case FOLDER_BUSTING: return "Clear a whole area,no Recovery chips...|...and your next folder hits like a truck!";
+	case FOLDER_LEAN: return "Somebody dove ten layers down!|Now any five of his chips make a hand!";
+	default: return NULL;
+	}
+}
+
+static const char *secret_line(uint32_t seed, int *folder) {
+	const char *say[5];
+	int told[5] = { 0 }, n = 0;
 	int depth = run.depth;
 	if (meta_spins() != 0x3F && depth >= 2 && depth <= 8)
 		say[n++] = "I heard a blue Mystery Data down deep hides a Spin!|A color nobody's found yet! A new one every dive!";
@@ -146,13 +162,23 @@ static const char *secret_line(uint32_t seed) {
 		say[n++] = "I swear a Navi walked off a walkway's end!|Right over nothing! Some floor here can't be seen!";
 	if (!profile.reg_taught && pacing_loop(depth) == 0 && !is_boss_depth(depth))
 		say[n++] = "Every layer before a guardian hides a RegUp,off the path!";
-	return n ? say[seed % (uint32_t)n] : NULL;
+	/* (a locked folder, picked by the layer's seed among those unheard) */
+	int f = meta_folder_rumor(seed >> 4);
+	if (f && folder_line(f)) { told[n] = f; say[n++] = folder_line(f); }
+	if (!n) return NULL;
+	*folder = told[seed % (uint32_t)n];
+	return say[seed % (uint32_t)n];
 }
 
-const char *rumors_line(void) {
+const char *rumors_line(int *folder) {
 	uint32_t seed = run.layer_seed * 2654435761u;
-	const char *secret = secret_line(seed >> 8), *pa = pa_line(seed >> 16);
+	int told = 0;
+	const char *secret = secret_line(seed >> 8, &told), *pa = pa_line(seed >> 16);
+	if (folder) *folder = 0;
 	/* (a secret one layer in three while one is left, a recipe else) */
-	if (secret && (!pa || seed % 3 == 0)) return secret;
+	if (secret && (!pa || seed % 3 == 0)) {
+		if (folder) *folder = told;
+		return secret;
+	}
 	return pa ? pa : secret;
 }

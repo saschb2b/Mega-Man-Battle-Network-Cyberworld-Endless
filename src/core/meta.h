@@ -13,6 +13,8 @@ typedef struct {
 	const char *name;
 	const char *about;   /* its style and its cost, a line */
 	const char *opens;   /* how it opens ("delete any guardian"), NULL: open from the start */
+	const char *hint;    /* ... and the kind of deed, never the deed, after "Opens" ("when something big falls") */
+	const char *style;   /* what it plays like in a line, the reason to want it while locked ("Any five chips make a hand") */
 } FolderInfo;
 
 const FolderInfo *meta_folder(int folder);
@@ -20,6 +22,27 @@ const FolderInfo *meta_folder(int folder);
  * *), or NULL for the Standard folder, which is the game's own. */
 const uint16_t *meta_folder_chips(int folder);
 bool meta_folder_open(int folder);
+/* The shelf of starting folders (issue #864, docs/game/meta/shelf.md;
+ * meta_shelf.c): the setup shows all six, each open, or locked with a
+ * hint at the kind of deed, or heard (its plain milestone) once a
+ * bystander's rumor or the floor's post on the BBS told it. */
+enum { SHELF_LOCKED, SHELF_HEARD, SHELF_OPEN };
+int meta_folder_state(int folder);
+int meta_folders_open(void);
+/* Folder `folder` heard of (a bystander's rumor said): kept in the profile. */
+void meta_folder_hear(int folder);
+/* The rumor a layer's whisperer may tell: a locked folder not yet heard,
+ * picked by `pick`, once the shelf has been shown; 0 none. */
+int meta_folder_rumor(uint32_t pick);
+/* Whether the floor's post on the BBS told folder `folder`. */
+bool meta_folder_floored(int folder);
+/* The setup has shown the shelf: the floor's count of finished runs
+ * begins, if it had not. */
+void meta_shelf_seen(void);
+/* A run's end (meta_run_over): three finished runs since the count began,
+ * and the first folder still locked and unheard is heard by the floor's
+ * post (the BBS's NEW); the count begins again. */
+void meta_shelf_run_over(void);
 /* The milestones the Z-Canon and Busting folders open with, in any run
  * (Profile.folder_feats): chip `id` used by MegaMan in a battle (a Program
  * Advance, a Recovery chip; meta_chip_watched says which are worth the

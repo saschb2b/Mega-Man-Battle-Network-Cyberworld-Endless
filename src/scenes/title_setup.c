@@ -66,6 +66,7 @@ static struct {
 	int top[TABS];   /* ... and its first row in sight */
 	int t;           /* frames since the page came: its fade */
 	SetupChoice c;
+	int look;        /* the folder the FOLDER row shows: the run's, or a locked one looked at (the shelf, issue #864) */
 } S;
 
 /* the rows the last summary's unlocks are on (profile.setup_new) */
@@ -150,6 +151,7 @@ void title_setup_open(void) {
 	S.shown = true;
 	S.t = 0;
 	meta_unlocks_unsaid();
+	meta_shelf_seen();
 	S.c.net = profile.last_net == RUN_ENDLESS && meta_endless_open() ? RUN_ENDLESS : RUN_SHORT;
 	S.c.folder = meta_folder_open(profile.last_folder) ? profile.last_folder : FOLDER_STANDARD;
 	S.c.cross = meta_cross_open(profile.last_cross) ? profile.last_cross : 0;
@@ -158,6 +160,7 @@ void title_setup_open(void) {
 	S.c.soul = soul_form() && soul_offered(S.c.form, profile.last_soul) ? profile.last_soul : 0;
 	S.c.helpers = profile.last_helpers & ((1 << meta_helpers_shown()) - 1);
 	S.c.extras_off = profile.last_extras_off & ((1 << EXTRAS) - 1);
+	S.look = S.c.folder;
 	/* (each page's cursor on its foot, so that A goes page by page to
 	 * JACK IN!; but on the row of what the last run opened, as a new
 	 * unlock is spent here: a playtester's A went through a setup that
@@ -182,7 +185,7 @@ void title_setup_open(void) {
 static int value_of(int row) {
 	if (row == ROW_FORM) return S.c.form;
 	if (row == ROW_CROSS) return soul_form() ? S.c.soul : S.c.cross;
-	return row == ROW_NET ? S.c.net : row == ROW_FOLDER ? S.c.folder : S.c.threat;
+	return row == ROW_NET ? S.c.net : row == ROW_FOLDER ? S.look : S.c.threat;
 }
 
 /* Left or Right on the FORM row: the next offered form; on the Soul row,
@@ -205,11 +208,12 @@ static void turn(int row, int d) {
 	int was = value_of(row);
 	if (row == ROW_FORM || (row == ROW_CROSS && soul_form())) turn_form(row, d);
 	else if (row == ROW_NET && meta_endless_open()) S.c.net = S.c.net == RUN_SHORT ? RUN_ENDLESS : RUN_SHORT;
-	if (row == ROW_FOLDER)   /* (the open ones only) */
-		for (int k = 1; k < FOLDER_COUNT; ++k) {
-			int f = (S.c.folder + d * k + FOLDER_COUNT * k) % FOLDER_COUNT;
-			if (meta_folder_open(f)) { S.c.folder = f; break; }
-		}
+	/* (the whole shelf, a locked folder looked at but not taken: the run
+	 * keeps the last open one, issue #864) */
+	if (row == ROW_FOLDER) {
+		S.look = (S.look + d + FOLDER_COUNT) % FOLDER_COUNT;
+		if (meta_folder_open(S.look)) S.c.folder = S.look;
+	}
 	if (row == ROW_CROSS && !soul_form())   /* (none, or an open one) */
 		for (int k = 1; k <= META_CROSSES; ++k) {
 			int c = (S.c.cross + d * k + (META_CROSSES + 1) * k) % (META_CROSSES + 1);
@@ -239,6 +243,8 @@ static void turn_page(int d, int sfx) {
  * (A as Right), a helper or an extra on or off, as Options' Display turns
  * its lines */
 static void row_turn(int row, int d, bool a) {
+	/* (A on a locked folder: refused, with BN6's refusal) */
+	if (S.tab == TAB_RUN && row == ROW_FOLDER && a && !meta_folder_open(S.look)) { audio_sfx(SFX_ERROR); return; }
 	if (S.tab == TAB_RUN) { turn(row, d); return; }
 	if (S.tab == TAB_HELP) S.c.helpers ^= 1 << row;
 	else S.c.extras_off ^= 1 << row;
@@ -255,6 +261,8 @@ bool title_setup_update(void) {
 	if (btn_repeat(BTN_DOWN)) { *at = (*at + 1) % (n + 1); scroll(S.tab); audio_sfx(SFX_CURSOR); }
 	int row = row_at(), d = btn_repeat(BTN_RIGHT) ? 1 : btn_repeat(BTN_LEFT) ? -1 : 0;
 	if (row >= 0 && (d || btn_pressed(BTN_A))) row_turn(row, d ? d : 1, !d);
+	/* (off the FOLDER row, it shows the folder the run takes again) */
+	if (S.tab != TAB_RUN || row != ROW_FOLDER) S.look = S.c.folder;
 	if (row >= 0 || !btn_pressed(BTN_A)) return false;
 	if (S.tab == TABS - 1) return go();   /* (JACK IN!) */
 	turn_page(1, SFX_SELECT);   /* (NEXT: the next page, on its foot as it was left) */
@@ -304,12 +312,16 @@ static const char *run_note(int row, char *buf, size_t n, char shut[][SHUT_MAX],
 	switch (row) {
 	case ROW_NET:
 		return setup_word(S.c.net == RUN_ENDLESS ? SW_ENDLESS_NOTE : meta_endless_open() ? SW_SHORT_NOTE : SW_SHORT_WIN_NOTE);
-	case ROW_FOLDER:
-		/* (every folder still to open, and how: the telegraph comes first) */
-		for (int f = 1; f < FOLDER_COUNT && *nshut < SHUT_LINES; ++f)
-			if (!meta_folder_open(f) && meta_folder(f)->opens)
-				setup_shut_folder(shut[(*nshut)++], SHUT_MAX, meta_folder(f)->name, meta_folder(f)->opens);
-		return meta_folder(S.c.folder)->about;
+	case ROW_FOLDER: {
+		/* (what the folder shown plays like; under it, while locked, the
+		 * kind of deed that opens it, and the deed once heard: issue #864) */
+		const FolderInfo *f = meta_folder(S.look);
+		int state = meta_folder_state(S.look);
+		if (state == SHELF_LOCKED && f->hint) setup_folder_hint(shut[(*nshut)++], SHUT_MAX, f->hint);
+		if (state == SHELF_HEARD && f->opens) setup_folder_heard(shut[(*nshut)++], SHUT_MAX, f->opens);
+		/* (a locked one's style in a line, so its hint has room under it) */
+		return state == SHELF_OPEN || !f->style ? f->about : f->style;
+	}
 	case ROW_FORM: return form_note(shut, nshut);
 	case ROW_CROSS: return soul_form() ? soul_note() : cross_note(buf, n, shut, nshut);
 	default:
@@ -360,40 +372,66 @@ static void tabs_draw(int x0, int y0) {
 	look_tabs(x0 + WIN_X, y0 + TABS_Y, WIN_W, TABS, S.tab, names);
 }
 
-/* a row's name, NEW after it where `fresh`: orange capitals over their
- * dark red, as BN6 marks a new mail */
-static void label_draw(int x0, int y, const char *s, bool fresh) {
+/* a row's name, a count after it in the PET's small capitals where
+ * `count` ("3/6", the folders open), NEW after them where `fresh`: orange
+ * capitals over their dark red, as BN6 marks a new mail */
+static void label_draw(int x0, int y, const char *s, bool fresh, const char *count) {
+	int x = x0 + LABEL_X + look_text_width(s) + 5;
 	look_text(x0 + LABEL_X, y, s, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
-	if (fresh) look_new(x0 + LABEL_X + look_text_width(s) + 5, y + 3, setup_word(SW_NEW));
+	if (count) {
+		look_caps(x, y + 3, count, LOOK_TEXT, LOOK_SHADE);
+		x += look_caps_width(count) + 5;
+	}
+	if (fresh) look_new(x, y + 3, setup_word(SW_NEW));
 }
 
 /* a value at the right, BN6's small orange arrows either side where the
- * d-pad turns it (as Options' lines) */
-static void value_draw(int x0, int y, const char *v, bool turns) {
+ * d-pad turns it (as Options' lines); one that cannot be taken in a list's
+ * dim letters, the information box's tag before it saying so (a locked
+ * folder: the PET's own pieces, no new art) */
+static void value_draw(int x0, int y, const char *v, bool turns, const char *shut) {
 	int r = x0 + VALUE_R, l = r - look_text_width(v);
-	look_text(l, y, v, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+	look_text(l, y, v, shut ? LOOK_DIM : LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+	if (shut) {
+		int w = look_caps_width(shut) + 6;
+		look_tag(l - 5 - 4 - 3 - w, y + 1, w, 9, shut, LOOK_SHADE);
+	}
 	if (!turns) return;
 	look_pointer(l - 5, y, 4, true, PET_ORANGE);
 	look_pointer(r + 4, y, 4, false, PET_ORANGE);
 }
 
+/* a RUN row's name (a switch: the consoles' GCC read a table of them as
+ * indexed past its end once NEW's test was inlined beside it) */
+static SetupWord run_row_word(int row) {
+	switch (row) {
+	case ROW_NET: return SW_NET;
+	case ROW_FOLDER: return SW_FOLDER;
+	case ROW_FORM: return SW_FORM;
+	case ROW_CROSS: return soul_form() ? SW_SOUL : SW_CROSS;
+	default: return SW_THREAT;
+	}
+}
+
 /* a RUN row: its name and value */
 static void run_row_draw(int x0, int y, int row) {
-	static const SetupWord names[RUN_ROWS] = { SW_NET, SW_FOLDER, SW_FORM, SW_CROSS, SW_THREAT };
-	int open_folders = 0;
-	for (int f = 0; f < FOLDER_COUNT; ++f) open_folders += meta_folder_open(f);
-	char v[16];
+	if (row < 0 || row >= RUN_ROWS) return;
+	char v[16], count[16];
 	snprintf(v, sizeof v, "%d", S.c.threat);
 	int forms = 0, souls = 0;
 	for (int f = RUN_FORM_CROSS; f < RUN_FORMS; ++f) forms += form_offered(f);
 	for (int p = 1; soul_form() && p <= FORM_POWERS; ++p) souls += soul_offered(S.c.form, p);
 	const char *start = soul_form() ? (S.c.soul ? forms_power_name(S.c.form, S.c.soul) : setup_word(SW_NONE))
 		: S.c.cross ? powers_cross_name(S.c.cross) : setup_word(SW_NONE);
-	const char *values[RUN_ROWS] = { setup_word(S.c.net == RUN_ENDLESS ? SW_ENDLESS : SW_SHORT), meta_folder(S.c.folder)->name,
+	const char *values[RUN_ROWS] = { setup_word(S.c.net == RUN_ENDLESS ? SW_ENDLESS : SW_SHORT), meta_folder(S.look)->name,
 		meta_form_name(S.c.form), start, v };
-	bool turns[RUN_ROWS] = { meta_endless_open(), open_folders > 1, forms > 1, soul_form() ? souls > 0 : crosses_open() > 0, meta_threat_open() > 0 };
-	label_draw(x0, y, setup_word(row == ROW_CROSS && soul_form() ? SW_SOUL : names[row]), row_new(row));
-	value_draw(x0, y, values[row], turns[row]);
+	/* (the shelf turns through every folder, the open ones counted beside its name) */
+	bool turns[RUN_ROWS] = { meta_endless_open(), true, forms > 1, soul_form() ? souls > 0 : crosses_open() > 0, meta_threat_open() > 0 };
+	if (row == ROW_FOLDER) setup_folder_count(count, sizeof count, meta_folders_open(), FOLDER_COUNT);
+	/* (NEW, a folder opened, gives way to a locked one's tag while the row shows one) */
+	bool fresh = row_new(row) && (row != ROW_FOLDER || meta_folder_open(S.look));
+	label_draw(x0, y, setup_word(run_row_word(row)), fresh, row == ROW_FOLDER ? count : NULL);
+	value_draw(x0, y, values[row], turns[row], row == ROW_FOLDER && !meta_folder_open(S.look) ? setup_word(SW_LOCKED) : NULL);
 }
 
 /* the foot's button: NEXT, or JACK IN! on the last page, NaviCust's RUN!,
@@ -418,8 +456,8 @@ static void page_draw(int x0, int y0) {
 			bool on = S.tab == TAB_HELP ? S.c.helpers >> row[i] & 1 : !(S.c.extras_off >> row[i] & 1);
 			const char *name = S.tab == TAB_HELP ? (row[i] == HELPER_BEAST && soul_form() ? setup_word(SW_SOULT) : meta_helper(row[i])->name)
 				: extra_words(row[i])->name;
-			label_draw(x0, y, name, S.tab == TAB_HELP && row[i] == HELPER_BEAST && (profile.setup_new & SETUP_NEW_HELP));
-			value_draw(x0, y, setup_word(on ? SW_ON : SW_OFF), true);
+			label_draw(x0, y, name, S.tab == TAB_HELP && row[i] == HELPER_BEAST && (profile.setup_new & SETUP_NEW_HELP), NULL);
+			value_draw(x0, y, setup_word(on ? SW_ON : SW_OFF), true, NULL);
 		}
 		/* (BN6's lists keep a line's colour under the cursor: the arrow alone says where it is) */
 		if (i == at) look_cursor(x0 + CURSOR_X, y + 2);
@@ -430,15 +468,18 @@ static void page_draw(int x0, int y0) {
 void title_setup_describe(FILE *f) {
 	if (!S.shown) return;
 	static const char *const tabs[TABS] = { "run", "help", "extras" }, *const rows[RUN_ROWS] = { "net", "folder", "form", "cross", "threat" };
-	int row = row_at(), folders = 0;
-	for (int k = 0; k < FOLDER_COUNT; ++k) folders += meta_folder_open(k);
+	static const char *const states[] = { "locked", "heard", "open" };
+	int row = row_at(), folders = meta_folders_open();
 	fprintf(f, "tab %s\n", tabs[S.tab]);
 	if (row < 0) fprintf(f, "row foot\n");
 	else if (S.tab == TAB_RUN) fprintf(f, "row %s\n", rows[row]);
 	else fprintf(f, "row %d\n", row);
 	meta_setup_describe(f, S.c.net, S.c.folder, S.c.cross, S.c.threat, S.c.helpers, S.c.extras_off);
 	if (run_debug_forms) fprintf(f, "form %s\nstartsoul %s\n", meta_form_name(S.c.form), S.c.soul ? forms_power_name(S.c.form, S.c.soul) : "none");
-	fprintf(f, "endless %s\nfolders %d\ncrosses %d\nthreatmax %d\nhelpersshown %d\n", meta_endless_open() ? "open" : "shut", folders,
+	/* (the shelf: the folder the row shows and its state, each folder's, issue #864) */
+	fprintf(f, "folderlook %s\nfolderstate %s\nshelf", meta_folder(S.look)->name, states[meta_folder_state(S.look)]);
+	for (int k = 1; k < FOLDER_COUNT; ++k) fprintf(f, "%s%s:%s", k > 1 ? "," : " ", meta_folder(k)->name, states[meta_folder_state(k)]);
+	fprintf(f, "\nendless %s\nfolders %d\ncrosses %d\nthreatmax %d\nhelpersshown %d\n", meta_endless_open() ? "open" : "shut", folders,
 		crosses_open(), meta_threat_open(), meta_helpers_shown());
 }
 

@@ -177,6 +177,10 @@ static bool act_on_choices(void) {
 			/* a bystander named the act's guardian (and no more to do) */
 			D.heard_act = D.layer_act;
 			break;
+		case CHOICE_WHISPER:
+			/* ... or told how a starting folder opens */
+			layer_whisper_heard();
+			break;
 		case OBJ_BATTLER:
 			/* (his stake paid: BN6's own first round, docs/world/level-design/) */
 			battler_begin();

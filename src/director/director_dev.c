@@ -189,7 +189,7 @@ static bool dev_gift(const char *name) {
  * false for another. */
 static bool dev_say(const char *name) {
 	if (!strcmp(name, "status")) talk_start(status_words(), FACE_MEGAMAN);
-	else if (!strcmp(name, "rumor")) { if (rumors_line()) talk_start(rumors_line(), FACE_NAVI); }
+	else if (!strcmp(name, "rumor")) { if (rumors_line(NULL)) talk_start(rumors_line(NULL), FACE_NAVI); }
 	else if (!strcmp(name, "narrate")) {
 		const char *boxes = getenv("CYBERWORLD_NARRATE");
 		if (boxes && *boxes) talk_start(boxes, FACE_DAD);
@@ -197,6 +197,21 @@ static bool dev_say(const char *name) {
 	}
 	else return false;
 	return true;
+}
+
+/* A --talk name's script in the layer's archive: a kind's first talker,
+ * the guardian's, a find's, the flame's, the whisper's; -1 none on this
+ * layer, -2 a name of none of these */
+static int named_script(const char *name) {
+	for (unsigned i = 0; i < sizeof kinds / sizeof *kinds; ++i)
+		if (!strcmp(name, kinds[i].name)) return D.objs.script_of[kinds[i].type];
+	const struct { const char *name; int script; } named[] = {
+		{ "intro", D.objs.guardian.intro }, { "defeat", D.objs.guardian.defeat }, { "reward", D.objs.guardian.reward },
+		{ "fragment", D.objs.fragment_found }, { "spin", D.objs.spin_found }, { "dark", D.objs.dark_flame }, { "whisper", D.objs.whisper },
+	};
+	for (unsigned i = 0; i < sizeof named / sizeof *named; ++i)
+		if (!strcmp(name, named[i].name)) return named[i].script;
+	return -2;
 }
 
 /* --talk NAME:FRAME,...: from the layer's frame FRAME, once no chat is
@@ -217,16 +232,8 @@ static void dev_talks(void) {
 		int frame = 0;
 		if (sscanf(t, "%31[^:]:%d", name, &frame) != 2 || D.frame < frame || (done & (1u << n))) continue;
 		done |= 1u << n;
-		int script = -1;
-		for (unsigned i = 0; i < sizeof kinds / sizeof *kinds; ++i)
-			if (!strcmp(name, kinds[i].name)) script = D.objs.script_of[kinds[i].type];
-		if (!strcmp(name, "intro")) script = D.objs.guardian.intro;
-		else if (!strcmp(name, "defeat")) script = D.objs.guardian.defeat;
-		else if (!strcmp(name, "reward")) script = D.objs.guardian.reward;
-		else if (!strcmp(name, "fragment")) script = D.objs.fragment_found;
-		else if (!strcmp(name, "spin")) script = D.objs.spin_found;
-		else if (!strcmp(name, "dark")) script = D.objs.dark_flame;
-		else if (dev_say(name) || dev_gift(name)) return;
+		int script = named_script(name);
+		if (script == -2 && (dev_say(name) || dev_gift(name))) return;
 		/* (a trader talks from the game's own trader archive) */
 		if (!strcmp(name, "trader") || !strcmp(name, "bugtrader")) {
 			int k = D.objs.trader_kind;

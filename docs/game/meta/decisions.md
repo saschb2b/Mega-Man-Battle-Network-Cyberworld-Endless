@@ -3,7 +3,7 @@ type: Design
 title: "Decisions and phase one"
 description: "The meta layer's decisions (options only, a short net by default, helpers counting toward unlocks, a setup screen), phase one as built (unlocks, threat rungs 1-5, helpers, the Blade and Storm folders) and the designed Z-Canon, Busting and Lean folders."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T17:28:00Z }
 sources:
   - id: owner
     resource: "The owner's decisions, given in the project's sessions and written down here"
@@ -81,6 +81,11 @@ something Standard keeps.
 | Z-Canon | Cannon A A B B C, CrakShot A x2, TankCan1 A, DublShot C x2, Rflectr1 C x2, AirShot * x2, MiniBomb B x2, AreaGrab B x2, HolyPanl B, Barrier A x2, Recov10 A x2 * x2, Atk+10 * x3, PanlGrab * x2 | GigaCan1 (Cannon A, B, C in a row) waits in every draw; the rest are shots in its codes | The design's few answers behind cover: two MiniBombs its only throw (that its shots stop at the first foe in the row is assumed from play, not measured) | A Program Advance used, any, in any run |
 | Busting | TankCan1 R x4, HiCannon L x3, WideSwrd L x3, Sword L x3, MiniBomb L x3 R x2, Thunder R x3, Barrier R x2, AreaGrab * x2, PanlGrab *, Atk+10 * x4 | The heaviest chips act 1 allows, in two codes; Thunder holds a foe for TankCan1's wind-up | No Recovery chip: every heal is the net's (a Mr.Prog's, a find's). No LongSwrd, so LifeSword stays Blade's | An act cleared with no Recovery chip used in it (its guardian deleted; the Secret Area's master ends no act) |
 | Lean | Cannon B x5, MiniBomb B x5, Vulcan1 B x5, Thunder B x5, AreaGrab B x4, Atk+10 * x3, Recov10 * x3 | Seven kinds, all in B or *: any five chips make a hand, every turn | Every chip weak and near the same; and the code lean (phase two) brings its finds in B too, so a strong find off B breaks the hands it is built on | Layer 10 reached in any run (the best depth, so a veteran's profile has it) |
+
+On the setup all six stand on one shelf, the locked ones with a hint at
+their milestone rather than the milestone itself, which a rumor in the net
+or the BBS's late post tells ([The shelf of starting folders](shelf.md), 24
+November 2026).
 
 The game-design reasoning, the part the design left open:
 
