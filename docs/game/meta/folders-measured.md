@@ -42,7 +42,7 @@ The folders' design rules are in [the meta layer's design](design.md),
   player, not how well he plays it.
 - **The autopilot.** The host build's autopilot (`CYBERWORLD_AUTOPILOT=1`)
   played each folder from `--scene town` with `--setup short,F,T,0`, a
-  fresh data folder a seed, 90000 frames, seeds 1-12 at threat 1; threat
+  fresh data folder a seed, 90000 frames, seeds 1-12 at threat 1 (72 runs, about 40 minutes on six cores); threat
   3 and 5 only for the runs that passed act 1 at threat 1, because the
   rungs change nothing before act 2 (`pacing.c`'s extra version and
   `loot.c`'s from `pacing_act(depth) >= 1`; the shops' from threat 3 are
@@ -89,11 +89,55 @@ log's `foehp`), its guardian 500 (seed 1's, g13).
 
 ### The autopilot
 
-AUTOPILOT_TABLE
+Threat 1, seeds 1-12 each (72 runs); the act-1 guardian counted where
+the run reached him:
+
+| Folder | Layer reached, mean (each seed) | Act-1 guardian won | Deaths: guardian, virus battle | Act-1 virus battles: frames, chips used, HP lost |
+| --- | --- | --- | --- | --- |
+| Standard | 3.4 (3 3 3 6 3 5 3 3 3 3 3 3) | 2 of 11 | 10, 2 | 549, 3.4, 4 |
+| Blade | 3.8 (3 2 5 6 3 3 3 5 6 3 3 3) | 4 of 10 | 8, 4 | 1103, 8.0, 10 |
+| Storm | 4.8 (3 3 5 6 6 6 5 5 6 5 5 3) | 9 of 12 | 7, 5 | 502, 4.8, 3 |
+| Z-Canon | 3.7 (3 3 3 6 3 3 6 5 3 3 3 3) | 4 of 12 | 10, 2 | 589, 4.3, 6 |
+| Busting | 4.5 (3 3 5 2 8 6 6 6 6 3 3 3) | 6 of 11 | 9, 3 | 354, 3.2, 7 |
+| Lean | 5.1 (6 6 5 6 6 3 5 5 3 5 5 6) | 10 of 12 | 7, 5 | 371, 4.7, 4 |
+
+At threats 3 and 5 the 34 runs that passed act 1 at threat 1 were played
+again: every one reached the same layer and died the same way at both
+rungs (Standard 2 runs, Blade 4, Storm 9, Z-Canon 3, Busting 6, Lean 10;
+all ended at layers 5-6, act 2's viruses or its guardian). In these runs
+the rungs from 1 to 5 made no difference the autopilot met; where they
+bite (act 3 on) it never got.
+
+- **The folder decides the autopilot's act 1.** Seeds give each folder
+  the same areas and guardians, and the act-1 guardian falls to Lean 10
+  times in 12, Storm 9, Busting 6, but Standard 2 in 11 and Z-Canon 4.
+  The autopilot picks the largest legal hand: Lean (one code) and Storm
+  (two) hand it four to five chips a turn, Standard's five codes three.
+  A player builds hands better than it does, so this overstates the gap;
+  but it says which folders give whole hands without thought, and that
+  Standard is not the easy folder it is meant to be.
+- **Blade's battles take twice as long** (1103 frames, 8 chips, 10 HP
+  lost against about 500 frames elsewhere): its swords need MegaMan in
+  reach, which the autopilot walks into, taking hits.
+- **Busting kills fastest** (354 frames) and pays in HP (7 a battle, no
+  Recovery chip), as designed; it reached layer 8 once, the deepest run.
 
 Chips the autopilot used most in act 1, by share of its chip uses:
 
-AUTOPILOT_CHIPS
+| Folder | Most used |
+| --- | --- |
+| Standard | Cannon 29%, Sword 14%, Recov10 10%, CrakShot 9%, MiniBomb 8%, AirShot 8% |
+| Blade | Sword 23%, WideSwrd 19%, AreaGrab 15%, LongSwrd 11%, Barrier 9%, Recov10 9% |
+| Storm | Thunder 20%, Cannon 13%, Vulcan1 13%, AirShot 9%, Recov10 9%, MiniBomb 7% |
+| Z-Canon | Cannon 21%, Recov10 10%, CrakShot 9%, PanlGrab 9%, DublShot 9%, Rflectr1 6% |
+| Busting | TankCan1 26%, AreaGrab 15%, HiCannon 14%, WideSwrd 9%, MiniBomb 9%, Thunder 8% |
+| Lean | Cannon 26%, Vulcan1 20%, AreaGrab 17%, Thunder 15%, MiniBomb 13%, Recov10 6% |
+
+Each folder's act 1 is its own by what it fires (Storm's Thunder,
+Busting's TankCan1, Blade's swords), Standard and Z-Canon the nearest
+pair (Cannon first, then the rest); Z-Canon's GigaCan1 did not appear in
+the top six. The Program Advances it formed agree with the hand model: Z-Canon's GigaCan1 once in 66 battles (the model's 1%), Blade's LifeSrd
+7 times in 73 (the model's 11%); no other folder formed one.
 
 ## The players (to read)
 
