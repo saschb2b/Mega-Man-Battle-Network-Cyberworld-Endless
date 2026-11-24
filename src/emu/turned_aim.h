@@ -3,8 +3,7 @@
  *
  * BN6 never turns MegaMan; a liberation's Surrounded battle (BN5's field,
  * BN6_SIDES_SURROUNDED: the enemy's columns 1-2 and 5-6, his 3-4) does, on
- * L or R. Two of BN6's routines aim a chip by its side alone, and here
- * miss:
+ * L or R. BN6's routines that aim a chip by its side alone here miss:
  * - its search of a row (BN6_ROW_SEARCH) walks from the field's edge
  *   behind the searcher and gives the first panel its filter takes:
  *   GolmHit's fist the first of the enemy's. Behind MegaMan between the
@@ -17,7 +16,19 @@
  *   from MegaMan turned left. A hook answers the way the object faces,
  *   while MegaMan stands turned round (unturned, his battle's every way
  *   toward the enemy as BN6's).
- * Both act for an object of MegaMan's side on a field none of BN6's three
+ * The rest (issue #846) take their side alone in places of their own:
+ * - BN4's moved code calls the way toward the enemy with objects whose flip
+ *   BN4 left 0 (it never turned MegaMan): answered from there by the way
+ *   he faces (PanlSht, RollAro, GutPnch, DrkVulcn, DarkBomb, Boomer);
+ * - BN6's search of the row across (BN6_ROW_PANEL_ACROSS), which BN4's
+ *   Meteors calls, by the alliance: its way by the object's flip;
+ * - BN6's chips and BN4's that read the alliance into a start column, a
+ *   table's index or a flip (SandWrm, BurnSqr, TenguMan, AirRaid, Magnum;
+ *   BN4's SeekBom, PitRng, GutsMan): the register turned round with him;
+ * - BlastMan's flames started at the field's edge behind him, by the
+ *   alliance: from his own column the way he faces, turned or not, as the
+ *   row's search.
+ * All act for an object of MegaMan's side on a field none of BN6's three
  * plain ones, so every plain battle, and every foe's aim, runs as BN6's. */
 #ifndef CW_TURNED_AIM_H
 #define CW_TURNED_AIM_H
