@@ -9,7 +9,7 @@
 #include "meta.h"
 
 /* Folder `folder`'s words (0 .. FOLDER_COUNT - 1; the Standard folder's
- * for any other). */
+ * for any other; all NULL for an id no folder holds). */
 const FolderInfo *meta_folder_words(int folder);
 
 /* The summary's closest goal (meta_next_goal): what to do and what it

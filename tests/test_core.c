@@ -101,6 +101,7 @@
 #include "xchips_code.h"
 #include "xchips_moved.h"
 #include "xchips_pas.h"
+#include "xchips_folder.h"
 #include "xchips_record.h"
 #include "xchips_registry.h"
 #include "xchips_text.h"
@@ -5429,22 +5430,94 @@ static void test_preset_nine(void) {
  * Recovery chip, Lean's seven kinds in B or *); and the designed three's
  * milestones: a Program Advance used, an act cleared without a Recovery
  * chip, layer 10, each in any run. */
+typedef struct { int id; const char *codes; } FolderCodes;
+static const FolderCodes *soul_codes;
+static size_t soul_ncodes;
+static int soul_run_of(int id) { return id; }
+static void soul_codes_of(int id, uint8_t out[4]) {
+	memset(out, 0xFF, 4);
+	for (size_t q = 0; q < soul_ncodes; ++q)
+		if (soul_codes[q].id == id)
+			for (int k = 0; k < 4 && soul_codes[q].codes[k]; ++k) out[k] = (uint8_t)(soul_codes[q].codes[k] == '*' ? 26 : soul_codes[q].codes[k] - 'A');
+}
+
+/* The Soul forms' starts (docs/game/meta/forms.md, Each game's start):
+ * BN5's and BN4's NEW GAME folders, as numbers (the run's chip ids, each
+ * game's own codes; docs/game/meta/folders-measured.md, 3), as
+ * xfolder_as_run takes them: each a legal BN6 folder after it, 30 chips,
+ * five of a chip at most, every code one BN6's record gives, and only
+ * BN4's AirShot A and Vulcan1 V moved, to * and S (the line names them) */
+static void test_soul_starts(const FolderCodes *codes, size_t ncodes) {
+#define E(id, c, n) { id, c, n }
+	static const struct { int id; char code; int n; } bn5[] = {
+		E(1, 'A', 2), E(1, 'B', 2), E(4, '*', 3), E(5, 'D', 3), E(54, 'B', 2), E(54, 'L', 2), E(71, 'S', 4), E(72, 'S', 2),
+		E(298, '*', 2), E(154, 'A', 2), E(154, 'L', 2), E(163, 'S', 1), E(175, '*', 1), E(192, '*', 2),
+	}, bn4[] = {
+		E(1, 'A', 2), E(1, 'B', 2), E(4, 'A', 3), E(5, 'V', 3), E(54, 'B', 2), E(54, 'L', 2), E(71, 'S', 4), E(72, 'S', 2),
+		E(298, '*', 3), E(154, 'A', 2), E(154, 'L', 2), E(163, 'S', 1), E(192, '*', 2),
+	};
+#undef E
+	soul_codes = codes;
+	soul_ncodes = ncodes;
+	static const uint8_t airshot[4] = { 26, 0xFF, 0xFF, 0xFF }, vulcan[4] = { 1, 3, 18, 26 }, cannon[4] = { 0, 1, 2, 26 }, two[4] = { 1, 3, 0xFF, 0xFF };
+	CHECK(xfolder_code(airshot, 0) == 26 && xfolder_code(vulcan, 21) == 18 && xfolder_code(vulcan, 3) == 3 && xfolder_code(cannon, 26) == 26,
+		"soul starts: AirShot A as *, Vulcan1 V as S, Vulcan1 D and Cannon * kept");
+	CHECK(xfolder_code(two, 2) == 1 && xfolder_code(two, 26) == 3, "soul starts: a tie to the earlier letter, a * the record lacks to its nearest");
+	for (int g = 0; g < 2; ++g) {
+		const char *game = g ? "BN4" : "BN5";
+		uint16_t in[XFOLDER_ENTRIES], out[XFOLDER_ENTRIES];
+		int k = 0, rows = g ? (int)(sizeof bn4 / sizeof *bn4) : (int)(sizeof bn5 / sizeof *bn5);
+		for (int r = 0; r < rows; ++r) {
+			int id = g ? bn4[r].id : bn5[r].id, n = g ? bn4[r].n : bn5[r].n;
+			char c = g ? bn4[r].code : bn5[r].code;
+			for (int i = 0; i < n && k < XFOLDER_ENTRIES; ++i) in[k++] = chip9_entry((unsigned)id, c == '*' ? 26u : (unsigned)(c - 'A'));
+		}
+		CHECK(k == XFOLDER_ENTRIES, "soul starts: %s's has %d chips", game, k);
+		int swapped = -1, count[1024] = { 0 };
+		CHECK(xfolder_as_run(in, soul_run_of, soul_codes_of, out, &swapped), "soul starts: %s's has a chip the run lacks", game);
+		CHECK(swapped == (g ? 6 : 0), "soul starts: %s's moved %d codes", game, swapped);
+		for (int i = 0; i < XFOLDER_ENTRIES; ++i) {
+			int id = (int)chip_entry_id(out[i]), code = (int)chip_entry_code(out[i]);
+			uint8_t rec[4];
+			soul_codes_of(id, rec);
+			CHECK(rec[0] != 0xFF && memchr(rec, code, 4), "soul starts: %s's chip %d in a code BN6 does not give it (%d)", game, id, code);
+			CHECK(++count[id] <= 5, "soul starts: %s's holds more than five of chip %d", game, id);
+		}
+	}
+	CHECK(meta_start_chips(FOLDER_STANDARD, RUN_FORM_CROSS) == NULL && meta_start_chips(FOLDER_BLADE, RUN_FORM_SOUL_BN5) == meta_folder_chips(FOLDER_BLADE),
+		"soul starts: CROSS keeps BN6's Standard, another folder its own in a Soul form");
+	CHECK(strstr(meta_standard_about(RUN_FORM_SOUL_BN4), "AirShot in *") && strstr(meta_standard_about(RUN_FORM_SOUL_BN4), "Vulcan1 in S")
+		&& strstr(meta_standard_about(RUN_FORM_SOUL_BN5), "BN5") && !strcmp(meta_standard_about(RUN_FORM_CROSS), meta_folder(FOLDER_STANDARD)->about),
+		"soul starts: the Standard line names its game and BN4's swaps");
+}
+
 static void test_folders(void) {
 	/* (the folders' chips' codes as BN6's records hold them, at 0x021DA8 + id x
 	 * 0x2C, read from the ROM: docs/rom/chips.md) */
-	static const struct { int id; const char *codes; } bn6_codes[] = {
-		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 12, "AGR" }, { 30, "BRS*" }, { 31, "AEQ" }, { 34, "JLS" },
-		{ 54, "BLR*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 131, "ACP*" },
-		{ 154, "ADL*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 175, "*" }, { 178, "AFR*" }, { 192, "*" },
+	static const FolderCodes bn6_codes[] = {
+		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 6, "DFL" }, { 12, "AGR" }, { 20, "FGH*" }, { 27, "BET" }, { 30, "BRS*" }, { 31, "AEQ" },
+		{ 34, "JLS" }, { 54, "BLR*" }, { 55, "CKV*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 107, "DEF" },
+		{ 131, "ACP*" }, { 154, "ADL*" }, { 155, "ELQ*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 170, "*" }, { 175, "*" }, { 178, "AFR*" },
+		{ 184, "*" }, { 192, "*" }, { 193, "*" }, { 257, "B*" }, { 260, "D*" }, { 263, "C*" },
+		/* (issue #865's archetypes: Ember's and Tide's) */
+		{ 24, "AFK" }, { 68, "AFS*" }, { 69, "ALR*" }, { 76, "FOZ" }, { 110, "HPV" },
+		{ 298, "*" },   /* (CrakOut, moved: the registry's row's codes, BN5's record's) */
 	};
+	test_soul_starts(bn6_codes, sizeof bn6_codes / sizeof *bn6_codes);
 	Profile profile_was = profile;
 	Run run_was = run;
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f) {
+		if (!meta_folder_exists(f)) {
+			CHECK(!meta_folder_chips(f) && !meta_folder_open(f), "folders: id %d holds no folder but opens or holds chips", f);
+			continue;
+		}
 		const uint16_t *c = meta_folder_chips(f);
 		const char *name = meta_folder(f)->name;
 		CHECK(c && meta_folder(f)->opens, "folders: %s has no chips or no milestone", name);
 		if (!c) continue;
-		int count[512] = { 0 }, kinds = 0, recov = 0, cannons = 0, off_lean = 0;
+		/* (Z-Canon's three recipes of codes in a row, BN6's table at 0x02BA60: GigaCan1 from Cannon A B C, WideBrn1
+		 * from FireBrn1 F G H, FlmHook1 from FireHit1 D E F; a bit per code each) */
+		int count[512] = { 0 }, kinds = 0, recov = 0, cannons = 0, burners = 0, hits = 0, off_lean = 0;
 		for (int k = 0; k < 30; ++k) {
 			int id = (int)chip_entry_id(c[k]), code = (int)chip_entry_code(c[k]);
 			const char *given = NULL;
@@ -5454,10 +5527,21 @@ static void test_folders(void) {
 			kinds += !count[id]++;
 			recov += id >= 154 && id <= 161;
 			cannons |= id == 1 && code <= 2 ? 1 << code : 0;
+			burners |= id == 20 && code >= 5 && code <= 7 ? 1 << (code - 5) : 0;
+			hits |= id == 107 && code >= 3 && code <= 5 ? 1 << (code - 3) : 0;
 			off_lean += code != 1 && code != 26;
 		}
-		for (int id = 0; id < 512; ++id) CHECK(count[id] <= 5, "folders: %s holds %d of chip %d", name, count[id], id);
-		if (f == FOLDER_ZCANON) CHECK(cannons == 7, "folders: Z-Canon lacks a Cannon in A, B or C (%#x)", cannons);
+		/* (BN6's rules: five of a chip at most, a Mega (the Navi chips 221-280) once, five Megas at most) */
+		int megas = 0;
+		for (int id = 0; id < 512; ++id) {
+			CHECK(count[id] <= (id >= 221 && id <= 280 ? 1 : 5), "folders: %s holds %d of chip %d", name, count[id], id);
+			megas += id >= 221 && id <= 280 ? count[id] : 0;
+		}
+		CHECK(megas <= 5, "folders: %s holds %d Megas", name, megas);
+		if (f == FOLDER_NAVI) CHECK(megas == 3, "folders: Navi holds %d Navi chips", megas);
+		if (f == FOLDER_ZCANON)
+			CHECK(cannons == 7 && burners == 7 && hits == 7, "folders: Z-Canon lacks a recipe's code (Cannon %#x, FireBrn1 %#x, FireHit1 %#x)",
+				cannons, burners, hits);
 		if (f == FOLDER_BUSTING) CHECK(recov == 0, "folders: Busting holds %d Recovery chips", recov);
 		if (f == FOLDER_LEAN) CHECK(kinds <= 7 && !off_lean, "folders: Lean has %d kinds, %d chips outside B and *", kinds, off_lean);
 	}
@@ -5496,6 +5580,17 @@ static void test_folders(void) {
 	CHECK(!meta_folder_open(FOLDER_LEAN), "folders: Lean open at layer 9");
 	profile.best_depth = 10;
 	CHECK(meta_folder_open(FOLDER_LEAN), "folders: Lean shut at layer 10");
+	/* Steady at act 3's first layer; Navi once a Navi chip is used (BlastMan; a Cannon is none) */
+	memset(&profile, 0, sizeof profile);
+	profile.best_depth = 6;
+	CHECK(!meta_folder_open(FOLDER_STEADY), "folders: Steady open at layer 6");
+	profile.best_depth = 7;
+	CHECK(meta_folder_open(FOLDER_STEADY), "folders: Steady shut at layer 7");
+	CHECK(meta_chip_watched(257) && meta_chip_watched(221) && meta_chip_watched(280), "folders: the Navi chips watched");
+	meta_chip_used(1);
+	CHECK(!meta_folder_open(FOLDER_NAVI), "folders: Navi open after a Cannon");
+	meta_chip_used(257);
+	CHECK(meta_folder_open(FOLDER_NAVI) && !meta_folder_open(FOLDER_ZCANON), "folders: Navi shut after BlastMan, or Z-Canon opened with it");
 	/* (said on the summary as they open, the closest one named before) */
 	memset(&profile, 0, sizeof profile);
 	profile.short_wins = 1;
@@ -5510,6 +5605,7 @@ static void test_folders(void) {
 	 * lines) */
 	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {
 		char g[96];
+		if (!meta_folder_exists(f)) continue;
 		meta_goal_words(g, sizeof g, GOAL_FOLDER, f);
 		CHECK(strlen(g) <= 56, "folders: the goal line \"%s\" past 56 letters", g);
 		meta_goal_words(g, sizeof g, GOAL_FOLDER_HINT, f);
@@ -5522,6 +5618,26 @@ static void test_folders(void) {
 	bool told = false;
 	for (int i = 0; i < n; ++i) told |= !strcmp(said[i], "the Z-Canon folder");
 	CHECK(told && (profile.setup_new & SETUP_NEW_FOLDER), "folders: the summary did not say Z-Canon");
+	/* issue #865's archetypes, from blank guardians' records (no saves
+	 * here): Tide opens with a Fire guardian deleted (HeatMan, BlastMan),
+	 * Ember with any guardian deleted in HeatCross, or Beast Out in it; a
+	 * record of before opens it while that battle is the guardian's last,
+	 * and the profile keeps it once a guardian falls */
+	rivals_load();
+	memset(&profile, 0, sizeof profile);
+	CHECK(!meta_folder_open(FOLDER_EMBER) && !meta_folder_open(FOLDER_TIDE), "folders: Ember or Tide open on a new profile");
+	rival_result(6, RIVAL_MEGAMAN_WON, &(RivalEnd){ 0, 100, 400 }, 1);
+	CHECK(!meta_folder_open(FOLDER_TIDE) && meta_folder_open(FOLDER_STORM), "folders: an Aqua guardian opened Tide, or not Storm");
+	rival_result(12, RIVAL_MEGAMAN_WON, &(RivalEnd){ BN6_FORM_CROSS_BEAST + 3, 100, 400 }, 1);
+	CHECK(meta_folder_open(FOLDER_TIDE) && !meta_folder_open(FOLDER_EMBER), "folders: BlastMan deleted, Tide shut or Ember open (SlashCross)");
+	rival_result(13, RIVAL_MEGAMAN_WON, &(RivalEnd){ BN6_FORM_CROSS_BEAST + BN6_FORM_HEAT_CROSS, 100, 400 }, 2);
+	CHECK(meta_folder_open(FOLDER_EMBER), "folders: a guardian deleted in HeatCross's Beast Out left Ember shut");
+	meta_guardian_deleted();
+	rival_result(13, RIVAL_NAVI_WON, NULL, 3);
+	CHECK((profile.folder_feats & FEAT_HEAT_GUARDIAN) && meta_folder_open(FOLDER_EMBER), "folders: Ember not kept past the guardian's next battle");
+	memset(&profile, 0, sizeof profile);
+	CHECK(!meta_folder_open(FOLDER_EMBER), "folders: Ember open with no guardian's last battle won in HeatCross");
+	rivals_load();
 	profile = profile_was;
 	run = run_was;
 }

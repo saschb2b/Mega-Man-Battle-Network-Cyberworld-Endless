@@ -3,7 +3,7 @@ type: Analysis
 title: "Starting folders measured"
 description: "Issue 865's groundwork: the six starting folders measured (hands drawn, the autopilot's runs), BN6's five other preset folders and BN5's and BN4's starting folders read from their ROMs and judged as a run's start, and five archetypes of ours sketched; numbers for the owner's calls, no folder changed."
 tags: [game, meta, folders, measurement]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 sources:
   - id: roms
     resource: "BN6 Gregar's, BN5 Team Colonel's and BN4 Red Sun's ROMs, read by tools/folder_hands.py"
@@ -255,7 +255,10 @@ chip as MMKB's Folder page lists them.
   Standard in act 1 (their hands a little weaker, 0.88 and 0.81 of it).
   As shelf entries they fail the issue's own test (a first act unlike
   every other's); as the start a SOUL BN5 or SOUL BN4 run brings in place
-  of Standard they are a fidelity touch at no balance cost.
+  of Standard they are a fidelity touch at no balance cost. So they were
+  built ([MegaMan's forms](forms.md), Each game's start), BN4's with
+  AirShot \* and Vulcan1 S: drawn so, 115 on turn one and 283 over three
+  (Standard's 128 and 304).
 - **What else they hold.** BN5's table has five more (its story's extra
   folders: a stronger start like BN6's preset 1, a tutorial one, two
   Mega-chip folders and a dark one of DrkSword, DarkInvs, DarkThnd and
@@ -265,6 +268,9 @@ chip as MMKB's Folder page lists them.
   was asked for; named for the owner.
 
 ## 4. Archetypes of ours (sketches)
+
+Ember and Tide are built since 24 November 2026: what they hold and how
+they measure is section 6.
 
 The lens: the meta layer's dialectic, what you bring against what you
 find; each folder an opening argument with a cost that bites in act 1
@@ -314,3 +320,101 @@ needed a battle read), its hint and words on issue 864's shelf, a test
 row in `test_folders`, and a loot table: the code lean reads the
 folder's codes as each layer is made, so a folder in A and T makes runs
 find A and T ([Phase two](phase-two.md)).
+
+## 5. After: the folders built from BN6's presets
+
+What the owner's calls built ([Decisions and phase one](decisions.md),
+Z-Canon rebuilt), measured as above (`tools/folder_hands.py`, 4000
+draws; the autopilot on this build over seeds 1-12 at threat 1, Standard
+played again beside it so a change of build shows).
+
+| Folder | Kinds | Codes | In `*` | Attack power | Heal | Turn 1: damage, chips | Three turns: damage, heal, chips, PAs |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Standard | 12 | 5 | 8 | 1030 | 40 | 128, 2.5 | 303, 4, 6.5, 0.00 |
+| Z-Canon, rebuilt | 10 | 9 | 12 | 1110 | 40 | 113, 2.6 | 324, 12, 7.1, 0.09 |
+| Steady | 12 | 7 | 6 | 1285 | 120 | 148, 2.5 | 359, 21, 6.3, 0.04 |
+| Navi | 13 | 3 | 12 | 830 | 40 | 124, 3.1 | 302, 10, 7.8, 0.00 |
+
+- **Z-Canon** now forms a Program Advance in 9 battles in 100 under the
+  greedy pick (GigaCan1 3.6, FlmHook1 2.5, WideBrn1 2.4, LifeSrd 0.3),
+  where the first Z-Canon formed 1, at Standard's damage within a tenth.
+
+The autopilot (this build, seeds 1-12 at threat 1, fresh data folders):
+
+| Folder | Layer reached, mean (each seed) | Act-1 guardian won | Deaths: guardian, virus battle | Act-1 virus battles: frames, chips used, HP lost |
+| --- | --- | --- | --- | --- |
+| Standard | 3.4 (3 3 3 6 3 5 3 3 3 3 3 3) | 2 of 11 | 10, 2 | 549, 3.4, 4 |
+| Z-Canon, rebuilt | 2.9 (3 3 3 3 3 2 3 3 3 3 3 3) | 0 of 11 | 11, 1 | 511, 3.4, 6 |
+| Steady | 3.4 (3 3 3 5 3 5 6 2 3 2 3 3) | 3 of 10 | 8, 4 | 354, 2.6, 6 |
+| Navi | 4.0 (3 3 3 9 3 6 5 4 3 3 3 3) | 4 of 12 | 10, 2 | 329, 3.3, 2 |
+
+- **Z-Canon's act 1 under the autopilot** clears its virus battles a
+  little faster than Standard's and loses its guardian every time (the
+  first Z-Canon won 4 of 12, Standard 2 of 11 on both builds). The
+  autopilot fires the largest legal hand from where it stands: FireHit1
+  (21% of its chip uses) reaches one panel and FireBrn1 two, which it
+  does not walk into range for; Cannon is 33%. It formed GigaCan1 twice
+  in 132 battles, where the hand model says 9 in 100 for a player who
+  sends what he holds. 0 of 11 against 2 of 11 is inside the autopilot's
+  noise (the six ranged from 2 of 11 to 10 of 12), so no wall is shown;
+  the players' statistics per folder are the measure that settles it.
+- **Steady** kills its act-1 battles fastest of the three (354 frames)
+  with the fewest chips, HiCannon and Cannon half its uses, and beats
+  the guardian 3 times in 10; it lost four runs in virus battles, its
+  thin hands leaving the autopilot a single chip some turns. Above
+  Standard in the hands, not in the runs: no walkover.
+- **Navi** reached the deepest of the four (layer 9 once) and lost the
+  least in act 1's battles (2 HP), BblStar1 its most used chip (21%) as
+  the shell's hold. The autopilot sent DiveMan 27 times, BlastMan 26 and
+  CircusMan 11 over its 12 runs; act 1's guardian fell 4
+  times in 12.
+
+
+## 6. After: Ember and Tide, archetypes of ours
+
+What issue #865's first archetypes became ([Decisions and phase
+one](decisions.md), Issue 865's archetypes; the sketches of section 4
+changed where the records' codes or the hands asked), measured as above
+(`tools/folder_hands.py`, 3000 draws; `--grass` models Ember's seed: a
+Fire chip sent after a GrasSeed in the same pick doubled, the seed taken
+as landing under the foe, so its numbers are an upper bound).
+
+| Folder | Kinds | Codes | In `*` | Attack power | Heal | Turn 1: damage, chips | Three turns: damage, heal, chips, PAs |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Standard | 12 | 5 | 8 | 1030 | 40 | 128, 2.5 | 305, 4, 6.5, 0.00 |
+| Ember | 11 | 5 | 12 | 1040 | 30 | 140, 3.4 | 373, 11, 8.9, 0.03 |
+| Ember, `--grass` | | | | | | 165, 3.5 | 440, 11, 9.0, 0.03 |
+| Tide | 11 | 2 | 9 | 830 | 30 | 113, 3.3 | 301, 9, 9.0, 0.00 |
+
+- **Ember** began at 162 and 435 plain, 192 and 512 with grass, near
+  Busting's; FireSwrd went for a fifth GrasSeed and a BurnSqr1 for an
+  AirShot, which put it between Standard and Blade until the seed lands.
+- **Tide** is Standard's hand; its double on a Fire body (BN6's weakness
+  table) is not modelled.
+
+The autopilot (this build, the run log's chips and frames as section 1's,
+seeds 1-12 at threat 1, fresh data folders, Standard again beside them):
+
+| Folder | Layer reached, mean (each seed) | Act-1 guardian won | Deaths: guardian, virus battle | Act-1 virus battles: frames, chips used, HP lost |
+| --- | --- | --- | --- | --- |
+| Standard | 3.4 (3 3 3 6 3 5 3 3 3 3 3 3) | 2 of 11 | 10, 2 | 549, 3.4, 4 |
+| Ember | 4.3 (3 3 5 6 3 6 6 6 3 3 5 3) | 6 of 12 | 10, 2 | 643, 5.4, 4 |
+| Tide | 5.2 (8 3 3 9 3 9 6 8 3 3 5 3) | 6 of 12 | 8, 4 | 245, 2.9, 2 |
+
+Act 1's guardian by element, won of met: BlastMan (Fire) Ember 4 of 4,
+Tide 4 of 4, Standard 2 of 4; SpoutMan (Aqua) Ember 1 of 6, Tide 1 of 6,
+Standard 0 of 6; DiveMan (Aqua) 1 of 2 each, Standard 0 of 2.
+
+- **Neither a wall nor a walkover:** 6 of 12 each, between Standard's 2 of
+  11 and Lean's 10 of 12, Busting's 6 of 11 the nearest. Their costs show:
+  the Aqua guardians stop both (HeatCross's weakness for Ember, a plain
+  hit for Tide), BlastMan falls to both.
+- **Each first act is its own by what it fires:** Ember's GrasSeed 24%,
+  FireHit1 13%, FireBrn1 11%, BurnSqr1 9%; Tide's TrnArrw1 23%, BblStar1
+  18%, Cannon 11%, CrakShot 9%, IceSeed 7%. Ember's battles run longer
+  than Standard's (643 frames, 5.4 chips: the seed first); Tide's are the
+  fastest of any folder measured (245 frames, Busting's 354).
+- **A watch item:** Tide reached layers 8 and 9 in four runs of twelve,
+  the deepest of any folder, by its virus battles' pace. The players'
+  win rate per folder (The players, above) is what settles whether it
+  needs a trim, as for Busting.

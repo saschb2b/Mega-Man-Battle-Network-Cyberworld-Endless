@@ -40,12 +40,14 @@ static bool by_object(const char *name, int nth, int *x, int *y) {
 	return false;
 }
 
-/* ... the Mystery Data that holds a ScrtData, or the layer's RegUp: a key item's, kind 4 */
+/* ... the Mystery Data that holds a ScrtData, the layer's RegUp, or the
+ * run's rare find of colours (ColrData): a key item's, kind 4 */
 static bool by_find(const char *name, int *x, int *y) {
 	for (int k = 0; k < D.objs.nmd; ++k) {
 		unsigned item = D.objs.md_find[k] >> 16 == 4 ? D.objs.md_find[k] & 0xFFFFu : 0;
 		bool regup = item >= SCRIPTS_REG_UP1 && item <= SCRIPTS_REG_UP1 + 2;
-		if (!item || strcmp(name, item == SCRIPTS_SECRET_DATA ? "scrtdata" : regup ? "regup" : "") != 0) continue;
+		const char *what = item == SCRIPTS_SECRET_DATA ? "scrtdata" : item == SCRIPTS_COLOR_DATA ? "colrdata" : regup ? "regup" : "";
+		if (!item || strcmp(name, what) != 0) continue;
 		*x = (int)layer.obj[D.objs.md_obj[k]].x; *y = (int)layer.obj[D.objs.md_obj[k]].y;
 		return true;
 	}

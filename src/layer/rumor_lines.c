@@ -141,9 +141,13 @@ static const char *folder_line(int folder) {
 	switch (folder) {
 	case FOLDER_BLADE: return "My buddy deleted a guardian!|Next dive,his whole folder was swords!";
 	case FOLDER_STORM: return "Did you hear? Delete an Aqua guardian...|...and you dive with Elec chips! Zap!";
-	case FOLDER_ZCANON: return "A pal pulled off a Program Advance!|Now he dives with Cannons in A,B and C!";
+	case FOLDER_ZCANON: return "A pal pulled off a Program Advance!|Now his folder's packed with combos!";
 	case FOLDER_BUSTING: return "Clear a whole area,no Recovery chips...|...and your next folder hits like a truck!";
 	case FOLDER_LEAN: return "Somebody dove ten layers down!|Now any five of his chips make a hand!";
+	case FOLDER_STEADY: return "My pal made it three areas deep!|Now his folder heals him up!";
+	case FOLDER_NAVI: return "My buddy used a Navi chip!|Next dive,three Navis came along!";
+	case FOLDER_EMBER: return "Did you hear? Beat a guardian as HeatCross...|...and you dive burning grass with Fire chips!";
+	case FOLDER_TIDE: return "Did you hear? Delete a Fire guardian...|...and you dive with Aqua chips! Splash!";
 	default: return NULL;
 	}
 }

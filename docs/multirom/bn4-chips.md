@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T00:15:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -53,6 +53,14 @@ while this was built). As this was built (15 of BN4's rows playing), with
 all three ROMs the catalogue held 130 chips, 15 of them BN4's own; with
 BN6 and BN4, 93 and the same 15. It has grown since by itself, as more of
 BN4's rows came to play (84 in 0.21.0, its dark chips left out).
+
+**BN4's NEW GAME folder, a SOUL BN4 run's start** (24 November 2026,
+[MegaMan's forms](../game/meta/forms.md), Each game's start): its chips
+are the run's by `xchips_bn4_paid` as the finds' are; its two codes
+BN6's records lack, AirShot A and Vulcan1 V, were not moved (two rows
+of their own, each one more chip the catalogue would hold) but play in
+the nearest code BN6 gives, AirShot \* and Vulcan1 S, the setup's line
+naming both.
 
 Two decisions the design left open, taken with the game-design skill.
 **The catalogue holds the chips BN6 names too**, as BN5's does: fifteen

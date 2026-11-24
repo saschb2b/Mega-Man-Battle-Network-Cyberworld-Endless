@@ -3,7 +3,7 @@ type: Feature
 title: "All *, a fourth helper"
 description: "All *, the fourth helper (issue #18): every chip of the run in BN6's `*` wildcard through the core's chip records, Program Advances still forming, an opt-in assist that counts toward unlocks."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T18:02:58Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:40:00Z }
 ---
 
 # All *, a fourth helper (4 October 2026, issue #18)
@@ -45,7 +45,7 @@ the other way.
   chip in any hand, higher busting levels and their better rewards). It
   flattens the folders built on codes: Blade keeps its swords and loses
   only its S, and the planned Lean (codes aligned for big hands) and
-  Z-Canon (Cannons in A, B and C) would have nothing left to offer such a
+  Z-Canon (three recipes of codes in a row) would have nothing left to offer such a
   run. A Chip Trader stops fixing codes (every chip fits) and stays the
   collector's machine. Accepted: it is a dial the player turns, off by
   default, and named.

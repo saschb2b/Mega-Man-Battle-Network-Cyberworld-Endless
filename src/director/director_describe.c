@@ -127,6 +127,7 @@ void director_describe(FILE *f) {
 		fprintf(f, "battlestep %s\n", battle_word());
 	}
 	director_quit_describe(f);
+	looks_routes_describe(f);   /* (the palettes owned and said, the run's rare find: docs/game/looks-earning.md) */
 	describe_turns(f);
 	battle_describe(f);
 	battle_state_describe(f);

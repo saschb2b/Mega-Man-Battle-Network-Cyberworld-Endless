@@ -7,7 +7,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
-enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_COUNT };
+/* (the ids are kept in profiles and runs, so a folder's never changes;
+ * 6 and 7 are BN6's Extra and Navi presets made a start's, 8 stays free
+ * (its Support preset, left out), 9-11 the archetypes', issue #865, and
+ * an id no folder holds is skipped everywhere: meta_folder_exists) */
+enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_STEADY, FOLDER_NAVI, FOLDER_EMBER = 9, FOLDER_TIDE,
+	FOLDER_COUNT };
 
 typedef struct {
 	const char *name;
@@ -18,9 +23,22 @@ typedef struct {
 } FolderInfo;
 
 const FolderInfo *meta_folder(int folder);
+/* Whether `folder` is one (an id below FOLDER_COUNT that no folder holds
+ * is not: the shelf, the setup and the posts pass it by). */
+bool meta_folder_exists(int folder);
+/* The Standard folder's line in a run of form `form` (RUN_FORM_*): BN6's
+ * own, or in a Soul form its game's start, a code BN6's records lack named
+ * where it was swapped (meta_start_chips) */
+const char *meta_standard_about(int form);
 /* A folder's 30 chips as BN6 keeps them (chip id | code << 9, code 26 for
  * *), or NULL for the Standard folder, which is the game's own. */
 const uint16_t *meta_folder_chips(int folder);
+/* ... the 30 a run of form `form` (RUN_FORM_*) starts with: a SOUL BN5
+ * run's Standard is BN5's own NEW GAME folder, a SOUL BN4 run's BN4's,
+ * read from their ROMs (xchips_folder.h; docs/game/meta/forms.md, Each
+ * game's start); NULL for BN6's own Standard (CROSS, the mix, or where
+ * that game's folder cannot be read) */
+const uint16_t *meta_start_chips(int folder, int form);
 bool meta_folder_open(int folder);
 /* The shelf of starting folders (issue #864, docs/game/meta/shelf.md;
  * meta_shelf.c): the setup shows all six, each open, or locked with a
@@ -29,6 +47,8 @@ bool meta_folder_open(int folder);
 enum { SHELF_LOCKED, SHELF_HEARD, SHELF_OPEN };
 int meta_folder_state(int folder);
 int meta_folders_open(void);
+/* How many folders there are, Standard's among them. */
+int meta_folders(void);
 /* Folder `folder` heard of (a bystander's rumor said): kept in the profile. */
 void meta_folder_hear(int folder);
 /* The rumor a layer's whisperer may tell: a locked folder not yet heard,
@@ -43,10 +63,10 @@ void meta_shelf_seen(void);
  * and the first folder still locked and unheard is heard by the floor's
  * post (the BBS's NEW); the count begins again. */
 void meta_shelf_run_over(void);
-/* The milestones the Z-Canon and Busting folders open with, in any run
- * (Profile.folder_feats): chip `id` used by MegaMan in a battle (a Program
- * Advance, a Recovery chip; meta_chip_watched says which are worth the
- * call), and an act's guardian deleted. */
+/* The milestones the Z-Canon, Busting and Navi folders open with, in any
+ * run (Profile.folder_feats): chip `id` used by MegaMan in a battle (a
+ * Program Advance, a Recovery chip, a Navi chip; meta_chip_watched says
+ * which are worth the call), and an act's guardian deleted. */
 bool meta_chip_watched(int id);
 void meta_chip_used(int id);
 void meta_guardian_deleted(void);
@@ -137,6 +157,9 @@ int meta_spin_colour(void);
 /* Whether the current layer holds this run's Spin: one normal layer of 4-8,
  * by the run's seed. */
 bool meta_spin_here(void);
+/* The normal layer (4-8, from the run's seed) that holds the run's Spin
+ * where the profile lacks one. */
+int meta_spin_depth(void);
 /* This run's Spin picked up: the profile keeps it. */
 void meta_spin_found(int colour);
 /* "pink", for colour 1-6. */

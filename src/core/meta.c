@@ -10,14 +10,20 @@
 #include "analytics.h"
 #include "battle_data.h"
 #include "bn6.h"
+#include "bn6_forms.h"
 #include "chip_pool.h"
+#include "data.h"
+#include "looks.h"
+#include "looks_routes.h"
 #include "meta_text.h"
 #include "net.h"
 #include "pacing.h"
 #include "powers.h"
 #include "rivals.h"
+#include "rom.h"
 #include "run.h"
 #include "save.h"
+#include "xchips_folder.h"
 #include "xchips_registry.h"
 
 /* Each folder opens with a milestone that teaches its style and that a
@@ -26,6 +32,18 @@
  * keys, came in act 3 or the Nest); Lean's, layer 10, the design's one
  * for a player who has seen the net's middle. Their words are
  * meta_text.c's. */
+/* A guardian's last battle won in HeatCross, or Beast Out in it: the
+ * guardian's record keeps MegaMan's form (boss.c, as the battle ends), so
+ * a profile of before that did it opens Ember too, where that battle is
+ * still the guardian's last. */
+static bool heat_guardian(void) {
+	for (int n = 1; n < RIVAL_NAVIS; ++n) {
+		const Rival *r = rival(n);
+		if (r->last == RIVAL_MEGAMAN_WON && (r->form == BN6_FORM_HEAT_CROSS || r->form == BN6_FORM_CROSS_BEAST + BN6_FORM_HEAT_CROSS)) return true;
+	}
+	return false;
+}
+
 /* (in any run, this build's or one before: rivals.sav keeps who fell) */
 static bool earned(int folder) {
 	switch (folder) {
@@ -38,13 +56,22 @@ static bool earned(int folder) {
 		return rival(6)->megaman_won > 0 || rival(13)->megaman_won > 0;
 	case FOLDER_ZCANON: return (profile.folder_feats & FEAT_PA) != 0;
 	case FOLDER_BUSTING: return (profile.folder_feats & FEAT_DRY_ACT) != 0;
-	/* (the best depth, kept from the first runs on) */
+	/* (the best depth, kept from the first runs on: act 3 begins at layer 7) */
 	case FOLDER_LEAN: return profile.best_depth >= 10;
+	case FOLDER_STEADY: return profile.best_depth >= 7;
+	case FOLDER_NAVI: return (profile.folder_feats & FEAT_NAVI) != 0;
+	/* (issue #865's archetypes: a guardian deleted in HeatCross, the Cross
+	 * whose charge Ember's Fire chips feed; BN6's Fire navis among the
+	 * guardians, HeatMan and BlastMan, Storm's mirror) */
+	case FOLDER_EMBER: return (profile.folder_feats & FEAT_HEAT_GUARDIAN) || heat_guardian();
+	case FOLDER_TIDE: return rival(1)->megaman_won > 0 || rival(12)->megaman_won > 0;
 	default: return folder == FOLDER_STANDARD;
 	}
 }
 
 const FolderInfo *meta_folder(int folder) { return meta_folder_words(folder); }
+
+bool meta_folder_exists(int folder) { return folder >= 0 && folder < FOLDER_COUNT && meta_folder_words(folder)->name; }
 
 /* The folders' chips by BN6's record numbers (docs/rom/chips.md, chip
  * records): no more than five of a chip, as the game's folders hold; codes
@@ -52,7 +79,12 @@ const FolderInfo *meta_folder(int folder) { return meta_folder_words(folder); }
 #define C(id, code) CHIP_ENTRY((id), (code) == '*' ? 26 : (code) - 'A')
 enum { SWORD = 71, WIDESWRD = 72, LONGSWRD = 73, AREAGRAB = 163, PANLGRAB = 162, RECOV10 = 154, ATK10 = 192, BARRIER = 178,
 	THUNDER = 30, ELCPULS1 = 34, DOLTHDR1 = 31, CANNON = 1, VULCAN1 = 5, MINIBOMB = 54, AIRSHOT = 4, BUSTERUP = 175,
-	HICANNON = 2, TANKCAN1 = 12, CRAKSHOT = 89, DUBLSHOT = 90, RFLECTR1 = 131, HOLYPANL = 168 };
+	HICANNON = 2, TANKCAN1 = 12, DUBLSHOT = 90, FIREBRN1 = 20, FIREHIT1 = 107 };
+/* (Steady's and Navi's: BN6's Extra and Navi presets' chips, and their trims) */
+enum { VULCAN2 = 6, ENERGBOM = 55, RECOV30 = 155, WHICAPSL = 184, COMINGRD = 170, NAVI20 = 193,
+	BLASTMAN = 257, DIVEMAN = 260, CRCUSMAN = 263 };
+/* (issue #865's archetypes: Ember's and Tide's) */
+enum { BURNSQR1 = 110, GRASSEED = 68, TRNARRW1 = 24, BBLSTAR1 = 27, ICESEED = 69, CRAKSHOT = 89 };
 static const uint16_t blade[30] = {
 	/* LifeSword's three in S, a spare in L; AreaGrab to close in, nothing
 	 * that reaches the back */
@@ -77,15 +109,19 @@ static const uint16_t storm[30] = {
 	C(ATK10, '*'), C(ATK10, '*'), C(BUSTERUP, '*'),
 };
 static const uint16_t zcanon[30] = {
-	/* GigaCan1's three Cannons (A, B, C in a row) and shots in their
-	 * codes that stop at the first thing in the row; two MiniBombs the only
-	 * throw over cover */
+	/* BN6's Program Advance preset one tier down (docs/game/meta/decisions.md,
+	 * issue #865): three recipes of three chips in codes in a row (GigaCan1
+	 * from Cannon A B C, WideBrn1 from FireBrn1 F G H, FlmHook1 from FireHit1
+	 * D E F, BN6's table at 0x02BA60), two of each code but one so that five
+	 * of a kind stay the most, and LifeSrd's three in S once each; the rest
+	 * in * so any part of a recipe makes a hand */
 	C(CANNON, 'A'), C(CANNON, 'A'), C(CANNON, 'B'), C(CANNON, 'B'), C(CANNON, 'C'),
-	C(CRAKSHOT, 'A'), C(CRAKSHOT, 'A'), C(TANKCAN1, 'A'), C(DUBLSHOT, 'C'), C(DUBLSHOT, 'C'),
-	C(RFLECTR1, 'C'), C(RFLECTR1, 'C'), C(AIRSHOT, '*'), C(AIRSHOT, '*'),
-	C(MINIBOMB, 'B'), C(MINIBOMB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(HOLYPANL, 'B'),
-	C(BARRIER, 'A'), C(BARRIER, 'A'), C(RECOV10, 'A'), C(RECOV10, 'A'), C(RECOV10, '*'), C(RECOV10, '*'),
-	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(PANLGRAB, '*'), C(PANLGRAB, '*'),
+	C(FIREBRN1, 'F'), C(FIREBRN1, 'G'), C(FIREBRN1, 'G'), C(FIREBRN1, 'H'), C(FIREBRN1, 'H'),
+	C(FIREHIT1, 'D'), C(FIREHIT1, 'D'), C(FIREHIT1, 'E'), C(FIREHIT1, 'E'), C(FIREHIT1, 'F'),
+	C(SWORD, 'S'), C(WIDESWRD, 'S'), C(LONGSWRD, 'S'),
+	C(AREAGRAB, '*'), C(AREAGRAB, '*'), C(BARRIER, '*'), C(BARRIER, '*'),
+	C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'),
+	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'),
 };
 static const uint16_t busting[30] = {
 	/* the heaviest of each kind a first act allows, in L and R: TankCan1
@@ -109,6 +145,54 @@ static const uint16_t lean[30] = {
 	C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'),
 	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'),
 };
+static const uint16_t steady[30] = {
+	/* BN6's Extra preset (its second folder, a qualifier's prize) with its
+	 * four Recov50 C made Recov30 L, the code of its HiCannons: Standard's
+	 * shape a step up, its heals the folder's own (issue #865) */
+	C(CANNON, 'A'), C(CANNON, 'B'), C(CANNON, 'C'), C(CANNON, '*'),
+	C(HICANNON, 'L'), C(HICANNON, 'L'), C(HICANNON, 'L'), C(VULCAN2, 'D'), C(VULCAN2, 'D'), C(VULCAN2, 'D'),
+	C(ENERGBOM, 'K'), C(ENERGBOM, 'K'), C(ENERGBOM, 'K'), C(ENERGBOM, 'K'),
+	C(SWORD, 'S'), C(SWORD, 'S'), C(SWORD, 'S'), C(WIDESWRD, 'S'), C(WIDESWRD, 'S'), C(LONGSWRD, 'S'),
+	C(DUBLSHOT, '*'), C(DUBLSHOT, '*'), C(RECOV30, 'L'), C(RECOV30, 'L'), C(RECOV30, 'L'), C(RECOV30, 'L'),
+	C(AREAGRAB, 'S'), C(BUSTERUP, '*'), C(ATK10, '*'), C(ATK10, '*'),
+};
+static const uint16_t navis[30] = {
+	/* BN6's Navi preset at a start's level: BlastMan, DiveMan and CircusMan
+	 * at V1 for its EX three, each with small chips in his code (B, D, C)
+	 * where the preset had rarity-3 blades; BblStar1, WhiCapsl and ComingRd
+	 * to hold a foe for them, and Navi+20 for them alone */
+	C(BLASTMAN, 'B'), C(DIVEMAN, 'D'), C(CRCUSMAN, 'C'),
+	C(BBLSTAR1, 'B'), C(BBLSTAR1, 'B'), C(BBLSTAR1, 'B'), C(MINIBOMB, 'B'), C(MINIBOMB, 'B'), C(MINIBOMB, 'B'),
+	C(CANNON, 'B'), C(CANNON, 'B'), C(CANNON, 'C'), C(CANNON, 'C'), C(VULCAN1, 'D'), C(VULCAN1, 'D'), C(VULCAN1, 'D'),
+	C(RECOV10, 'D'), C(RECOV10, 'D'), C(RECOV10, '*'), C(RECOV10, '*'),
+	C(WHICAPSL, '*'), C(WHICAPSL, '*'), C(AREAGRAB, '*'), C(AREAGRAB, '*'), C(COMINGRD, '*'),
+	C(NAVI20, '*'), C(NAVI20, '*'), C(NAVI20, '*'), C(ATK10, '*'), C(ATK10, '*'),
+};
+/* (issue #865's archetypes, docs/game/meta/folders-measured.md: BN6's
+ * rules verified in its battle code, docs/research/sources.md) */
+static const uint16_t ember[30] = {
+	/* grass first, then fire on it: a Fire hit on a foe on grass does
+	 * double and burns the grass plain; WideBrn1 (FireBrn1 F G H) and
+	 * FlmHook1 (FireHit1 D E F) in reach; little that reaches the back */
+	C(GRASSEED, 'F'), C(GRASSEED, 'F'), C(GRASSEED, 'F'), C(GRASSEED, 'F'), C(GRASSEED, '*'),
+	C(FIREBRN1, 'F'), C(FIREBRN1, 'F'), C(FIREBRN1, 'G'), C(FIREBRN1, 'H'), C(FIREBRN1, '*'),
+	C(FIREHIT1, 'D'), C(FIREHIT1, 'E'), C(FIREHIT1, 'F'), C(FIREHIT1, 'F'),
+	C(BURNSQR1, 'H'), C(BURNSQR1, 'H'),
+	C(CANNON, '*'), C(CANNON, '*'), C(AIRSHOT, '*'), C(MINIBOMB, '*'), C(MINIBOMB, '*'),
+	C(AREAGRAB, 'F'), C(AREAGRAB, 'F'), C(BARRIER, 'F'), C(BARRIER, 'F'),
+	C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'), C(ATK10, '*'), C(ATK10, '*'),
+};
+static const uint16_t tide[30] = {
+	/* Aqua in A and T: double on a Fire body; a bubble or an Aqua hit on ice
+	 * holds a foe for the next shot; weak hits on the rest */
+	C(TRNARRW1, 'A'), C(TRNARRW1, 'A'), C(TRNARRW1, 'A'), C(TRNARRW1, 'A'),
+	C(BBLSTAR1, 'T'), C(BBLSTAR1, 'T'), C(BBLSTAR1, 'T'), C(BBLSTAR1, 'T'),
+	C(ICESEED, 'A'), C(ICESEED, 'A'), C(ICESEED, '*'),
+	C(CANNON, 'A'), C(CANNON, 'A'), C(CANNON, 'A'), C(CRAKSHOT, 'T'), C(CRAKSHOT, 'T'), C(CRAKSHOT, 'A'),
+	C(AIRSHOT, '*'), C(AIRSHOT, '*'), C(MINIBOMB, '*'), C(MINIBOMB, '*'),
+	C(AREAGRAB, '*'), C(AREAGRAB, '*'), C(BARRIER, 'A'), C(BARRIER, 'A'),
+	C(RECOV10, 'A'), C(RECOV10, 'A'), C(RECOV10, 'A'), C(ATK10, '*'), C(ATK10, '*'),
+};
 #undef C
 
 const uint16_t *meta_folder_chips(int folder) {
@@ -118,8 +202,19 @@ const uint16_t *meta_folder_chips(int folder) {
 	case FOLDER_ZCANON: return zcanon;
 	case FOLDER_BUSTING: return busting;
 	case FOLDER_LEAN: return lean;
+	case FOLDER_STEADY: return steady;
+	case FOLDER_NAVI: return navis;
+	case FOLDER_EMBER: return ember;
+	case FOLDER_TIDE: return tide;
 	default: return NULL;
 	}
+}
+
+const uint16_t *meta_start_chips(int folder, int form) {
+	static uint16_t own[XFOLDER_ENTRIES];
+	int game = folder != FOLDER_STANDARD ? -1 : form == RUN_FORM_SOUL_BN5 ? XROM_BN5_COLONEL_US : form == RUN_FORM_SOUL_BN4 ? XROM_BN4_RED_SUN_US : -1;
+	if (game < 0) return meta_folder_chips(folder);
+	return xfolder_start(game, own, NULL) ? own : NULL;
 }
 
 /* ---- the milestones a battle reaches (Z-Canon's and Busting's) ---- */
@@ -139,11 +234,19 @@ static bool program_advance(int id) {
  * another act) */
 static int act_key(void) { return pacing_loop(run.depth) * PACING_ACTS + pacing_act(run.depth) + 1; }
 
-bool meta_chip_watched(int id) { return recovery(id) || program_advance(id); }
+/* (a Navi chip: BN6's own by number, Roll to Django3 221-280, and any
+ * other by its record's family, the Gigas and the registry's among them) */
+static bool navi_chip_id(int id) { return (id >= 221 && id <= 280) || chip_family(id) == CHIP_FAMILY_NAVI; }
+
+bool meta_chip_watched(int id) { return recovery(id) || program_advance(id) || navi_chip_id(id); }
 
 void meta_chip_used(int id) {
 	if (program_advance(id) && !(profile.folder_feats & FEAT_PA)) {
 		profile.folder_feats |= FEAT_PA;
+		profile_save();
+	}
+	if (navi_chip_id(id) && !(profile.folder_feats & FEAT_NAVI)) {
+		profile.folder_feats |= FEAT_NAVI;
 		profile_save();
 	}
 	if (recovery(id) && (profile.recov_run != run.seed || profile.recov_act != act_key())) {
@@ -154,6 +257,13 @@ void meta_chip_used(int id) {
 }
 
 void meta_guardian_deleted(void) {
+	/* (in HeatCross, or Beast Out in it: any guardian, the Secret Area's
+	 * master too; kept, as the guardian's record keeps only its last
+	 * battle) */
+	if (heat_guardian() && !(profile.folder_feats & FEAT_HEAT_GUARDIAN)) {
+		profile.folder_feats |= FEAT_HEAT_GUARDIAN;
+		profile_save();
+	}
 	/* (an act's own guardian: the Secret Area's master ends no act) */
 	if (run.side_kind == LAYER_SECRET || (profile.folder_feats & FEAT_DRY_ACT)) return;
 	if (profile.recov_run == run.seed && profile.recov_act == act_key()) return;
@@ -164,7 +274,7 @@ void meta_guardian_deleted(void) {
 /* (earned in any run; the profile's bit marks it as announced on a
  * summary, and keeps one opened under an older rule) */
 bool meta_folder_open(int folder) {
-	if (folder <= FOLDER_STANDARD || folder >= FOLDER_COUNT) return folder == FOLDER_STANDARD;
+	if (folder <= FOLDER_STANDARD || !meta_folder_exists(folder)) return folder == FOLDER_STANDARD;
 	return (profile.folders_open >> folder & 1) || earned(folder);
 }
 
@@ -318,8 +428,10 @@ int meta_spin_colour(void) {
 	return n ? missing[spin_hash(run.seed ^ 0x5B1Du) % (uint32_t)n] : 0;
 }
 
+int meta_spin_depth(void) { return 4 + (int)(spin_hash(run.seed) % 5u); }
+
 bool meta_spin_here(void) {
-	return run.side_kind == LAYER_NORMAL && run.depth == 4 + (int)(spin_hash(run.seed) % 5u) && meta_spin_colour() > 0;
+	return run.side_kind == LAYER_NORMAL && run.depth == meta_spin_depth() && meta_spin_colour() > 0;
 }
 
 void meta_spin_found(int colour) {
@@ -508,6 +620,11 @@ void meta_run_over(bool won) {
 	open_crosses(true);
 	open_forms(true);
 	earn_marks(won);
+	/* (and MegaMan's colours for what it earned, the disc's Hazard among
+	 * them: docs/game/looks-earning.md, Earning; he says so at the next start) */
+	unsigned colours = looks_milestones();
+	for (int p = 0; p < LOOK_PALETTES; ++p)
+		if (colours >> p & 1) say("the %s colors", looks_palette_name(p));
 	profile_save();
 }
 

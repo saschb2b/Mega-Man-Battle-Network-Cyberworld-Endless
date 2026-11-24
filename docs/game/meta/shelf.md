@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "The shelf of starting folders"
-description: "The setup's FOLDER row shows all six starting folders (issue #864): open, locked with a hint at the kind of deed, or heard (its milestone said plainly) once a bystander's rumor or the BBS's floor post told it; the summary's closest unlock follows the same rule."
+description: "The setup's FOLDER row shows every starting folder (issue #864): open, locked with a hint at the kind of deed, or heard (its milestone said plainly) once a bystander's rumor or the BBS's floor post told it; the summary's closest unlock follows the same rule."
 tags: [game, meta, setup]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T17:28:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 sources:
   - id: issue-864
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/864"
@@ -30,8 +30,10 @@ Which folders exist, what they hold and how they open are unchanged
 
 ## Three states
 
-The FOLDER row turns through all six, the open ones counted beside its
-name ("Folder 3/6"). The setup is still skipped on a profile's first run
+The FOLDER row turns through every folder, the open ones counted beside
+its name ("Folder 3/10"), passing over an id no folder holds (the ids are
+kept in profiles and runs, and issue #865's builders took them in blocks:
+`meta_folder_exists`). The setup is still skipped on a profile's first run
 ([Decisions and phase one](decisions.md)).
 
 | State | The row | The information box |
@@ -56,6 +58,8 @@ milestone having been chosen to teach its style (`meta_text.c`'s `hint`):
 | Z-Canon | A Program Advance used | Opens when chips work as one, in order |
 | Busting | An act cleared with no Recovery chip | Opens for an act with no safety net |
 | Lean | Layer 10 reached | Opens deep down in the Net |
+| Steady | Act 3 reached | Opens for a Navi who lasts |
+| Navi | A Navi chip used | Opens when a friend helps |
 
 ## Heard in the net
 
@@ -85,7 +89,11 @@ knows](what-megaman-knows.md)): in the profile, `Profile.shelf`
 (unread since 19 October 2026). A profile of before holds other data
 there; `shelf.kept` reads `SHELF_KEPT` once they are the shelf's, and
 `profile_load` clears them once (nothing heard, the floor's count not
-begun). The profile's size and every other field stand.
+begun). The profile's size and every other field stand. Its two bit sets
+are sixteen bits each, a bit per folder (`1 << FOLDER_*`), so the shelf
+holds up to sixteen; the first shelf's byte-wide sets, never released,
+held eight, and a profile that kept them starts its shelf afresh
+(issue #865).
 
 ## The summary
 

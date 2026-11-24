@@ -265,7 +265,7 @@ static void setup_json(Json *j) {
 	helpers_words(helpers, sizeof helpers);
 	if (!extras_off_names(off, sizeof off, run.extras_off, ", ")) snprintf(off, sizeof off, "none");
 	json_member(j, "net", net_name());
-	json_member(j, "folder", meta_folder(run.folder < FOLDER_COUNT ? run.folder : FOLDER_STANDARD)->name);
+	json_member(j, "folder", meta_folder(meta_folder_exists(run.folder) ? run.folder : FOLDER_STANDARD)->name);
 	json_member(j, "cross", cross ? cross : "none");
 	json_member(j, "form", meta_form_name(run.form));
 	json_int(j, "threat", run.threat);
