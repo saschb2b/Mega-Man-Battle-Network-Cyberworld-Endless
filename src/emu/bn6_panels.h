@@ -281,6 +281,24 @@
  * enemy's), where object_getFrontDirection (0x0800E2CA) takes its flip too; 53 calls in Gregar's code */
 #define BN6_ENEMY_DIRECTION   0x0800E2C0u /* ... ldrb r0,[r5,#0x16], then object_getAllianceDirection's three (0x0800E2C2) and mov pc,lr */
 
+/* BN6_ROW_PANEL_ACROSS's (bn6_chips.h) two searches of the row, each from the edge of its side's across by its alliance alone
+ * (r0 alliance ^ 1 into BN6_ROW_SEARCH's way), which only BN4's moved Meteors calls: issue #846 */
+#define BN6_ROW_ACROSS_WAY    0x08016178u /* ... the first's eors r0,r1 (r0 the alliance, r1 1), the object in r5 */
+#define BN6_ROW_ACROSS_WAY2   0x08016192u /* ... the second's, the same */
+
+/* BN6's chips that take their start, their way or their flip from their side alone, the alliance (or 1) read into a register
+ * the next instruction takes, r5 the object: turned round with MegaMan on a Surrounded field (issue #846) */
+#define BN6_SANDWORM_FLIP     0x080E0546u /* SandWrm's worm (sub_80DECBC): strb r0,[r5,#0x17], r0 1: it faces back at its side */
+#define BN6_SANDWORM_FLIP2    0x080E088Au /* ... its body's segments (sub_80DF016), the same */
+#define BN6_BURNSQR_START     0x080BC8C2u /* BurnSqr's square (sub_80BB048): r0 the alliance, the table at 0x080BC904 its start (+0) and end
+                                           * (+2) columns, {5,2,1,6}, walked back toward its user */
+#define BN6_TENGU_DASH        0x080BB5FEu /* TenguMan's dash (sub_80B9D6E): lsls r0,#1, r0 the alliance, the start at 0x080BB6A4 by it */
+#define BN6_TENGU_DIVE        0x080BB6CAu /* ... his dive (sub_80B9E40): the same, the table at 0x080BB764 */
+#define BN6_AIRRAID_EDGE      0x080D4FF2u /* AirRaid's bomb with no foe ahead (sub_80D3770): r0 the alliance, ^ 1, x 5, + 1: the far edge */
+#define BN6_MAGNUM_START      0x080BCC16u /* Magnum's cursor (sub_80BB398): r0 the alliance, the start column at 0x080BCC64 by it ({6,1}) */
+#define BN6_BLASTMAN_START    0x080BA8D0u /* BlastMan's flames (sub_80B903A): lsls r4,#8, r0 their start column and r4 their way by the
+                                           * alliance alone (side 0: from column 0, right), each stopping at the first foe in its row */
+
 /* A panel flag (bn6.h's BN6_PANEL_FLAGS) */
 #define BN6_PANEL_SIDE_0      0x00010000u /* BN6_PANEL_FLAGS: an object of side 0 stands on it, what side 1's panel scans want: the Gunner's
                                            * attack step (0x081140F0) asks object_getFirstPanelInDirectionFiltered (0x0800D0BC) for the first

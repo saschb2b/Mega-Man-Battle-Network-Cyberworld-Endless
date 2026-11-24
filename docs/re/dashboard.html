@@ -81,8 +81,8 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-23",
-  "previous": "2026-11-22",
+  "updated": "2026-11-24",
+  "previous": "2026-11-23",
   "features": [
     {
       "name": "Net Square",
@@ -290,28 +290,45 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-11-23",
       "link": "../multirom/souls.md",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "MegaMan's look",
+      "state": "proven",
+      "now": "Measured (epic #854, step 1): his battle, field, mugshot and emotion-window palettes and their ramps (two blue channels, armour and suit, in battle and on the field; the helmet alone in the mugshot and the face), the code that picks his battle palette by form, and BN6's renderer giving OBJ palette slots by content (12 on the maps, 10 in battle; the Square's plaza 9 of 12 given). A throwaway spike rotated the armour's hue in the ROM copy: field, chat box, battle and emotion face recoloured, HeatCross in its own colours, the look back after it.",
+      "left": "Step 2 onward: the channels and Classic in the profile, the PET screen; the Square's peers each in a sprite of their own; a per-side palette for NetBattles.",
+      "updated": "2026-11-24",
+      "link": "../rom/megaman-colours.md",
+      "state_text": "Proven in research, not built"
     }
   ],
   "decisions": [],
   "since": [
     {
-      "date": "2026-11-23",
-      "what": "Catack's take of the panel it drives onto, and the column timer that hands it back, mapped in both games for issue #837 (closed as BN5's own design): BN6 0x0800CC14 the setter and 0x0800CC36 the timer (0x708 into the column record 0x02034010 +6), Catack's take 0x0810D8E2-0x0810D904, the countdown 0x0800C746; BN5 0x0800B2D6, 0x0800B2F8 (0x02034020), 0x081093B8-0x081093DA. Names only, no code uses them (src/emu/bn6_panels.h, src/emu/bn5_liberation_rules.h; docs/rom/liberation.md, A panel taken and handed back)."
+      "date": "2026-11-24",
+      "what": "MegaMan's colours mapped (src/emu/bn6_look.h; docs/rom/megaman-colours.md): his battle sprite's 43 palettes (BN6_LOOK_BATTLE_PALS 0x081DE160), the field's (0x08437C34), the mugshot's (0x084EDD1C), the emotion face's through BN6_FACE_PALS_REF, the battle palette's pick by form (0x0801002C), the field's index (0x02000AA5), and the renderer's OBJ palette slots given by content (0x03006108, its limit 0x020098A8 by mode)."
     },
     {
-      "date": "2026-11-23",
-      "what": "MegaMan's aim turned round on a Surrounded field located and mended (issue #838; docs/rom/chips-code.md, A chip used turned round): BN6's search of a row (bn6_panels.h BN6_ROW_SEARCH 0x0800D086, its start BN6_ROW_SEARCH_START 0x0800D09C, its loop BN6_ROW_SEARCH_LOOP 0x0800D09E) walks from the field's edge behind the searcher, so between the two sides GolmHit's fist (BN6_GOLMHIT_FIST 0x080E60F0, its search at 0x080E6144) fell on column 6 turned left and column 1 facing right; BN6's way toward the enemy (BN6_ENEMY_DIRECTION 0x0800E2C0) takes the side alone, where DiveMan's chip and 32 of BN4's moved chips aim; a BattleSettings' +6 its column pattern (bn6_forms.h BN6_SETTINGS_SIDES). Hooks start MegaMan's side's search at its own column and answer its facing, on a field none of BN6's plain three (src/emu/turned_aim.c); tools/turned_sweep.py swept 643 chips turned left, the rest open in issue #846."
-    },
-    {
-      "date": "2026-11-23",
-      "what": "BN6's Chip Trader screen (bn6f ChipTraderControl) driven as a Bring request's choice of one chip (issue 842): ts_start_chip_trader's amount 1 is the BugFrag Trader's and opens no screen, so the asker's script opens it for 2 and the list made (0x0804B150) sets 1 and keeps the request's element alone; its question for an amount but 3 (script 8 through 0x0804BCD8) is MegaMan's of ours; its Yes (0x0804B26E) leaves by BN6's own way out with no trade (0x0804B254), since a trade's sets the map's fade for the prize's cutscene and a screen left with none stayed black. Proved in a headless run: the screen at 0/ 1 over the Wood chips alone, the second put in, Yes, the asker handing it over (src/world/bring_choice.c; docs/rom/world.md, The Chip Trader's screen as a Bring's choice; tests/scenarios/home_bring_choice.py)."
-    },
-    {
-      "date": "2026-11-23",
-      "what": "BN6's PET reads a shown power past 1000 as one of its own Navis' by MegaMan's best time (0x08010C76: the times at 0x020018C0 + 2n, the powers at 0x08020E54 + 22n, n the power less 1001), for the folder editor's card (Gregar 0x0811A874, drawn at 0x0811A878) and the pack's Attack sort (0x08121D7E); 0x08010CE0 is its twin at the step 5 (the card's where the submenu's bytes are 0x18 0x1C). The battle computes the power by 0x080109A4 instead. A moved SP's record names an entry of BN6's grown table (1128 and up), so the card read past BN6's Navis: CosmoMn SP's 6544 (issue 835). Both routines are hooked: a grown entry goes to 0x080109A4 for side 0. BN5's card (0x0812315C into 0x0800EB50: times 0x02002670, steps 0x0800EB94, powers 0x0801D27A) and BN4's (0x0801969C: times 0x02001610, steps 0x080196E0, powers 0x08018B48) are BN6's routine by their own tables, and each save's times start 0xFFFF (BN5 0x080092E0, BN4 0x08007FFA fill a side's 0x2C bytes with ~0), past every step: a card with no time shows its row's last power, which the moved routine deals with XC_SP_TIMES none (src/emu/xchips_shown.c; docs/rom/chips-code.md, its row A moved SP's power in the PET)."
+      "date": "2026-11-24",
+      "what": "The rest of the chips used turned round on a Surrounded field located and mended (issue #846; docs/rom/chips-code.md, A chip used turned round, the rest): BN4's moved code calls BN6_ENEMY_DIRECTION with objects whose flip it left 0 (answered by MegaMan's facing from XC4_CODE and XN_BN4_CODE); BN6_ROW_PANEL_ACROSS's two searches by the alliance (BN6_ROW_ACROSS_WAY 0x08016178, BN6_ROW_ACROSS_WAY2 0x08016192, Meteors); BN6's side reads in SandWrm (BN6_SANDWORM_FLIP 0x080E0546, BN6_SANDWORM_FLIP2 0x080E088A), BurnSqr (BN6_BURNSQR_START 0x080BC8C2), TenguMan (BN6_TENGU_DASH 0x080BB5FE, BN6_TENGU_DIVE 0x080BB6CA), AirRaid (BN6_AIRRAID_EDGE 0x080D4FF2), Magnum (BN6_MAGNUM_START 0x080BCC16) and BlastMan (BN6_BLASTMAN_START 0x080BA8D0); BN4's in SeekBom (BN4_SEEKBOM_AHEAD 0x080DEF5C), PitRng (BN4_PITRNG_EDGE 0x080E99FE) and GutsMan (BN4_GUTSMAN_EDGE 0x080D07E2), hooked where they were moved (src/emu/turned_aim.c). Left as the originals' own, read in BN6's, BN5's and BN4's code: FlshBom, Magnum's timing, Voltz, Astroid, CloudMan's 50, CosmoMan, MokoRus, BigHamr's random panels, Hole. Scenarios battle-turned/{burnsqr,blastman,panlsht,meteors,seekbom}, seen to fail on the build before."
     }
   ],
   "experiments": [
+    {
+      "feature": "MegaMan's look",
+      "date": "2026-11-24",
+      "name": "The armour's hue turned in the ROM copy",
+      "result": "Battle palette 0's and 4's indexes 2-5, the field's 2-5, the mugshot's 2-3 and emotion face 0's 11-13 (read through BN6_FACE_PALS_REF, the Souls' copy) turned to hue 350 as the core started: the field, MegaMan's line in a chat box, the Custom screen, a battle and its emotion window drew the armour red in BN6's own shading, the suit, skin and window frame as they were; HeatCross chosen on CROSSSELECT drew its own colours, and the next battle the red armour again. A first try on BN6's own face palettes changed nothing: the engine reads the copy.",
+      "meaning": "A look is a write of the plain palettes in the ROM copy, read by the renderer every frame: no hook for the field, the chat box or the battle, and the forms keep their palettes untouched.",
+      "link": "../rom/megaman-colours.md"
+    },
+    {
+      "feature": "MegaMan's look",
+      "date": "2026-11-24",
+      "name": "The Net Square's OBJ palette slots",
+      "result": "Three games on a local server, the engine's dump in each part: the slot limit 12 everywhere; the welcome plaza gave 9 slots (MegaMan and both peers in slot 0), Trade Central 3, the stage 2. In romlab a byte poked into the OBJ work palette (0x03001550) reached palette RAM that frame and was put back the next.",
+      "meaning": "Peers in one look share a slot; each look of its own costs one. The plaza can show three looks besides the player's own before BN6's renderer marks a sprite and leaves it in a stale slot.",
+      "link": "../rom/megaman-colours.md"
+    },
     {
       "feature": "Shared dive",
       "date": "2026-11-23",
