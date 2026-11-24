@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-24
+* **Update**: code/tools.md (house.py's row: the `Mosaic`, several games of one take at once in a trailer's big window, new with 0.24.0's cut).
 * **Creation**: releases/v0.24.0.md (the players' notes of 0.24.0: MegaMan's colours, the folders' shelf and five folders, Team ProtoMan, the week's DeepNet dived as a crew, the fixes, each pictured), releases/overview.md (its line).
 * **Update**: online/shared-dive.md (a crew in one column: each plate in the first spot beside its MegaMan that covers no MegaMan, plate or BN6 piece, none while the battle's clock holds, issue #886; the field's marks and the crew's display in battle to match; the divers' names on a layer kept off the crew's plates), engine/ui.md (Ours: the battle field's labels and where they stand).
 * **Update**: online/shared-dive.md (Looks on the field: the field built from BN6's colours, each seat's look carried with his MegaMan into the spare palettes, the picks answered by seat; issue #879), game/looks.md (On a shared dive's field), rom/megaman-colours.md (the spares and picks on the party's field), code/online.md (`party_looks.c`).
