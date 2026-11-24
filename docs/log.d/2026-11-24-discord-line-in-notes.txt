@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-24T21:10:00Z
-* **Update**: releases/overview.md (a release's notes carry an invitation to the Discord server under their opening paragraph, the CHANGELOG at its top).
