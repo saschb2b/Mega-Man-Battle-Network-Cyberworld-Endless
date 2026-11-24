@@ -115,6 +115,7 @@ void profile_load(void) {
 		if (profile.runs) profile.heard |= HEARD_DEALER | HEARD_FIRST_DIVE;
 		profile.heard |= HEARD_KEPT;
 	}
+	looks_profile_loaded();
 }
 
 void save_init(void) {
