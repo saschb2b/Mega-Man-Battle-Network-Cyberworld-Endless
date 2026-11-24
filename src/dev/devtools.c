@@ -81,6 +81,9 @@ static bool dev_switch(const char *t) {
 	return false;
 }
 
+static Look dev_look_set;
+static bool dev_look_on;
+
 /* `--dev look=`'s words: its first channel `first`, the next two taken
  * from the tokens after it while they read as channels (the commas split
  * them), a token that does not left in `*rest` for the switches */
@@ -95,8 +98,7 @@ static void dev_look(const char *first, char **rest) {
 		size_t n = strlen(words);
 		snprintf(words + n, sizeof words - n, ",%s", t);
 	}
-	Look l;
-	if (looks_parse(words, &l)) looks_set_override(&l);
+	if (looks_parse(words, &dev_look_set)) dev_look_on = true;
 	else fprintf(stderr, "dev: look=%s is no look (P.C,P.C,P.C, - for BN6's own)\n", words);
 }
 
@@ -139,6 +141,8 @@ void devtools_parse(const char *spec) {
 }
 
 void devtools_veteran(void) {
+	/* (the worn slot's look, saved: a CONTINUE without the switch keeps it) */
+	if (dev_look_on) looks_set(looks_slot(), &dev_look_set);
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
 	/* (a bit a folder but the Standard's, every one meta.h has) */
 	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }

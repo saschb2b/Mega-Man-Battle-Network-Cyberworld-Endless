@@ -6,8 +6,9 @@
  *
  * A pick sets a channel's average: the ramp's mean hue, saturation and
  * value (of BN6's plain palette) become the pick's, and each shade keeps
- * its place around that mean (its hue offset, its saturation and value
- * levelled: below the mean scaled toward 0, above it toward full). So a
+ * its place around that mean: its hue offset; its saturation scaled by the
+ * pick's over the mean's; its value levelled (below the mean scaled toward
+ * 0, above it toward full, so a light pick keeps its highlights). So a
  * blue pick near BN6's own gives BN6's ramp back, a pale one a pale ramp,
  * and a grey, white or black pick (no saturation) a shaded grey, white or
  * black: its saturation and value come from the pick, its shading from
@@ -81,6 +82,14 @@ static int level(int x, int m, int t) {
 	return x <= m ? x * t / m : t + (x - m) * (ONE - t) / (ONE - m);
 }
 
+/* x scaled as t scales the mean, held at ONE: a saturation, which a grey
+ * pick (t 0) takes to none in every shade, its hue then meaningless */
+static int scale(int x, int m, int t) {
+	if (m <= 0) return t;
+	int y = x * t / m;
+	return y > ONE ? ONE : y;
+}
+
 /* ---- BN6's own palettes ---- */
 
 static bool rom_pal(uint32_t at, uint16_t out[16]) {
@@ -121,7 +130,7 @@ static void colour_ramp(uint16_t pal[16], const uint16_t base[16], Span sp, uint
 	Hsv mean = { first_h + dh / n, s / n, v / n }, pick = hsv_of(c);
 	for (int i = sp.first; i <= sp.last; ++i) {
 		Hsv o = hsv_of(pal[i]);
-		Hsv out = { pick.h + hue_off(o.h, mean.h), level(o.s, mean.s, pick.s), level(o.v, mean.v, pick.v) };
+		Hsv out = { pick.h + hue_off(o.h, mean.h), scale(o.s, mean.s, pick.s), level(o.v, mean.v, pick.v) };
 		pal[i] = rgb_of(out);
 	}
 }

@@ -7,8 +7,6 @@
 
 #include "save.h"
 
-static bool override_on;
-static Look override_look;
 static void (*on_change)(void);
 static void (*describer)(FILE *f);
 
@@ -48,13 +46,7 @@ bool looks_set(int slot, const Look *look) {
 	return true;
 }
 
-Look looks_worn(void) { return override_on ? override_look : looks_get(looks_slot()); }
-
-void looks_set_override(const Look *look) {
-	override_on = look && look_valid(look);
-	if (override_on) override_look = *look;
-	if (on_change) on_change();
-}
+Look looks_worn(void) { return looks_get(looks_slot()); }
 
 void looks_profile_loaded(void) {
 	if (profile.looks_kept) return;
@@ -73,7 +65,7 @@ void looks_describe(FILE *f) {
 	for (int c = 0; c < LOOK_CHANNELS; ++c)
 		if (w.palette[c] == LOOK_NONE) fprintf(f, "%s-", c ? "," : " ");
 		else fprintf(f, "%s%d.%d", c ? "," : " ", w.palette[c], w.colour[c]);
-	fprintf(f, " slot %d%s\n", looks_slot(), override_on ? " dev" : "");
+	fprintf(f, " slot %d\n", looks_slot());
 	if (describer) describer(f);
 }
 

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **New: MegaMan in colours of his own, the engine's part.** His plain
+  body takes a look: the armour, the suit and the gold each coloured from
+  one of twelve palettes (Classic, Undernet, Gregar, ProtoMan, Nebula,
+  Tournament, Hazard, Central Town, Seaside, Sky, Mystery, Glitch), on the
+  field, in battle, in a chat box and on the Custom screen, BN6's shading
+  kept. A Cross, a Soul or BeastOut keeps its own colours. A profile keeps
+  three looks; the PET's screen to pick them and the ways to earn the
+  palettes follow (issue #854).
+
 - **New: fast forward keeps the music at its own pace.** While the game
   runs fast, the song plays on as it would at BN6's speed instead of
   hurrying along with the game, and when fast forward stops the game
