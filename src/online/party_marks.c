@@ -23,7 +23,8 @@
 #define PAD    1    /* its plate's edge around the letters */
 #define NAME_H (PIXFONT_CAP + 2 * PAD + 1)   /* a name's plate (+1: the shade's pixel) */
 #define HP_GAP 1    /* a partner's HP under his name, this far */
-#define CHIP_LINE 148   /* BN6's chip's name in a battle, its top on the picture (seen in the captures) */
+#define FOOT (160 - LOOK_BAND_H - 1)   /* a plate's foot at most: over the joiner's band (party_play.c), and so over BN6's */
+                                       /* chip name in a battle (its top 148, seen in the captures) */
 #define BODY 47         /* a MegaMan on the field, from his feet to over his head (seen in the captures) */
 #define BODY_HALF 17    /* ... and from his feet' middle to either side, his buster held out (seen in the captures) */
 #define HALF 120        /* the player's side of the field, the picture's left half: a plate stays off the enemies' */
@@ -121,7 +122,7 @@ static bool seen(struct mCore *c, unsigned mine, unsigned n, Seen *v) {
 
 /* where each MegaMan's plate stands on the picture (issue #886): the first of four spots beside him that covers no
  * MegaMan's body, no plate placed before it, nor BN6's HP box, emotion window or gauge, nor the enemies' half, nor
- * BN6's chip name at the picture's foot. Under his feet first, where BN6 writes an enemy's HP; then in front of him
+ * BN6's chip name and the band at the picture's foot. Under his feet first, where BN6 writes an enemy's HP; then in front of him
  * (the next column, the plate's foot on his feet' line), behind him, over his head. Where none is clear, the one
  * that covers least. The player's own is placed first, then the partners by seat */
 typedef struct { int left, top, w, h; } Box;
@@ -155,7 +156,7 @@ static bool spot(int k, int x, int y, int w, int h, Box *b) {
 	if (k == 1) *b = (Box){ x + BODY_HALF + 1, y - h, w, h };
 	if (k == 2) *b = (Box){ x - BODY_HALF - 1 - w, y - h, w, h };
 	if (k == 3) b->top = y - BODY - h;
-	if (b->left < 0 || b->left + b->w > HALF || b->top + b->h > CHIP_LINE) return false;
+	if (b->left < 0 || b->left + b->w > HALF || b->top + b->h > FOOT) return false;
 	for (size_t i = 0; i < sizeof hud / sizeof hud[0]; ++i)
 		if (meets(*b, hud[i])) return false;
 	return true;

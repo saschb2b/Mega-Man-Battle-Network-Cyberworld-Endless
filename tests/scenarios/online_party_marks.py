@@ -97,8 +97,9 @@ def crew_battle(others):
         *[soon(f'crew={n}: {names}', g, 900) for g in games],
         ('do', 'battle; wait 10'),
         *[soon(f'partyfield~{n} seat', g, 1200) for g in games],
-        *[step for g in games for step in (soon(f'marks={n} apart', g, 3600), online.at(g, ('expect', f'plates={n} clear')))],
-        *[online.at(g, ('do', 'wait 30; shot'), ('expect', f'plates={n} clear')) for g in games],
+        # (each game's field drawn, not held under his own Custom screen or BATTLE START!: every plate clear, its picture)
+        *[step for g in games for step in (soon(f'marks={n} apart', g, 3600), soon(f'plates={n} clear', g, 3600),
+                                           online.at(g, ('do', 'shot')))],
     ))
 
 
