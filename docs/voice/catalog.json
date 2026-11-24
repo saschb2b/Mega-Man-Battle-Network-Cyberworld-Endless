@@ -1214,6 +1214,9 @@
   "lock_words:ta_pcode_teller": {
    "line": 127
   },
+  "looks_text:names": {
+   "line": 5
+  },
   "meta_text:folders": {
    "comment": "(in the folders' order, FOLDER_STANDARD first)",
    "line": 13
@@ -2494,6 +2497,15 @@
    "speaker": "MegaMan",
    "stem": "extras_text"
   },
+  "src/core/looks_text.c": {
+   "comment": "The looks' palettes' names, as the look screen shows them: each named for where it is earned (docs/game/looks.md), in LookPalette's order.",
+   "domain": "MegaMan's look",
+   "kind": "screen",
+   "lines": 1,
+   "shows": [],
+   "speaker": "Screen",
+   "stem": "looks_text"
+  },
   "src/core/meta_text.c": {
    "comment": "meta_text.h. Menu words, short and plain: a folder's style and its cost in a line, as KeyItem's box says what an item is, and its milestone as the setup's shut folders list it (\"Storm: delete an Aqua guardian\"); the summary's closest goal, a sentence of three lines at most, its period as BN6's KeyItem descriptions end theirs.",
    "domain": "Title",
@@ -3337,6 +3349,14 @@
     "lines": 10,
     "speech": 10
    },
+   "MegaMan's look": {
+    "files": [
+     "src/core/looks_text.c"
+    ],
+    "flagged": 0,
+    "lines": 1,
+    "speech": 0
+   },
    "NaviCust": {
     "files": [
      "src/director/board_words.c",
@@ -3644,7 +3664,7 @@
     "words_per_box": 5.4
    }
   },
-  "lines": 2400,
+  "lines": 2401,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -4900,6 +4920,7 @@
   {"container":"discord_text:state","domain":"Discord","file":"src/discord/discord_text.c","id":"discord_text:state","line":47,"lines":["discord_text:state:caseDISCORD_SUMMARY.0","discord_text:state:caseDISCORD_LAYER.0","discord_text:state:caseDISCORD_HOME.0"],"speakers":["Screen"],"title":"The second line","when":"The second line: what"},
   {"container":"discord_text:discord_words","domain":"Discord","file":"src/discord/discord_text.c","id":"discord_text:discord_words","line":62,"lines":["discord_text:discord_words:0","discord_text:discord_words:1"],"speakers":["Screen"],"title":"The activity's lines for `f`","when":"The activity's lines for `f` (its start left as it was)"},
   {"container":"discord_text:discord_setting_note","domain":"Discord","file":"src/discord/discord_text.c","id":"discord_text:discord_setting_note","line":69,"lines":["discord_text:discord_setting_note:0"],"speakers":["Screen"],"title":"Settings.ini","when":"---- settings.ini ----"},
+  {"container":"looks_text:names","domain":"MegaMan's look","file":"src/core/looks_text.c","id":"looks_text:names","line":7,"lines":["looks_text:names:7"],"speakers":["Screen"],"title":"Names","when":""},
   {"container":"options_text:words","domain":"Options","file":"src/core/options_text.c","id":"options_text:words","line":13,"lines":["options_text:words:2","options_text:words:6","options_text:words:8","options_text:words:12","options_text:words:13","options_text:words:19","options_text:words:20","options_text:words:21","options_text:words:22","options_text:words:23","options_text:words:24","options_text:words:25","options_text:words:30","options_text:words:31","options_text:words:33","options_text:words:34","options_text:words:35","options_text:words:36","options_text:words:37","options_text:words:42","options_text:words:43","options_text:words:44","options_text:words:45","options_text:words:46","options_text:words:47","options_text:words:48","options_text:words:49","options_text:words:53","options_text:words:54","options_text:words:55","options_text:words:56","options_text:words:60","options_text:words:61","options_text:words:62","options_text:words:63","options_text:words:64","options_text:words:65","options_text:words:66","options_text:words:67","options_text:words:68","options_text:words:69","options_text:words:70","options_text:words:71","options_text:words:72","options_text:words:73","options_text:words:74","options_text:words:76","options_text:words:77","options_text:words:78","options_text:words:80","options_text:words:85","options_text:words:86","options_text:words:87","options_text:words:88","options_text:words:89","options_text:words:90","options_text:words:91","options_text:words:92","options_text:words:93","options_text:words:94","options_text:words:95","options_text:words:97","options_text:words:98","options_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in OptionsWord's order, its name beside each)"},
   {"container":"options_text:options_sound_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_sound_note","line":126,"lines":["options_text:options_sound_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the sound line","when":"settings.ini's lines before the sound line: what it is"},
   {"container":"options_text:options_low_pass_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_low_pass_note","line":135,"lines":["options_text:options_low_pass_note:0"],"speakers":["Screen"],"title":"Options low pass note","when":"... before mGBA's filter's level and the output's"},
@@ -5137,6 +5158,7 @@
   {"boxes":[{"pages":[["A flame of darkness","offers a DarkChip in","each act"]],"speaker":"MegaMan","text":"A flame of darkness offers a DarkChip in each act"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":[],"fragment":true,"id":"extras_text:extra_words.extras:4.1","kind":"speech","line":17,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A flame of darkness offers a DarkChip in each act","text_hash":"3e0786dfb032"},
   {"boxes":[{"pages":[["Older nets"]],"speaker":"MegaMan","text":"Older nets"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":[],"fragment":true,"id":"extras_text:extra_words.extras:5.0","kind":"speech","line":18,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Older nets","text_hash":"b6da4582a1b0"},
   {"boxes":[{"flags":[{"at":"areas, Navis","code":"comma-space"}],"pages":[["Other games' areas,","Navis and viruses in","BN6's net"]],"speaker":"MegaMan","text":"Other games' areas, Navis and viruses in BN6's net"}],"container":"extra_words.extras","domain":"Other","file":"src/core/extras_text.c","flags":["comma-space"],"fragment":true,"id":"extras_text:extra_words.extras:5.1","kind":"speech","line":18,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Other games' areas, Navis and viruses in BN6's net","text_hash":"2b2bdded07bb"},
+  {"boxes":[{"pages":[["Central Town"]],"speaker":"Screen","text":"Central Town"}],"container":"names","domain":"MegaMan's look","file":"src/core/looks_text.c","flags":[],"id":"looks_text:names:7","kind":"screen","line":7,"speaker":"Screen","speakers":["Screen"],"text":"Central Town","text_hash":"5d3185c629d4"},
   {"boxes":[{"pages":[["BN6's own starting","folder"]],"speaker":"Screen","text":"BN6's own starting folder"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:0.1","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"BN6's own starting folder","text_hash":"f2da4d374ae1"},
   {"boxes":[{"pages":[["Swords in S for","LifeSword. Nothing","reaches the back"]],"speaker":"Screen","text":"Swords in S for LifeSword. Nothing reaches the back"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:1.1","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"Swords in S for LifeSword. Nothing reaches the back","text_hash":"e56b093a99fa"},
   {"boxes":[{"pages":[["delete any guardian"]],"speaker":"Screen","text":"delete any guardian"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:1.2","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"delete any guardian","text_hash":"4f3c1a48d7e1"},

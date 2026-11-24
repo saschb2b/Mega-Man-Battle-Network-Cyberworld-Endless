@@ -181,7 +181,7 @@ typedef struct {
 	uint8_t last_form, last_soul;
 	uint8_t form_best[4];
 	uint16_t souls_won[2];
-	/* MegaMan's look (issue #854, docs/game/looks-earning.md; looks_profile.c): the
+	/* MegaMan's look (issue #854, docs/game/looks.md; looks_profile.c): the
 	 * palettes owned (a bit each; Classic's always), the slot worn, whether
 	 * the looks are kept (0: a profile saved before them, which takes
 	 * Classic and BN6's own colours in every slot), the three looks */
