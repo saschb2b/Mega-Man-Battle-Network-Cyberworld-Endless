@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-24
+* **Update**: game/looks.md (the look applied onto his palettes: each art's indexes by channel, how a pick colours a ramp and a grey, white or black one, the accent shipped, the palettes' themes, the dev switch, the state's `look` and `lookseen` lines and the scenario), code/tools.md (`tools/looks_sheet.py`).
 * **Create**: game/looks.md (MegaMan's look, issue #854: the design as decided and step 2's model, profile and apply interface). **Update**: game/index.md (its line), code/core.md (`looks.c`, `looks_text.c`, `looks_profile.c`), code/emu.md (`look_apply.c`).
 * **Update**: rom/chips-code.md (A chip used turned round, the rest: the side reads of BN6's and BN4's chips and BN4's moved way toward the enemy mended, what is left as the originals' own, issue #846), code/emu.md (turned_aim.c's line).
 * **New**: rom/megaman-colours.md (MegaMan's palettes in battle, on the field, in a chat box and in the emotion window, their shade ramps and channels, where a form takes them over, the OBJ palette slots shared by content and the Net Square's count, what a NetBattle needs; epic #854's step 1). **Update**: rom/index.md (its line), research/sources.md (MegaMan's colours, BN2 to BN6: Style Change's precedent checked), code/emu.md (`bn6_look.h`).
