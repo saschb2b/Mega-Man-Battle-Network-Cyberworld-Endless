@@ -3,7 +3,7 @@ type: Design
 title: "Decisions and phase one"
 description: "The meta layer's decisions (options only, a short net by default, helpers counting toward unlocks, a setup screen), phase one as built (unlocks, threat rungs 1-5, helpers, the Blade and Storm folders) and the designed Z-Canon, Busting and Lean folders."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 sources:
   - id: owner
     resource: "The owner's decisions, given in the project's sessions and written down here"
