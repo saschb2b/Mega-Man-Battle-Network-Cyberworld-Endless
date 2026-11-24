@@ -120,12 +120,11 @@ typedef struct {
 	int tw, th, ex, ey, dv, face, hang;
 	bool rimmed;       /* floor edges are rims, not plain floor (areas told by shape, TILES_RIMMED) */
 	bool apart;        /* the TILE_APART pieces are drawn as if no other floor touched them (tilemap.c) */
-	bool single;       /* pairs that draw on one layer only */
+	bool single, gaps_apart;   /* pairs that draw on one layer only; a gap its picks paint as floor drawn as its two floors apart (TILES_GAPS_APART) */
 	int side;          /* how far down beside a side face a tile may draw (0: the face's height) */
 	bool plain_ends;   /* a walkway's end at a piece drawn apart is marked TILE_JOINS: the area has no joint to stand there */
 	int wall;          /* how far over a floor's upper edge a wall of it may stand, which lies in front of what is behind it (0: none known; 8 where the area's panels are laid whole) */
-	const struct TileBook *roads;   /* the books of the area's roads, its TILE_ROAD panels' (NULL: it has none) */
-	int nroads;
+	const struct TileBook *roads; int nroads;   /* the books of the area's roads, its TILE_ROAD panels' (NULL: it has none) */
 	unsigned rules;    /* the thin books' rules of laying that hold here though the books are not thin (LAY_*, panels_lay.c) */
 	bool thin;         /* its books are thin (a road's): a panel taken up for how it meets its neighbours is laid again from another that meets them (panels_lay.c) */
 } TileGrid;
@@ -253,6 +252,7 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * BN4's countries lay their green walkways two and three wide, whose
  * middles stood in their cream platforms' middles as green blotches. */
 #define TILES_WALK_HUE 0x8000000
+#define TILES_GAPS_APART 0x4000000   /* a gap its picks paint as floor drawn as its two floors apart (Mr. Weather Comp's slots: tilemap.c, gaps_apart) */
 /* ... and with TILES_UNDER, platform floor that passes under what its map
  * sets over it on the second layer is floor, whatever the walls and heights
  * there say, learned from the first layer: BN4's Park Area's conveyor

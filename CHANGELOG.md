@@ -58,6 +58,13 @@
   now strikes the first of the enemy's columns ahead of him, whichever
   way he faces. Thanks to Agergo100 for the report.
 
+- **Fixed: a gap between two floors drawn as a cut walkway (issue
+  #836).** In Mr. Weather Comp, a gap one panel wide between two rooms
+  or pads was drawn in pieces of floor cut straight down, sky through
+  them and a dark square at the edge, like a walkway that was not
+  there. Each floor now ends in its own rim there, the gap open sky.
+  Thanks to Agergo100 for the report.
+
 ## 0.23.0 (2026-11-19)
 
 - **New: your friends on Discord see you play, and how far the run
