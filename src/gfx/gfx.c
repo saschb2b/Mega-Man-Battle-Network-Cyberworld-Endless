@@ -176,6 +176,10 @@ static int frame_bounds(const uint8_t *obj, int part, int *minx, int *miny, int 
 	return count;
 }
 
+/* (sprite_draw_palette's: the palette a frame is built in, its key) */
+#define OWN_PAL 0x4000000
+static const uint8_t *own_pal;
+
 static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) {
 	const uint8_t *b = s->base;
 	const uint8_t *tiles = b + le32(f);
@@ -205,7 +209,7 @@ static CachedFrame *build_frame(Sprite *s, const uint8_t *f, int pal, int part) 
 	for (const uint8_t *o = obj; !(o[0] == 0xFF && o[1] == 0xFF); o += 5, ++k) {
 		if ((o[4] & 3) > 2 || (part > 0 && k != part - 1)) continue;
 		int bank = ((o[4] >> 4) + pal) % banks;
-		const uint8_t *pl = pal >= SPRITE_PAL_PAST ? pals + (pal - SPRITE_PAL_PAST) * 32
+		const uint8_t *pl = pal == OWN_PAL ? own_pal : pal >= SPRITE_PAL_PAST ? pals + (pal - SPRITE_PAL_PAST) * 32
 			: pal >= SPRITE_ROM_PAL && pal != SPRITE_WHITE ? R.data + (pal - SPRITE_ROM_PAL) : pals + bank * 32;
 		blit_obj(px, W, o, (int8_t)o[1] - minx, (int8_t)o[2] - miny, tiles, tiles_len, pal == SPRITE_WHITE ? NULL : pl);
 	}
@@ -308,6 +312,29 @@ static void draw_cached(CachedFrame *c, int x, int y, bool flip, int fx) {
 
 void sprite_draw_frame(Sprite *s, int anim, int frame, int x, int y, bool flip, int pal, int fx) {
 	draw_cached(get_frame(s, anim, frame, pal), x, y, flip, fx);
+}
+
+void sprite_draw_palette(Sprite *s, int anim, int frame, int x, int y, bool flip, const uint8_t pal[32]) {
+	/* (one frame kept: built again where the frame, the palette or the canvas's colours changed) */
+	static CachedFrame *kept_frame;
+	static const Sprite *kept_of;
+	static uint8_t kept_pal[32];
+	static unsigned kept_gen;
+	const uint8_t *f = s ? frame_ptr(s, anim, frame) : NULL;
+	if (!f) return;
+	uint32_t off = (uint32_t)(f - s->base);
+	if (!kept_frame || kept_of != s || kept_frame->frame_off != off || memcmp(kept_pal, pal, 32) || kept_gen != lcd_canvas_gen()) {
+		if (kept_frame) {
+			if (kept_frame->tex) SDL_DestroyTexture(kept_frame->tex);
+			free(kept_frame);
+		}
+		memcpy(kept_pal, pal, 32);
+		own_pal = kept_pal;
+		kept_frame = build_frame(s, f, OWN_PAL, 0);
+		kept_of = s;
+		kept_gen = lcd_canvas_gen();
+	}
+	draw_cached(kept_frame, x, y, flip, 0);
 }
 
 void anim_draw(const Anim *a, int x, int y, bool flip, int pal, int fx) {

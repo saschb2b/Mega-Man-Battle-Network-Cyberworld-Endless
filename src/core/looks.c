@@ -38,3 +38,5 @@ bool look_valid(const Look *look) {
 		if (look->palette[c] == LOOK_NONE ? look->colour[c] != LOOK_NONE : look->palette[c] >= LOOK_PALETTES || look->colour[c] >= LOOK_COLOURS) return false;
 	return true;
 }
+
+bool looks_channel_live(int c) { return c == 0 || c == 1; }

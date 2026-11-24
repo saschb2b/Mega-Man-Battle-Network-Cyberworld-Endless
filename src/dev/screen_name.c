@@ -9,6 +9,7 @@
 #include "jukebox.h"
 #include "forms_screen.h"
 #include "library.h"
+#include "looks_screen.h"
 #include "netpass_screen.h"
 #include "online_describe.h"
 #include "options.h"
@@ -27,6 +28,7 @@ const char *screen_name(void) {
 	if (jukebox_shown()) return "jukebox";
 	if (library_shown()) return "library";
 	if (forms_screen_shown()) return "forms";
+	if (looks_screen_shown()) return "looks";
 	if (netpass_screen_shown()) return "netpass";
 	return second_screen_word();
 }

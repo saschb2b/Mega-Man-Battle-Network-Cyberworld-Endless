@@ -30,5 +30,7 @@ Look looks_get(int slot);
 void looks_set(int slot, const Look *look);
 Look looks_worn(void);
 bool look_valid(const Look *look);
+/* Whether channel c recolours anything (the accent may be inert) */
+bool looks_channel_live(int c);
 
 #endif
