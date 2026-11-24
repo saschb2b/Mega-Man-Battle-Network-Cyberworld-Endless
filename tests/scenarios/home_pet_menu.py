@@ -1,6 +1,6 @@
 """Issue #793: the PET's start menu of ours over BN6's, BN6's list folded in
 two columns. Each entry opens from its place (ChipFolder, SubChip, Library,
-MegaMan, Forms down the left; E-Mail, KeyItem, Options, Save down the right)
+MegaMan, Forms, Colours down the left; E-Mail, KeyItem, Options, Save down the right)
 as BN6 opens it, and B gives the menu back with the cursor on that entry;
 Up from the top wraps to Save as BN6's does, Right goes across and on to
 EXIT, the grid's last place, and EXIT's Up and Left go to Save over it and
@@ -35,6 +35,7 @@ MANY = {
     'library': entry(['DOWN'] * 2, 'library', 'Library'),
     'megaman': entry(['DOWN'] * 3, 'status', 'MegaMan'),
     'forms': entry(['DOWN'] * 4, 'forms', 'Forms'),
+    'looks': entry(['DOWN'] * 5, 'looks', 'Colours'),
     'email': entry(['RIGHT'], 'mail', 'E-Mail'),
     'keyitem': entry(['RIGHT', 'DOWN'], 'keyitem', 'KeyItem'),
     'options': entry(['UP', 'UP'], 'options-display', 'Options'),
@@ -44,8 +45,12 @@ MANY = {
         ('do', 'press UP; wait 6'), ('expect', 'petmenu=at Save'),               # Up from the top: Save, as BN6's
         ('do', 'press DOWN; wait 6'), ('expect', 'petmenu=at ChipFolder'),       # and back round
         ('do', 'press UP; wait 6; ' * 4), ('expect', 'petmenu=at E-Mail'),       # BN6's Up count to E-Mail
-        ('do', 'press UP; wait 6'), ('expect', 'petmenu=at Forms'),              # across the fold
-        ('do', 'press RIGHT; wait 6'), ('expect', 'petmenu=at EXIT'),            # nothing beside Forms: EXIT
+        ('do', 'press UP; wait 6'), ('expect', 'petmenu=at Colours'),            # across the fold
+        ('do', 'press RIGHT; wait 6'), ('expect', 'petmenu=at EXIT'),            # nothing beside Colours: EXIT
+        ('do', 'press LEFT; wait 6'), ('expect', 'petmenu=at Forms'),            # Left from EXIT: Forms, beside it
+        ('do', 'press DOWN; wait 6'), ('expect', 'petmenu=at Colours'),
+        ('do', 'press UP; wait 6'), ('expect', 'petmenu=at Forms'),
+        ('do', 'press RIGHT; wait 6'), ('expect', 'petmenu=at EXIT'),            # Forms' Right: EXIT, beside it
         ('do', 'press LEFT; wait 6'), ('expect', 'petmenu=at Forms'),            # Left from EXIT: Forms, beside it
         ('do', 'press LEFT; wait 6'), ('expect', 'petmenu=at Forms'),            # Left from the left column: nothing
         ('do', 'press UP; wait 6; press UP; wait 6; press RIGHT; wait 6'), ('expect', 'petmenu=at Options'),   # Library's row: Options
