@@ -16,7 +16,7 @@ sources:
 
 # Peers' looks
 
-A player's look (his MegaMan's colour channels, issue #854)
+A player's [look](../../game/looks.md) (his MegaMan's colour channels)
 travels with his name, and the other players' MegaMen in the Square are
 drawn in theirs, under one limit BN6 sets: how many sets of colours a
 frame can hold.
@@ -74,7 +74,7 @@ part's room is one look smaller for ten seconds.
 by session: `peer_looks_of(session, &look)` gives it, BN6's own where
 he was never seen (the state's `peerlooks` line reads it the same way).
 A game's own side is `square_looks_sent`, the look the others know it by. A NetBattle's pairing reads its opponent's there; the
-two sides are drawn from it (issue #854's NetBattle step).
+two sides are drawn from it ([Looks in a NetBattle](../arena/looks.md)).
 
 ## Checked
 
