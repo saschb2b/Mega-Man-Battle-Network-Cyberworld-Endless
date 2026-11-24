@@ -1,0 +1,8 @@
+{
+  "feature": "MegaMan's look",
+  "date": "2026-11-24",
+  "name": "The Net Square's OBJ palette slots",
+  "result": "Three games on a local server, the engine's dump in each part: the slot limit 12 everywhere; the welcome plaza gave 9 slots (MegaMan and both peers in slot 0), Trade Central 3, the stage 2. In romlab a byte poked into the OBJ work palette (0x03001550) reached palette RAM that frame and was put back the next.",
+  "meaning": "Peers in one look share a slot; each look of its own costs one. The plaza can show three looks besides the player's own before BN6's renderer marks a sprite and leaves it in a stale slot.",
+  "link": "../rom/megaman-colours.md"
+}

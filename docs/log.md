@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-24
+* **New**: rom/megaman-colours.md (MegaMan's palettes in battle, on the field, in a chat box and in the emotion window, their shade ramps and channels, where a form takes them over, the OBJ palette slots shared by content and the Net Square's count, what a NetBattle needs; epic #854's step 1). **Update**: rom/index.md (its line), research/sources.md (MegaMan's colours, BN2 to BN6: Style Change's precedent checked), code/emu.md (`bn6_look.h`).
 * **Update**: rom/pet-and-second-screen.md (the PET menu's labels: tile 0x2FF is BN6's blank on the Chip Folder's screens, Forms' word kept out of the video memory, the `blanktile` line), game/pet-menu.md (Forms' label's tiles the engine's own).
 * **Update**: engine/emulation/fast-forward.md (The music: the song at its own pace on the engine's MP2K while fast, followed and handed back, through the core's ring at the core's DirectSound's line, measured), engine/emulation/index.md (its line), GUIDE.md (Fast forward: the music at its own pace, `fast_music`), rom/sound.md (the carried music's row: SoundInfo's DMA count, ring and samples a frame, read as fast forward takes the song), code/gfx-and-audio.md (`music_fast.c`, `music_game.h`).
 

@@ -380,6 +380,7 @@
 #include "bn6_ai.h"   /* the battle's AI data: its pool of eight (issue #182) */
 #include "bn6_link.h"   /* the link battle's keys into a player, the Practice NetBattle's list (epic #167) */
 #include "bn6_forms.h"   /* MegaMan's forms: the tables by form, the code that reads it, a Cross chosen (issue #82) */
+#include "bn6_look.h"   /* MegaMan's colours: his palettes and their ramps, the OBJ palette slots (issue #854) */
 #include "bn6_navis.h"   /* the battle engine's Navis: their tables by AI index, the routines they name, their arm points (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
 #include "bn6_sound.h"   /* the sound engine (MP2K): its RAM, its tables, its routines */
