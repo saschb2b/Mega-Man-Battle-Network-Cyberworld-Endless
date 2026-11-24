@@ -105,4 +105,17 @@ bool tl_skipped(const Src *s, int A, int B);
 int tl_first_class(const TileBook *b, uint32_t key);
 int tl_first_of(const TileBook *b, uint32_t key);
 
+/* A gap one panel wide between two floors, open to the void at both its
+ * ends, at tile (tx, ty): its panel (A, B), and the tile's pixels on it
+ * well past the faces hanging from the floor above, where it shows the
+ * background (sky). False none (issue 836). */
+typedef struct { int A, B; uint64_t sky; } TileGap;
+bool tiles_gap(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, TileGap *out);
+/* While set, tiles_pick draws a gap's tile (tiles_gap) as its two floors
+ * apart, each as if the other were not there: tilemap.c's pass over a gap
+ * whose picks painted it as floor (TILES_GAPS_APART: Mr. Weather Comp's
+ * walled slots, sunken floor in its maps; in 19 of the tile test's layers
+ * of other areas, drawing apart counted worse). */
+extern bool tiles_pick_gaps;
+
 #endif

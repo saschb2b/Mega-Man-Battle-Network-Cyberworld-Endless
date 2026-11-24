@@ -511,8 +511,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	 * its maps: TILE_JOINS) */
 	grid.plain_ends = !joints;
 	grid.rules = netmap_rules_forced | (L->def->lay & (LAY_RULES | LAY_RIM_OWN | LAY_PADS_WHOLE | LAY_ROOMS_OVER));
-	grid.roads = L->road;
-	grid.nroads = L->nroads;
+	grid.roads = L->road; grid.nroads = L->nroads;
 	grid.gaps_apart = L->def->styles & TILES_GAPS_APART;
 	/* (where its pads' panels alone are laid whole, LAY_PADS_WHOLE, the rest is picked as before) */
 	for (int k = 0; k < L->nbooks && !(((L->def->lay | netmap_rules_forced) & LAY_PADS_WHOLE) && !(L->def->lay & LAY_WHOLE) && !(L->def->styles & TILES_WHOLE)); ++k) grid.wall = L->book[k].panels.n ? 8 : grid.wall;
@@ -987,7 +986,7 @@ void netmap_last_cells(char out[MAP_H][MAP_W + 1]) {
 		out[y][MAP_W] = 0;
 	}
 	if (!nm_last.seams) return;
-	TileGrid grid = { nm_last.tw, nm_last.th, nm_place.ex, nm_place.ey, 0, 0, 0, false, false, false, 0, false, 0, NULL, 0, false };
+	TileGrid grid = { nm_last.tw, nm_last.th, nm_place.ex, nm_place.ey, 0, 0, 0, false, false, false, false, 0, false, 0, NULL, 0, false };
 	for (int ty = 0; ty < nm_last.th; ++ty)
 		for (int tx = 0; tx < nm_last.tw; ++tx) {
 			if ((nm_last.seams[ty * nm_last.tw + tx] >> 2 & 3) != TILE_OFF_NEAR || nm_last.pasted[ty * nm_last.tw + tx] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) continue;

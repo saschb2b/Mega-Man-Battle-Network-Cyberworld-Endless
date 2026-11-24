@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "panels.h"
+#include "tiles_parts.h"   /* tiles_gap */
 
 #define PASSES 3
 
@@ -210,6 +211,7 @@ static void lay_whole(Picked *p) {
 typedef struct { int A, B, sky, drawn; } GapPanel;
 static void gaps_apart(Picked *p) {
 	const TileGrid *g = p->g;
+	if (!g->gaps_apart) return;
 	GapPanel panel[GAP_PANELS];
 	int n = 0;
 	for (int ty = 0; ty < g->th; ++ty)
@@ -275,7 +277,7 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 			}
 		if (!changed) break;
 	}
-	if (g->gaps_apart) gaps_apart(&p);
+	gaps_apart(&p);
 	tiles_stats = first;
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
