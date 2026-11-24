@@ -53,9 +53,9 @@ void game_hooks_install(void) {
 	cross_rows_install();
 	/* (BN5's chip AI for the player entered in each battle: DarkInvs's machine, installed with the Souls; docs/multirom/) */
 	darkinvs_dev(dev.chipai);
-	/* (MegaMan's look on his plain palettes: the profile's worn one; docs/game/looks.md) */
-	Look worn = looks_worn();
-	look_apply(&worn);
+	/* (MegaMan's look on his plain palettes, after soullook.c's copy of the
+	 * faces: the profile's worn one, again as it changes; docs/game/looks.md) */
+	look_apply_worn();
 }
 
 void game_hooks_after_boot(void) {

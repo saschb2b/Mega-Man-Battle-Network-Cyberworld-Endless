@@ -109,6 +109,7 @@ void director_describe(FILE *f) {
 	/* (what of BN6 holds him, issue #23: none where Lan or MegaMan stands free) */
 	fprintf(f, "held %s\n", held_names(bn6_held()));
 	describe_body(f);
+	looks_describe(f);   /* (MegaMan's look and the palettes holding it: docs/game/looks.md) */
 	/* (the game's own count of its main loop's frames: one that stands while
 	 * the engine's frames go on is a game standing still, issue #482;
 	 * tools/old_checkpoint.py watches it) */

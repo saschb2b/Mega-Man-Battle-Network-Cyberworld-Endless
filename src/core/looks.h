@@ -11,6 +11,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define LOOK_CHANNELS 3     /* 0 armour (BN6's light blue ramp), 1 suit (the dark blue), 2 accent (the gold) */
 #define LOOK_PALETTES 12
@@ -70,12 +71,19 @@ Look looks_get(int slot);
  * where the slot is out of range or the look not look_valid. Ownership is
  * the screen's to keep (it offers the owned palettes alone). */
 bool looks_set(int slot, const Look *look);
-/* The look worn: the selected slot's, or the dev switch's where one is
- * set for the session (looks_set_override). */
+/* The look worn: the selected slot's. */
 Look looks_worn(void);
-/* A look worn for the session in place of the slot's, not saved
- * (`--dev look=`); NULL drops it. */
-void looks_set_override(const Look *look);
+/* `fn` called whenever the worn look changes (look_apply.c registers its
+ * apply: a layer below cannot call it) */
+void looks_on_change(void (*fn)(void));
+/* The state in words: `look P.C,P.C,P.C slot N` (`-` a channel as BN6
+ * draws it), then what `fn` adds (look_apply.c's `lookseen`) */
+void looks_describe(FILE *f);
+void looks_describe_with(void (*fn)(FILE *f));
+/* `--dev look=P.C,P.C,P.C` read (the worn slot set to it and saved): the
+ * channels given (P.C or -), the rest BN6's; false where the words are no
+ * look */
+bool looks_parse(const char *words, Look *out);
 /* The profile just read (profile_load): one saved before looks were kept
  * takes Classic owned, every slot BN6's own colours and slot 0. */
 void looks_profile_loaded(void);

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **New: MegaMan in colours of his own, the engine's part.** His plain
+  body takes a look: the armour, the suit and the gold each coloured from
+  one of twelve palettes (Classic, Undernet, Gregar, ProtoMan, Nebula,
+  Tournament, Hazard, Central Town, Seaside, Sky, Mystery, Glitch), on the
+  field, in battle, in a chat box and on the Custom screen, BN6's shading
+  kept. A Cross, a Soul or BeastOut keeps its own colours. A profile keeps
+  three looks; the PET's screen to pick them and the ways to earn the
+  palettes follow (issue #854).
+
 - **Fixed: more chips strike the way MegaMan faces when he turns round.**
   On a liberation's Surrounded field, turned left with L, SandWrm,
   BurnSqr, TenguMan's chip, AirRaid and Magnum, and BN4's GutsMan,
