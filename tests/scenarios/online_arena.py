@@ -69,8 +69,8 @@ MANY = {
     'netbattle-looks-apart': dict(CAST, START=FIGHT + f',arenalook={LOOK_A}/{LOOK_B}', GAMES={'beta': FIGHT_WEAK + f',arenalook={LOOK_B}/{LOOK_C}'},
         STEPS=online.course(
             MEET, CHALLENGE,
-            soon('arenacard=stopped', '', 1500),
-            soon('arenacard=stopped', 'beta', 600),
+            soon('arenastop=apart', '', 1500),
+            soon('arenastop=apart', 'beta', 600),
             ('expect', 'bouts=0'),
         )),
     'challenge-turned-down': dict(CAST, START=online.HOME, GAMES={'beta': online.HOME}, STEPS=online.course(

@@ -64,6 +64,7 @@ typedef struct {
 	const char *said;         /* MegaMan's word, once back in the Square */
 	char why[160];            /* a stop's cause, for the log */
 	ArenaStop stop;           /* ... its PET line on the card */
+	bool stopped;             /* a match stopped since the visit began (the state's `arenastop`) */
 	bool team;                /* a Team NetBattle's bout (square_team.h): no rematch, the team's card */
 	uint16_t carry;           /* ... the HP my MegaMan goes in with, 0 whole */
 	uint16_t hp_left;         /* my MegaMan's HP at the last battle's end */

@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T21:00:00Z
+* **Create**: online/arena/looks.md (each player's MegaMan in his look in a NetBattle: the spare palettes, the three picks answered by side, the looks in the pair's hash, measured). **Update**: online/arena/index.md (its line), online/arena/overview.md (its link), online/arena/run-it.md (`arenalook`), rom/megaman-colours.md (NetBattles: the spare palettes verified unread, the pick's end, the form's second reader and the face's copy, an object's alliance the cable's side), code/online.md (`arena_looks.c`), devtools/scenarios.md (`arenalooks`, `arenastop`).
