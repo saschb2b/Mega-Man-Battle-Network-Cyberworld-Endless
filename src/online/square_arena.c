@@ -177,6 +177,7 @@ static void fail_as(const char *why, ArenaStop stop, bool both) {
 	snprintf(SA.why, sizeof SA.why, "%s", why);
 	snprintf(SA.whose, sizeof SA.whose, "%s", square_bout_whose());
 	SA.stop = stop;
+	SA.stopped = true;
 	printf("arena: match %u stopped: %s\n", SA.match, SA.why);
 	/* (what both games see, two hashes apart, is the cable's first's to
 	 * tell, as the battle's end is: the server would answer the second

@@ -12,6 +12,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_boot.h"
+#include "arena_looks.h"
 #include "arena_pair.h"
 #include "arena_sync.h"
 #include "arena_team.h"
@@ -307,6 +308,8 @@ static bool pair_begin(void) {
 	}
 	heap_said("BN5's installs made on the game's core");
 	const OnlineLoadout *loadout[2] = { NULL, NULL };
+	/* (arenalook=MINE/THEIRS: the two looks, their palettes rolled back with the rest) */
+	arena_looks_bout(0, dev.arena_look);
 	B.boot = arena_boot_new(R.data, ROM_SIZE, loadout);
 	if (!B.boot) B.why = "no memory for the pair";
 	B.stage = BOOT;

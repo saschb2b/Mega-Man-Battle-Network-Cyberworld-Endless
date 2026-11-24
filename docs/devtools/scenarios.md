@@ -293,8 +293,9 @@ none|offered|waiting|answered|accepted|done|cancelled` with `tradewith`,
 `listchip`, `deal ask|wait|swap|swapped`, `dealcursor`
 (`trade_screen_describe`), `tradeboard N` with `tradeoffer NAME has 20F wants W` and
 `myoffer`, `challenge none|to NAME|from NAME`, `arena idle|sent|...|
-battle|over` with `arenacard won|lost|stopped`, `arenahp MINE HIS`, `rematch`
-(`square_arena_describe`), `bouts N`, `bout won against NAME won 1 lost 0`,
+battle|over` with `arenacard won|lost|stopped`, `arenahp MINE HIS`, `rematch`,
+`arenalooks on|none` (the bout's looks, [Looks in a NetBattle](../online/arena/looks.md))
+and `arenastop apart|left|...` (why the last match stopped) (`square_arena_describe`), `bouts N`, `bout won against NAME won 1 lost 0`,
 `weekoffer none|new|again|on|trade|stamp`, `week N`, `weekboard WORDS`; on
 a dive with its link `divers N: NAMES`, `diver NAME at X Y`, `tags N:
 NAMES` (the names shown over the divers' heads, `NAME+K` where K more

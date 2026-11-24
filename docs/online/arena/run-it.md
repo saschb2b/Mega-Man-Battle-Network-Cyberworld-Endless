@@ -30,7 +30,8 @@ by the frame's number alone (a run that rolls back and one that does not
 hand him the same keys), `arenahp=N` makes the carried MegaMan's HP N
 (the installer seen in the battle), and `arenacarry=N` sends him in with
 N HP of his max, as a Team NetBattle's winner goes on ([Team
-NetBattles](teams.md)). `arenaseed=N` gives the bout the seed N
+NetBattles](teams.md)). `arenalook=MINE/THEIRS` gives the two MegaMen
+looks, twelve hex digits each ([Looks in a NetBattle](looks.md)). `arenaseed=N` gives the bout the seed N
 and `arenaagain=N` fights N bouts more, each from the pair kept as the
 last began, its seed one more ([A rematch in a
 second](from-square/rematch-in-a-second.md)). `arenaboth` makes the first player

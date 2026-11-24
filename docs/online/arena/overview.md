@@ -34,4 +34,5 @@ Square](from-square/overview.md), below).
 - [The stands](stands.md)
 - [Team NetBattles](teams.md)
 - [Two MegaMen a side](two-a-side/overview.md)
+- [Looks in a NetBattle](looks.md)
 - [Not yet](not-yet.md)
