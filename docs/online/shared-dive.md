@@ -1091,7 +1091,9 @@ own is placed first, then the partners by seat. In the lead's column of
 three the upper two partners' plates stand in front of them, the bottom
 row's own name under its feet; with four, the one behind the lead keeps
 his under his feet. A plate moves only when someone steps to another
-panel. Chosen over the name over the head with the HP beside the feet
+panel. None stands while the battle's clock holds (BATTLE START! across
+the field at each turn's start, where a top-row plate in front of its
+MegaMan stood, and the pause), as the duel's clock hides. Chosen over the name over the head with the HP beside the feet
 (the name lay on the MegaMan a row up and on BN6's chip icons over each
 head), and over the names and HP in a strip under BN6's emotion window
 with a letter by each MegaMan (no strip of three lines in BN6's digits
@@ -1100,7 +1102,13 @@ and the field; and a letter to look up is a step more than a name beside
 him). The Arena's two a side keeps its own marks (`arena_team_view.c`),
 unchanged. The state says each plate's box and its MegaMan's
 (`plateK X Y W H seat X Y W H`) and whether any plate meets a MegaMan or
-another plate (`plates N clear|COVER`).
+another plate (`plates N clear|COVER`; `held` while none is drawn).
+
+Seen headless with the dev's field of two, three and four and over a
+local server with a crew of two, three and four games (Alpha, Beta, Gamma
+and Delta; the scenarios `online-party-marks/dev-field-four`,
+`crew-of-two`, `crew-of-three` and `crew-of-four`): on every game every
+MegaMan whole, each plate beside its own, `plates N clear`.
 
 **His own Custom screen and his results** (22 November 2026,
 [issue #757](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/757),

@@ -30,6 +30,7 @@
 #define HUD_W 48        /* BN6's HP box and the emotion window under it, at the picture's top left */
 #define HUD_H 34
 #define GAUGE_H 15      /* BN6's Custom gauge, across the picture's top */
+#define HELD 4          /* draws with the battle's clock standing still before the plates go (a stall of the field's a few) */
 
 /* the partners' names in the crew's colour (crew_look.h, as on a layer) */
 #define OWN_COLOUR  LOOK_ORANGE   /* the player's own: the PET cursor's orange */
@@ -37,6 +38,9 @@
 _Static_assert(ONLINE_SEATS == PARTY_MOST, "a party's seats are START's");
 
 static const SDL_Color shade = { 0, 24, 41, 255 };
+
+/* draws the battle's clock has stood still (the drawing's own count, party_marks_draw) */
+static unsigned still;
 
 /* each seat's mark as drawn (the player's own without its arrow) */
 static char tags[PARTY_MOST][ONLINE_NAME_BYTES + 1];
@@ -198,6 +202,13 @@ void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
 	Placed m[PARTY_MOST];
 	if (!seen(c, mine, n, &v)) return;
 	if (v.own_box) arena_team_view_hp(v.hp_box, v.open);
+	/* (none while the battle's clock holds: BN6's BATTLE START! across the field at each turn's start, where a top-row
+	 * plate in front of its MegaMan stands, and the pause; the duel's clock hides so too, director_see.c) */
+	static uint32_t last;
+	uint32_t now = (uint32_t)c->rawRead32(c, BN6_BATTLE_TIMER, -1);
+	still = now == last ? still + 1 : 0;
+	last = now;
+	if (still > HELD) return;
 	layout(&v, mine, P.core_x, P.core_y, m);
 	for (unsigned i = 0; i < v.count; ++i) {
 		bool own = v.seat[i] == mine;
@@ -237,7 +248,9 @@ void party_marks_describe(FILE *f, struct mCore *c, unsigned mine, unsigned n) {
 			clear &= !meets(q, body(v.x[j] - P.core_x, v.y[j] - P.core_y)) && (j == i || !meets(q, o));
 		}
 	}
-	fprintf(f, "marks %u %s\n", v.count, apart ? "apart" : "MEET");
-	fprintf(f, "plates %u %s\n", v.count, clear ? "clear" : "COVER");
+	/* (none drawn while the clock holds: "held") */
+	bool held = v.count && still > HELD;
+	fprintf(f, "marks %u %s\n", v.count, held ? "held" : apart ? "apart" : "MEET");
+	fprintf(f, "plates %u %s\n", v.count, held ? "held" : clear ? "clear" : "COVER");
 }
 

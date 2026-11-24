@@ -96,11 +96,12 @@ def crew_battle(others):
         ('sleep', 1.5),
         *[soon(f'crew={n}: {names}', g, 900) for g in games],
         ('do', 'battle; wait 10'),
-        *[soon(f'partyfield={n} seat', g, 1200) for g in games],
+        *[soon(f'partyfield~{n} seat', g, 1200) for g in games],
         *[step for g in games for step in (soon(f'marks={n} apart', g, 3600), online.at(g, ('expect', f'plates={n} clear')))],
         *[online.at(g, ('do', 'wait 30; shot'), ('expect', f'plates={n} clear')) for g in games],
     ))
 
 
+MANY['crew-of-two'] = crew_battle(('beta',))
 MANY['crew-of-three'] = crew_battle(('beta', 'gamma'))
 MANY['crew-of-four'] = crew_battle(('beta', 'gamma', 'delta'))

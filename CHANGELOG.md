@@ -122,8 +122,8 @@ Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
 
 - **New: a partner's HP in BN6's own digits.** On a party's field and in the
   Arena's two a side, your ally's HP stands under his name in BN6's
-  battle digits, where BN6 puts an enemy's: orange while it falls, green
-  while it rises.
+  battle digits, beside him as BN6 puts an enemy's, never over another
+  MegaMan of the crew: orange while it falls, green while it rises.
 
 - **New: fast forward keeps the music at its own pace.** While the game
   runs fast, the song plays on as it would at BN6's speed instead of
