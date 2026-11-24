@@ -424,8 +424,20 @@ static void loadout_bytes(void) {
 	l.pulled = true;
 	n = arena_loadout_pack(&l, b, sizeof b);
 	assert(b[1] == 3 && arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && carried && back.pulled);
-	b[1] = 7;
+	b[1] = 9;
 	assert(!arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && strstr(why, "flags"));
+	/* (issue #879: his look, the flags' third bit and six bytes after the tail, back as it went; none where BN6's) */
+	l.pulled = false;
+	assert(!back.looked);
+	l.looked = true;
+	l.look = (Look){ { 2, 3, LOOK_NONE }, { 9, 11, LOOK_NONE } };
+	size_t looked = arena_loadout_pack(&l, b, sizeof b);
+	assert(b[1] == 5 && arena_loadout_unpack(b, looked, &back, &carried, why, sizeof why) && back.looked);
+	assert(!memcmp(&back.look, &l.look, sizeof l.look) && arena_loadout_pack(&back, again, sizeof again) == looked && !memcmp(again, b, looked));
+	b[looked - 4] = LOOK_PALETTES;   /* (a palette past the last: refused) */
+	assert(!arena_loadout_unpack(b, looked, &back, &carried, why, sizeof why) && strstr(why, "colours"));
+	assert(!arena_loadout_unpack(b, looked - 1, &back, &carried, why, sizeof why) && strstr(why, "size"));
+	l.looked = false;
 	l.pulled = false;
 	n = arena_loadout_pack(&l, b, sizeof b);
 	assert(b[1] == 1);

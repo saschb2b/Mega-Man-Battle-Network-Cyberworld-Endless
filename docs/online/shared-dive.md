@@ -1163,6 +1163,47 @@ a held battle hands the game back (a crew's, the Square's NetBattle) is
 now kept from it until let go (`online_visit_keys`, as the Battle Lab's
 screen does), the d-pad walking on.
 
+## Looks on the field (24 November 2026)
+
+Each diver's MegaMan wears his own player's look ([MegaMan's
+look](../game/looks.md), epic #854) on a party's field, a crew's join-in
+battle and a guardian's alike, on every game of the party
+([issue #879](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/879)).
+Filming the 0.24.0 trailer found that crewmates in different looks never
+shared a field: `look_apply.c` writes the worn look into the core's ROM
+copy, the field was built from that copy, and by the battle's first
+Custom screen each game's palette RAM held its own look, so the ready's
+hashes differed ("the fields went apart before the first frame"), the
+joiners went back to their maps and each fought the guardian alone.
+
+- **Built from BN6's own colours.** The field's ROM copy has BN6's
+  palettes put back wherever the game's look was written
+  (`look_rom_plain`, every art `look_apply` writes), so it is the same on
+  every game whatever each wears.
+- **Each seat's look with his MegaMan.** A carried MegaMan's bytes take
+  his look where it is not BN6's (the loadout's flag 4, six bytes after
+  its tail: `arena_wire.c`; within protocol v30, which no release before
+  0.24.0 speaks), so every game of the party knows every seat's.
+- **Into the spare palettes, answered by seat** (`party_looks.c`), as
+  [a NetBattle's](arena/looks.md) are answered by side: each seat's plain
+  body and its pale twin in two of the battle block's eight palettes BN6
+  never picks (seat n's in the spares 2n and 2n + 1), and the pick's end
+  and the form's second reader hooked on the field's core, the seat an
+  object is read from side 0's slots (the slot an enemy's routine has
+  traded in traded back). Four seats take all eight, so Full Synchro and
+  the emotion window's face are BN6's on the field. A seat in BN6's
+  colours takes no palette and no hook.
+- **Held equal.** The looks are in the ROM's palettes the field draws, so
+  two games that disagree on a seat's look part at the ready's hash, as
+  before; agreeing, they fight on with every hash agreed.
+- **Checked** by `online-week/crew-battle-in-looks` and
+  `online-week/guardian-in-looks` (three games over a local server, each
+  in another look): every seat's hash agrees, and the state's
+  `partylooks` says each seat's look is in the field's OBJ palettes.
+
+On the layer itself every MegaMan is still drawn in the game's own look,
+not the diver's: the looks travel in the Square and onto the field only.
+
 ## Comings and goings (22 November 2026)
 
 What the friction hunt of 21 November found silent ([issue

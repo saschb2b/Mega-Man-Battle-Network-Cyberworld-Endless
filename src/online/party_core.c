@@ -19,6 +19,7 @@
 #include "emu.h"
 #include "free_space.h"
 #include "hook.h"
+#include "party_looks.h"
 #include "soulunite.h"
 #include "team_shape.h"
 #include "xinstall_log.h"
@@ -128,6 +129,8 @@ static bool rom_in(PartyCore *pc, const uint8_t *run_rom, const PartyBattle *b) 
 	uint8_t *rom = malloc(EMU_ROM_SIZE);
 	if (!rom) return false;
 	memcpy(rom, run_rom, EMU_ROM_SIZE);
+	/* (BN6's own colours where this game's look was, and every seat's look in the spare palettes: issue #879) */
+	party_looks_rom(rom, EMU_ROM_SIZE, b->seat, b->n);
 	uint32_t at = FREE_RECORDS - 0x08000000u;
 	memcpy(rom + at, b->record, PARTY_RECORD_BYTES);
 	put32(rom + at + 12, FREE_RECORDS + RECORD_LIST);
@@ -221,7 +224,7 @@ PartyCore *party_core_open(const uint8_t *rom, size_t size, const uint8_t *run_r
 	if (hc) team_shape_party(hook_slot_of(pc->core), pc->field.own, &pc->field.swapped);
 	if (pc->field.own) partners_given(b);
 	if (!hc || !xlog_hook_core(pc->core) || !soulunite_held_core(pc->core, b->seat[0].souls) || !party_field_hooks(hc, &pc->field) || !party_field_aim(hc, &pc->field) ||
-		!hook_on(hc, BN6_ENCOUNTER_CHECK, forced, pc)) {
+		!party_looks_hooks(hc, &pc->field) || !hook_on(hc, BN6_ENCOUNTER_CHECK, forced, pc)) {
 		fail(pc, why, wn, "the party's core's hooks could not be set");
 		return NULL;
 	}
@@ -412,4 +415,8 @@ void party_core_sound(PartyCore *pc, bool heard) {
 		emu_audio_open();
 		emu_audio_from(pc->core);
 	} else emu_audio_drop_from(pc->core);
+}
+
+void party_core_looks_describe(PartyCore *pc, FILE *f) {
+	if (pc) party_looks_describe(f, pc->core, (unsigned)pc->field.n);
 }

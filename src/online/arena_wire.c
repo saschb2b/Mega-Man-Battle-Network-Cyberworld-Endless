@@ -126,24 +126,26 @@ bool arena_wire_read_loadout(const uint8_t *data, size_t size, uint32_t *match, 
  * slot's number and its 8 bytes), the grid (49), max and base HP (u16),
  * and twelve bytes: attack, speed, charge, Regular memory, MegaChip and
  * GigaChip limits, the Regular and the two TagChips, Crosses, Souls,
- * Beast Out */
+ * Beast Out; then, where the flags say so, his look (LOADOUT_LOOK) */
 #define SLOT_BYTES 8
 #define HEAD_BYTES (3 + 2 * BN6_FOLDER_ENTRIES)   /* the version, carried, the folder and the count of programs */
 #define TAIL_BYTES 12
 #define HP_BYTES 6    /* max HP, base HP, and HP (v2) */
 #define LOADOUT_CARRIED 1   /* its flags: a MegaMan carried */
 #define LOADOUT_PULLED 2    /* ... and his shared dive's pull-back spent (v22, crew_pull.h) */
+#define LOADOUT_LOOK 4      /* ... and his look after the tail, six bytes: the channels' palettes, then their colours (v30, issue #879) */
+#define LOOK_BYTES (2 * LOOK_CHANNELS)
 
 size_t arena_loadout_pack(const OnlineLoadout *l, uint8_t *out, size_t cap) {
 	if (cap < 2) return 0;
 	out[0] = ARENA_LOADOUT_VERSION;
 	/* (its flags: a MegaMan carried, and a shared dive's pull-back spent, v22) */
-	out[1] = (uint8_t)(l ? LOADOUT_CARRIED | (l->pulled ? LOADOUT_PULLED : 0) : 0);
+	out[1] = (uint8_t)(l ? LOADOUT_CARRIED | (l->pulled ? LOADOUT_PULLED : 0) | (l->looked ? LOADOUT_LOOK : 0) : 0);
 	if (!l) return 2;
 	unsigned placed = 0;
 	for (unsigned s = 0; s < BN6_NAVICUST_SLOTS; ++s)
 		for (unsigned k = 0; k < SLOT_BYTES; ++k) if (l->board[s * SLOT_BYTES + k]) { ++placed; break; }
-	size_t size = HEAD_BYTES + placed * (1 + SLOT_BYTES) + ONLINE_BOARD_CELLS + HP_BYTES + TAIL_BYTES;
+	size_t size = HEAD_BYTES + placed * (1 + SLOT_BYTES) + ONLINE_BOARD_CELLS + HP_BYTES + TAIL_BYTES + (l->looked ? LOOK_BYTES : 0);
 	if (size > cap || size > ONLINE_ARENA_LOADOUT_MAX) return 0;
 	uint8_t *o = out + 2;
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i, o += 2) put16(o, l->folder[i]);
@@ -166,6 +168,10 @@ size_t arena_loadout_pack(const OnlineLoadout *l, uint8_t *out, size_t cap) {
 	const uint8_t tail[TAIL_BYTES] = { l->attack, l->speed, l->charge, l->regular_mb, l->mega_limit, l->giga_limit,
 		l->regular, l->tag[0], l->tag[1], l->crosses, l->souls, l->beast };
 	memcpy(o, tail, TAIL_BYTES);
+	if (l->looked) {
+		memcpy(o + TAIL_BYTES, l->look.palette, LOOK_CHANNELS);
+		memcpy(o + TAIL_BYTES + LOOK_CHANNELS, l->look.colour, LOOK_CHANNELS);
+	}
 	return size;
 }
 
@@ -176,13 +182,14 @@ bool arena_loadout_unpack(const uint8_t *in, size_t n, OnlineLoadout *out, bool 
 	*carried = false;
 	if (n < 2 || in[0] != ARENA_LOADOUT_VERSION) return BAD("the other PET's MegaMan is in another version's form");
 	if (!in[1]) return n == 2 ? true : BAD("the other PET's MegaMan came with bytes too many");
-	if (in[1] & ~(LOADOUT_CARRIED | LOADOUT_PULLED)) return BAD("the other PET's MegaMan came with flags it has not");
+	if (in[1] & ~(LOADOUT_CARRIED | LOADOUT_PULLED | LOADOUT_LOOK)) return BAD("the other PET's MegaMan came with flags it has not");
 	size_t head = HEAD_BYTES;
 	if (n < head) return BAD("the other PET's MegaMan came short");
 	const uint8_t *i = in + 2;
 	for (unsigned k = 0; k < BN6_FOLDER_ENTRIES; ++k, i += 2) out->folder[k] = get16(i);
 	unsigned placed = *i++;
-	if (n != head + placed * (1 + SLOT_BYTES) + ONLINE_BOARD_CELLS + HP_BYTES + TAIL_BYTES) return BAD("the other PET's MegaMan came in the wrong size");
+	size_t look_bytes = (in[1] & LOADOUT_LOOK) ? LOOK_BYTES : 0;
+	if (n != head + placed * (1 + SLOT_BYTES) + ONLINE_BOARD_CELLS + HP_BYTES + TAIL_BYTES + look_bytes) return BAD("the other PET's MegaMan came in the wrong size");
 	for (unsigned k = 0; k < placed; ++k, i += 1 + SLOT_BYTES) {
 		if (i[0] >= BN6_NAVICUST_SLOTS) return BAD("the other PET's NaviCust has a program out of its list");
 		memcpy(out->board + i[0] * SLOT_BYTES, i + 1, SLOT_BYTES);
@@ -201,6 +208,12 @@ bool arena_loadout_unpack(const uint8_t *in, size_t n, OnlineLoadout *out, bool 
 	out->regular = i[6]; out->tag[0] = i[7]; out->tag[1] = i[8];
 	out->crosses = i[9]; out->souls = i[10]; out->beast = i[11];
 	out->pulled = (in[1] & LOADOUT_PULLED) != 0;
+	if (look_bytes) {
+		memcpy(out->look.palette, i + TAIL_BYTES, LOOK_CHANNELS);
+		memcpy(out->look.colour, i + TAIL_BYTES + LOOK_CHANNELS, LOOK_CHANNELS);
+		if (!look_valid(&out->look)) return BAD("the other PET's MegaMan came in colours it has not");
+		out->looked = true;
+	}
 	*carried = true;
 	return true;
 }

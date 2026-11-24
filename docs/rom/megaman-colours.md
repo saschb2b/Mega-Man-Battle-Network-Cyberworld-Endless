@@ -167,7 +167,9 @@ recolours both; a look per side needs the pick to answer by the object's
 side, into the block's spare palettes (0x19-0x1A, 0x1E-0x1F, 0x23-0x24,
 0x28-0x29, never read by BN6) or a grown copy: an install both games make
 alike, keyed by the core's side and not by which player is local. That is
-how [Looks in a NetBattle](../online/arena/looks.md) does it, on these:
+how [Looks in a NetBattle](../online/arena/looks.md) does it, on these. A shared dive's field (one core, up to four MegaMen on side 0)
+takes the same spares and the same two picks answered by seat instead of side
+([The shared dive](../online/shared-dive.md), Looks on the field; issue #879):
 
 | Data | Offset | How it was found / verified |
 | --- | --- | --- |
