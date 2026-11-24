@@ -8,9 +8,11 @@
 #include <stdio.h>
 
 /* (the ids are kept in profiles and runs, so a folder's never changes;
- * 6-8 are BN6's presets' and 11 the next archetype's, issue #865, and an
- * id no folder holds is skipped everywhere: meta_folder_exists) */
-enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_EMBER = 9, FOLDER_TIDE, FOLDER_COUNT };
+ * 6 and 7 are BN6's Extra and Navi presets made a start's, 8 stays free
+ * (its Support preset, left out), 9-11 the archetypes', issue #865, and
+ * an id no folder holds is skipped everywhere: meta_folder_exists) */
+enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_STEADY, FOLDER_NAVI, FOLDER_EMBER = 9, FOLDER_TIDE,
+	FOLDER_COUNT };
 
 typedef struct {
 	const char *name;
@@ -61,10 +63,10 @@ void meta_shelf_seen(void);
  * and the first folder still locked and unheard is heard by the floor's
  * post (the BBS's NEW); the count begins again. */
 void meta_shelf_run_over(void);
-/* The milestones the Z-Canon and Busting folders open with, in any run
- * (Profile.folder_feats): chip `id` used by MegaMan in a battle (a Program
- * Advance, a Recovery chip; meta_chip_watched says which are worth the
- * call), and an act's guardian deleted. */
+/* The milestones the Z-Canon, Busting and Navi folders open with, in any
+ * run (Profile.folder_feats): chip `id` used by MegaMan in a battle (a
+ * Program Advance, a Recovery chip, a Navi chip; meta_chip_watched says
+ * which are worth the call), and an act's guardian deleted. */
 bool meta_chip_watched(int id);
 void meta_chip_used(int id);
 void meta_guardian_deleted(void);

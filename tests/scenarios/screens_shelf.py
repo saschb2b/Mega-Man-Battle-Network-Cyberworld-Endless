@@ -27,7 +27,7 @@ MANY = {
             ('expect', 'folders=1'),
             ('expect', 'folderlook=Standard'),
             ('expect', 'folderstate=open'),
-            ('expect', 'shelf=Blade:locked,Storm:locked,Z-Canon:locked,Busting:locked,Lean:locked,Ember:locked,Tide:locked'),
+            ('expect', 'shelf=Blade:locked,Storm:locked,Z-Canon:locked,Busting:locked,Lean:locked,Steady:locked,Navi:locked,Ember:locked,Tide:locked'),
             ('do', 'press RIGHT; wait 6'),
             ('expect', 'folderlook=Blade'),
             ('expect', 'folderstate=locked'),
@@ -45,19 +45,19 @@ MANY = {
             ('expect', 'startfolder=Standard'),
         ]),
     'heard-by-a-whisper': dict(
-        GUARDS="The second bystander's whisper of how Busting opens (seed 2's first layer, its pick among the seven locked), said: Busting heard at the next setup.",
+        GUARDS="The second bystander's whisper of how Blade opens (seed 2's first layer, its pick among the nine locked), said: Blade heard at the next setup.",
         START=SETUP, STEPS=[
-            ('expect', 'shelf~Busting:locked'),        # (the shelf seen: the floor's count and the whispers begin)
+            ('expect', 'shelf~Blade:locked'),          # (the shelf seen: the floor's count and the whispers begin)
             ('restart', '--scene emu --seed 2 --run-depth 1 --dev quiet --talk whisper:60'),
             ('do', 'wait 150; mash A 300; wait 20'),
             ('repeat', 'mash A 60; wait 30', 'chat=closed'),
-            ('expect', 'whisperfolder=Busting'),
+            ('expect', 'whisperfolder=Blade'),
             ('do', 'wait 30'),
             ('restart', SETUP),
-            ('expect', 'shelf=Blade:locked,Storm:locked,Z-Canon:locked,Busting:heard,Lean:locked,Ember:locked,Tide:locked'),
+            ('expect', 'shelf=Blade:heard,Storm:locked,Z-Canon:locked,Busting:locked,Lean:locked,Steady:locked,Navi:locked,Ember:locked,Tide:locked'),
             FOLDER_ROW,
-            ('do', 'press RIGHT; wait 6; press RIGHT; wait 6; press RIGHT; wait 6; press RIGHT; wait 6'),
-            ('expect', 'folderlook=Busting'),
+            ('do', 'press RIGHT; wait 6'),
+            ('expect', 'folderlook=Blade'),
             ('expect', 'folderstate=heard'),
         ]),
     'no-whisper-before-the-shelf': dict(
@@ -77,7 +77,7 @@ MANY = {
             ('restart', LOST), *OVER,
             ('restart', SETUP),
             ('expect', 'runs=3'),
-            ('expect', 'shelf=Blade:heard,Storm:locked,Z-Canon:locked,Busting:locked,Lean:locked,Ember:locked,Tide:locked'),
+            ('expect', 'shelf=Blade:heard,Storm:locked,Z-Canon:locked,Busting:locked,Lean:locked,Steady:locked,Navi:locked,Ember:locked,Tide:locked'),
         ]),
     'summary-gives-the-hint': dict(
         GUARDS="The summary's closest unlock while Blade is locked and unheard: the hint, never the deed.",

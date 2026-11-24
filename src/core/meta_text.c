@@ -23,6 +23,10 @@ static const FolderInfo folders[FOLDER_COUNT] = {
 	[FOLDER_BUSTING] = { "Busting", "Heavy hitters in L and R. No Recovery chips", "clear an act with no Recov", "for an act with no safety net",
 		"Heavy hitters, no Recovery" },
 	[FOLDER_LEAN] = { "Lean", "Seven kinds in B or *: whole hands, little else", "reach layer 10", "deep down in the Net", "Any five chips make a hand" },
+	/* (BN6's presets made a start's, ids 6 and 7, issue #865) */
+	[FOLDER_STEADY] = { "Steady", "A step up from Standard, four Recov30. Few codes", "reach act 3", "for a Navi who lasts", "A step up, with heals" },
+	[FOLDER_NAVI] = { "Navi", "Three Navi chips and help for them. The rest hits soft", "use a Navi chip", "when a friend helps",
+		"Navi chips at its heart" },
 	/* (issue #865's archetypes, ids 9-11) */
 	[FOLDER_EMBER] = { "Ember", "Grass first, then Fire on it for double. Short reach", "delete a guardian in HeatCross",
 		"in the heat of a big fight", "Fire chips on grass" },

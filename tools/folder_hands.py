@@ -33,7 +33,7 @@ BN6_PRESETS = (0x0213AC, 0x0213E8, 0x02158C, 0x021604, 0x0215C8, 0x021640)   # B
 BN5_PRESETS = (0x01D814, 0x01D850, 0x01D9F4, 0x01DA6C, 0x01DA30, 0x01DAA8)   # BN5_FOLDER_TABLE's six
 BN4_START = 0x017CC8                             # BN4_FOLDERS, its first of twelve
 HEAL = {154: 10, 155: 30, 156: 50, 157: 80, 158: 120}   # Recov10 to Recov120
-ATK = {192: 10}                                  # Atk+10
+ATK = {192: 10, 193: 20}                         # Atk+10, Navi+20
 NO_DAMAGE = {131, 146, 162, 163, 168, 175, 177, 178, 179, 184, 298}   # support: no damage of their own here
 PAS = [(339, (71, 72, 73), 4), (339, (71, 74, 75), 4), (320, (1,), 0), (321, (2,), 0), (322, (3,), 0), (337, (23,), 0),
        (323, (20,), 0), (326, (107,), 0),

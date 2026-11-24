@@ -31,7 +31,7 @@ Which folders exist, what they hold and how they open are unchanged
 ## Three states
 
 The FOLDER row turns through every folder, the open ones counted beside
-its name ("Folder 3/8"), passing over an id no folder holds (the ids are
+its name ("Folder 3/10"), passing over an id no folder holds (the ids are
 kept in profiles and runs, and issue #865's builders took them in blocks:
 `meta_folder_exists`). The setup is still skipped on a profile's first run
 ([Decisions and phase one](decisions.md)).
@@ -58,6 +58,8 @@ milestone having been chosen to teach its style (`meta_text.c`'s `hint`):
 | Z-Canon | A Program Advance used | Opens when chips work as one, in order |
 | Busting | An act cleared with no Recovery chip | Opens for an act with no safety net |
 | Lean | Layer 10 reached | Opens deep down in the Net |
+| Steady | Act 3 reached | Opens for a Navi who lasts |
+| Navi | A Navi chip used | Opens when a friend helps |
 
 ## Heard in the net
 

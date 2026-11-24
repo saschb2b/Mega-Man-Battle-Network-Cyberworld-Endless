@@ -412,6 +412,8 @@ static int bbs_posts(Post *out) {
 		[FOLDER_ZCANON] = { 0x14, "CannonKid", "Pulled off my first Program Advance! Next dive my folder was packed with combos!" },
 		[FOLDER_BUSTING] = { FACE_HEEL, "NoHeals", "Cleared a whole area without one Recovery chip. Next dive,heavy hitters only!" },
 		[FOLDER_LEAN] = { FACE_TECH, "TenDown", "Made it ten layers down! Now any five of my chips make a hand." },
+		[FOLDER_STEADY] = { 0x19, "LongHaul", "Made it to the third area! Next dive my folder had Recov30s to spare." },
+		[FOLDER_NAVI] = { FACE_NAVI, "NaviPal", "Used my first Navi chip. Next dive,three Navis came along in my folder!" },
 		[FOLDER_EMBER] = { FACE_NAVI, "Firestarter", "Beat a guardian as HeatCross. Next dive,I set grass and burned it. Toasty!" },
 		[FOLDER_TIDE] = { 0x19, "Splasher", "Put out a Fire guardian. Ever since,I dive with Aqua chips. Splash!" },
 	};

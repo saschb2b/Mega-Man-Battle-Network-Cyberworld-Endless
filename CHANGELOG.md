@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Two new starting folders from BN6's own.** Steady is BN6's
+  ExtraFolder (HiCannon, Vulcan2, EnergBom, LifeSword's three swords) with
+  four Recov30 of its own; it opens once a run reaches act 3. Navi is
+  BN6's Navi folder made a start's: BlastMan, DiveMan and CircusMan with
+  small chips in their codes, BblStar1 and WhiCapsl to hold a foe for
+  them, and three Navi+20; it opens once you use a Navi chip. BN6's
+  Support folder was played and left out: its aimed and delayed chips
+  are too slow for a run's first battles (issue #865).
+
 - **New: two starting folders, Ember and Tide.** Ember lays grass with
   GrasSeed and burns it with Fire chips, which hit a foe on grass for
   double; it opens once a guardian falls to MegaMan in HeatCross. Tide is

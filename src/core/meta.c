@@ -12,6 +12,7 @@
 #include "bn6.h"
 #include "bn6_forms.h"
 #include "chip_pool.h"
+#include "data.h"
 #include "looks.h"
 #include "looks_routes.h"
 #include "meta_text.h"
@@ -55,8 +56,10 @@ static bool earned(int folder) {
 		return rival(6)->megaman_won > 0 || rival(13)->megaman_won > 0;
 	case FOLDER_ZCANON: return (profile.folder_feats & FEAT_PA) != 0;
 	case FOLDER_BUSTING: return (profile.folder_feats & FEAT_DRY_ACT) != 0;
-	/* (the best depth, kept from the first runs on) */
+	/* (the best depth, kept from the first runs on: act 3 begins at layer 7) */
 	case FOLDER_LEAN: return profile.best_depth >= 10;
+	case FOLDER_STEADY: return profile.best_depth >= 7;
+	case FOLDER_NAVI: return (profile.folder_feats & FEAT_NAVI) != 0;
 	/* (issue #865's archetypes: a guardian deleted in HeatCross, the Cross
 	 * whose charge Ember's Fire chips feed; BN6's Fire navis among the
 	 * guardians, HeatMan and BlastMan, Storm's mirror) */
@@ -77,6 +80,9 @@ bool meta_folder_exists(int folder) { return folder >= 0 && folder < FOLDER_COUN
 enum { SWORD = 71, WIDESWRD = 72, LONGSWRD = 73, AREAGRAB = 163, PANLGRAB = 162, RECOV10 = 154, ATK10 = 192, BARRIER = 178,
 	THUNDER = 30, ELCPULS1 = 34, DOLTHDR1 = 31, CANNON = 1, VULCAN1 = 5, MINIBOMB = 54, AIRSHOT = 4, BUSTERUP = 175,
 	HICANNON = 2, TANKCAN1 = 12, DUBLSHOT = 90, FIREBRN1 = 20, FIREHIT1 = 107 };
+/* (Steady's and Navi's: BN6's Extra and Navi presets' chips, and their trims) */
+enum { VULCAN2 = 6, ENERGBOM = 55, RECOV30 = 155, WHICAPSL = 184, COMINGRD = 170, NAVI20 = 193,
+	BLASTMAN = 257, DIVEMAN = 260, CRCUSMAN = 263 };
 /* (issue #865's archetypes: Ember's and Tide's) */
 enum { BURNSQR1 = 110, GRASSEED = 68, TRNARRW1 = 24, BBLSTAR1 = 27, ICESEED = 69, CRAKSHOT = 89 };
 static const uint16_t blade[30] = {
@@ -139,6 +145,29 @@ static const uint16_t lean[30] = {
 	C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'),
 	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'),
 };
+static const uint16_t steady[30] = {
+	/* BN6's Extra preset (its second folder, a qualifier's prize) with its
+	 * four Recov50 C made Recov30 L, the code of its HiCannons: Standard's
+	 * shape a step up, its heals the folder's own (issue #865) */
+	C(CANNON, 'A'), C(CANNON, 'B'), C(CANNON, 'C'), C(CANNON, '*'),
+	C(HICANNON, 'L'), C(HICANNON, 'L'), C(HICANNON, 'L'), C(VULCAN2, 'D'), C(VULCAN2, 'D'), C(VULCAN2, 'D'),
+	C(ENERGBOM, 'K'), C(ENERGBOM, 'K'), C(ENERGBOM, 'K'), C(ENERGBOM, 'K'),
+	C(SWORD, 'S'), C(SWORD, 'S'), C(SWORD, 'S'), C(WIDESWRD, 'S'), C(WIDESWRD, 'S'), C(LONGSWRD, 'S'),
+	C(DUBLSHOT, '*'), C(DUBLSHOT, '*'), C(RECOV30, 'L'), C(RECOV30, 'L'), C(RECOV30, 'L'), C(RECOV30, 'L'),
+	C(AREAGRAB, 'S'), C(BUSTERUP, '*'), C(ATK10, '*'), C(ATK10, '*'),
+};
+static const uint16_t navis[30] = {
+	/* BN6's Navi preset at a start's level: BlastMan, DiveMan and CircusMan
+	 * at V1 for its EX three, each with small chips in his code (B, D, C)
+	 * where the preset had rarity-3 blades; BblStar1, WhiCapsl and ComingRd
+	 * to hold a foe for them, and Navi+20 for them alone */
+	C(BLASTMAN, 'B'), C(DIVEMAN, 'D'), C(CRCUSMAN, 'C'),
+	C(BBLSTAR1, 'B'), C(BBLSTAR1, 'B'), C(BBLSTAR1, 'B'), C(MINIBOMB, 'B'), C(MINIBOMB, 'B'), C(MINIBOMB, 'B'),
+	C(CANNON, 'B'), C(CANNON, 'B'), C(CANNON, 'C'), C(CANNON, 'C'), C(VULCAN1, 'D'), C(VULCAN1, 'D'), C(VULCAN1, 'D'),
+	C(RECOV10, 'D'), C(RECOV10, 'D'), C(RECOV10, '*'), C(RECOV10, '*'),
+	C(WHICAPSL, '*'), C(WHICAPSL, '*'), C(AREAGRAB, '*'), C(AREAGRAB, '*'), C(COMINGRD, '*'),
+	C(NAVI20, '*'), C(NAVI20, '*'), C(NAVI20, '*'), C(ATK10, '*'), C(ATK10, '*'),
+};
 /* (issue #865's archetypes, docs/game/meta/folders-measured.md: BN6's
  * rules verified in its battle code, docs/research/sources.md) */
 static const uint16_t ember[30] = {
@@ -173,6 +202,8 @@ const uint16_t *meta_folder_chips(int folder) {
 	case FOLDER_ZCANON: return zcanon;
 	case FOLDER_BUSTING: return busting;
 	case FOLDER_LEAN: return lean;
+	case FOLDER_STEADY: return steady;
+	case FOLDER_NAVI: return navis;
 	case FOLDER_EMBER: return ember;
 	case FOLDER_TIDE: return tide;
 	default: return NULL;
@@ -203,11 +234,19 @@ static bool program_advance(int id) {
  * another act) */
 static int act_key(void) { return pacing_loop(run.depth) * PACING_ACTS + pacing_act(run.depth) + 1; }
 
-bool meta_chip_watched(int id) { return recovery(id) || program_advance(id); }
+/* (a Navi chip: BN6's own by number, Roll to Django3 221-280, and any
+ * other by its record's family, the Gigas and the registry's among them) */
+static bool navi_chip_id(int id) { return (id >= 221 && id <= 280) || chip_family(id) == CHIP_FAMILY_NAVI; }
+
+bool meta_chip_watched(int id) { return recovery(id) || program_advance(id) || navi_chip_id(id); }
 
 void meta_chip_used(int id) {
 	if (program_advance(id) && !(profile.folder_feats & FEAT_PA)) {
 		profile.folder_feats |= FEAT_PA;
+		profile_save();
+	}
+	if (navi_chip_id(id) && !(profile.folder_feats & FEAT_NAVI)) {
+		profile.folder_feats |= FEAT_NAVI;
 		profile_save();
 	}
 	if (recovery(id) && (profile.recov_run != run.seed || profile.recov_act != act_key())) {
