@@ -15,7 +15,7 @@ static const char *const words[LW_COUNT] = {
 	[LW_INFORMATION] = "INFORMATION",
 };
 
-const char *looks_word(LooksWord w) { return w >= 0 && w < LW_COUNT ? words[w] : ""; }
+const char *looks_word(LooksWord w) { return (unsigned)w < LW_COUNT ? words[w] : ""; }
 
 static const char *const channels[LOOK_CHANNELS] = { "Armour", "Suit", "Accent" };
 static const char *const parts[LOOK_CHANNELS] = { "his helmet, arms and legs", "his bodysuit", "his fins and emblem" };
