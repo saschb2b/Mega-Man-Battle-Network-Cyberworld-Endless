@@ -13,7 +13,6 @@
 #include "director.h"
 #include "dive_comings.h"
 #include "dive_crew.h"
-#include "dive_crew_view.h"
 #include "dive_dots.h"
 #include "dive_looks.h"
 #include "dive_seats.h"
@@ -153,7 +152,7 @@ static Tag *tag_under(Tag *tags, int n, const Tag *t) {
 	return NULL;
 }
 
-/* whether a tag would meet the crew's plates under BN6's HP box (dive_crew_view.h): a name piled on others keeps under
+/* whether a tag would meet the crew's plates under BN6's HP box (dive_crew.h): a name piled on others keeps under
  * them, counted on the one it would have stood over, as past the picture's top (issue #886) */
 static bool on_plates(const Tag *t) {
 	int x, y, w, h;

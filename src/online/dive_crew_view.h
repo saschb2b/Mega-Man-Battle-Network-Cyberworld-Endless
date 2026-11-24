@@ -41,10 +41,7 @@ int dive_crew_view_rows(CrewRow out[ONLINE_PARTY_MOST]);
 void dive_crew_view_bar(int x, int y, int w, const CrewRow *row);
 /* Over the map (at P.core_x, P.core_y) */
 void dive_crew_view_draw(void);
-/* ... the plates' column as drawn, on the 240x160 picture: its left, top,
- * width and height; false where there are none (issue #886: the divers'
- * names on the layer keep under it) */
-bool dive_crew_view_box(int *x, int *y, int *w, int *h);
+/* (... the plates' column as drawn: dive_crew_view_box, in dive_crew.h) */
 /* ... in the state's words: `crewview N` (the plates shown; `crewview N
  * party` the door's party) and a line a plate, `mateK NAME hp H/M|--|none
  * layer D|home|battle|busy|here`, ` stranger` after a diver outside the crew */
