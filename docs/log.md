@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-25
+* **Update**: code/layers.md (0.24.0's row of the numbers), devtools/old-checkpoint.md (0.24.0's candidate continued 0.23.0's and 0.22.2's runs).
+
 ## 2026-11-24
 * **Update**: code/tools.md (house.py's row: the `Mosaic`, several games of one take at once in a trailer's big window, new with 0.24.0's cut).
 * **Creation**: releases/v0.24.0.md (the players' notes of 0.24.0: MegaMan's colours, the folders' shelf and five folders, Team ProtoMan, the week's DeepNet dived as a crew, the fixes, each pictured), releases/overview.md (its line).
