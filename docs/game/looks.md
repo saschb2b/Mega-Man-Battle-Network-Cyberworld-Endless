@@ -3,7 +3,7 @@ type: Design
 title: "MegaMan's look"
 description: "Each profile's MegaMan in colours of its own, on Warframe's model (issue #854): three channels of his plain body (armour, suit, accent) each coloured from one of twelve palettes the profile owns, earned by milestones, the home shop and rare finds, looks only; the owner's calls of 24 November 2026 and what is built."
 tags: [game, design, meta, megaman]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T18:10:00Z }
 sources:
   - id: issue
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/854"

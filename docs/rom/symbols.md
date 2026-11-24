@@ -106,8 +106,8 @@ how to verify it.
 | Fields of structures | 199 | 47 | 3 |
 | Event flags | 39 | 3 | 2 |
 | Values of fields | 121 | 16 | 3 |
-| Constants, sizes and counts | 682 | 303 | 381 |
-| All | 2759 | 1577 | 1098 |
+| Constants, sizes and counts | 685 | 303 | 381 |
+| All | 2762 | 1577 | 1098 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
@@ -120,7 +120,7 @@ how to verify it.
 | Sound | 29 | 30 | 14 |
 | Maps and the overworld | 152 | 42 | 30 |
 | Events and progress | 77 | 21 | 13 |
-| Engine core | 1198 | 714 | 650 |
+| Engine core | 1201 | 714 | 650 |
 
 <!-- end of what tools/symbols.py writes -->
 
