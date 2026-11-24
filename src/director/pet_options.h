@@ -15,10 +15,14 @@
 bool pet_options_install(void);
 /* Comm is Options: its A is the engine's (pet.c's hook on the menu's input) */
 bool pet_options_here(void);
-/* The ninth row's label, Forms, made beside Options in the same copy of the
- * labels' tiles: its 9 x 2 tile entries (Save's, the word's columns ours),
- * for pet_row.c; false while the labels are BN6's */
+/* The ninth row's label, Forms, made beside Options from the same letters:
+ * its 9 x 2 tile entries (Save's, the word's columns ours), for the menu's
+ * picture (pet_menu_frame.c); false while the labels are BN6's */
 bool pet_options_forms_map(uint16_t out[2 * 9]);
+/* The word's tile a Forms entry names (4bpp, 32 bytes), NULL for any
+ * other number: held here, never in the video memory, where BN6's screens
+ * use the tiles past the labels' as their blank (docs/rom/pet-and-second-screen.md) */
+const uint8_t *pet_options_forms_tile(int n);
 /* The state in words, in the PET: `blanktile zero` while BN6's blank tile
  * (0x2FF of BG character block 2, BG0's every entry on the Chip Folder's
  * screens) is clear of the labels' copy, `drawn` where a screen of BN6's

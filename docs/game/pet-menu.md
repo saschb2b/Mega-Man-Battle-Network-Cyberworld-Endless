@@ -51,7 +51,10 @@ changed is in issue #793.
   19 pixels from each side. The cursor's row is lit as BN6 lights it: its
   label white and its icon stepped 8 pixels out. Forms' button is Save's
   with Forms' label set from the labels' own letters beside Options'
-  (`pet_options.c`); its icon is BN6's Status icon, the one BN6 shows in
+  (`pet_options.c`), its word's tiles the engine's own and drawn by the
+  picture, never loaded into BN6's video memory, where the Chip Folder's
+  screens use the tile past them as their blank
+  ([The PET menu's labels](../rom/pet-and-second-screen.md)); its icon is BN6's Status icon, the one BN6 shows in
   MegaMan's row for another Navi.
 - **EXIT** in the grid's last place, under Save and beside Forms: BN6's
   capsule, its plain body repeated so it spans the cell from the icons'

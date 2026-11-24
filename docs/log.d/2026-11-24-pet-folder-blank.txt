@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T00:40:00Z
+* **Update**: rom/pet-and-second-screen.md (the PET menu's labels: tile 0x2FF is BN6's blank on the Chip Folder's screens, Forms' word kept out of the video memory, the `blanktile` line), game/pet-menu.md (Forms' label's tiles the engine's own).
