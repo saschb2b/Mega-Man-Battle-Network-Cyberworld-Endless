@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-23",
+  "what": "BN6's Chip Trader screen (bn6f ChipTraderControl) driven as a Bring request's choice of one chip (issue 842): ts_start_chip_trader's amount 1 is the BugFrag Trader's and opens no screen, so the asker's script opens it for 2 and the list made (0x0804B150) sets 1 and keeps the request's element alone; its question for an amount but 3 (script 8 through 0x0804BCD8) is MegaMan's of ours; its Yes (0x0804B26E) leaves by BN6's own way out with no trade (0x0804B254), since a trade's sets the map's fade for the prize's cutscene and a screen left with none stayed black. Proved in a headless run: the screen at 0/ 1 over the Wood chips alone, the second put in, Yes, the asker handing it over (src/world/bring_choice.c; docs/rom/world.md, The Chip Trader's screen as a Bring's choice; tests/scenarios/home_bring_choice.py)."
+}

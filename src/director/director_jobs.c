@@ -12,6 +12,7 @@
 
 #include "bn6.h"
 #include "boss.h"
+#include "bring_choice.h"
 #include "cinema.h"
 #include "data.h"
 #include "debug.h"
@@ -22,7 +23,6 @@
 #include "emu.h"
 #include "flags.h"
 #include "job_words.h"
-#include "layer_objs.h"
 #include "mapslot.h"
 #include "request_bbs.h"
 #include "run.h"
@@ -36,6 +36,9 @@ static struct {
 	const char *words;    /* MegaMan's word to say, NULL none */
 	bool vow_told;        /* the vow's reminder said, this act */
 } J;
+
+/* the element the visit's Bring request asked, settled or not (0 none): for the state */
+static int bring_need;
 
 /* the chips of `element` MegaMan holds, the Pack's first, then the
  * Folder's (the script checks the Pack as Lan talks) */
@@ -78,6 +81,10 @@ void home_jobs_visit(void) {
 		if (theirs && due && run.job.kind == JOB_BRING) bring_chips(jt, run.job.need);
 		jt->lost = jt->mode == JOB_TALK_OFFER && run.depth <= 1 && profile.last_job == k + 1;
 	}
+	/* (the held Bring request's chip, chosen on BN6's Chip Trader's screen
+	 * where more than one kind fits: bring_choice.h) */
+	bring_need = due && run.job.kind == JOB_BRING ? run.job.need : 0;
+	bring_choice_arm(bring_need);
 	if (run.depth <= 1 && profile.last_job) { profile.last_job = 0; profile_save(); }
 	J.vow_told = false;
 	for (int c = 0; emu_debug_on() && c < job_talk[JOB_BOARD].nbring; ++c) {
@@ -119,9 +126,29 @@ void home_jobs_flag(int flag) {
 	} else if (flag == JOB_SETTLED_FLAG) {
 		if (run.job.state == JOB_DONE) runlog_choice(CHOICE_JOB_KEPT);
 		memset(&run.job, 0, sizeof run.job);
+		bring_choice_arm(0);
 	}
 	request_bbs_post();
 	if (emu_debug_on()) fprintf(stderr, "jobs: flag %04x, the run's job now kind %d from %d\n", flag, run.job.kind, run.job.asker);
+}
+
+/* The Chip Trader's screen for the held Bring request closed: its asker
+ * goes on, the chip chosen handed over and the request paid, or, left by
+ * B, the request kept (job_words.c's job_bring_after) */
+void home_jobs_bring(void) {
+	static BringResult due;
+	static int id, code;
+	BringResult r = bring_choice_result(&id, &code);
+	if (r != BRING_NONE) due = r;
+	if (due == BRING_NONE || run.job.kind != JOB_BRING || run.job.asker >= JOB_ASKERS) { due = BRING_NONE; return; }
+	if (cinema_busy() || !on_map()) return;
+	static TextArchive t;
+	ta_begin(&t);
+	int i = job_bring_after(&t, &job_talk[run.job.asker], home_in_hp(), due == BRING_CHOSEN ? id : 0, code);
+	if (talk_archive(&t, i)) {
+		if (emu_debug_on()) fprintf(stderr, "jobs: the bring's choice %s chip %d code %d\n", due == BRING_CHOSEN ? "took" : "kept", id, code);
+		due = BRING_NONE;
+	}
 }
 
 /* ---- in the Net ---- */
@@ -190,10 +217,26 @@ const char *home_jobs_status(const char *words) {
 	return buf;
 }
 
+/* the Pack's chips of the visit's Bring request's element, id:code:copies */
+static void bring_pack(FILE *f) {
+	fprintf(f, "bringpack");
+	int shown = 0;
+	for (int id = 1; id < PACK_CHIPS && shown < 12; ++id) {
+		uint32_t at = pack_listed(id) ? pack_entry(id) : 0;
+		if (!at || chip_hits_with(id) != bring_need) continue;
+		ChipInfo ci;
+		chip_info(id, &ci);
+		for (int k = 0; k < ci.ncodes && k < 4; ++k)
+			if (emu_read8(at + (uint32_t)k)) { fprintf(f, " %d:%c:%d", id, ci.codes[k], emu_read8(at + (uint32_t)k)); ++shown; }
+	}
+	fprintf(f, "%s\n", shown ? "" : " none");
+}
+
 void home_jobs_describe(FILE *f) {
 	static const char *const kinds[JOB_KINDS] = { "none", "clean", "quick", "explore", "bring", "vow" };
 	static const char *const states[] = { "offered", "taken", "done", "failed" };
 	const Job *j = &run.job;
+	if (bring_need && D.town) bring_pack(f);
 	if (!j->kind && !D.town) return;
 	fprintf(f, "request %s", kinds[j->kind % JOB_KINDS]);
 	if (j->kind) fprintf(f, " %s got %d of %d", states[j->state & 3], j->got, j->need);

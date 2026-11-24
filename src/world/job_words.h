@@ -36,6 +36,14 @@ extern JobTalk job_talk[JOB_ASKERS];
 /* Asker `asker`'s script at this visit, spoken with `face`; `plain` its
  * words where it has no job to talk of. */
 int job_script(TextArchive *t, int asker, int face, const char *plain);
+/* After BN6's Chip Trader's screen opened for the held Bring request
+ * (bring_choice.h), by its asker or by the courier in Lan's HP (`in_hp`):
+ * `id` in `code` chosen there and handed over, then the pay; or, `id` 0,
+ * nothing chosen and the request kept. Its script in `t`. */
+int job_bring_after(TextArchive *t, const JobTalk *jt, bool in_hp, int id, int code);
+/* MegaMan's question on that screen, once its chip is put in: script 0 of
+ * `t`, Yes and No both going on, the screen reading the answer. */
+int job_bring_ask(TextArchive *t);
 /* Request `j` on BN6's Request BBS at AsterLand (request_bbs.c): its title
  * in the board's list (14 letters at most), and its post as the board reads
  * it out, in the poster's own words: what it asks, the pay, where they wait. */

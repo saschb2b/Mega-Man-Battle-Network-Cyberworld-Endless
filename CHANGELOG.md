@@ -23,6 +23,13 @@
   does a battle, a chat, the PET or a warp. Held, it shows while held,
   as before. Thanks to agergo100 for the idea (issue #840).
 
+- **New: you choose the chip a Bring request takes.** Where more than
+  one kind of chip in your Pack fits the NetBattler's request, he opens
+  BN6's Chip Trader screen over those alone: put in the one you can
+  spare, and he takes that one. B leaves it with nothing taken, the
+  request still yours. One kind alone goes as before (issue #842).
+  Thanks to agergo100 for the idea.
+
 - **New: Falzar's five Crosses.** SpoutMan, TomahawkMan, TenguMan,
   GroundMan and DustMan now give their Crosses when they fall as an
   act's guardian, as Gregar's five Cross Navis do: SpoutCross,
