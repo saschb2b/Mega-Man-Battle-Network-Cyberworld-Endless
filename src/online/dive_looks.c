@@ -28,6 +28,10 @@
 
 _Static_assert(DIVE_PEOPLE <= LOOK_SPRITE_PUPPETS, "a palette a diver's puppet (look_sprite.h)");
 
+static int dev_most;   /* divelooks=N, 0 none */
+
+void dive_looks_dev_room(int most) { dev_most = most; }
+
 static struct {
 	LookSprite sprite;
 	bool made;                   /* the copy stands in this layer's room */
@@ -75,6 +79,7 @@ static void measure(const Look *own) {
 	if (!look_palette_of(own, LOOK_SPRITE_FIELD, mine)) memcpy(mine, D.sprite.colours[0], sizeof mine);
 	int room = (int)emu_read8(BN6_OBJ_PAL_LIMIT) - layer_slots(mine);
 	if (room < 0) room = 0;
+	if (dev_most > 0 && room > dev_most) room = dev_most;
 	if (D.room_least < 0 || room < D.room_least) D.room_least = room;
 }
 

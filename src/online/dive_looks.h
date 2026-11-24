@@ -41,6 +41,8 @@ void dive_looks_reset(void);
  * room for besides MegaMan's own (-1 none measured yet); the puppets BN6
  * drew in a stale slot's colours this frame. */
 int dive_looks_shown(int k);
+/* Dev (divelooks=N): N looks at most besides MegaMan's own on each layer, whatever BN6 leaves. */
+void dive_looks_dev_room(int most);
 int dive_looks_room(void);
 int dive_looks_stale(void);
 

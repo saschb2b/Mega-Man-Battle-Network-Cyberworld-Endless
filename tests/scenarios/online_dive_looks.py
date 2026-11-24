@@ -3,7 +3,10 @@ docs/online/shared-dive.md, Each in his own look): three games in three
 looks dive the week's net, and on the first layer each draws the other two
 in theirs, not in its own player's (every MegaMan had worn the local
 look); a look changed on the layer reaches the others; none drawn in a
-stale slot's colours."""
+stale slot's colours. Past the layer's room (`divelooks=1` on the first
+game: room for one look besides its own, which BN6's blue for the rest
+takes), the others are drawn in BN6's blue, never in the local look nor
+in stale colours."""
 import os
 import sys
 
@@ -47,5 +50,18 @@ MANY = {
         soon(f'divelooks~Beta {said(BETA2)} drawn', 'gamma', 300),
         ('do', 'wait 30; shot'),
         ('expect', 'divelookstale=0'),
+    )),
+    'past-the-room': dict(CAST, START=online.HOME.replace('--dev quiet,', '--dev quiet,divelooks=1,'),
+                          GAMES={'beta': online.HOME, 'gamma': online.HOME}, STEPS=online.course(
+        into('', ALPHA), into('beta', BETA), into('gamma', GAMMA),
+        ('sleep', 1.5),
+        soon(f'divelooks~Beta {said(BETA)} classic', '', 600),
+        soon(f'divelooks~Gamma {said(GAMMA)} classic', '', 300),
+        ('expect', 'divelookroom=1'),
+        ('expect', 'divelookstale=0'),
+        # (the game with no cap still draws both in theirs)
+        soon(f'divelooks~Alpha {said(ALPHA)} drawn', 'beta', 300),
+        soon(f'divelooks~Gamma {said(GAMMA)} drawn', 'beta', 300),
+        ('do', 'wait 30; shot'),
     )),
 }

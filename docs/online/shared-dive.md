@@ -489,7 +489,8 @@ The state says it: `divelooks NAME P.P.P/C.C.C drawn|classic|none`
 for each diver in the room, `divelookroom` and `divelookstale`
 (`tests/scenarios/online_dive_looks.py`: three games in three looks on
 one layer, each seeing the other two in theirs, and a look changed there
-reaching the others).
+reaching the others; and with `--dev divelooks=1`, a layer with room
+for one look besides MegaMan's own, the other two drawn in BN6's blue).
 
 ## Nothing over BN6's screens (22 November 2026)
 
