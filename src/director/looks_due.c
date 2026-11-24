@@ -56,9 +56,9 @@ void looks_due_frame(void) {
 	moments();
 	shop_watch();
 	unsigned untold = looks_untold();
-	bool layer = D.active && !D.town;
-	if (layer && D.frame < ARRIVAL_FRAMES) L.home |= untold;
-	if (!layer) L.home = 0;
+	bool on_layer = D.active && !D.town;
+	if (on_layer && D.frame < ARRIVAL_FRAMES) L.home |= untold;
+	if (!on_layer) L.home = 0;
 	untold &= ~L.home;
 	bool calm = on_map() && hold_save_ok() && !emu_read8(BN6_CHATBOX) && cinema_input_mode() == CINEMA_FREE;
 	if (!untold || !calm) {
