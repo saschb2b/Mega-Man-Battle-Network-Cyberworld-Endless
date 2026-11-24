@@ -56,6 +56,22 @@ void look_apply(const Look *look) {
 	looks_describe_with(describe_seen);
 }
 
+void look_rom_plain(uint8_t *rom, size_t size) {
+	const uint32_t bus = 0x08000000u;
+	Look plain = look_plain();
+	for (int w = 0; rom && w < LOOK_SPRITE_COUNT; ++w) {
+		uint16_t pal[16];
+		/* (face 0's through the copy's own word, as look_apply finds it in the core) */
+		uint32_t at = look_palette_at(w);
+		if (w == LOOK_SPRITE_FACE) {
+			uint32_t ref = BN6_FACE_PALS_REF - bus;
+			at = ref + 4 <= size ? (uint32_t)rom[ref] | (uint32_t)rom[ref + 1] << 8 | (uint32_t)rom[ref + 2] << 16 | (uint32_t)rom[ref + 3] << 24 : 0;
+		}
+		if (at < bus || at - bus + sizeof pal > size || !look_palette_of(&plain, w, pal)) continue;
+		for (int i = 0; i < 16; ++i) rom[at - bus + 2u * (unsigned)i] = (uint8_t)pal[i], rom[at - bus + 2u * (unsigned)i + 1] = (uint8_t)(pal[i] >> 8);
+	}
+}
+
 static void apply_worn(void) {
 	Look w = looks_worn();
 	look_apply(&w);

@@ -3,7 +3,7 @@ type: Style Guide
 title: "The PET's screens: Battle Network's rules"
 description: "BN6's PET screens' rules measured from Gregar (band, windows, information box, cursor, motion, keys, letters, colours) and what the engine's own screens (the Jukebox, Options and its pages and scene, Trade Central) take from them through `pet_look.c`."
 tags: [engine, ui]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:40:00Z }
 ---
 
 # The PET's screens: Battle Network's rules
@@ -267,6 +267,15 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   Board as the server answers it ("Asking..." for up to six seconds,
   then "3rd", or "No link"), MegaMan's word that the portal is open
   again; RECORDS as for any dive.
+- Over a battle's field, a crewmate's name and HP stand beside his
+  MegaMan as BN6 writes an enemy's HP under it, in BN6's own digits; BN6
+  places one label per actor and never stacks actors in a column, so
+  ours takes the first spot (under the feet, in front, behind, over the
+  head) that covers no MegaMan, no other label and none of BN6's own
+  pieces (the HP box, the emotion window under it, the gauge, the chip
+  name at the foot), and stays on the player's half of the picture
+  ([Who is who on a party's field](../online/shared-dive.md), issue
+  #886).
 - A list's line keeps its colour under the cursor (Options).
 - Yes and No as BN6 asks them: the statistics question.
 - The second screen's HP, ZENNY and BUGFRAGS named as the PET menu

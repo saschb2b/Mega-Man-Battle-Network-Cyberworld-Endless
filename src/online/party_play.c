@@ -804,6 +804,7 @@ void party_play_describe(FILE *f) {
 	}
 	if (!PP.core || PP.stage != PP_FIGHT) return;
 	fprintf(f, "partyfield %u seat %u\n", PP.b.n, viewer());
+	party_core_looks_describe(PP.core, f);
 	custom_describe(f);
 	if (down_now()) fprintf(f, "partydown %s\n", PP.b.seat[PP.seat].pulled ? "spent" : "unspent");
 	/* (a partner's own Custom screen: the HP its box shows, and his own on the field, issue #757) */

@@ -3,7 +3,7 @@ type: Design
 title: "MegaMan's look"
 description: "Each profile's MegaMan in colours of its own, on Warframe's model (issue #854): three channels of his plain body (armour, suit, accent) each coloured from one of twelve palettes the profile owns, earned by milestones, the home shop and rare finds, looks only; the owner's calls of 24 November 2026 and what is built."
 tags: [game, design, meta, megaman]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:25:00Z }
 sources:
   - id: issue
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/854"
@@ -139,6 +139,15 @@ takes the two looks from the Square's wire (its own as last sent, the
 other's as the Square knows him), and so do the stands; `--dev
 arenalook=MINE/THEIRS` gives them for tests; two MegaMen a side keep
 BN6's.
+
+### On a shared dive's field
+
+A party's field (a crew's battle, a party's guardian) is built from BN6's
+own colours on every game, and each seat's MegaMan wears his own player's
+look there, carried with his MegaMan and written into the same spare
+palettes, BN6's picks answered by seat; Full Synchro and the face stay
+BN6's there ([The shared dive](../online/shared-dive.md), Looks on the
+field; issue #879).
 
 ### In the Net Square
 

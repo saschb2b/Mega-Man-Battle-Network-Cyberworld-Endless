@@ -17,6 +17,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "online_snapshot.h"
 #include "party_field.h"
@@ -115,6 +116,8 @@ unsigned party_core_deck(PartyCore *pc, unsigned seat, uint16_t out[BN6_DECK_SIZ
 bool party_core_picking(PartyCore *pc, unsigned seat);
 /* The turn's clock: frames since its first OK (0 none) */
 unsigned party_core_clock(PartyCore *pc);
+/* Its seats' looks in words (party_looks.h's `partylooks` line) */
+void party_core_looks_describe(PartyCore *pc, FILE *f);
 
 
 #endif

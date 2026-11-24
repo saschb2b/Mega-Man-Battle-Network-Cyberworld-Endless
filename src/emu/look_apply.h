@@ -7,6 +7,7 @@
 #define CW_LOOK_APPLY_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "looks.h"
@@ -29,6 +30,11 @@ enum {
  * as the form ends. The state's `lookseen` line says which of them the
  * frame's OBJ palettes hold. */
 void look_apply(const Look *look);
+/* A copy of the core's ROM (`size` bytes from 0x08000000, emu_rom_clean's)
+ * with BN6's own colours back in every palette look_apply writes: the
+ * shared dive's field is built alike on every game of a party whatever
+ * each wears (issue #879, party_looks.h) */
+void look_rom_plain(uint8_t *rom, size_t size);
 /* The profile's worn look applied (scene_emu's start: a run's start and a
  * CONTINUE), and applied again whenever the worn look changes (a slot set
  * or selected, the dev switch) from now on */
