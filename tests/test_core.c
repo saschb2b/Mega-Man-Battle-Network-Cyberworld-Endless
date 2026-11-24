@@ -5433,9 +5433,9 @@ static void test_folders(void) {
 	/* (the folders' chips' codes as BN6's records hold them, at 0x021DA8 + id x
 	 * 0x2C, read from the ROM: docs/rom/chips.md) */
 	static const struct { int id; const char *codes; } bn6_codes[] = {
-		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 12, "AGR" }, { 20, "FGH*" }, { 30, "BRS*" }, { 31, "AEQ" }, { 34, "JLS" },
+		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 6, "DFL" }, { 27, "BET" }, { 55, "CKV*" }, { 12, "AGR" }, { 20, "FGH*" }, { 30, "BRS*" }, { 31, "AEQ" }, { 34, "JLS" },
 		{ 54, "BLR*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 107, "DEF" }, { 131, "ACP*" },
-		{ 154, "ADL*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 175, "*" }, { 178, "AFR*" }, { 192, "*" },
+		{ 154, "ADL*" }, { 155, "ELQ*" }, { 170, "*" }, { 184, "*" }, { 193, "*" }, { 257, "B*" }, { 260, "D*" }, { 263, "C*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 175, "*" }, { 178, "AFR*" }, { 192, "*" },
 	};
 	Profile profile_was = profile;
 	Run run_was = run;
@@ -5460,7 +5460,14 @@ static void test_folders(void) {
 			hits |= id == 107 && code >= 3 && code <= 5 ? 1 << (code - 3) : 0;
 			off_lean += code != 1 && code != 26;
 		}
-		for (int id = 0; id < 512; ++id) CHECK(count[id] <= 5, "folders: %s holds %d of chip %d", name, count[id], id);
+		/* (BN6's rules: five of a chip at most, a Mega (the Navi chips 221-280) once, five Megas at most) */
+		int megas = 0;
+		for (int id = 0; id < 512; ++id) {
+			CHECK(count[id] <= (id >= 221 && id <= 280 ? 1 : 5), "folders: %s holds %d of chip %d", name, count[id], id);
+			megas += id >= 221 && id <= 280 ? count[id] : 0;
+		}
+		CHECK(megas <= 5, "folders: %s holds %d Megas", name, megas);
+		if (f == FOLDER_NAVI) CHECK(megas == 3, "folders: Navi holds %d Navi chips", megas);
 		if (f == FOLDER_ZCANON)
 			CHECK(cannons == 7 && burners == 7 && hits == 7, "folders: Z-Canon lacks a recipe's code (Cannon %#x, FireBrn1 %#x, FireHit1 %#x)",
 				cannons, burners, hits);
@@ -5502,6 +5509,17 @@ static void test_folders(void) {
 	CHECK(!meta_folder_open(FOLDER_LEAN), "folders: Lean open at layer 9");
 	profile.best_depth = 10;
 	CHECK(meta_folder_open(FOLDER_LEAN), "folders: Lean shut at layer 10");
+	/* Steady at act 3's first layer; Navi once a Navi chip is used (BlastMan; a Cannon is none) */
+	memset(&profile, 0, sizeof profile);
+	profile.best_depth = 6;
+	CHECK(!meta_folder_open(FOLDER_STEADY), "folders: Steady open at layer 6");
+	profile.best_depth = 7;
+	CHECK(meta_folder_open(FOLDER_STEADY), "folders: Steady shut at layer 7");
+	CHECK(meta_chip_watched(257) && meta_chip_watched(221) && meta_chip_watched(280), "folders: the Navi chips watched");
+	meta_chip_used(1);
+	CHECK(!meta_folder_open(FOLDER_NAVI), "folders: Navi open after a Cannon");
+	meta_chip_used(257);
+	CHECK(meta_folder_open(FOLDER_NAVI) && !meta_folder_open(FOLDER_ZCANON), "folders: Navi shut after BlastMan, or Z-Canon opened with it");
 	/* (said on the summary as they open, the closest one named before) */
 	memset(&profile, 0, sizeof profile);
 	profile.short_wins = 1;

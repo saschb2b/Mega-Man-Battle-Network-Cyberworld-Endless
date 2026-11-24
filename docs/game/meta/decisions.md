@@ -157,3 +157,76 @@ preset (its fifth, given by a Soul Injection's script) one tier down.
   hits, and its close chips leave a foe behind cover to the Cannons. A
   promise of a combo, not a habit: one battle in eleven, which the shelf's
   words say ("Three Program Advances", never "every draw").
+
+## The presets' folders: Steady and Navi (24 November 2026)
+
+Two more of BN6's preset folders, taken to a start's level on the
+owner's calls of issue #865 (Extra with its Recov50 down to Recov30; Navi
+rebuilt with V1 Navi chips in a support shell; nothing as it is behind a
+deep milestone). Each is checked by `test_folders` against BN6's rules
+(30 chips, five of a kind, a Navi chip once and five Megas at most, codes
+the records give) and played by the autopilot ([Starting folders
+measured](folders-measured.md), 5).
+
+| Folder | Its 30 | What it plays like | What it gives up | Opens |
+| --- | --- | --- | --- | --- |
+| Steady (id 6) | Cannon A B C \*, HiCannon L x3, Vulcan2 D x3, EnergBom K x4, Sword S x3, WideSwrd S x2, LongSwrd S, DublShot \* x2, Recov30 L x4, AreaGrab S, BusterUp \*, Atk+10 \* x2 | Standard's shape a step up (HiCannon, Vulcan2, EnergBom, LifeSrd's three in S) with four heals of its own | Codes: seven, few in \*, so its hands are as thin as Standard's; its Recov30s share HiCannon's L, so a heal is a cannon not fired | Act 3 reached (layer 7), in any run |
+| Navi (id 7) | BlastMan B, DiveMan D, CircusMan C, BblStar1 B x3, MiniBomb B x3, Cannon B x2 C x2, Vulcan1 D x3, Recov10 D x2 \* x2, WhiCapsl \* x2, AreaGrab \* x2, ComingRd \*, Navi+20 \* x3, Atk+10 \* x2 | Each Navi chip the centre of a hand in its code, the small chips beside it, BblStar1 and WhiCapsl to hold a foe in place for it, Navi+20 for it alone | Little else hits hard: with a Navi chip out of the draw its hands are Cannons and bombs | A Navi chip used, any, in any run |
+
+- **Steady, from BN6's ExtraFolder** (a qualifier's prize in BN6's
+  story). Its four Recov50 C, 200 HP of heals against Standard's 40, made
+  Recov30; Recov30's records give E L Q \*, not C, so they went to L,
+  HiCannon's code. The rest is BN6's. The name is ours: BN6 calls the
+  folder ExtraFolder, which beside the setup's EXTRAS page would read as
+  something else.
+- **Navi, from BN6's Navi preset** (transmitted in a script that names
+  Mr.Famous): BlastMan EX, DiveMan EX and CircusMan EX made V1 (120, 130
+  and 20 with its stun); WideBlde, LongBlde, VarSwrd, DolThdr2, GolmHit2,
+  WideSht and BblStar2, each rarity 1 to 3 and 100 to 190, left out for
+  small chips in the Navis' codes (B, D, C) and BblStar1; IceSeed, the
+  Sword and the WhiCapsl beyond two out for Navi+20.
+- **Measured** (`tools/folder_hands.py`, 4000 draws, one hit each; a
+  Navi chip's whole attack and the shell's holds not modelled): Steady
+  148 on turn 1 and 359 in three (Standard 128 and 303), 120 HP of heals
+  in its 30; Navi 124 and 302 with 3.1 chips a turn.
+- **Through the lens.** The meta layer's dialectic, what you bring
+  against what you find: Steady brings its heals and finds its damage in
+  the net's chips, which its few codes take in badly; Navi brings three
+  strong chips and must find the rest. **Smells checked:** Steady is the
+  one folder above Standard on every count but codes, which is why it
+  opens late (act 3, the net's last third, where its heals meet the act's
+  bands), never in a first run; it sits under Blade and Busting's damage
+  and is watched in the statistics as a dominant-strategy candidate. Navi
+  stays under Standard's damage, its Navi chips the reason to bring it.
+  None of the seven plays like another: Steady's cushion is the only one
+  of heals, Navi's the only one built on Megas.
+- **Milestones that teach the style.** Act 3 is where a run lasts or
+  does not: Steady's heals are what lasting takes. A Navi chip used is
+  the folder's whole idea met once, in any folder: a guardian's chip or
+  a find. Both are seen without a battle read: the best depth, as
+  Lean's, and the chip-use hook Z-Canon's Program Advance already rides
+  (`meta_chip_used`; a Navi chip by number, Roll to Django3 221-280, or
+  by its record's family 27 where another game's or a Giga).
+- **Their words:** the shelf's hint, plain line and NEW, a bystander's
+  rumor and the floor's BBS post each (`meta_text.c`, `rumor_lines.c`,
+  `pet_text.c`), read against [the voice rules](../../voice/rules.md);
+  a rumor tells each, as for the six.
+
+## Support, BN6's fourth preset: not taken (24 November 2026)
+
+BN6's Support preset (GunDelS1 C x4, GunDelS2 R x3, WaveArm1 F x3,
+AirRaid1 R x3, Boomer J x3, TimeBom1 F x3, Fanfare \* x3, Recov80 \* x4,
+Invisibl \* x3, Barr100 O) was the one that plays unlike all six, and the
+hand model cannot see its delayed chips, so it was played by hand first
+with Recov80 made Recov30 (`tools/cw.py play`, act 1's first layer,
+seed 1): a lone Mettaur deleted by WaveArm1 at once; the next lone
+Mettaur took 1500 frames and 50 HP, GunDelS1's and GunDelS2's sun cursor
+missing it and AirRaid1 doing 10; a pair of Piranhas left untouched by
+two GunDelS1 while MegaMan fell from 90 to 30 HP. Its damage is aimed or
+delayed (the sun's roaming cursor, TimeBom's countdown, Boomer's path
+round the field) where act 1's battles do not wait, and its milestone (a
+foe deleted by a TimeBom) needs a battle read the engine does not have.
+**Not on the shelf:** at a start's level it is a wall for the player it
+would be new to, and above it the owner's call keeps nothing behind a
+deep milestone. Its id (8) stays free; the idea is kept for a later look
+once the Battle Lab can teach its chips.

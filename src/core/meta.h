@@ -7,7 +7,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_COUNT };
+/* (6 and 7, BN6's Extra and Navi presets made a start's, issue #865) */
+enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_STEADY, FOLDER_NAVI, FOLDER_COUNT };
 
 typedef struct {
 	const char *name;
@@ -43,10 +44,10 @@ void meta_shelf_seen(void);
  * and the first folder still locked and unheard is heard by the floor's
  * post (the BBS's NEW); the count begins again. */
 void meta_shelf_run_over(void);
-/* The milestones the Z-Canon and Busting folders open with, in any run
- * (Profile.folder_feats): chip `id` used by MegaMan in a battle (a Program
- * Advance, a Recovery chip; meta_chip_watched says which are worth the
- * call), and an act's guardian deleted. */
+/* The milestones the Z-Canon, Busting and Navi folders open with, in any
+ * run (Profile.folder_feats): chip `id` used by MegaMan in a battle (a
+ * Program Advance, a Recovery chip, a Navi chip; meta_chip_watched says
+ * which are worth the call), and an act's guardian deleted. */
 bool meta_chip_watched(int id);
 void meta_chip_used(int id);
 void meta_guardian_deleted(void);

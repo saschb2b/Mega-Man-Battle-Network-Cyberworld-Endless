@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T22:30:00Z
+* **Update**: game/meta/decisions.md (Steady and Navi from BN6's Extra and Navi presets: their 30, what each gives up, what opens it; Support played and not taken), game/meta/design.md (Steady's and Navi's rows), game/meta/shelf.md (their hints), game/meta/folders-measured.md (Steady and Navi measured), game/fidelity.md (the presets made Steady and Navi).

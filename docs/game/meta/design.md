@@ -94,6 +94,8 @@ milestone that teaches its style, never by a count to grind.
 | Z-Canon | BN6's Program Advance folder one tier down: Cannon, FireBrn1 and FireHit1 in codes in a row | Reach and codes: most of it hits close, and nine codes split its hands | Use any Program Advance in a run |
 | Busting | Heavy hitters, no Recovery chips | Every heal comes from the net | Clear an act without a Recovery chip |
 | Lean | Few kinds of chip, codes aligned for big hands | Little coverage | Reach layer 10 |
+| Steady | BN6's ExtraFolder with Recov30 for its Recov50: Standard's shape a step up, heals of its own | Few codes, so thin hands; its heals tied to HiCannon's L | Reach act 3 |
+| Navi | BN6's Navi folder at V1: BlastMan, DiveMan and CircusMan with small chips in their codes and help to hold a foe | Little else hits hard: the Navi chips are its punch | Use a Navi chip |
 
 Z-Canon, Busting and Lean are built since 26 October 2026 ([Decisions
 and phase one](decisions.md), the designed three), each in codes BN6's

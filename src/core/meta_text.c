@@ -22,6 +22,8 @@ static const FolderInfo folders[FOLDER_COUNT] = {
 	{ "Busting", "Heavy hitters in L and R. No Recovery chips", "clear an act with no Recov", "for an act with no safety net",
 		"Heavy hitters, no Recovery" },
 	{ "Lean", "Seven kinds in B or *: whole hands, little else", "reach layer 10", "deep down in the Net", "Any five chips make a hand" },
+	{ "Steady", "A step up from Standard, four Recov30. Few codes", "reach act 3", "for a Navi who lasts", "A step up, with heals" },
+	{ "Navi", "Three Navi chips and help for them. The rest hits soft", "use a Navi chip", "when a friend helps", "Navi chips at its heart" },
 };
 
 const FolderInfo *meta_folder_words(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }

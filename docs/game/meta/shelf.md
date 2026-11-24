@@ -30,8 +30,8 @@ Which folders exist, what they hold and how they open are unchanged
 
 ## Three states
 
-The FOLDER row turns through all six, the open ones counted beside its
-name ("Folder 3/6"). The setup is still skipped on a profile's first run
+The FOLDER row turns through every starting folder, the open ones counted beside its
+name ("Folder 3/8"). The setup is still skipped on a profile's first run
 ([Decisions and phase one](decisions.md)).
 
 | State | The row | The information box |
@@ -56,6 +56,8 @@ milestone having been chosen to teach its style (`meta_text.c`'s `hint`):
 | Z-Canon | A Program Advance used | Opens when chips work as one, in order |
 | Busting | An act cleared with no Recovery chip | Opens for an act with no safety net |
 | Lean | Layer 10 reached | Opens deep down in the Net |
+| Steady | Act 3 reached | Opens for a Navi who lasts |
+| Navi | A Navi chip used | Opens when a friend helps |
 
 ## Heard in the net
 
