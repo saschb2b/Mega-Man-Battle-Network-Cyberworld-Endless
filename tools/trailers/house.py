@@ -255,6 +255,61 @@ def pic(scene, i):
     return kit.shot(scene, i)
 
 
+class Mosaic:
+    """Several games at once in the big window, each whole at 2x: two
+    side by side, or four in a square (the blueprint's "2x for a mosaic of
+    four"), each scene's sample `i` plus its `offsets` (games of one take
+    fall a few samples apart). With `widen` (frames) the first game starts
+    alone at 4x and pulls back into its corner as the others are uncovered:
+    one player's game, then the room around it. Stands where a feed names a
+    scene (the cold open, a narrator's backdrop)."""
+
+    SEAM = 4                               # the seams between the games, in video pixels
+
+    def __init__(self, scenes, offsets=None, widen=0):
+        self.scenes, self.widen = tuple(scenes), widen
+        self.offsets = tuple(offsets or (0,) * len(self.scenes))
+        if len(self.scenes) not in (2, 4):
+            raise SystemExit(f'a mosaic is of two or four games: {self.scenes}')
+
+    def __str__(self):
+        return '+'.join(self.scenes)
+
+    def places(self):
+        """each game's place in the 960 x 640 window"""
+        if len(self.scenes) == 2:
+            return [(0, 160), (480, 160)]
+        return [(0, 0), (480, 0), (0, 320), (480, 320)]
+
+    def big(self, i, k=10 ** 6):
+        """the window's 960 x 640 picture at sample i, k frames after the
+        mosaic began"""
+        out = Image.new('RGB', (960, 640), NET)
+        for scene, off, xy in zip(self.scenes, self.offsets, self.places()):
+            out.paste(pic(scene, max(0, i + off)).resize((480, 320), Image.NEAREST), xy)
+        d = ImageDraw.Draw(out)
+        h = self.SEAM // 2
+        if len(self.scenes) == 4:
+            d.rectangle([0, 320 - h, 959, 320 + h - 1], fill=FRAME_LO)
+        d.rectangle([480 - h, self.places()[0][1], 480 + h - 1, self.places()[0][1] + (639 if len(self.scenes) == 4 else 319)],
+                    fill=FRAME_LO)
+        t = ease(k / self.widen) if self.widen else 1.0
+        if t < 1:
+            first = pic(self.scenes[0], max(0, i + self.offsets[0]))
+            x0, y0 = self.places()[0]
+            w, hgt = round(960 - 480 * t), round(640 - 320 * t)
+            out.paste(first.resize((w, hgt), Image.NEAREST), (round(x0 * t), round(y0 * t)))
+        return out
+
+
+def big(scene, i, k=10 ** 6):
+    """a feed's scene at sample i in the big window (960 x 640): a game at
+    4x, or a Mosaic"""
+    if isinstance(scene, Mosaic):
+        return scene.big(i, k)
+    return pic(scene, i).resize((960, 640), Image.NEAREST)
+
+
 # ---- the narrator: Dad in BN6's own chat box ----
 
 def wrap(box):
@@ -315,6 +370,20 @@ class Narration:
                     ImageDraw.Draw(m).line([(xs[0], y), (xs[-1], y)], fill=255)
             self._mask = m
         return self._mask
+
+    def frame_big(self, k, beat):
+        """the slot's frame k in the big window (960 x 640): the backdrop
+        (a game at 4x or a Mosaic) and the box's rows of his frame over it
+        at 4x; as frame() at 4x where the backdrop is one game"""
+        if not self.backdrop or not os.path.isdir(os.path.join(kit.WORK, self.scene)):
+            return pic(self.scene, self.sample(k, beat)).resize((960, 640), Image.NEAREST)
+        feed = [(round(b * beat), sc, first, rate) for b, sc, first, rate in self.backdrop]
+        start, scene, first, rate = max((e for e in feed if e[0] <= k), key=lambda e: e[0], default=feed[0])
+        i = first if scene == 'still' else first + max(0, int((k - start) * rate))
+        out = big(scene, i, k - start).copy()
+        box = pic(self.scene, self.sample(k, beat)).resize((960, 640), Image.NEAREST)
+        out.paste(box, (0, 0), self.mask().resize((960, 640), Image.NEAREST))
+        return out
 
     def frame(self, k, beat):
         """the slot's frame k: the narrator's box, and behind it the
@@ -458,8 +527,8 @@ class Trailer:
     def draw_cold(self, fr):
         im, _ = self.big_frame(fr)
         feed = [(round(b * self.beat), sc, first, rate) for b, sc, first, rate in self.cold]
-        start, scene, first, rate = max(e for e in feed if e[0] <= fr)
-        im.paste(pic(scene, first + int((fr - start) * rate)).resize((960, 640), Image.NEAREST), BIG)
+        start, scene, first, rate = max((e for e in feed if e[0] <= fr), key=lambda e: e[0])
+        im.paste(big(scene, first + int((fr - start) * rate), fr - start), BIG)
         return im
 
     def draw_title(self, fr):
@@ -485,7 +554,7 @@ class Trailer:
         """Dad on the line: his box in the game's own frame at 4x"""
         im, _ = self.big_frame(fr)
         k = fr - self.slots[slot][0]
-        im.paste(narration.frame(k, self.beat).resize((960, 640), Image.NEAREST), BIG)
+        im.paste(narration.frame_big(k, self.beat), BIG)
         return im
 
     def where(self, fr):
