@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T21:25:00Z
+* **Update**: online/shared-dive.md (Looks on the field: the field built from BN6's colours, each seat's look carried with his MegaMan into the spare palettes, the picks answered by seat; issue #879), game/looks.md (On a shared dive's field), rom/megaman-colours.md (the spares and picks on the party's field), code/online.md (`party_looks.c`).

@@ -69,6 +69,11 @@
   the Square carries the other player's look, NetBattles stay in BN6's
   colours on both sides (issue #854).
 
+- **New: a crew's MegaMen wear their own looks on a shared field.** In
+  the week's DeepNet a crew's battle and a party's guardian show each
+  MegaMan in his own player's look, on every game. Full Synchro and the
+  emotion window's face keep BN6's colours there (issue #879).
+
 - **Fixed: more chips strike the way MegaMan faces when he turns round.**
   On a liberation's Surrounded field, turned left with L, SandWrm,
   BurnSqr, TenguMan's chip, AirRaid and Magnum, and BN4's GutsMan,

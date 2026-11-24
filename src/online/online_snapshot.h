@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "bn6.h"
+#include "looks.h"
 #include "online_types.h"
 
 #define ONLINE_PACK_IDS 512
@@ -30,6 +31,11 @@ typedef struct {
 	/* a shared dive's: his crew's pull-back spent this dive (crew_pull.h),
 	 * the loadout's flags' second bit (v22) */
 	bool pulled;
+	/* his look, where it is not BN6's own colours (the loadout's flags'
+	 * third bit): the shared dive's field draws each seat's MegaMan in it
+	 * (party_looks.h; issue #879) */
+	bool looked;
+	Look look;
 } OnlineLoadout;
 
 /* Between emulator frames. The caller supplies souls_held(), which is a
