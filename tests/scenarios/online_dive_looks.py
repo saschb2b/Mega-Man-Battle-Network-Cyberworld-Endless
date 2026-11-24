@@ -26,8 +26,9 @@ def said(look):
 
 
 def into(game, look):
-    """`game` in the Square in `look`, then through the portal onto the dive's first layer."""
-    return online.course(online.into_square(game), online.at(game, ('do', f'look {look}; wait 10')), dive(game))
+    """`game` in `look`, put on at home (a visit puts the profile back as it was, so a look put on in the Square is
+    gone by the dive, which starts from the home profile's), through the Square and its portal onto the first layer."""
+    return online.course(online.at(game, ('do', f'look {look}; wait 10')), online.into_square(game), dive(game))
 
 
 MANY = {

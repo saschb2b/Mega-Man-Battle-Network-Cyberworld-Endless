@@ -29,6 +29,16 @@
 _Static_assert(DIVE_PEOPLE <= LOOK_SPRITE_PUPPETS, "a palette a diver's puppet (look_sprite.h)");
 
 static int dev_most;   /* divelooks=N, 0 none */
+static bool due;       /* MegaMan's look to send again */
+
+Look dive_looks_peer(const OnlinePeer *p) { return look_sprite_wire(p->look); }
+
+void dive_looks_due(void) { due = true; }
+
+void dive_looks_send(void) {
+	square_looks_send(due);
+	due = false;
+}
 
 void dive_looks_dev_room(int most) { dev_most = most; }
 

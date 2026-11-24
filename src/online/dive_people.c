@@ -8,7 +8,6 @@
 
 #include "bn6.h"
 #include "bn6_fields.h"
-#include "emu.h"
 #include "claims.h"
 #include "crew_look.h"
 #include "director.h"
@@ -21,7 +20,6 @@
 #include "floor_ring.h"
 #include "gfx.h"
 #include "layer_objs.h"
-#include "look_sprite.h"
 #include "map_label.h"
 #include "npc.h"
 #include "pixfont.h"
@@ -64,6 +62,10 @@ static int dev_room;   /* diveroom=N: N puppets at most, 0 as the layer leaves *
 static int sprite = PUPPET_MEGAMAN;   /* the list-6 number the puppets draw: the looks' copy (dive_looks.h) */
 
 void dive_people_dev_room(int most) { dev_room = most; }
+
+void dive_people_look_due(void) { dive_looks_due(); }
+
+void dive_people_look_send(void) { dive_looks_send(); }
 
 static void make_puppets(NpcList *npcs, int most) {
 	if (dev_room > 0 && most > dev_room) most = dev_room;
@@ -292,7 +294,7 @@ static void looks(const OnlineSnapshot *s, int n) {
 			const OnlinePeer *p = &s->peers[i];
 			if (p->id != P.id[k]) continue;
 			lp[k].id = p->id;
-			lp[k].look = look_sprite_wire(p->look);
+			lp[k].look = dive_looks_peer(p);
 			lp[k].distance = abs((int)p->x - bn6_player_x()) + abs((int)p->y - bn6_player_y());
 			lp[k].crew = dive_crew_has(p->id);
 		}
@@ -319,7 +321,7 @@ void dive_people_frame(const OnlineSnapshot *s) {
 		Who *w = &P.who[i];
 		*w = (Who){ .id = p->id, .x = (int)p->x, .y = (int)p->y, .z = (int)p->z };
 		memcpy(w->name, p->name, sizeof w->name);
-		w->look = look_sprite_wire(p->look);
+		w->look = dive_looks_peer(p);
 		for (int k = 0; k < P.made; ++k) w->drawn |= P.id[k] == p->id;
 	}
 	claims_begin(WRITER);

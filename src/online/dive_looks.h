@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 #include "looks.h"
+#include "online_types.h"
 
 /* One puppet of the layer's this frame: the diver it shows (0 none), his
  * look, how far he stands from MegaMan (world units) and whether he is in
@@ -35,6 +36,15 @@ int dive_looks_install(int puppets);
 void dive_looks_frame(const DiveLookPuppet *puppets, int n);
 /* Forgotten: the dive's people off, or another layer begun. */
 void dive_looks_reset(void);
+
+/* A diver's look as his SNAPSHOT says it (BN6's own where it is no look). */
+Look dive_looks_peer(const OnlinePeer *p);
+
+/* MegaMan's own look over the wire again at the next dive_looks_send (a
+ * link begun or back: the server's new session knows none), and sent where
+ * it is due or changed since it was last sent (square_looks_send). */
+void dive_looks_due(void);
+void dive_looks_send(void);
 
 /* For the state in words: whether puppet `k` is drawn in his own look (1),
  * in BN6's own colours (0) or not at all (-1); the looks the layer has
