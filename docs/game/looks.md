@@ -162,3 +162,107 @@ colours. The Square shows forms on nobody.
   box, the field, the Custom screen and a battle; HeatCross in BN6's own
   colours (`lookseen none`), the look back in the next battle, and kept by
   a quit and CONTINUE.
+
+## The colours screen
+
+Colours, a row of [the PET's start menu](pet-menu.md) after Forms, opens
+it outside battle. BN6 has no screen for it, so it is ours, in the PET's
+look and from its pieces ([The PET's screens](../engine/ui.md)), like
+[the forms screen](meta/forms-screen.md) beside it. It went through two
+rounds of review and a final pass by three experts in their own roles (a
+BN6 pixel purist, a game UX designer, a Warframe fashion player), each
+round's findings built before the next; a count of the palettes owned and
+marks for each page were tried and taken out (no room under the grid; read
+as a page number).
+
+Reasoned with the game-design skill:
+
+- **The dialectic** is the epic's, what you chose against what you did:
+  free picks for expression, earned palettes as trophies. The screen
+  shows both: every owned colour is one press away, and a palette not
+  owned can be tried on him, never kept, its origin in words.
+- **The loop layer** is the meta layer's (a milestone's reward that is not
+  power) and the Square's social one. Nothing on the screen touches a run.
+- **The patterns:** meta-progression that unlocks variety, not power;
+  feedforward (the cursor recolours him before A commits); undo over
+  confirm where undo is free (B in the grid puts the colour back) and a
+  question, No chosen, where something would be lost (a look replaced);
+  and no colour told by its colour alone (every colour has a plain name).
+
+What it shows, at 240 x 160:
+
+- **The band** names it COLOURS, `L/R:PALETTE` at its right end.
+- **STATUS's slot** on the left holds BN6's own MegaMan, read from the
+  player's ROM, each art in its palette as the look makes it
+  (`look_palette_of`, `looks_preview.c`): his chat box's face at the top
+  in the NAVIGATOR box's outline, and his body under it. On the list his
+  body runs a loop that shows him whole (his field sprite walking round
+  all eight directions, front, side and back; then his battle body
+  standing, firing the buster, throwing and firing a charged shot). In
+  the grid it holds the battle stance, the body that shows every channel
+  largest, with a shot of the buster on a change (one under way is let
+  finish), and left alone it turns round slowly on the field, as the
+  Square sees him. A channel chosen blinks on him, its colours turned
+  over twice.
+- **The list** in a window, LOOK A on its band: `Look` with the look worn
+  between Options' orange pointers, then Armour, Suit and Accent, each
+  with the colour he wears in a swatch (BN6's own shade inset in the
+  field's navy where it is plain, so plain reads by its shape). The orange arrow is on the cursor's row; in the grid it holds
+  still and dim.
+- **The palette's window**: the palette's short name on its band between
+  the Library's green page arrows, its sixteen colours in a 4x4 grid, and
+  PLAIN under them, the channel as BN6 draws it. The channel's colour is framed
+  white, as STATUS frames its slot; EQUIP's orange corners in the gutters
+  are the grid's cursor. A palette not owned has its cells dimmed and
+  LOCKED where PLAIN stands.
+- **ChipFolder's SELECT pop-up** under the Look row, SELECT on its band and
+  its rows in capitals as SELECT's: COPY TO B, COPY TO C, ALL PLAIN.
+- **KeyItem's INFORMATION box** says what the cursor is on: the look worn,
+  channel by channel; a channel's parts and colour; a colour's palette,
+  number and plain name and where the palette comes from; a locked
+  palette's origin; on the pop-up what the look it goes over holds now;
+  its question; and what was done (the words in
+  `src/looks/looks_screen_text.c`, in BN6's own way: no space after a
+  comma, no colons).
+
+The keys, as BN6's screens use them:
+
+- Up and Down walk the list and wrap; Left and Right on `Look` change the
+  look worn, at once. A on a channel goes into the grid on its colour,
+  worn at once.
+- In the grid the d-pad moves the cursor, four across and four down, and
+  Down from the last row reaches PLAIN. MegaMan takes the colour under the
+  cursor as it moves, in the slot and in the game; a locked palette's
+  colour he takes in the slot alone. A picks it (a locked one buzzes),
+  the swatch's frame flashing; B or START puts the colour back.
+- L and R page through all twelve palettes, on the list and in the grid.
+- A on `Look` opens the pop-up. A copy over a look that is not plain, or
+  All plain on one that is not, asks first in the INFORMATION box, Yes
+  and No behind BN6's green triangle, No chosen. A copy is worn at once,
+  to be changed from there.
+- B on the list (or START) leaves, the look kept, as BN's screens keep
+  what was set. Each press has BN6's sound: the cursor's, A's, B's, the
+  buzz.
+- A tap takes a row, a cell or a page arrow; a tap on the grid's cursor
+  is A; on the Look row the letter turns to the next look and the word
+  opens the pop-up; a tap outside the pop-up is B.
+
+Each change is applied in the screen's update (`look_apply`, never in its
+draw), so the field behind the PET and the chat box's face wear it as soon
+as the screen closes. The second screen (the 3DS's bottom, a phone's
+panel) shows nothing of it: it keeps what it shows under the PET. The
+state in words has the core's `look` line (the look worn, above) and,
+while the screen is up, `looks at armour grid page Classic cell 13` (and
+`popup N`, `asking yes|no`); the scenario `tests/scenarios/home_looks.py`
+picks a colour, tries a locked one and copies a look over another
+([Scenarios](../devtools/scenarios.md)).
+
+Not yet: a palette's exact way to earn it named (the routes' work), and a
+mark on what is new since the last visit (the profile does not yet keep
+what was seen).
+
+## Earning
+
+How each palette is earned, as built (the six milestones, AsterLand's
+three, the two rare finds, MegaMan's word and Dad's Colors mail):
+[MegaMan's palettes, earned](looks-earning.md).

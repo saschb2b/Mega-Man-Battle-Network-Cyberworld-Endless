@@ -167,8 +167,12 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
 	return i;
 }
 
-int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int closed_flag, const char *closed) {
+void ta_shop_open(TextArchive *t, int shop) {
 	uint8_t open[] = { 0xEE, 0x00, 24, 0, 0xFB, 0x05, (uint8_t)shop };   /* ts_wait, ts_start_shop */
+	ta_bytes(t, open, sizeof open);
+}
+
+int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int closed_flag, const char *closed) {
 	int shut = closed_flag >= 0 && closed ? ta_say(t, face, closed) : -1;
 	int i = ta_script(t);
 	if (shut >= 0) {
@@ -177,7 +181,7 @@ int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int clo
 	}
 	bool first = true;
 	ta_pages(t, greeting, face, &first);
-	ta_bytes(t, open, sizeof open);
+	ta_shop_open(t, shop);
 	ta_end(t);
 	return i;
 }
