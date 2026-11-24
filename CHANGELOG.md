@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **New: two starting folders, Ember and Tide.** Ember lays grass with
+  GrasSeed and burns it with Fire chips, which hit a foe on grass for
+  double; it opens once a guardian falls to MegaMan in HeatCross. Tide is
+  Aqua in codes A and T, double on Fire foes, with bubbles and IceSeed's
+  ice to hold a foe still; it opens once a Fire guardian is deleted, so a
+  profile that has beaten HeatMan or BlastMan has it at once. Both wait on
+  the setup's shelf beside the six (issue #865).
 - **New: other players' MegaMen wear their own looks in the Net Square.**
   Your look travels with your name, and the players around you are drawn
   in theirs; a look changed there shows to the others at once. Where a

@@ -144,6 +144,8 @@ static const char *folder_line(int folder) {
 	case FOLDER_ZCANON: return "A pal pulled off a Program Advance!|Now he dives with Cannons in A,B and C!";
 	case FOLDER_BUSTING: return "Clear a whole area,no Recovery chips...|...and your next folder hits like a truck!";
 	case FOLDER_LEAN: return "Somebody dove ten layers down!|Now any five of his chips make a hand!";
+	case FOLDER_EMBER: return "Did you hear? Beat a guardian as HeatCross...|...and you dive burning grass with Fire chips!";
+	case FOLDER_TIDE: return "Did you hear? Delete a Fire guardian...|...and you dive with Aqua chips! Splash!";
 	default: return NULL;
 	}
 }

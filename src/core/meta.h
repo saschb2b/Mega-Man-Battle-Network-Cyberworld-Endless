@@ -7,7 +7,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_COUNT };
+/* (the ids are kept in profiles and runs, so a folder's never changes;
+ * 6-8 are BN6's presets' and 11 the next archetype's, issue #865, and an
+ * id no folder holds is skipped everywhere: meta_folder_exists) */
+enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_EMBER = 9, FOLDER_TIDE, FOLDER_COUNT };
 
 typedef struct {
 	const char *name;
@@ -18,6 +21,9 @@ typedef struct {
 } FolderInfo;
 
 const FolderInfo *meta_folder(int folder);
+/* Whether `folder` is one (an id below FOLDER_COUNT that no folder holds
+ * is not: the shelf, the setup and the posts pass it by). */
+bool meta_folder_exists(int folder);
 /* A folder's 30 chips as BN6 keeps them (chip id | code << 9, code 26 for
  * *), or NULL for the Standard folder, which is the game's own. */
 const uint16_t *meta_folder_chips(int folder);
@@ -29,6 +35,8 @@ bool meta_folder_open(int folder);
 enum { SHELF_LOCKED, SHELF_HEARD, SHELF_OPEN };
 int meta_folder_state(int folder);
 int meta_folders_open(void);
+/* How many folders there are, Standard's among them. */
+int meta_folders(void);
 /* Folder `folder` heard of (a bystander's rumor said): kept in the profile. */
 void meta_folder_hear(int folder);
 /* The rumor a layer's whisperer may tell: a locked folder not yet heard,

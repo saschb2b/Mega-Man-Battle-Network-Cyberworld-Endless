@@ -94,10 +94,13 @@ milestone that teaches its style, never by a count to grind.
 | Z-Canon | Cannons in codes A, B and C: BN6's Program Advance ready to draw | Few answers to viruses behind cover | Use any Program Advance in a run |
 | Busting | Heavy hitters, no Recovery chips | Every heal comes from the net | Clear an act without a Recovery chip |
 | Lean | Few kinds of chip, codes aligned for big hands | Little coverage | Reach layer 10 |
+| Ember | Grass, then Fire on it: GrasSeed lays it, FireBrn1, FireHit1 and BurnSqr1 burn it for double; HeatCross's partner | A seed spent before the payoff; short reach | Delete a guardian in HeatCross |
+| Tide | Aqua in A and T: TrnArrw1, BblStar1, IceSeed; bubbles and ice hold a foe | One element: only Fire foes take double | Delete a Fire guardian |
 
 Z-Canon, Busting and Lean are built since 26 October 2026 ([Decisions
 and phase one](decisions.md), the designed three), each in codes BN6's
-records give its chips.
+records give its chips; Ember and Tide since 24 November 2026, issue
+#865's first archetypes (the same page, Issue 865's archetypes).
 
 A folder is what the run brings: the pack starts as BN6's would have after
 NEW GAME gave that folder (its chips counted, marked as given), not with

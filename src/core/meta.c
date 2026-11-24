@@ -10,6 +10,7 @@
 #include "analytics.h"
 #include "battle_data.h"
 #include "bn6.h"
+#include "bn6_forms.h"
 #include "chip_pool.h"
 #include "meta_text.h"
 #include "net.h"
@@ -26,6 +27,18 @@
  * keys, came in act 3 or the Nest); Lean's, layer 10, the design's one
  * for a player who has seen the net's middle. Their words are
  * meta_text.c's. */
+/* A guardian's last battle won in HeatCross, or Beast Out in it: the
+ * guardian's record keeps MegaMan's form (boss.c, as the battle ends), so
+ * a profile of before that did it opens Ember too, where that battle is
+ * still the guardian's last. */
+static bool heat_guardian(void) {
+	for (int n = 1; n < RIVAL_NAVIS; ++n) {
+		const Rival *r = rival(n);
+		if (r->last == RIVAL_MEGAMAN_WON && (r->form == BN6_FORM_HEAT_CROSS || r->form == BN6_FORM_CROSS_BEAST + BN6_FORM_HEAT_CROSS)) return true;
+	}
+	return false;
+}
+
 /* (in any run, this build's or one before: rivals.sav keeps who fell) */
 static bool earned(int folder) {
 	switch (folder) {
@@ -40,11 +53,18 @@ static bool earned(int folder) {
 	case FOLDER_BUSTING: return (profile.folder_feats & FEAT_DRY_ACT) != 0;
 	/* (the best depth, kept from the first runs on) */
 	case FOLDER_LEAN: return profile.best_depth >= 10;
+	/* (issue #865's archetypes: a guardian deleted in HeatCross, the Cross
+	 * whose charge Ember's Fire chips feed; BN6's Fire navis among the
+	 * guardians, HeatMan and BlastMan, Storm's mirror) */
+	case FOLDER_EMBER: return (profile.folder_feats & FEAT_HEAT_GUARDIAN) || heat_guardian();
+	case FOLDER_TIDE: return rival(1)->megaman_won > 0 || rival(12)->megaman_won > 0;
 	default: return folder == FOLDER_STANDARD;
 	}
 }
 
 const FolderInfo *meta_folder(int folder) { return meta_folder_words(folder); }
+
+bool meta_folder_exists(int folder) { return folder >= 0 && folder < FOLDER_COUNT && meta_folder_words(folder)->name; }
 
 /* The folders' chips by BN6's record numbers (docs/rom/chips.md, chip
  * records): no more than five of a chip, as the game's folders hold; codes
@@ -53,6 +73,7 @@ const FolderInfo *meta_folder(int folder) { return meta_folder_words(folder); }
 enum { SWORD = 71, WIDESWRD = 72, LONGSWRD = 73, AREAGRAB = 163, PANLGRAB = 162, RECOV10 = 154, ATK10 = 192, BARRIER = 178,
 	THUNDER = 30, ELCPULS1 = 34, DOLTHDR1 = 31, CANNON = 1, VULCAN1 = 5, MINIBOMB = 54, AIRSHOT = 4, BUSTERUP = 175,
 	HICANNON = 2, TANKCAN1 = 12, CRAKSHOT = 89, DUBLSHOT = 90, RFLECTR1 = 131, HOLYPANL = 168 };
+enum { FIREBRN1 = 20, FIREHIT1 = 107, BURNSQR1 = 110, GRASSEED = 68, TRNARRW1 = 24, BBLSTAR1 = 27, ICESEED = 69 };
 static const uint16_t blade[30] = {
 	/* LifeSword's three in S, a spare in L; AreaGrab to close in, nothing
 	 * that reaches the back */
@@ -109,6 +130,31 @@ static const uint16_t lean[30] = {
 	C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'), C(AREAGRAB, 'B'),
 	C(ATK10, '*'), C(ATK10, '*'), C(ATK10, '*'), C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'),
 };
+/* (issue #865's archetypes, docs/game/meta/folders-measured.md: BN6's
+ * rules verified in its battle code, docs/research/sources.md) */
+static const uint16_t ember[30] = {
+	/* grass first, then fire on it: a Fire hit on a foe on grass does
+	 * double and burns the grass plain; WideBrn1 (FireBrn1 F G H) and
+	 * FlmHook1 (FireHit1 D E F) in reach; little that reaches the back */
+	C(GRASSEED, 'F'), C(GRASSEED, 'F'), C(GRASSEED, 'F'), C(GRASSEED, 'F'), C(GRASSEED, '*'),
+	C(FIREBRN1, 'F'), C(FIREBRN1, 'F'), C(FIREBRN1, 'G'), C(FIREBRN1, 'H'), C(FIREBRN1, '*'),
+	C(FIREHIT1, 'D'), C(FIREHIT1, 'E'), C(FIREHIT1, 'F'), C(FIREHIT1, 'F'),
+	C(BURNSQR1, 'H'), C(BURNSQR1, 'H'),
+	C(CANNON, '*'), C(CANNON, '*'), C(AIRSHOT, '*'), C(MINIBOMB, '*'), C(MINIBOMB, '*'),
+	C(AREAGRAB, 'F'), C(AREAGRAB, 'F'), C(BARRIER, 'F'), C(BARRIER, 'F'),
+	C(RECOV10, '*'), C(RECOV10, '*'), C(RECOV10, '*'), C(ATK10, '*'), C(ATK10, '*'),
+};
+static const uint16_t tide[30] = {
+	/* Aqua in A and T: double on a Fire body; a bubble or an Aqua hit on ice
+	 * holds a foe for the next shot; weak hits on the rest */
+	C(TRNARRW1, 'A'), C(TRNARRW1, 'A'), C(TRNARRW1, 'A'), C(TRNARRW1, 'A'),
+	C(BBLSTAR1, 'T'), C(BBLSTAR1, 'T'), C(BBLSTAR1, 'T'), C(BBLSTAR1, 'T'),
+	C(ICESEED, 'A'), C(ICESEED, 'A'), C(ICESEED, '*'),
+	C(CANNON, 'A'), C(CANNON, 'A'), C(CANNON, 'A'), C(CRAKSHOT, 'T'), C(CRAKSHOT, 'T'), C(CRAKSHOT, 'A'),
+	C(AIRSHOT, '*'), C(AIRSHOT, '*'), C(MINIBOMB, '*'), C(MINIBOMB, '*'),
+	C(AREAGRAB, '*'), C(AREAGRAB, '*'), C(BARRIER, 'A'), C(BARRIER, 'A'),
+	C(RECOV10, 'A'), C(RECOV10, 'A'), C(RECOV10, 'A'), C(ATK10, '*'), C(ATK10, '*'),
+};
 #undef C
 
 const uint16_t *meta_folder_chips(int folder) {
@@ -118,6 +164,8 @@ const uint16_t *meta_folder_chips(int folder) {
 	case FOLDER_ZCANON: return zcanon;
 	case FOLDER_BUSTING: return busting;
 	case FOLDER_LEAN: return lean;
+	case FOLDER_EMBER: return ember;
+	case FOLDER_TIDE: return tide;
 	default: return NULL;
 	}
 }
@@ -154,6 +202,13 @@ void meta_chip_used(int id) {
 }
 
 void meta_guardian_deleted(void) {
+	/* (in HeatCross, or Beast Out in it: any guardian, the Secret Area's
+	 * master too; kept, as the guardian's record keeps only its last
+	 * battle) */
+	if (heat_guardian() && !(profile.folder_feats & FEAT_HEAT_GUARDIAN)) {
+		profile.folder_feats |= FEAT_HEAT_GUARDIAN;
+		profile_save();
+	}
 	/* (an act's own guardian: the Secret Area's master ends no act) */
 	if (run.side_kind == LAYER_SECRET || (profile.folder_feats & FEAT_DRY_ACT)) return;
 	if (profile.recov_run == run.seed && profile.recov_act == act_key()) return;
@@ -164,7 +219,7 @@ void meta_guardian_deleted(void) {
 /* (earned in any run; the profile's bit marks it as announced on a
  * summary, and keeps one opened under an older rule) */
 bool meta_folder_open(int folder) {
-	if (folder <= FOLDER_STANDARD || folder >= FOLDER_COUNT) return folder == FOLDER_STANDARD;
+	if (folder <= FOLDER_STANDARD || !meta_folder_exists(folder)) return folder == FOLDER_STANDARD;
 	return (profile.folders_open >> folder & 1) || earned(folder);
 }
 

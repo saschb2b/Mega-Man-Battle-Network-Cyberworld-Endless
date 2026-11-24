@@ -211,7 +211,8 @@ static void turn(int row, int d) {
 	/* (the whole shelf, a locked folder looked at but not taken: the run
 	 * keeps the last open one, issue #864) */
 	if (row == ROW_FOLDER) {
-		S.look = (S.look + d + FOLDER_COUNT) % FOLDER_COUNT;
+		do S.look = (S.look + d + FOLDER_COUNT) % FOLDER_COUNT;
+		while (!meta_folder_exists(S.look));
 		if (meta_folder_open(S.look)) S.c.folder = S.look;
 	}
 	if (row == ROW_CROSS && !soul_form())   /* (none, or an open one) */
@@ -427,7 +428,7 @@ static void run_row_draw(int x0, int y, int row) {
 		meta_form_name(S.c.form), start, v };
 	/* (the shelf turns through every folder, the open ones counted beside its name) */
 	bool turns[RUN_ROWS] = { meta_endless_open(), true, forms > 1, soul_form() ? souls > 0 : crosses_open() > 0, meta_threat_open() > 0 };
-	if (row == ROW_FOLDER) setup_folder_count(count, sizeof count, meta_folders_open(), FOLDER_COUNT);
+	if (row == ROW_FOLDER) setup_folder_count(count, sizeof count, meta_folders_open(), meta_folders());
 	/* (NEW, a folder opened, gives way to a locked one's tag while the row shows one) */
 	bool fresh = row_new(row) && (row != ROW_FOLDER || meta_folder_open(S.look));
 	label_draw(x0, y, setup_word(run_row_word(row)), fresh, row == ROW_FOLDER ? count : NULL);
@@ -478,7 +479,8 @@ void title_setup_describe(FILE *f) {
 	if (run_debug_forms) fprintf(f, "form %s\nstartsoul %s\n", meta_form_name(S.c.form), S.c.soul ? forms_power_name(S.c.form, S.c.soul) : "none");
 	/* (the shelf: the folder the row shows and its state, each folder's, issue #864) */
 	fprintf(f, "folderlook %s\nfolderstate %s\nshelf", meta_folder(S.look)->name, states[meta_folder_state(S.look)]);
-	for (int k = 1; k < FOLDER_COUNT; ++k) fprintf(f, "%s%s:%s", k > 1 ? "," : " ", meta_folder(k)->name, states[meta_folder_state(k)]);
+	for (int k = 1; k < FOLDER_COUNT; ++k)
+		if (meta_folder_exists(k)) fprintf(f, "%s%s:%s", k > 1 ? "," : " ", meta_folder(k)->name, states[meta_folder_state(k)]);
 	fprintf(f, "\nendless %s\nfolders %d\ncrosses %d\nthreatmax %d\nhelpersshown %d\n", meta_endless_open() ? "open" : "shut", folders,
 		crosses_open(), meta_threat_open(), meta_helpers_shown());
 }

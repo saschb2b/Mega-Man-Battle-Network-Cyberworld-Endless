@@ -1,5 +1,5 @@
 """The JACK-IN SETUP's shelf of starting folders (issue #864,
-docs/game/meta/shelf.md): the FOLDER row turns through all six; a locked
+docs/game/meta/shelf.md): the FOLDER row turns through every folder; a locked
 one is looked at, never taken (A refused, START and the next row keep the
 open one the run takes); a bystander's whisper of how one opens makes it
 heard at the next setup; three finished runs from the shelf's first showing,
@@ -27,7 +27,7 @@ MANY = {
             ('expect', 'folders=1'),
             ('expect', 'folderlook=Standard'),
             ('expect', 'folderstate=open'),
-            ('expect', 'shelf=Blade:locked,Storm:locked,Z-Canon:locked,Busting:locked,Lean:locked'),
+            ('expect', 'shelf=Blade:locked,Storm:locked,Z-Canon:locked,Busting:locked,Lean:locked,Ember:locked,Tide:locked'),
             ('do', 'press RIGHT; wait 6'),
             ('expect', 'folderlook=Blade'),
             ('expect', 'folderstate=locked'),
@@ -35,8 +35,8 @@ MANY = {
             ('do', 'press A; wait 6'),                # refused: the row stays, the run's folder too
             ('expect', 'folderlook=Blade'),
             ('expect', 'startfolder=Standard'),
-            ('do', 'press LEFT; wait 6; press LEFT; wait 6'),   # round the shelf: Standard, then Lean
-            ('expect', 'folderlook=Lean'),
+            ('do', 'press LEFT; wait 6; press LEFT; wait 6'),   # round the shelf: Standard, then the last
+            ('expect', 'folderlook=Tide'),
             ('do', 'press DOWN; wait 6'),             # off the row: it shows the run's folder again
             ('expect', 'folderlook=Standard'),
             ('do', 'press UP; wait 6; press RIGHT; wait 6'),
@@ -54,7 +54,7 @@ MANY = {
             ('expect', 'whisperfolder=Storm'),
             ('do', 'wait 30'),
             ('restart', SETUP),
-            ('expect', 'shelf=Blade:locked,Storm:heard,Z-Canon:locked,Busting:locked,Lean:locked'),
+            ('expect', 'shelf=Blade:locked,Storm:heard,Z-Canon:locked,Busting:locked,Lean:locked,Ember:locked,Tide:locked'),
             FOLDER_ROW,
             ('do', 'press RIGHT; wait 6; press RIGHT; wait 6'),
             ('expect', 'folderlook=Storm'),
@@ -77,7 +77,7 @@ MANY = {
             ('restart', LOST), *OVER,
             ('restart', SETUP),
             ('expect', 'runs=3'),
-            ('expect', 'shelf=Blade:heard,Storm:locked,Z-Canon:locked,Busting:locked,Lean:locked'),
+            ('expect', 'shelf=Blade:heard,Storm:locked,Z-Canon:locked,Busting:locked,Lean:locked,Ember:locked,Tide:locked'),
         ]),
     'summary-gives-the-hint': dict(
         GUARDS="The summary's closest unlock while Blade is locked and unheard: the hint, never the deed.",
