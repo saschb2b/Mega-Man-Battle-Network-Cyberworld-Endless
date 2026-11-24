@@ -3632,6 +3632,8 @@ static void test_fast_forward(void) {
 	/* a batch: up to the speed, while the last frame's time still fits */
 	CHECK(fast_batch_more(3, 1, 2, 1, 10) && fast_batch_more(3, 2, 2, 1, 10) && !fast_batch_more(3, 3, 2, 1, 10), "a batch ran past its speed");
 	CHECK(!fast_batch_more(3, 1, 8, 4, 10), "a batch ran past the frame's time");
+	/* the music at its own pace by default (settings.ini's fast_music) */
+	CHECK(fast_music(), "fast forward's music is not at its own pace by default");
 }
 
 static void test_padmap(void) {

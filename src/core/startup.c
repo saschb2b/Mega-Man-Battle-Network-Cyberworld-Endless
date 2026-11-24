@@ -243,11 +243,11 @@ static void settings_load(const char *path) {
 		f = fopen(path, "w");
 		if (!f) return;
 		fprintf(f, "# Cyberworld Endless: settings. Delete this file for the defaults.\n%ssmooth_motion = off\n%sscreen = auto\n%ssound = gba\n"
-			"%slow_pass = %d\n%soutput = speakers\n%smusic = %d\n%seffects = %d\n%sfast_forward = %s\n%svibration = %s\n%strigger_effects = on\n"
+			"%slow_pass = %d\n%soutput = speakers\n%smusic = %d\n%seffects = %d\n%sfast_forward = %s\n%sfast_music = on\n%svibration = %s\n%strigger_effects = on\n"
 			"%scolour_correction = off\n%sinterframe_blending = off\n%slcd3x = off\n%s%s = %s\n",
 			options_smooth_note(), options_screen_note(), options_sound_note(), options_low_pass_note(), SOUND_LOW_PASS_DEFAULT,
 			options_output_note(), options_music_note(), SOUND_LEVELS, options_effects_note(), SOUND_LEVELS,
-			options_fast_note(), fast_speed_word(FAST_DEFAULT), options_vibration_note(), feel_level_word(FEEL_DEFAULT), options_triggers_note(),
+			options_fast_note(), fast_speed_word(FAST_DEFAULT), options_fast_music_note(), options_vibration_note(), feel_level_word(FEEL_DEFAULT), options_triggers_note(),
 			options_colour_note(), options_blend_note(), options_lcd3x_note(), options_voxel_note(), display_depth_key(), display_depth_default() ? "on" : "off");
 		fclose(f);
 		platform_persist();
@@ -264,6 +264,7 @@ static void settings_load(const char *path) {
 		if (!strcmp(key, "music")) sound_heard_set(sound_heard_read(val), sound_heard_effects());
 		if (!strcmp(key, "effects")) sound_heard_set(sound_heard_music(), sound_heard_read(val));
 		if (!strcmp(key, "fast_forward")) fast_speed_set(fast_speed_read(val));
+		if (!strcmp(key, "fast_music")) fast_music_set(on);
 		if (!strcmp(key, "vibration")) feel_set_level(feel_level_read(val));
 		if (!strcmp(key, "trigger_effects")) feel_set_triggers(on);
 		if (!strcmp(key, "touch_controls")) touch_set_off(!strcmp(val, "off"));

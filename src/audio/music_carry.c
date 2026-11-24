@@ -10,6 +10,7 @@
 #include "emu.h"
 #include "mp2k.h"
 #include "mp2k_carry.h"
+#include "music_game.h"
 #include "platform.h"
 
 #define IO 0x04000000u
@@ -18,7 +19,7 @@ static enum { CARRY_NONE, CARRY_GAME, CARRY_OWN } carry;
 static Mp2kGameMusic taken;   /* the game's music as the engine took it */
 
 /* the game's music as its RAM holds it */
-static void game_read(Mp2kGameMusic *g) {
+void music_game_read(Mp2kGameMusic *g) {
 	emu_read_bytes(BN6_MUSIC_PLAYER, g->player, sizeof g->player);
 	for (int i = 0; i < MP2K_CARRY_TRACKS; ++i) emu_read_bytes(mp2k_carry_track_at(i), g->track[i], sizeof g->track[i]);
 	emu_read_bytes(BN6_SOUND_CHANS, g->ds[0], sizeof g->ds);
@@ -27,7 +28,7 @@ static void game_read(Mp2kGameMusic *g) {
 	g->c15 = emu_read8(BN6_SOUND_C15);
 }
 
-static void game_write(const Mp2kGameMusic *g, const Mp2kWrite *writes, int n) {
+void music_game_write(const Mp2kGameMusic *g, const Mp2kWrite *writes, int n) {
 	emu_write(BN6_MUSIC_PLAYER, g->player, sizeof g->player);
 	for (int i = 0; i < MP2K_CARRY_TRACKS; ++i) emu_write(mp2k_carry_track_at(i), g->track[i], sizeof g->track[i]);
 	emu_write(BN6_SOUND_CHANS, g->ds[0], sizeof g->ds);
@@ -39,7 +40,7 @@ static void game_write(const Mp2kGameMusic *g, const Mp2kWrite *writes, int n) {
 static uint8_t game_read8(int reg) { return emu_read8(IO + (uint32_t)reg); }
 static void game_write8(int reg, uint8_t v) { emu_io_write8(IO + (uint32_t)reg, v); }
 static void game_write32(int reg, uint32_t v) { emu_io_write32(IO + (uint32_t)reg, v); }
-static const Mp2kRegs game_regs = { game_read8, game_write8, game_write32 };
+const Mp2kRegs music_game_regs = { game_read8, game_write8, game_write32 };
 
 /* ---- the check (CYBERWORLD_CARRY_CHECK=N:M:HOW@FRAME): at the engine's
  * frame FRAME the game's music handed to the engine for N frames and given
@@ -63,22 +64,22 @@ static void check(void) {
 		if (spec && sscanf(spec, "%d:%d:%d@%d", &frames, &then, &how, &at) != 4) at = -1;
 	}
 	if (at < 0 || P.frame != (uint64_t)at || !mp2k_carry_track_at(0)) return;
-	game_read(&taken);
+	music_game_read(&taken);
 	if (how) {
 		Mp2kWrite w[MP2K_CARRY_WRITES];
 		audio_lock();
 		mp2k_game_rom(emu_rom_byte);
 		mp2k_carry_in(&taken);
 		for (int f = 0; f < frames; ++f) mp2k_frame();
-		int n = mp2k_carry_out(&taken, &game_regs, w);
+		int n = mp2k_carry_out(&taken, &music_game_regs, w);
 		mp2k_game_rom(NULL);
 		audio_unlock();
-		game_write(&taken, w, n);
+		music_game_write(&taken, w, n);
 	} else
 		for (int f = 0; f < frames; ++f) emu_frame(0);
 	for (int f = 0; f < then; ++f) emu_frame(0);
 	Mp2kGameMusic g;
-	game_read(&g);
+	music_game_read(&g);
 	check_line("player", g.player, MP2K_PLAYER_BYTES);
 	for (int i = 0; i < MP2K_CARRY_TRACKS; ++i) check_line("track", g.track[i], MP2K_TRACK_BYTES);
 	for (int c = 0; c < MP2K_DS_MAX + MP2K_CGB; ++c) check_line("channel", c < MP2K_DS_MAX ? g.ds[c] : g.cgb[c - MP2K_DS_MAX], MP2K_CHAN_BYTES);
@@ -92,7 +93,7 @@ static void check(void) {
 
 void music_carry_held(void) {
 	if (carry != CARRY_NONE || !emu_ready() || !audio_on() || !mp2k_carry_track_at(0)) return;
-	game_read(&taken);
+	music_game_read(&taken);
 	bool ok = false;
 	if (mp2k_carry_plays(&taken)) {
 		audio_lock();
@@ -121,16 +122,16 @@ void music_carry_resume(void) {
 	/* (given back only to the game as it was taken: one loaded meanwhile,
 	 * a test battle's snapshot, keeps its own) */
 	Mp2kGameMusic now;
-	game_read(&now);
+	music_game_read(&now);
 	bool same = !memcmp(&now, &taken, sizeof now);
 	Mp2kWrite writes[MP2K_CARRY_WRITES];
 	int n = -1;
 	audio_lock();
-	if (same) n = mp2k_carry_out(&taken, &game_regs, writes);
+	if (same) n = mp2k_carry_out(&taken, &music_game_regs, writes);
 	else mp2k_carry_drop();
 	mp2k_game_rom(NULL);
 	audio_unlock();
-	if (n >= 0) game_write(&taken, writes, n);
+	if (n >= 0) music_game_write(&taken, writes, n);
 }
 
 void music_carry_drop(void) {

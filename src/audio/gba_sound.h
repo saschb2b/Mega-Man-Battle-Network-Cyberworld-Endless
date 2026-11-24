@@ -19,6 +19,10 @@ uint8_t gba_sound_read8(int reg);
 /* One GBA frame (280896 cycles) of output, DirectSound playing `n` samples
  * of each side (the ring's part MP2K mixed the frame before) */
 void gba_sound_frame(const int8_t *right, const int8_t *left, int n);
+/* Its output paced to `per_frame` stereo frames a GBA frame: another
+ * sound's frames, which it joins (fast forward's music, the core's ring at
+ * the loop's pace: audio.h's audio_engine_add); 0 the device's 48 kHz */
+void gba_sound_pace(int per_frame);
 /* 48 kHz stereo frames ready, and up to `frames` of them taken */
 int gba_sound_avail(void);
 int gba_sound_read(int16_t *out, int frames);
