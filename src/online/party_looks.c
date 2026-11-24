@@ -112,7 +112,10 @@ void party_looks_describe(FILE *out, struct mCore *field, unsigned n) {
 		const char *says = "-";
 		if (P.looked[k])
 			says = in_obj_palettes(field, pal_at(spare[k * AS_KINDS + AS_PLAIN])) || in_obj_palettes(field, pal_at(spare[k * AS_KINDS + AS_PALE])) ? "drawn" : "unseen";
+		uint32_t obj = (uint32_t)field->rawRead32(field, BN6_BATTLE_PLAYERS + k * BN6_SIDE_PARTNER, -1);
 		fprintf(out, " %u:%s", k, says);
+		/* (where his MegaMan stands, column and row: which of the field's MegaMen is whose) */
+		if (obj) fprintf(out, "@%u,%u", (unsigned)field->rawRead8(field, obj + BN6_T1_PANEL_X, -1), (unsigned)field->rawRead8(field, obj + BN6_T1_PANEL_Y, -1));
 	}
 	fputc('\n', out);
 }

@@ -26,7 +26,7 @@ void party_looks_rom(uint8_t *rom, size_t size, const OnlineLoadout *seat, unsig
 bool party_looks_hooks(HookCore *core, PartyField *f);
 /* The state in words: `partylooks` and each seat's, `-` BN6's colours,
  * `drawn` where his palette is in the field's OBJ palettes this frame,
- * else `unseen` */
+ * else `unseen`, then `@COLUMN,ROW` where his MegaMan stands */
 void party_looks_describe(FILE *out, struct mCore *field, unsigned n);
 
 #endif

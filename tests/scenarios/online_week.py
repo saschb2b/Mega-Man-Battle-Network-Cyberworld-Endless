@@ -929,7 +929,7 @@ MANY['crew-a-held-over'] = dict(crew_fight(DOWN), STEPS=online.course(
 # on every game, each seat's look riding with his MegaMan into the battle sprite's spare palettes: every hash agrees,
 # and each seat's MegaMan is drawn in his own player's look (`partylooks`, seat by seat), as in a NetBattle.
 LOOKS = {'': 'look=2.2,2.9,2.12', 'beta': 'look=3.6,3.2,3.11', 'gamma': 'look=4.2,4.5,4.9'}
-DRAWN3 = 'partylooks=0:drawn 1:drawn 2:drawn'
+DRAWN = ('partylooks~0:drawn', 'partylooks~1:drawn', 'partylooks~2:drawn')
 
 
 def in_looks(start):
@@ -952,8 +952,14 @@ MANY['crew-battle-in-looks'] = dict(CAST, START=CREW_LOOKS['alpha'], GAMES={g: C
     soon('join=fighting', 'beta', 900),
     soon('join=fighting', 'gamma', 900),
     *[soon('partyagreed>=3', game, 1500) for game in LOOKS],   # the fields one: every seat's hash agrees
-    *[soon(DRAWN3, game, 600) for game in LOOKS],               # each MegaMan in his own player's look, on every game
+    *[soon(c, game, 600) for game in LOOKS for c in DRAWN],   # each MegaMan in his own player's look, on every game
+    # (each Custom screen closed, every seat's own: the three on the open field, still each in his own look)
+    *[step for game in LOOKS for step in soon('partycustom=chips', game, 600)
+      + online.at(game, ('do', 'press START; wait 10; press A; wait 10'))],
+    ('do', 'wait 90'),
+    *[soon(c, game, 600) for game in LOOKS for c in DRAWN],
     ('do', 'shot'),
+    ('@beta', 'do', 'shot'),
 ))
 
 DOOR_LOOKS = in_looks(online.HOME)
@@ -970,6 +976,6 @@ MANY['guardian-in-looks'] = dict(CAST, START=DOOR_LOOKS['alpha'], GAMES={g: DOOR
     *[step for _ in range(30) for game in LOOKS for step in online.at(game, ('do', 'press A; wait 20'))],
     *[soon('partyfield~3 seat', game, 3000) for game in LOOKS],   # three MegaMen on one field
     *[soon('partyagreed>=3', game, 1500) for game in LOOKS],
-    *[soon(DRAWN3, game, 600) for game in LOOKS],
+    *[soon(c, game, 600) for game in LOOKS for c in DRAWN],
     ('do', 'shot'),
 ))
