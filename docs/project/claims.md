@@ -3,7 +3,7 @@ type: Process
 title: "Claims"
 description: "What each branch in flight may take of the numbers branches share (chip ids, enemy ids, AI numbers, list numbers, song slots, free-space spans, units of work, `Run`): a file a branch in `docs/project/claims/`, written before the branch starts and held apart by `tools/claims.py`."
 tags: [project, process, git]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T21:31:59Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
 sources:
   - { id: notes, title: "The sessions' shared notes of 11 November 2026 (bn4-units-claims.md, team-protoman-claims.md): who moves which unit, which list numbers, rooms and song slots each takes", resource: "the sessions' notes folder on the owner's machine, outside the repository" }
 ---
@@ -67,6 +67,7 @@ of one name, so the names below are the ones to use:
 | `virus_ai`, `navi_ai` | AI numbers | the same |
 | `dispatch3`, `dispatch4` | The moved table's types of the third and fourth kind | `tools/xchiprecipe_bn4.py`, `tools/bn5_twins.py` |
 | `list2`, `list4` | Sprite lists' numbers | `tools/xnavirecipe.py`, the families' recipes |
+| `list6` | List 6's numbers left on the placeholder sprite (the Navis and Mr.Progs on a map) | `src/layer/xnavi.c`, `src/online/square_looks.c` |
 | `song_slots` | Slots of BN6's song table | `src/audio/xsong.c`, `src/emu/song_table.c` |
 | `free_rom`, `free_ram` | Spans of the free space, as offsets from `EMU_FREE` and as RAM addresses | `src/emu/free_space.plan` |
 

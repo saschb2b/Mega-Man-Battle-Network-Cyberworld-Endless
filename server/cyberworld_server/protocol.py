@@ -15,7 +15,7 @@ except FileNotFoundError:
 SPEC = json.loads(_spec_text)
 HELLO = struct.Struct("!BHHI4s20s4s20s4s20s16sHB")
 STATE = struct.Struct("!BiiiB")
-PEER = struct.Struct("!I16siiiB16sB")
+PEER = struct.Struct("!I16siiiB16sB6s")       # (v30: the look's six bytes last)
 PROFILE = struct.Struct("!HHBBBHHHBHI49s")
 WELCOME = struct.Struct("!BIIHBH16sHIH")
 TRADE = struct.Struct("!BBIHBHB")
@@ -72,6 +72,8 @@ TRANSFER_STATE = struct.Struct("!BBI")
 # (saves kept in step, no protocol version of their own either: sync.py)
 SYNC = struct.Struct("!BBB16s32sII")
 SYNC_STATE = struct.Struct("!BBII")
+# (MegaMan's look, v30: three palettes then three colours, every channel BN6's own until a LOOK says otherwise)
+LOOK_NONE = bytes((SPEC["look_none"],)) * (2 * SPEC["look_channels"])
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
 
@@ -222,7 +224,27 @@ def snapshot(players, recipient, flags=None, hidden=()):
     peers = [player for player in players.values() if player.id != recipient and player.channel == room and player.id not in hidden]
     data = bytes((SPEC["snapshot"], len(peers)))
     flags = flags or {}
-    return data + b"".join(PEER.pack(p.id, p.identity, *p.position, p.name.encode(), p.roms | flags.get(p.id, 0)) for p in peers)
+    return data + b"".join(PEER.pack(p.id, p.identity, *p.position, p.name.encode(), p.roms | flags.get(p.id, 0), p.look) for p in peers)
+
+
+def read_look(data):
+    """LOOK (v30): MegaMan's look, a palette byte per channel then a colour
+    byte per channel. Each channel either both look_none (BN6's own colours)
+    or a palette under look_palettes and a colour under look_colours; which
+    palettes the player owns is his game's to know, never the server's.
+    These bounds are the server's own numbers, held to the game's
+    src/core/looks.h by its tests."""
+    channels = SPEC["look_channels"]
+    if len(data) != SPEC["look_bytes"] or data[0] != SPEC["look"]:
+        raise ProtocolError("Malformed LOOK")
+    look = data[1:]
+    for c in range(channels):
+        palette, colour = look[c], look[channels + c]
+        if palette == colour == SPEC["look_none"]:
+            continue
+        if palette >= SPEC["look_palettes"] or colour >= SPEC["look_colours"]:
+            raise ProtocolError("Look outside limits", 6)
+    return bytes(look)
 
 
 def link_bars(round_trip):

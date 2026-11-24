@@ -10,6 +10,14 @@
   the setup says so. Neither start is stronger than BN6's; CROSS and every
   other folder stay as they were (issue 865).
 
+- **New: other players' MegaMen wear their own looks in the Net Square.**
+  Your look travels with your name, and the players around you are drawn
+  in theirs; a look changed there shows to the others at once. Where a
+  part of the Square has no room left for one more set of colours (the
+  plaza takes three besides yours), the players farthest from you are
+  drawn in BN6's blue until they come nearer, never in wrong colours
+  (issue #854). The server needs this version to play with it.
+
 - **New: every starting folder on the setup's shelf.** The FOLDER row
   turns through all six and counts the open ones. A locked folder can be
   looked at, not taken: what it plays like, and a hint at what opens it,

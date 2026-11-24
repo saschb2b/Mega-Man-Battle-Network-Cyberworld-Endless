@@ -71,21 +71,23 @@ palette bytes and the same code. This page is how that is kept.
 
 ## Where the looks come from
 
-Neither game knows the other's look until the Square's wire carries it
-(looks-square's protocol version). Both games must install the same two
-looks or none, so until then a NetBattle is fought in BN6's colours on both
-sides (`arena_looks_bout` with nothing given), and the dev switch gives
-them: `--dev arenalook=MINE/THEIRS`, twelve hex digits each (a `Look`'s
-six bytes in its order: the three channels' palettes, then their colours;
-`FF` a channel as BN6 draws it). `--dev arena` takes MINE for the first GBA
-and THEIRS for the scripted second; in the Square each game names its own
-first. Once the wire carries looks, MINE is the profile's worn look and
-THEIRS the one the Square knows the peer by.
+Each game takes the two looks from the Square (protocol v30, [Peers'
+looks](../square/looks.md)), both the server's word: its own as it last
+sent it (`square_looks_sent`) and the other's as the Square knows him
+(`peer_looks_of`, ARENA_STATE's other session), set by the cable's side
+in `square_bout_build`; where the other was never seen, BN6's colours on
+both sides. Both games must install the same two looks or none, and both
+read what the server passed on. The dev switch gives them instead:
+`--dev arenalook=MINE/THEIRS`, twelve hex digits each (a `Look`'s six
+bytes in its order: the three channels' palettes, then their colours;
+`FF` a channel as BN6 draws it), which `--dev arena` takes for the first
+GBA and the scripted second, and which the Square's path takes over the
+wire's where given (a mutation's).
 
-- **The stands** rebuild the pair from both players' keys: until the
-  wire carries both players' looks to a spectator, a watched battle with
-  looks would part from the players' hashes, so the stands set none, and
-  the players set none either without the dev switch.
+- **The stands** rebuild the pair from both players' keys: the
+  spectator's game takes both players' looks as its own Square knows them
+  (`peer_looks_of` for WATCH_STATE's two sessions, `arena_watch_looks`),
+  the pair both their games built; BN6's where either is not known.
 - **Team NetBattles** fight one bout at a time between two games: each
   bout takes its two fighters' looks the same way.
 - **Two MegaMen a side** (`--dev arena2v2` and the Square's 2v2) keep

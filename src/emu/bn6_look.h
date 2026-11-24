@@ -50,6 +50,23 @@
 #define BN6_LOOK_FIELD_GOLD   10          /* the field's gold, the helmet's stripe and fins: the look's accent */
 #define BN6_LOOK_FIELD_INDEX  0x02000AA5u /* u8 the palette he takes on the field (bn6f eStruct2000aa0 +5, 0 in play) */
 #define BN6_LOOK_FIELD_INDEX_SET 0x0809E770u /* ldrb r0,[r7,#5] then sprite_setPalette (BN6_SPRITE_PALETTE_SET), each frame */
+/* The field sprite's frames (gfx.c's sprite layout): after the 4-byte header
+ * a u32 per animation, the offset of its first frame, each frame 20 bytes:
+ * +0 its tiles, +4 its palettes (BN6_LOOK_PAL_SIZE each, a size word first),
+ * +8 its sub-animation and +12 its objects, each an offset from the
+ * sprite's data past the header, and +18 bit 0x80 its animation's last. The
+ * renderer adds each to the sprite's address (+0x18 of its state) as a u32,
+ * so a copy of the frames elsewhere reaches the same tiles (the Square's
+ * peers: docs/rom/megaman-colours.md, Peers' looks) */
+#define BN6_LOOK_FRAME_SIZE   20
+#define BN6_LOOK_FRAME_TILES  0
+#define BN6_LOOK_FRAME_PALS   4
+#define BN6_LOOK_FRAME_SUB    8
+#define BN6_LOOK_FRAME_OAM    12
+#define BN6_LOOK_FRAME_FLAGS  18
+#define BN6_LOOK_FRAME_LAST   0x80
+#define BN6_LOOK_FIELD_SPARE  0x59        /* list 6's last number Gregar leaves on the placeholder sprite that nothing of ours takes */
+                                          /* (xnavi.c takes 0x07-0x35's and 0x48-0x4E's): the peers' copy's */
 /* In a chat box: the mugshot, sprite list 8's 0x37 */
 #define BN6_LOOK_MUGSHOT_WORD 0x08032674u /* list 8's word for entry 0x37 */
 #define BN6_LOOK_MUGSHOT_SPRITE 0x084ED738u /* ... the sprite it names (raw) */
@@ -82,6 +99,8 @@
 #define BN6_OBJ_PAL_MODE_EIGHT 0x080027E4u /* ... 8, */
 #define BN6_OBJ_PAL_MODE_ALL  0x080027F4u /* ... 16 */
 #define BN6_OBJ_PAL_FIXED     0x08002818u /* a sprite's palette into its fixed slot (+0x15 >> 4) */
+#define BN6_SPRITE_PAL_STALE_AT 0x03      /* a sprite's state +3: bit 0x10 (BN6_SPRITE_PAL_STALE) set where it was past the limit, */
+#define BN6_SPRITE_PAL_STALE  0x10        /* ... drawn in the slot it had, whatever that holds now */
 #define BN6_OBJ_SLOT_EMOTION  12          /* the emotion window's face in battle */
 #define BN6_OBJ_SLOT_MUGSHOT  13          /* a chat box's mugshot (bank 0); 14 the chat box, 12 the HP box on the field */
 
