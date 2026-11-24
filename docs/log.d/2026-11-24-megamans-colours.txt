@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T16:30:00Z
+* **New**: rom/megaman-colours.md (MegaMan's palettes in battle, on the field, in a chat box and in the emotion window, their shade ramps and channels, where a form takes them over, the OBJ palette slots shared by content and the Net Square's count, what a NetBattle needs; epic #854's step 1). **Update**: rom/index.md (its line), research/sources.md (MegaMan's colours, BN2 to BN6: Style Change's precedent checked), code/emu.md (`bn6_look.h`).
