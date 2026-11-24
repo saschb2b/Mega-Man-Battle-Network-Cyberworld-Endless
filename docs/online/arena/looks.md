@@ -109,7 +109,13 @@ and the hooks' calls counted by core, alliance and kind):
   met the window's owner on alliance 0 on the first GBA and on alliance 1
   on the second, 5,677 times each; the pick's end met alliance 0 5,879 and
   alliance 1 5,674 times on each core alike.
-- **Rollback.** `arenabusy,arenadelay=1,arenalag=5`: RESULT_ROLLBACK
-- **Two games.** RESULT_SCENARIOS
-
-![Both GBAs of one NetBattle](../../screenshots/PLACEHOLDER)
+- **Rollback.** With `arenabusy,arenadelay=1,arenalag=5` the battle rolled back
+  489 times (2,445 frames run again), every one of its 54 hashes agreed
+  and it ended as it does straight. `--dev rollbench` with both looks: 11
+  rollbacks of 8 frames checked, the game's state the same in all 11.
+- **Two games.** `online-arena/netbattle-looks` (two games over a local
+  server, each naming its own look first) fights to its end with every
+  hash agreed; its mutation `netbattle-looks-apart`, Beta given another
+  look for Alpha, stops both games before the first frame ("the two games
+  went apart before the battle", the state's `arenastop apart`), so the
+  proof can fail. The rest of `online-arena` passes unchanged.
