@@ -414,9 +414,11 @@ static int bbs_posts(Post *out) {
 		[FOLDER_LEAN] = { FACE_TECH, "TenDown", "Made it ten layers down! Now any five of my chips make a hand." },
 		[FOLDER_STEADY] = { 0x19, "LongHaul", "Made it to the third area! Next dive my folder had Recov30s to spare." },
 		[FOLDER_NAVI] = { FACE_NAVI, "NaviPal", "Used my first Navi chip. Next dive,three Navis came along in my folder!" },
+		[FOLDER_EMBER] = { FACE_NAVI, "Firestarter", "Beat a guardian as HeatCross. Next dive,I set grass and burned it. Toasty!" },
+		[FOLDER_TIDE] = { 0x19, "Splasher", "Put out a Fire guardian. Ever since,I dive with Aqua chips. Splash!" },
 	};
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f)
-		if (meta_folder_floored(f)) out[n++] = told[f];
+		if (meta_folder_floored(f) && told[f].what) out[n++] = told[f];
 	#undef POST
 	return n;
 }

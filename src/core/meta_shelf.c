@@ -13,7 +13,7 @@
  * to the floor's next */
 #define SHELF_FLOOR_RUNS 3
 
-static bool heard(int folder) { return folder > FOLDER_STANDARD && folder < FOLDER_COUNT && (profile.shelf.heard >> folder & 1); }
+static bool heard(int folder) { return folder > FOLDER_STANDARD && meta_folder_exists(folder) && (profile.shelf.heard >> folder & 1); }
 
 int meta_folder_state(int folder) {
 	if (meta_folder_open(folder)) return SHELF_OPEN;
@@ -26,8 +26,14 @@ int meta_folders_open(void) {
 	return n;
 }
 
+int meta_folders(void) {
+	int n = 0;
+	for (int f = 0; f < FOLDER_COUNT; ++f) n += meta_folder_exists(f);
+	return n;
+}
+
 void meta_folder_hear(int folder) {
-	if (folder <= FOLDER_STANDARD || folder >= FOLDER_COUNT || heard(folder)) return;
+	if (folder <= FOLDER_STANDARD || !meta_folder_exists(folder) || heard(folder)) return;
 	profile.shelf.heard |= (uint16_t)(1u << folder);
 	profile_save();
 }
@@ -39,11 +45,11 @@ int meta_folder_rumor(uint32_t pick) {
 	if (!profile.shelf.floor_at) return 0;
 	int locked[FOLDER_COUNT], n = 0;
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f)
-		if (meta_folder_state(f) == SHELF_LOCKED) locked[n++] = f;
+		if (meta_folder_exists(f) && meta_folder_state(f) == SHELF_LOCKED) locked[n++] = f;
 	return n ? locked[pick % (uint32_t)n] : 0;
 }
 
-bool meta_folder_floored(int folder) { return folder > FOLDER_STANDARD && folder < FOLDER_COUNT && (profile.shelf.floored >> folder & 1); }
+bool meta_folder_floored(int folder) { return folder > FOLDER_STANDARD && meta_folder_exists(folder) && (profile.shelf.floored >> folder & 1); }
 
 void meta_shelf_seen(void) {
 	if (profile.shelf.floor_at) return;
@@ -59,7 +65,7 @@ void meta_shelf_run_over(void) {
 	int finished = profile.runs + 1;
 	if (!s->floor_at || finished - (s->floor_at - 1) < SHELF_FLOOR_RUNS) return;
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f) {
-		if (meta_folder_state(f) != SHELF_LOCKED) continue;
+		if (!meta_folder_exists(f) || meta_folder_state(f) != SHELF_LOCKED) continue;
 		s->heard |= (uint16_t)(1u << f);
 		s->floored |= (uint16_t)(1u << f);
 		s->floor_at = (uint16_t)(finished < 0xFFFE ? finished + 1 : 0xFFFF);

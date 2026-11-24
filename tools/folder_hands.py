@@ -9,6 +9,9 @@ each turn's pick the legal set (one chip's copies, or one code with * among it) 
 a Program Advance of BN6's table formed where its parts are in the pick. Power is the record's (+0x1A), one hit: a
 Vulcan's or a delayed chip's whole damage is not modelled, nor range, foes or the custom gauge's growth.
 
+--grass: a pick's strongest Fire chip after a GrasSeed in it hits double (BN6's Fire on grass; the seed lands where the
+foe stands, which the model takes as given).
+
 --list: each preset's chips and codes, and for BN5's and BN4's chips the id a run plays them as (the registry's,
 src/core/xchips_registry*.c, or BN6's own by name) and whether BN6's record has the code. Local only: the ROMs
 (CYBERWORLD_ROM_DIR, else ~/.cache/mmbn-ref/roms). Prints names read from the ROMs; writes nothing."""
@@ -35,6 +38,9 @@ NO_DAMAGE = {131, 146, 162, 163, 168, 175, 177, 178, 179, 184, 298}   # support:
 PAS = [(339, (71, 72, 73), 4), (339, (71, 74, 75), 4), (320, (1,), 0), (321, (2,), 0), (322, (3,), 0), (337, (23,), 0),
        (323, (20,), 0), (326, (107,), 0),
        (324, (21,), 0), (327, (108,), 0), (329, (92,), 0), (335, (144,), 0)]   # BN6's table (0x02BA60), the ones in reach
+FIRE = {20, 21, 22, 46, 60, 76, 107, 108, 109, 110, 111, 112}   # BN6's Fire attack chips among the commons
+GRASSEED = 68
+GRASS = False
 CODES = {c: k for k, c in enumerate('ABCDEFGHIJKLMNOPQRSTUVWXYZ')} | {'*': 26}
 
 
@@ -121,6 +127,11 @@ def value(F, sel):
         dmg = F.power(pa[0])
     attacks = [i for i in rest if i not in HEAL and i not in ATK and i not in NO_DAMAGE and F.power(i) > 0]
     dmg += sum(F.power(i) for i in attacks)
+    # (--grass: a GrasSeed sent first, the strongest Fire chip after it on grass: BN6 adds its damage once more and
+    # burns the grass plain, docs/research/sources.md)
+    fire = [F.power(i) for i in attacks if i in FIRE]
+    if GRASS and GRASSEED in rest and fire:
+        dmg += max(fire)
     if attacks or pa:
         dmg += sum(ATK.get(i, 0) for i in rest)
     return dmg, sum(HEAL.get(i, 0) for i in rest), int(pa is not None)
@@ -175,7 +186,10 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--list', action='store_true')
     ap.add_argument('--trials', type=int, default=4000)
+    ap.add_argument('--grass', action='store_true', help='a Fire chip sent after a GrasSeed in one pick hits the grass for double')
     a = ap.parse_args()
+    global GRASS
+    GRASS = a.grass
     F = Folders()
     if a.list:
         listing(F)
