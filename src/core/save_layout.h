@@ -18,9 +18,9 @@ _Static_assert(CHAR_BIT == 8 && sizeof(int) == 4 && sizeof(bool) == 1, "Save sca
  * card, for the designed folders' milestones, for the extras the last
  * run left out, for the battle data on virus families and for the Battle
  * Lab's own folder and for the first meetings heard and for MegaMan's
- * forms, read up to its size: an older profile reads whole, the new fields
+ * forms and his looks, read up to its size: an older profile reads whole, the new fields
  * zero) */
-_Static_assert(sizeof(Profile) == 1124, "Profile save size changed");
+_Static_assert(sizeof(Profile) == 1144, "Profile save size changed");
 _Static_assert(offsetof(Profile, crosses_falzar) == 1109, "Profile.crosses_falzar save offset changed");
 _Static_assert(offsetof(Profile, runs) == 0, "Profile.runs save offset changed");
 _Static_assert(offsetof(Profile, best_depth) == 4, "Profile.best_depth save offset changed");
@@ -108,6 +108,8 @@ _Static_assert(offsetof(Profile, lab_folder_on) == 1047 && offsetof(Profile, lab
 _Static_assert(offsetof(Profile, heard) == 1108, "Profile.heard save offset changed");
 _Static_assert(offsetof(Profile, forms_open) == 1110 && offsetof(Profile, last_form) == 1112 && offsetof(Profile, form_best) == 1114 &&
 	offsetof(Profile, souls_won) == 1118, "Profile.forms_open save layout changed");
+_Static_assert(offsetof(Profile, looks_owned) == 1122 && offsetof(Profile, look_slot) == 1124 && offsetof(Profile, looks_kept) == 1125 &&
+	offsetof(Profile, looks) == 1126 && sizeof(Look) == 6, "Profile.looks save layout changed");
 _Static_assert(offsetof(Profile, lab_sets) == 812 && sizeof(LabSaved) == 42 && offsetof(LabSaved, frames) == 38, "Profile.lab_sets save layout changed");
 
 _Static_assert(sizeof(Run) == 124, "Run save size changed");
