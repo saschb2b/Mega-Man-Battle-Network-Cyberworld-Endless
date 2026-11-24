@@ -484,9 +484,10 @@ state's `cover` line names it.
   arrival's two seconds are counted from the card's end.
 - **The plates:** six pixels between a crewmate's layer and his HP
   ("L1 100/100").
-- **The field's marks:** where a mark and its HP would reach BN6's chip
-  name at the picture's foot (the field's bottom row), they stand over
-  the MegaMan's head, the name over the HP as everywhere.
+- **The field's marks:** a mark and its HP never reach BN6's chip name
+  at the picture's foot; on the field's bottom row they take another spot
+  beside the MegaMan ([A crew in one column](#who-is-who-on-a-partys-field-21-november-2026),
+  issue #886).
 - **A dropped link:** while it is down (dropped, tried again, or given
   up) the crew is put away, the puppets, names, rings, dots and plates
   none, until the room's divers are heard again; the band's
@@ -1068,6 +1069,39 @@ marks apart, the joiner's HP box his own, every 60th frame's hash agreed.
 Not yet seen over the server: a guardian's door (the same drawing, on the
 same field).
 
+**A crew in one column** (24 November 2026,
+[issue #886](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/886),
+seen in 0.24.0's pictures): the crew stands a row each in the lead's
+column ([Viruses' aim](#viruses-aim-in-a-crews-battle-22-november-2026)), and a plate
+under one MegaMan's feet lay over the MegaMan in the row below, so that
+with three the lower two were mostly hidden and "Beta 100" read as
+Gamma's. A MegaMan stands 47 pixels tall on rows 24 apart: no spot under
+or over one is clear of the next in his column. **The call**, through the
+game-design skill's interface layer (a spatial label on the actor, read
+mid-fight while the number changes; no plate over an actor it does not
+name): each plate, a partner's name over his HP or the player's own name
+behind the PET's arrow, takes the first of four spots that covers no
+MegaMan's body, no plate placed before it and none of BN6's own pieces:
+under his feet, where BN6 writes an enemy's HP; in front of him, its foot
+on his feet' line in the next column; behind him; over his head. A plate
+keeps to the player's half of the picture (never over an enemy), under
+BN6's gauge, beside its HP box and emotion window, over its chip name at
+the foot. Where no spot is clear, the one that covers least. The player's
+own is placed first, then the partners by seat. In the lead's column of
+three the upper two partners' plates stand in front of them, the bottom
+row's own name under its feet; with four, the one behind the lead keeps
+his under his feet. A plate moves only when someone steps to another
+panel. Chosen over the name over the head with the HP beside the feet
+(the name lay on the MegaMan a row up and on BN6's chip icons over each
+head), and over the names and HP in a strip under BN6's emotion window
+with a letter by each MegaMan (no strip of three lines in BN6's digits
+fits between the emotion window, the chip icons over a top-row MegaMan
+and the field; and a letter to look up is a step more than a name beside
+him). The Arena's two a side keeps its own marks (`arena_team_view.c`),
+unchanged. The state says each plate's box and its MegaMan's
+(`plateK X Y W H seat X Y W H`) and whether any plate meets a MegaMan or
+another plate (`plates N clear|COVER`).
+
 **His own Custom screen and his results** (22 November 2026,
 [issue #757](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/757),
 found by the friction hunt's play of the whole dive): BN6's own screens
@@ -1270,9 +1304,9 @@ small, in one place, and covers nothing it needs to read):
   the engine's pixel font had made the two numbers of one frame look
   different; [Sprites, fonts and pictures](../rom/graphics.md), The HP
   under an enemy); MegaMan's own is the HP box. The name stays in the
-  pixel font: BN6 has no letters of that size for it. On the field's
-  bottom row the name and HP over his head end where the mark of one two
-  rows up begins, the digits being a line taller. A crewmate fighting his own battle: his plate's HP
+  pixel font: BN6 has no letters of that size for it. Where under his feet would cover
+  the MegaMan below him, the name and HP stand in front of him or
+  elsewhere beside him (Who is who, A crew in one column). A crewmate fighting his own battle: his plate's HP
   falls as he is hit, read from his battle.
 - **Later, each its own issue**: a second screen's page (`src/second/`,
   [issue #729](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/729)),

@@ -8,7 +8,12 @@ On one game, three MegaMen against layer 3's guardian on the party's core
 (partyview=1): the dev's partners have no names, so the marks are the
 Arena's P1 to P3. Over a server, two divers crewed on the week's net and
 a crew's join-in battle on one field: each game his own name marked as
-his and the other's as the crew's, Beta's name long enough to be cut."""
+his and the other's as the crew's, Beta's name long enough to be cut.
+
+A crew of three and of four in one column (issue #886): each plate, a
+name and a partner's HP under it, stands where it covers no MegaMan's
+body and no other plate, on every game of the field (`plates=N clear`),
+as on the dev's field of four."""
 import scenarios_online as online
 from scenarios_online import soon
 
@@ -67,4 +72,35 @@ MANY = {
             (f'@{LONG}', 'expect', 'mark0~tag Alpha'),
             (f'@{LONG}', 'expect', 'hpbox=own'),      # Beta's HP box his own
         )),
+    # (issue #886: four on the dev's field, the lead's column full and one behind him; no plate over a MegaMan)
+    'dev-field-four': dict(
+        START='CYBERWORLD_AUTOPILOT=1 --scene emu --seed 3 --run-depth 3 --dev quiet,partycore=4,partybot=1,partyview=1', STEPS=[
+            ('until', 'partyfield=4 seat 1', 3000),
+            ('until', 'marks=4 apart', 1500),
+            ('expect', 'plates=4 clear'),
+            ('do', 'wait 200'),
+            ('expect', 'plates=4 clear'),
+        ]),
 }
+
+
+def crew_battle(others):
+    """Alpha and the others dived in turn, each arriving where Alpha stands, one crew; Alpha's battle with every
+    crewmate in it unasked, the bots' keys on each game: on each game's field every plate clear of every MegaMan."""
+    games = [''] + list(others)
+    n = len(games)
+    names = ' '.join(g.capitalize() for g in ['alpha'] + list(others))
+    return dict(START=BOT, NEEDS=NEEDS, SERVER=True, FILES={'netpass.ini': online.SEEN_FULL}, GAMES={g: BOT for g in others},
+                STEPS=online.course(
+        *[part for g in games for part in online.course(online.into_square(g), dive(g))],
+        ('sleep', 1.5),
+        *[soon(f'crew={n}: {names}', g, 900) for g in games],
+        ('do', 'battle; wait 10'),
+        *[soon(f'partyfield={n} seat', g, 1200) for g in games],
+        *[step for g in games for step in (soon(f'marks={n} apart', g, 3600), online.at(g, ('expect', f'plates={n} clear')))],
+        *[online.at(g, ('do', 'wait 30; shot'), ('expect', f'plates={n} clear')) for g in games],
+    ))
+
+
+MANY['crew-of-three'] = crew_battle(('beta', 'gamma'))
+MANY['crew-of-four'] = crew_battle(('beta', 'gamma', 'delta'))
