@@ -383,4 +383,11 @@
                                        * (0x08000C00), the rest x 0x1AAAA >> 16 by 0x08000A38 (BN6's 0x08000C00); 0x99595999 from
                                        * 0x1499700 frames on. BN6 has none (searched) */
 
+/* Three of BN4's chips' sides by the alliance alone, read into a register its next instruction takes (BN4 never turns MegaMan;
+ * BN6's Surrounded field does: src/emu/turned_aim.c, issue #846) */
+#define BN4_SEEKBOM_AHEAD     0x080DEF5Cu /* SeekBom's targets ahead (its routine 0x080DEF1A): tst r1,r1, r1 the alliance (0: a column past its own) */
+#define BN4_PITRNG_EDGE       0x080E99FEu /* PitRng's start column: movs r1,#5, r0 the alliance (1 + 5 x it: the edge behind its side) */
+#define BN4_GUTSMAN_EDGE      0x080D07E2u /* GutsMan's panels to strike (his routine 0x080D07C4): movs r7,#5, r0 the alliance (6 - 5 x it: the
+                                           * enemy's far edge, walked back toward him) */
+
 #endif
