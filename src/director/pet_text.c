@@ -581,48 +581,63 @@ void pet_text_items(void) {
 	item_set(ITEM_LAB, lab_there() ? 1 : 0);
 }
 
-int pet_text_refresh(void) {
-	pet_text_items();
-	install_mails();
-	int got = 0;
-	for (int m = 1; m <= 18; ++m)
-		if (mail_of(m) && guardian_known(m) && mail_deliver(m)) got = m;
-	/* (the lab's two at the head of the list, NEW only with news: the
-	 * report on an act's first layer, a new guardian ahead; the records
-	 * once a battle has changed them. A playtester never saw either NEW,
-	 * so never knew when to read them) */
+/* (the lab's two at the head of the list, NEW only with news: the report
+ * on an act's first layer, a new guardian ahead; the records once a
+ * battle has changed them. A playtester never saw either NEW, so never
+ * knew when to read them) */
+static bool records_news(void) {
 	static const uint8_t navis[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18 };
 	uint32_t mark = 1;
 	for (unsigned i = 0; i < sizeof navis; ++i) {
 		const Rival *r = rival(navis[i]);
 		mark = mark * 31u + (uint32_t)(r->met * 7 + r->megaman_won * 101 + r->navi_won * 1009);
 	}
-	bool records_news = mark != profile.records_mark,
-		report_news = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
-	if (records_news) { profile.records_mark = mark; profile_save(); }
+	if (mark == profile.records_mark) return false;
+	profile.records_mark = mark;
+	profile_save();
+	return true;
+}
+
+/* The lab's mails: which are there (`there`) and which have news (`news`),
+ * each as it is marked so in the profile */
+static void lab_mails(bool there[MAIL_LAST + 1], bool news[MAIL_LAST + 1]) {
+	for (int m = MAIL_REPORT; m <= MAIL_LAST; ++m) there[m] = true;
+	news[MAIL_REPORT] = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
+	news[MAIL_RECORDS] = records_news();
 	/* (and the codes', third, from the first code entered: NEW with each
 	 * new one, issue #50) */
 	int entered = profile_codes_entered();
-	bool codes_news = entered > profile.codes_mailed;
-	if (codes_news) { profile.codes_mailed = (uint8_t)entered; profile_save(); }
+	there[MAIL_CODES] = entered > 0;
+	news[MAIL_CODES] = entered > profile.codes_mailed;
+	if (news[MAIL_CODES]) { profile.codes_mailed = (uint8_t)entered; profile_save(); }
 	/* (and the BBS's, last, NEW with each new post) */
 	static Post post[24];
 	int posts = bbs_posts(post);
-	bool bbs_news = posts > profile.bbs_seen;
-	if (bbs_news) { profile.bbs_seen = (uint8_t)posts; profile_save(); }
+	news[MAIL_BBS] = posts > profile.bbs_seen;
+	if (news[MAIL_BBS]) { profile.bbs_seen = (uint8_t)posts; profile_save(); }
 	/* (and the Battle Lab's, once the lab has sent it: NEW with each family whose data is complete since) */
 	int data = battle_data_families_complete();
-	bool lab_news = lab_there() && (data > profile.lab_mailed || !profile.lab_mailed);
-	if (lab_news) { profile.lab_mailed = (uint8_t)(data ? data : 1); profile_save(); }
+	there[MAIL_LAB] = lab_there();
+	news[MAIL_LAB] = there[MAIL_LAB] && (data > profile.lab_mailed || !profile.lab_mailed);
+	if (news[MAIL_LAB]) { profile.lab_mailed = (uint8_t)(data ? data : 1); profile_save(); }
 	/* (and the colours', from the first palette past Classic: NEW once) */
-	bool looks_news = looks_there() && !profile.looks_mailed;
-	if (looks_news) { profile.looks_mailed = 1; profile_save(); }
+	there[MAIL_LOOKS] = looks_there();
+	news[MAIL_LOOKS] = there[MAIL_LOOKS] && !profile.looks_mailed;
+	if (news[MAIL_LOOKS]) { profile.looks_mailed = 1; profile_save(); }
+}
+
+int pet_text_refresh(void) {
+	pet_text_items();
+	install_mails();
+	int got = 0;
+	for (int m = 1; m <= 18; ++m)
+		if (mail_of(m) && guardian_known(m) && mail_deliver(m)) got = m;
+	bool there[MAIL_LAST + 1], news[MAIL_LAST + 1];
+	lab_mails(there, news);
 	for (int m = MAIL_LAST; m >= MAIL_REPORT; --m) {
-		if ((m == MAIL_CODES && !entered) || (m == MAIL_LAB && !lab_there()) || (m == MAIL_LOOKS && !looks_there())) continue;
-		bool news = m == MAIL_REPORT ? report_news : m == MAIL_RECORDS ? records_news : m == MAIL_CODES ? codes_news : m == MAIL_LAB ? lab_news
-			: m == MAIL_LOOKS ? looks_news : bbs_news;
+		if (!there[m]) continue;
 		mail_deliver(m);
-		if (news) { flag_set(BN6_FLAG_MAIL_NEW + m); flag_clear(BN6_FLAG_MAIL_READ + m); }
+		if (news[m]) { flag_set(BN6_FLAG_MAIL_NEW + m); flag_clear(BN6_FLAG_MAIL_READ + m); }
 		mail_first(m);
 	}
 	return got;
