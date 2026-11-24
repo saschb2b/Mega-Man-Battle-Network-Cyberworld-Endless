@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **New: MegaMan in colours of your own.** Colours, a new entry of the
+  PET's start menu, opens a screen where his armour and suit take any
+  colour of the palettes you own, previewed on MegaMan as the cursor
+  moves; three looks are kept, A to C. Palettes you don't own yet show
+  where they come from (epic #854).
+
 - **New: fast forward keeps the music at its own pace.** While the game
   runs fast, the song plays on as it would at BN6's speed instead of
   hurrying along with the game, and when fast forward stops the game

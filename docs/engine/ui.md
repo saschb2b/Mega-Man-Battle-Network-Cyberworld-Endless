@@ -198,6 +198,15 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   rows in FOLDER EDIT's pill; the Souls a page of their own, its tags on
   the band as the Library's entries; KeyItem's INFORMATION box under
   them.
+- The colours screen ([MegaMan's look](../game/looks.md)) puts BN6's own
+  MegaMan in STATUS's slot, in his palette as the look makes it, beside
+  the list in its window (the look worn between Options' pointers, each
+  channel's colour in a swatch framed white) and the palette's window,
+  its name between the Library's green arrows and its sixteen colours a
+  4x4 grid with PLAIN under it, EQUIP's orange corners the grid's cursor
+  (a grid has no row for the arrow) and a white frame the colour worn, as
+  STATUS frames its slot; a locked palette dimmed with LOCKED across it,
+  its origin in KeyItem's INFORMATION box.
 - One key's hint on the band where the key does something unguessed:
   the Jukebox's `START:REPEAT` (the mode), Options' `START:DEFAULT` (a
   page's lines back, on pages that have such lines), the reconnect

@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T16:40:00Z
+* **New**: game/looks.md (MegaMan's look, epic #854: the colours screen in the PET, its design, layout, keys and state). **Update**: game/pet-menu.md (Colours, the tenth entry: its button, icon, place and keys), engine/ui.md (the colours screen's pieces), code/screens.md (`src/looks/`), code/director.md (`pet_screens.c`), voice/rules.md (`looks_text.c`'s row), rom/pet-and-second-screen.md (Colours' label tiles kept in the engine).
