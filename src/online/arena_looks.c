@@ -88,10 +88,11 @@ void arena_looks_rom(uint8_t *rom, size_t size) {
 
 /* ---- the hooks (user: the core's side) ---- */
 
-/* the player an object of this core is: its alliance's, as the core's own
- * player stands on alliance 0 */
+/* the player an object is: its alliance's, the cable's side on every GBA
+ * (measured: the second GBA's emotion window shows alliance 1's face) */
 static unsigned player_of(uint32_t obj, void *user) {
-	return ((unsigned)(uintptr_t)user ^ hook_read8(obj + BN6_T1_ALLIANCE)) & 1u;
+	(void)user;
+	return hook_read8(obj + BN6_T1_ALLIANCE) & 1u;
 }
 
 /* MegaMan as BN6 draws him in no form: his own Navi, no Cross, Soul or Beast Out */

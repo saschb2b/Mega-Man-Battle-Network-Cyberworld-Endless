@@ -3,8 +3,9 @@
  * it starts, in palettes of MegaMan's battle block BN6 never picks
  * (BN6_LOOK_PAL_SPARE), and three hooks on each core answer BN6's picks of
  * his palette by the object's player: his body (plain, pale, Full Synchro)
- * and the emotion window's face. A core's own player stands on alliance 0
- * of his GBA, so on core k alliance a is player k ^ a. Every client and
+ * and the emotion window's face. An object's alliance is its player's
+ * side of the cable on both GBAs, each GBA's own drawn on the left by BN6
+ * whichever it is. Every client and
  * spectator that builds the pair with the same two looks has the same
  * bytes and the same hooks: the pair's hash holds them to it, and takes
  * the looks in (arena_looks_hash) so two games given different looks part
