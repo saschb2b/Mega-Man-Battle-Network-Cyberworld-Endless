@@ -152,6 +152,15 @@ static Tag *tag_under(Tag *tags, int n, const Tag *t) {
 	return NULL;
 }
 
+/* whether a tag would meet the crew's plates under BN6's HP box (dive_crew.h): a name piled on others keeps under
+ * them, counted on the one it would have stood over, as past the picture's top (issue #886) */
+static bool on_plates(const Tag *t) {
+	int x, y, w, h;
+	if (!dive_crew_view_box(&x, &y, &w, &h)) return false;
+	int left = t->x - t->w / 2 - 2, top = t->y - 1;
+	return left < x + w && x < left + t->w + 4 && top < y + h && y < top + MAP_LABEL_ROW - 1;
+}
+
 /* The names that show now, as the divers stand: each over his
  * head, and where divers stand on one spot (a layer's arrival) each next
  * name a row over the last, those past the picture's top counted on the
@@ -167,9 +176,14 @@ static int tags_now(Tag tags[DIVE_PEOPLE]) {
 		if (!map_label_shown(t.x, t.y)) continue;
 		t.x = map_label_x(t.x, t.name);
 		Tag *under;
-		while ((under = tag_under(tags, n, &t)) != NULL && under->y - MAP_LABEL_ROW >= TAG_TOP) t.y = under->y - MAP_LABEL_ROW;
+		while ((under = tag_under(tags, n, &t)) != NULL) {
+			Tag up = t;
+			up.y = under->y - MAP_LABEL_ROW;
+			if (up.y < TAG_TOP || on_plates(&up)) break;
+			t = up;
+		}
 		if (under) ++under->more;
-		else tags[n++] = t;
+		else if (!on_plates(&t)) tags[n++] = t;   /* (his own spot under the plates: not drawn, as under a chat box) */
 	}
 	return n;
 }

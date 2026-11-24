@@ -4,7 +4,8 @@ shown the other's plate under BN6's HP box, his HP as it changes (a
 battle of his own, hit) and his layer once he goes on (the dev menu's
 Next layer); a crew split, or the link down, and no plates; a crewmate
 gone home between acts drawn on no layer, his plate saying Home (issue
-#756)."""
+#756); two crewmates on one spot up and left of MegaMan, their names
+piled over them keeping under the plates (issue #886)."""
 import scenarios_online as online
 from scenarios_online import soon
 
@@ -92,3 +93,26 @@ MANY = {
         soon('crew=3: Alpha Beta Gamma', '', 300),
     )),
 }
+
+# The divers' names under the plates (issue #886, seen in 0.24.0's dive-crew.gif): Beta and Gamma on one spot up and
+# left of Alpha, just under the crew's plates under BN6's HP box: their names, which would stand over their heads on the
+# plates, are not drawn there (as under BN6's chat box; a name piled on others stops under the plates, counted on the
+# one under it), and come back once they stand clear.
+MANY['names-under-plates'] = dict(CAST, GAMES={'beta': online.HOME, 'gamma': online.HOME}, STEPS=online.course(
+    online.into_square(), dive(), online.into_square('beta'), dive('beta'), online.into_square('gamma'), dive('gamma'),
+    ('sleep', 1.5),
+    soon('crew~3', '', 600),
+    ('@beta', 'do', 'place 0 0 3; wait 5'),
+    ('@gamma', 'do', 'place 0 0 3; wait 5'),
+    ('do', 'place 0 48 3; wait 5'),                  # (they stand up and left of him: world y less is the picture's up-left)
+    ('sleep', 1.0),
+    soon('crewview=2', '', 600),
+    soon('rings=2: Beta Gamma', '', 600),             # (both in the picture, ringed)
+    ('do', 'wait 30; shot'),
+    ('expect', 'tags=0'),                             # (no name over the plates)
+    ('do', 'place 0 0 3; wait 5'),                   # Alpha on their spot: the three in the picture's middle
+    ('sleep', 1.0),
+    soon('tags~Gamma', '', 600),
+    ('expect', 'tags~Beta'),
+    ('do', 'shot'),
+))
