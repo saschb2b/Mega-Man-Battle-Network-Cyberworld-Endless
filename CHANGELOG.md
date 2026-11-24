@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Fixed: more chips strike the way MegaMan faces when he turns round.**
+  On a liberation's Surrounded field, turned left with L, SandWrm,
+  BurnSqr, TenguMan's chip, AirRaid and Magnum, and BN4's GutsMan,
+  PanlSht, SeekBom, PitRng, RollAro, GutPnch, Meteors, Boomer, DrkVulcn
+  and DarkBomb aimed by his side alone: they struck behind him or
+  nothing at all. BlastMan's flames now start where he stands, so the
+  foe ahead burns, not the one behind, either way he faces (issue #846).
+
 - **New: fast forward keeps the music at its own pace.** While the game
   runs fast, the song plays on as it would at BN6's speed instead of
   hurrying along with the game, and when fast forward stops the game
