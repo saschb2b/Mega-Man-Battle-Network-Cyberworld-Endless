@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "layer_objs.h"
+#include "looks_due.h"   /* (MegaMan's palettes got: each frame on the map, the state's lines) */
 #include "navicust.h"
 #include "rom.h"
 #include "runlog.h"

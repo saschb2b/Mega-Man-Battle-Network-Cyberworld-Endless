@@ -19,6 +19,15 @@
   1 in 11, at about Standard's damage. It still opens with any Program
   Advance used (issue #865).
 
+- **New: colors for MegaMan, earned.** Six come with milestones a
+  profile reaches (the Undernet, the Cybeast's fall, Chaud's respect, a
+  Darkloid, the tournament, the top threat rung), three are sold at
+  AsterLand's counter for 6000 zenny each, and two hide in the net, one
+  run in a while: a Mystery Data's ColrData, or a Glitch layer's. MegaMan
+  says where each came from, and Dad mails where to change them. A
+  profile gets the milestones it already holds at its next start
+  (issue #854).
+
 - **New: other players' MegaMen wear their own looks in the Net Square.**
   Your look travels with your name, and the players around you are drawn
   in theirs; a look changed there shows to the others at once. Where a
