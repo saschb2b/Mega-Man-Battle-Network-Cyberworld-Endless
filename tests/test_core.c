@@ -139,6 +139,7 @@
 #include "xvirus_moved.h"
 #include "xvirus_shim.h"
 #include "soul_room.h"
+#include "looks.h"
 #include "soulcode.h"
 #include "xnavi_sprites.h"
 
@@ -225,6 +226,68 @@ bool town_after_abandon;
 /* (the older net's chips' share, home's requests' rolls; BN6's stages by depth) */
 int loot_older_share, loot_older_net;
 int loot_stage_allowed(int depth) { return depth > 12 ? 2 : depth > 6 ? 1 : 0; }
+
+/* MegaMan's looks in the profile (src/core/looks*.c, docs/game/looks.md):
+ * a fresh profile's, ownership, the slots, the bytes a save keeps read back,
+ * and a profile saved before looks were kept */
+static void test_looks(void) {
+	Profile keep = profile;
+	memset(&profile, 0, sizeof profile);
+	looks_profile_loaded();
+	CHECK(looks_owned(LOOK_CLASSIC) && !looks_owned(LOOK_UNDERNET) && looks_slot() == 0, "a fresh profile owns Classic alone, slot 0");
+	Look w = looks_worn(), plain = look_plain();
+	CHECK(!memcmp(&w, &plain, sizeof w) && look_valid(&w), "a fresh profile wears BN6's own colours");
+	CHECK(looks_grant(LOOK_UNDERNET) && !looks_grant(LOOK_UNDERNET) && looks_owned(LOOK_UNDERNET), "a palette granted once");
+	CHECK(!looks_grant(LOOK_CLASSIC) && !looks_grant(LOOK_PALETTES) && !looks_grant(-1), "Classic and no palette are not granted");
+	Look l = { { LOOK_UNDERNET, LOOK_CLASSIC, LOOK_NONE }, { 3, 15, LOOK_NONE } };
+	CHECK(looks_set(1, &l), "a look set");
+	looks_select(1);
+	w = looks_worn();
+	CHECK(looks_slot() == 1 && !memcmp(&w, &l, sizeof w), "the slot selected is worn");
+	Look bad = l;
+	bad.palette[0] = LOOK_PALETTES;
+	CHECK(!look_valid(&bad) && !looks_set(0, &bad), "a palette past the last refused");
+	bad = l;
+	bad.colour[1] = LOOK_COLOURS;
+	CHECK(!look_valid(&bad), "a colour past the last refused");
+	bad = l;
+	bad.colour[2] = 0;
+	CHECK(!look_valid(&bad) && !looks_set(3, &l), "a channel half LOOK_NONE refused, and a slot past the last");
+	Look parsed;
+	CHECK(looks_parse("11.0,-,5.15", &parsed) && parsed.palette[0] == LOOK_GLITCH && parsed.palette[1] == LOOK_NONE &&
+	      parsed.colour[1] == LOOK_NONE && parsed.colour[2] == 15, "the dev switch's look read");
+	CHECK(looks_parse("3.2", &parsed) && parsed.palette[1] == LOOK_NONE, "a dev look of one channel");
+	CHECK(!looks_parse("12.0", &parsed) && !looks_parse("1.16", &parsed) && !looks_parse("1.2,x", &parsed) && !looks_parse("1.2,3.4,5.6,7.8", &parsed),
+	      "words that are no look refused");
+	/* (the bytes a save writes, read back as profile_load reads them) */
+	static uint8_t bytes[sizeof(Profile)];
+	memcpy(bytes, &profile, sizeof profile);
+	memset(&profile, 0, sizeof profile);
+	memcpy(&profile, bytes, sizeof profile);
+	looks_profile_loaded();
+	w = looks_get(1);
+	CHECK(looks_owned(LOOK_UNDERNET) && looks_slot() == 1 && !memcmp(&w, &l, sizeof w), "the looks read back as saved");
+	/* (a profile saved before looks: its 1124 bytes, the rest zero, its
+	 * last two bytes the struct's padding then, which may hold anything) */
+	memset(bytes + 1124, 0, sizeof bytes - 1124);
+	bytes[1122] = bytes[1123] = 0xFF;
+	memcpy(&profile, bytes, sizeof profile);
+	looks_profile_loaded();
+	w = looks_worn();
+	CHECK(looks_owned(LOOK_CLASSIC) && !looks_owned(LOOK_UNDERNET) && looks_slot() == 0 && !memcmp(&w, &plain, sizeof w),
+	      "an old profile reads as Classic owned and BN6's own colours");
+	for (int p = 0; p < LOOK_PALETTES; ++p) {
+		CHECK(looks_palette_name(p)[0], "palette %d named", p);
+		int distinct = 0;
+		for (int i = 0; i < LOOK_COLOURS; ++i) {
+			int j = 0;
+			while (j < i && looks_colour(p, j) != looks_colour(p, i)) ++j;
+			distinct += j == i;
+		}
+		CHECK(distinct == LOOK_COLOURS, "palette %d's sixteen colours differ (%d)", p, distinct);
+	}
+	profile = keep;
+}
 
 static void test_sha1(void) {
 	char hex[41];
@@ -8587,6 +8650,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 	test_sha1();
+	test_looks();
 	test_battle_data();
 	test_lab_text();
 	test_heal_again();

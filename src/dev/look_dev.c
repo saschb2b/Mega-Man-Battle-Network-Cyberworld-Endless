@@ -6,7 +6,7 @@
 
 #include "looks.h"
 
-void dev_look(const char *spec) {
+void dev_look_step(const char *spec) {
 	Look l = look_plain();
 	unsigned v[6];
 	if (strcmp(spec, "plain") && sscanf(spec, "%u,%u,%u,%u,%u,%u", &v[0], &v[1], &v[2], &v[3], &v[4], &v[5]) == 6)

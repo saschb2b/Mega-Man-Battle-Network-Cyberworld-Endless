@@ -46,6 +46,8 @@
 #define BN6_LOOK_FIELD_PAL_COUNT 5
 #define BN6_LOOK_FIELD_BLUE_FIRST 2       /* one seven-shade blue ramp, 2-8: 2-5 the armour's, 6-8 the suit's, */
 #define BN6_LOOK_FIELD_BLUE_LAST 8        /* ... 9 white, 10 gold, 11 the emblem's red, 12-15 skin */
+#define BN6_LOOK_FIELD_SUIT_FIRST 6       /* ... 2-5 the armour's shades, 6-8 the suit's */
+#define BN6_LOOK_FIELD_GOLD   10          /* the field's gold, the helmet's stripe and fins: the look's accent */
 #define BN6_LOOK_FIELD_INDEX  0x02000AA5u /* u8 the palette he takes on the field (bn6f eStruct2000aa0 +5, 0 in play) */
 #define BN6_LOOK_FIELD_INDEX_SET 0x0809E770u /* ldrb r0,[r7,#5] then sprite_setPalette (BN6_SPRITE_PALETTE_SET), each frame */
 /* The field sprite's frames (gfx.c's sprite layout): after the 4-byte header
@@ -71,6 +73,7 @@
 #define BN6_LOOK_MUGSHOT_PAL  0x084EDD1Cu /* ... its one palette: 1-3 the helmet's blue (1 its outline), 4-7 the green behind */
 #define BN6_LOOK_MUGSHOT_BLUE_FIRST 1     /* ... him, 8 red, 11 gold, 9 and 13-15 skin, 12 black: its own layout, */
 #define BN6_LOOK_MUGSHOT_BLUE_LAST 3      /* ... not the field's or the battle's */
+#define BN6_LOOK_MUGSHOT_GOLD 11          /* the mugshot's gold, the helmet's side pieces: the look's accent */
 /* The emotion window (the battle's and the Custom screen's face): face 0's
  * palette in BN6_FACE_PALS, which soullook.c copies and repoints
  * (BN6_FACE_PALS_REF), so it is read through that word */
@@ -100,5 +103,16 @@
 #define BN6_SPRITE_PAL_STALE  0x10        /* ... drawn in the slot it had, whatever that holds now */
 #define BN6_OBJ_SLOT_EMOTION  12          /* the emotion window's face in battle */
 #define BN6_OBJ_SLOT_MUGSHOT  13          /* a chat box's mugshot (bank 0); 14 the chat box, 12 the HP box on the field */
+
+/* A NetBattle's two sides (src/online/arena_looks.c; docs/rom/megaman-colours.md,
+ * NetBattles): his battle block's palettes BN6 never picks, each side's look
+ * written there in the Arena's cores, and the places BN6 picks his palette */
+#define BN6_LOOK_PAL_SPARE    { 0x19, 0x1A, 0x1E, 0x1F, 0x23, 0x24, 0x28, 0x29 } /* zero in the ROM, never drawn (measured) */
+#define BN6_LOOK_PAL_SPARES   8           /* ... how many */
+#define BN6_LOOK_PICK_END     0x0801009Eu /* adds r0,r4,#0 at the pick's end: r4 the palette (0, 1 or 4 in no form), r5 the object */
+#define BN6_LOOK_FORM_READ2   0x080BF516u /* ldr r1,=BN6_FORM_PALETTES: an object drawn as MegaMan (0x080BF4FC), r0 its side's form, */
+#define BN6_LOOK_FORM_READ2_SET 0x080BF51Au /* ... its palette set (bl sprite_setPalette, r0 the palette) */
+#define BN6_LOOK_FACE_COPY    0x0801CC2Au /* ldr r1,=the work palette's slot: the emotion window's face palette copied (r0 its */
+                                          /* ... address, the faces' palettes + 0x20 x r4 the face, r5 the window) */
 
 #endif

@@ -1,41 +1,67 @@
-/* STUB of looks-core's apply (issue #854, step 2): a look's field palette
- * for the Square's peers, a channel's ramp turned to a hue of the look's,
- * BN6's saturation and value kept. Dropped for looks-core's own when dev
- * brings it in. */
+/* MegaMan's look onto his palettes in the core's ROM copy (look_apply.h;
+ * docs/game/looks.md): each art's palette written from look_palette_of,
+ * which computes from BN6's own bytes, so LOOK_NONE is BN6's bytes again. */
 #include "look_apply.h"
 
-#include <math.h>
-#include <string.h>
+#include <stdio.h>
 
 #include "bn6.h"
+#include "emu.h"
 #include "rom.h"
 
-static uint16_t hue_to(uint16_t c, double hue) {
-	double r = (c & 31) / 31.0, g = (c >> 5 & 31) / 31.0, b = (c >> 10 & 31) / 31.0;
-	double mx = fmax(r, fmax(g, b)), mn = fmin(r, fmin(g, b)), v = mx, s = mx > 0 ? (mx - mn) / mx : 0;
-	double h = fmod(hue, 360.0) / 60.0, f = h - floor(h), p = v * (1 - s), q = v * (1 - s * f), t = v * (1 - s * (1 - f));
-	double o[3];
-	switch ((int)floor(h) % 6) {
-	case 0: o[0] = v; o[1] = t; o[2] = p; break;
-	case 1: o[0] = q; o[1] = v; o[2] = p; break;
-	case 2: o[0] = p; o[1] = v; o[2] = t; break;
-	case 3: o[0] = p; o[1] = q; o[2] = v; break;
-	case 4: o[0] = t; o[1] = p; o[2] = v; break;
-	default: o[0] = v; o[1] = p; o[2] = q; break;
+/* ---- the core's copy ---- */
+
+static Look applied;
+static bool applied_on;
+
+/* Whether the core's OBJ work palette holds sprite `which`'s palette for the
+ * look applied: a slot given this frame, or a fixed one */
+static bool seen(int which) {
+	uint16_t want[16];
+	if (!look_palette_of(&applied, which, want)) return false;
+	for (int slot = 0; slot < 16; ++slot) {
+		bool same = true;
+		for (int i = 1; i < 16 && same; ++i) same = emu_read16(BN6_OBJ_PAL_WORK + 32u * (unsigned)slot + 2u * (unsigned)i) == want[i];
+		if (same) return true;
 	}
-	return (uint16_t)((int)lround(o[0] * 31) | (int)lround(o[1] * 31) << 5 | (int)lround(o[2] * 31) << 10);
+	return false;
 }
 
-bool look_palette_of(const Look *look, int which, uint16_t out16[16]) {
-	if (which != LOOK_SPRITE_FIELD || !R.data) return false;
-	const uint8_t *pal = R.data + (BN6_LOOK_FIELD_PALS - 0x08000000u);
-	for (int i = 0; i < 16; ++i) out16[i] = (uint16_t)(pal[2 * i] | pal[2 * i + 1] << 8);
-	if (!look) return true;
-	static const int first[2] = { 2, 6 }, last[2] = { 5, 8 };
-	for (int c = 0; c < 2; ++c) {
-		if (look->palette[c] == LOOK_NONE) continue;
-		double hue = (look->palette[c] * 29 + look->colour[c] * 23) % 360;
-		for (int i = first[c]; i <= last[c]; ++i) out16[i] = hue_to(out16[i], hue);
+static void describe_seen(FILE *f) {
+	static const char *const names[LOOK_SPRITE_COUNT] = { "battle", "field", "mugshot", "face", "pale", "synchro" };
+	fprintf(f, "lookseen");
+	int n = 0;
+	for (int w = 0; applied_on && w < LOOK_SPRITE_COUNT; ++w)
+		if (seen(w)) fprintf(f, " %s", names[w]), ++n;
+	fprintf(f, "%s\n", n ? "" : " none");
+}
+
+void look_apply(const Look *look) {
+	Look plain = look_plain();
+	if (!look || !look_valid(look)) look = &plain;
+	if (!emu_ready()) return;
+	/* (no claim: a recolour of BN6's own bytes and of soullook.c's copy of
+	 * the faces, rewritten whenever the look changes, not an install) */
+	for (int w = 0; w < LOOK_SPRITE_COUNT; ++w) {
+		uint16_t pal[16];
+		/* (face 0's: soullook.c's copy in the core, the word repointed) */
+		uint32_t at = w == LOOK_SPRITE_FACE ? emu_read32(BN6_FACE_PALS_REF) : look_palette_at(w);
+		if (!at || !look_palette_of(look, w, pal)) continue;
+		uint8_t bytes[32];
+		for (int i = 0; i < 16; ++i) bytes[2 * i] = (uint8_t)pal[i], bytes[2 * i + 1] = (uint8_t)(pal[i] >> 8);
+		emu_write(at, bytes, sizeof bytes);
 	}
-	return true;
+	applied = *look;
+	applied_on = R.data != NULL;
+	looks_describe_with(describe_seen);
+}
+
+static void apply_worn(void) {
+	Look w = looks_worn();
+	look_apply(&w);
+}
+
+void look_apply_worn(void) {
+	looks_on_change(apply_worn);
+	apply_worn();
 }

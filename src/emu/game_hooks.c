@@ -9,9 +9,9 @@
 #include "events.h"
 #include "gamecall.h"
 #include "idle.h"
+#include "look_apply.h"
 #include "npc.h"
 #include "order_sort.h"
-#include "party_field.h"
 #include "party_play.h"
 #include "pet.h"
 #include "pet_text.h"
@@ -53,6 +53,9 @@ void game_hooks_install(void) {
 	cross_rows_install();
 	/* (BN5's chip AI for the player entered in each battle: DarkInvs's machine, installed with the Souls; docs/multirom/) */
 	darkinvs_dev(dev.chipai);
+	/* (MegaMan's look on his plain palettes, after soullook.c's copy of the
+	 * faces: the profile's worn one, again as it changes; docs/game/looks.md) */
+	look_apply_worn();
 }
 
 void game_hooks_after_boot(void) {

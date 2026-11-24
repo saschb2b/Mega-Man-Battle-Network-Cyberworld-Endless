@@ -1,11 +1,56 @@
-/* STUB of looks-core's model (issue #854, step 2), so that the Square's
- * peers' looks (step 4) build before it lands on dev: the look worn from
- * CYBERWORLD_LOOK ("p0,p1,p2,c0,c1,c2"), nothing kept. Dropped for
- * looks-core's own when dev brings it in. */
+/* The looks' twelve palettes, sixteen colours each, ours (docs/game/looks.md,
+ * The palettes): authored as 24-bit RGB for reading and kept as the GBA's
+ * BGR555. Each runs lights, mids, darks and an accent or two, so a channel
+ * can be picked pale, deep or loud from any of them. */
 #include "looks.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <stddef.h>
+
+#define RGB(x) (uint16_t)((((x) >> 19) & 0x1F) | (((x) >> 11) & 0x1F) << 5 | (((x) >> 3) & 0x1F) << 10)
+
+static const uint16_t colours[LOOK_PALETTES][LOOK_COLOURS] = {
+	[LOOK_CLASSIC] = {
+		RGB(0x40A0F8), RGB(0x2848C0), RGB(0xE04040), RGB(0xF08830), RGB(0xF0D040), RGB(0x40C060), RGB(0x30B0B0), RGB(0x8050D0),
+		RGB(0xE870B0), RGB(0xF0F0F0), RGB(0xB0B0B8), RGB(0x787880), RGB(0x202028), RGB(0x906040), RGB(0xA0E040), RGB(0xA01830) },
+	[LOOK_UNDERNET] = {
+		RGB(0xC8B8E8), RGB(0x9070D0), RGB(0x6840B0), RGB(0x482888), RGB(0x301860), RGB(0x180C30), RGB(0x585060), RGB(0x302838),
+		RGB(0xA02040), RGB(0x601020), RGB(0x40C080), RGB(0x205838), RGB(0xD0D040), RGB(0x8890A0), RGB(0xE03070), RGB(0x101010) },
+	[LOOK_GREGAR] = {
+		RGB(0xF8D8A0), RGB(0xF8B040), RGB(0xF08020), RGB(0xD05010), RGB(0xA03008), RGB(0x602008), RGB(0xE8C060), RGB(0xB08830),
+		RGB(0x705020), RGB(0xF04020), RGB(0x901818), RGB(0x401010), RGB(0xF8F0D0), RGB(0x584838), RGB(0x7040A0), RGB(0x202020) },
+	[LOOK_PROTOMAN] = {
+		RGB(0xF8C8C0), RGB(0xF07068), RGB(0xE03030), RGB(0xB01818), RGB(0x781010), RGB(0x400808), RGB(0xF0F0F8), RGB(0xC0C0C8),
+		RGB(0x8088A0), RGB(0x404858), RGB(0x181820), RGB(0xE8C040), RGB(0x50D070), RGB(0x208040), RGB(0x6070E0), RGB(0xA03060) },
+	[LOOK_NEBULA] = {
+		RGB(0xE0C0F0), RGB(0xB080E0), RGB(0x8040C0), RGB(0x6020A0), RGB(0x401070), RGB(0x200838), RGB(0x100818), RGB(0xF02040),
+		RGB(0xA01030), RGB(0x50E0F0), RGB(0x2080A0), RGB(0x606070), RGB(0x303040), RGB(0xF070D0), RGB(0xD0A030), RGB(0x582050) },
+	[LOOK_TOURNAMENT] = {
+		RGB(0xF8E880), RGB(0xF0C840), RGB(0xD0A020), RGB(0x987018), RGB(0xE0E0E8), RGB(0xA8A8B8), RGB(0x707080), RGB(0xD08850),
+		RGB(0x985830), RGB(0x603818), RGB(0xE03838), RGB(0x3858D0), RGB(0x30A050), RGB(0xF8F8F8), RGB(0x282830), RGB(0x8040C0) },
+	[LOOK_HAZARD] = {
+		RGB(0xF8F060), RGB(0xF0D010), RGB(0xF8A010), RGB(0xF06000), RGB(0xE02010), RGB(0x80F040), RGB(0x40B020), RGB(0x206010),
+		RGB(0xB06030), RGB(0x704020), RGB(0x383028), RGB(0x101010), RGB(0xE0E0D0), RGB(0x909088), RGB(0x50E0E0), RGB(0xF040A0) },
+	[LOOK_CENTRAL] = {
+		RGB(0xF8E8C8), RGB(0xE8B070), RGB(0xC07840), RGB(0x904828), RGB(0xA0D080), RGB(0x60A048), RGB(0x307030), RGB(0x80C0F0),
+		RGB(0x4080D0), RGB(0x205090), RGB(0xF0D850), RGB(0xE05048), RGB(0xB0B0B0), RGB(0x686870), RGB(0x303038), RGB(0xF8F8F0) },
+	[LOOK_SEASIDE] = {
+		RGB(0xD8F8F8), RGB(0x90E8E0), RGB(0x40C8D0), RGB(0x2090B0), RGB(0x106080), RGB(0x083048), RGB(0xF8E8B0), RGB(0xE0C080),
+		RGB(0xF89878), RGB(0xE05858), RGB(0xF8D0E0), RGB(0x60D0A0), RGB(0x30A070), RGB(0xF8F8F8), RGB(0x506070), RGB(0xF0B030) },
+	[LOOK_SKY] = {
+		RGB(0xF8F8F8), RGB(0xE0F0F8), RGB(0xB0D8F8), RGB(0x80C0F0), RGB(0x5098E0), RGB(0x3060C0), RGB(0x183888), RGB(0x101850),
+		RGB(0xF8D0A0), RGB(0xF8A070), RGB(0xF07080), RGB(0xC060A0), RGB(0x8060C0), RGB(0xF8E860), RGB(0xC0C8D0), RGB(0x8890A0) },
+	[LOOK_MYSTERY] = {
+		RGB(0xC0F8C0), RGB(0x70E870), RGB(0x30C040), RGB(0x188020), RGB(0xA0E0F8), RGB(0x50B0F0), RGB(0x2070D0), RGB(0xE0B0F8),
+		RGB(0xB070E8), RGB(0x7030B0), RGB(0xF8E070), RGB(0xD0A020), RGB(0xF8F8F8), RGB(0x80F0E0), RGB(0x309088), RGB(0x202830) },
+	[LOOK_GLITCH] = {
+		RGB(0xF8F8F8), RGB(0xC8C8C8), RGB(0x888888), RGB(0x484848), RGB(0x101010), RGB(0xF800F8), RGB(0xA000A0), RGB(0x00F8F8),
+		RGB(0x00A0A8), RGB(0x00F800), RGB(0x00A000), RGB(0xF8F800), RGB(0xF80000), RGB(0x0000F8), RGB(0xF88800), RGB(0x8000F8) },
+};
+
+uint16_t looks_colour(int p, int i) {
+	if (p < 0 || p >= LOOK_PALETTES || i < 0 || i >= LOOK_COLOURS) return 0;
+	return colours[p][i];
+}
 
 bool look_valid(const Look *look) {
 	if (!look) return false;
@@ -19,29 +64,5 @@ bool look_valid(const Look *look) {
 Look look_plain(void) {
 	Look l;
 	for (int c = 0; c < LOOK_CHANNELS; ++c) l.palette[c] = l.colour[c] = LOOK_NONE;
-	return l;
-}
-
-static Look override;
-static bool overridden;
-
-int looks_slot(void) { return 0; }
-
-bool looks_set(int slot, const Look *look) {
-	if (slot || !look_valid(look)) return false;
-	overridden = true;
-	override = *look;
-	return true;
-}
-
-Look looks_worn(void) {
-	if (overridden) return override;
-	Look l = look_plain();
-	const char *e = getenv("CYBERWORLD_LOOK");
-	unsigned v[6];
-	if (e && sscanf(e, "%u,%u,%u,%u,%u,%u", &v[0], &v[1], &v[2], &v[3], &v[4], &v[5]) == 6) {
-		for (int c = 0; c < LOOK_CHANNELS; ++c) { l.palette[c] = (uint8_t)v[c]; l.colour[c] = (uint8_t)v[3 + c]; }
-		if (!look_valid(&l)) l = look_plain();
-	}
 	return l;
 }

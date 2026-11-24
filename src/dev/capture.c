@@ -117,7 +117,7 @@ static bool text_step(const char *tok, InputStep *s) {
 	else if (!strncmp(tok, "by ", 3)) snprintf(s->by, sizeof s->by, "%s", tok + 3);
 	/* (on a dark layer's board, beside the nearest panel of a kind: director_dev_board) */
 	else if (!strncmp(tok, "board ", 6)) snprintf(s->board, sizeof s->board, "%s", tok + 6);
-	/* (MegaMan's look, "P,P,P,C,C,C" or "plain", into the slot worn: dev_look) */
+	/* (MegaMan's look, "P,P,P,C,C,C" or "plain", into the slot worn: dev_look_step) */
 	else if (!strncmp(tok, "look ", 5)) snprintf(s->look, sizeof s->look, "%s", tok + 5);
 	else if (!strncmp(tok, "cross ", 6)) s->cross = (int)strtol(tok + 6, NULL, 0);
 	else if (!strncmp(tok, "folder ", 7)) s->folder = (int)strtol(tok + 7, NULL, 0);
@@ -266,7 +266,7 @@ static void place_steps(const InputStep *s) {
 	if (s->sig == 3) director_dev_guardian();
 	if (s->by[0]) director_dev_by(s->by);
 	if (s->board[0]) director_dev_board(s->board);
-	if (s->look[0]) dev_look(s->look);
+	if (s->look[0]) dev_look_step(s->look);
 }
 
 /* A step's dev steps on the game: a battle, foes, a record of BN5's, a

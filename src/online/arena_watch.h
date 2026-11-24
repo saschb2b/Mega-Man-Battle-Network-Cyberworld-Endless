@@ -15,6 +15,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "looks.h"
+
 #include "watch_keys.h"
 
 typedef enum {
@@ -33,6 +35,10 @@ ArenaWatch *arena_watch_new(const uint8_t *rom, size_t size, uint32_t match);
  * MegaMen and keys, the partners' set as the players' games set them
  * (arena_seats.h) */
 void arena_watch_four(ArenaWatch *w);
+/* The two players' looks, the cable's first's and second's, as the Square
+ * knows them (peer_looks_of; NULL: BN6's own), before the pair is built:
+ * the same pair both their games built (issue #854). */
+void arena_watch_looks(ArenaWatch *w, const Look *side0, const Look *side1);
 void arena_watch_free(ArenaWatch *w);
 /* What the server hands on: a player's MegaMen (ARENA_LOADOUT's bytes),
  * the cable's first's hashes (the installs' record, the ready, every 60

@@ -113,6 +113,7 @@ DOMAINS = {
     'title_lines': ('Title', 'MegaMan', 'speech'),
     'title_setup_text': ('Title', 'Screen', 'screen'),
     'meta_text': ('Title', 'Screen', 'screen'),
+    'looks_text': ("MegaMan's look", 'Screen', 'screen'),
     'title_summary_text': ('Title', 'Screen', 'screen'),
     'launcher_text': ('The ROMs screen', 'Screen', 'screen'),
     'pick_text': ('The ROMs screen', 'Screen', 'screen'),

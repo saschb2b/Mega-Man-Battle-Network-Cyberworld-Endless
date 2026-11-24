@@ -18,6 +18,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_boot.h"
+#include "arena_looks.h"
 #include "arena_loadout.h"
 #include "arena_pair.h"
 #include "arena_seats.h"
@@ -66,6 +67,8 @@ struct ArenaWatch {
 
 	uint32_t match;
 	unsigned seats;   /* 2, or a 2v2's 4 */
+	Look look[2];     /* the two players' looks as the Square knows them (arena_watch_looks) */
+	bool looked;
 	uint8_t loadout[ONLINE_SEATS][ONLINE_ARENA_LOADOUT_MAX];
 	size_t loadout_n[ONLINE_SEATS];
 	bool loadout_in[ONLINE_SEATS], record_in, ready_in, ended, fought, fast;
@@ -102,6 +105,11 @@ ArenaWatch *arena_watch_new(const uint8_t *rom, size_t size, uint32_t match) {
 void arena_watch_four(ArenaWatch *w) {
 	w->seats = ONLINE_SEATS;
 	watch_keys_seats(&w->keys, ONLINE_SEATS);
+}
+
+void arena_watch_looks(ArenaWatch *w, const Look *side0, const Look *side1) {
+	w->looked = side0 && side1;
+	if (w->looked) { w->look[0] = *side0; w->look[1] = *side1; }
 }
 
 void arena_watch_free(ArenaWatch *w) {
@@ -188,6 +196,10 @@ static void build(ArenaWatch *w) {
 	/* (a 2v2: the partners' MegaMen seats 2 and 3's, as every player's game sets them) */
 	if (w->seats > 2) arena_seats_partners(carried + 2);
 	arena_seats_set(w->seats > 2);
+	/* (the players' looks as the Square knows them, the pair both their games
+	 * built; BN6's where either is not known, and in a 2v2) */
+	if (w->looked && w->seats == 2) arena_looks_set(&w->look[0], &w->look[1]);
+	else arena_looks_set(NULL, NULL);
 	w->boot = arena_boot_new(w->rom, w->size, carried);
 	if (!w->boot) { fail(w, "too little memory for the two PETs"); return; }
 	if (arena_boot_stage(w->boot) == ARENA_BOOT_FAILED) { fail(w, arena_boot_error(w->boot)); return; }

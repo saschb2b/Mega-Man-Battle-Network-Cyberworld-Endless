@@ -32,6 +32,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_boot.h"
+#include "arena_looks.h"
 #include "arena_pair.h"
 #include "arena_roll.h"
 #include "arena_seats.h"
@@ -65,8 +66,9 @@ typedef struct {
 
 /* the two MegaMen a pair was made with, side by side as their bytes
  * (arena_loadout_pack, the carried HP among them): a kept pair is gone
- * into again only for the same two on the same sides */
-typedef struct { uint8_t bytes[2][ONLINE_ARENA_LOADOUT_MAX]; size_t n[2]; } ArenaKey;
+ * into again only for the same two on the same sides, in the same looks
+ * (their palettes in its cores' ROM copies, arena_looks.h) */
+typedef struct { uint8_t bytes[2][ONLINE_ARENA_LOADOUT_MAX]; size_t n[2]; uint64_t looks; } ArenaKey;
 
 struct ArenaKept {
 	ArenaPair *pair;
@@ -133,9 +135,11 @@ static void key_of(const OnlineLoadout *loadout[2], ArenaKey *key) {
 	memset(key, 0, sizeof *key);
 	for (unsigned side = 0; side < 2; ++side)
 		key->n[side] = arena_loadout_pack(loadout ? loadout[side] : NULL, key->bytes[side], sizeof key->bytes[side]);
+	key->looks = arena_looks_hash(1);
 }
 
 static bool same_key(const ArenaKey *x, const ArenaKey *y) {
+	if (x->looks != y->looks) return false;
 	for (unsigned side = 0; side < 2; ++side)
 		if (!x->n[side] || x->n[side] != y->n[side] || memcmp(x->bytes[side], y->bytes[side], x->n[side])) return false;
 	return true;
@@ -405,6 +409,7 @@ static void over(Arena *a, uint32_t frame, const Ran *r) {
 		" held, %" PRIu32 " of %" PRIu32 " uneven (%" PRIu32 " after frame %u), %" PRIu32 " hashes agreed, %u cable transfers\n",
 		frame, a->result, r->result[1], a->stalls, a->sync.held, a->uneven, a->ticks, a->settled, SETTLE, a->hashes,
 		arena_pair_transfers(a->pair));
+	arena_looks_probe_report();
 	printf("arena: window %u, delay %u: %" PRIu32 " rollbacks, %" PRIu32 " frames run again, %" PRIu32
 		" the most at once; a frame of the pair %.2f ms (the worst %.2f), a tick at worst %.2f ms, %" PRIu32 " past a 60th\n",
 		a->window, a->input.delay, a->rollbacks, a->again,
