@@ -24,6 +24,12 @@ int fast_speed_read(const char *word);
 /* Options' Left and Right: off, 2x, 3x, 4x and round */
 int fast_speed_next(int speed, int dir);
 
+/* settings.ini's `fast_music`: the music at the GBA's pace while the game
+ * runs fast (true, the default: audio.h's music_fast_update), or faster
+ * with it, at its own pitch (false) */
+void fast_music_set(bool own_pace);
+bool fast_music(void);
+
 /* The button, a frame at a time: a press turns fast forward on or off,
  * and one held past FAST_HOLD frames turns it back as it is let go */
 #define FAST_HOLD 20

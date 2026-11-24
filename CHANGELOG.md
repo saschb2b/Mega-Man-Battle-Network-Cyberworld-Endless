@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **New: fast forward keeps the music at its own pace.** While the game
+  runs fast, the song plays on as it would at BN6's speed instead of
+  hurrying along with the game, and when fast forward stops the game
+  picks the song up from there. A battle's theme and the win's start as
+  they come; the game's sounds still play fast, with what is on screen.
+  `fast_music = off` in `settings.ini` brings the faster music back
+  (issue #839). Thanks to agergo100 for the idea.
+
 - **New: the layer's map stays open.** A press of SELECT opens the map
   and leaves it open while MegaMan walks; the next press closes it, as
   does a battle, a chat, the PET or a warp. Held, it shows while held,

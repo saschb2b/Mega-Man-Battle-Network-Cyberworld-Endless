@@ -184,6 +184,11 @@ const char *options_fast_note(void) {
 		"# way while held. Options changes it too.\n";
 }
 
+const char *options_fast_music_note(void) {
+	return "\n# fast_music: on, the music plays at its own pace while fast forward runs\n"
+		"# the game; off, it plays faster with the game.\n";
+}
+
 const char *options_vibration_note(void) {
 	return "\n# vibration: how strongly the controller rumbles on a fight's beats (a hit,\n"
 		"# by its damage; the charged shot ready and fired; a counter; a deletion;\n"
