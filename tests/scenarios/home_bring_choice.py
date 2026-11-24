@@ -3,7 +3,8 @@ docs/world/home/jobs.md, The chip given): with two kinds of the request's
 element in the Pack, the NetBattler at AsterLand opens BN6's own Chip
 Trader screen for one over those alone; the second put in and Yes, he
 takes that one and pays, the first still in the Pack. Left by B, nothing
-is taken and the request stays held. Seed 7's request at layer 10 asks a
+is taken and the request stays held. The courier in Lan's HP (issue 841)
+offers the same. Seed 7's request at layer 10 asks a
 Wood chip; --dev pack=38 puts RiskyHoney1 B (37) and RiskyHoney2 C (38)
 in the Pack, one of each."""
 
@@ -68,5 +69,23 @@ MANY = {
             ('expect', 'doing=map'),
             ('expect', 'request~settled 1'),
             ('expect', 'bringpack=none'),
+        ]),
+    'courier-pick': dict(
+        GUARDS="Issue 841's courier in Lan's HP offers the same choice: the second chosen on BN6's Chip Trader screen is taken to the NetBattler, the first stays, and the request is paid there.",
+        START=START,
+        STEPS=[
+            ('until', 'chat=open', 900), ('repeat', 'mash A 60', 'chat=closed', 20), FREE,
+            ('expect', BOTH),
+            ('do', 'place -84 54 7; wait 10; press A; wait 30'),     # the courier, from below him
+            ('repeat', 'press A; wait 40', 'doing=menu', 8),
+            ('do', 'wait 60'),
+            ('do', 'press DOWN; wait 10; press A; wait 60'),
+            ('until', 'choice=1/2', 120),
+            ('repeat', 'press A 10; wait 60', 'doing=map', 4),
+            ('until', 'chat=open', 600),
+            ('repeat', 'press A; wait 40', 'held=none', 30),
+            ('expect', "place=Lan's HP"),
+            ('expect', 'request~settled 1'),
+            ('expect', 'bringpack=37:B:1'),
         ]),
 }
