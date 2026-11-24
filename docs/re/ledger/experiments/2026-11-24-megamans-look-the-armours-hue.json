@@ -1,0 +1,8 @@
+{
+  "feature": "MegaMan's look",
+  "date": "2026-11-24",
+  "name": "The armour's hue turned in the ROM copy",
+  "result": "Battle palette 0's and 4's indexes 2-5, the field's 2-5, the mugshot's 2-3 and emotion face 0's 11-13 (read through BN6_FACE_PALS_REF, the Souls' copy) turned to hue 350 as the core started: the field, MegaMan's line in a chat box, the Custom screen, a battle and its emotion window drew the armour red in BN6's own shading, the suit, skin and window frame as they were; HeatCross chosen on CROSSSELECT drew its own colours, and the next battle the red armour again. A first try on BN6's own face palettes changed nothing: the engine reads the copy.",
+  "meaning": "A look is a write of the plain palettes in the ROM copy, read by the renderer every frame: no hook for the field, the chat box or the battle, and the forms keep their palettes untouched.",
+  "link": "../rom/megaman-colours.md"
+}
