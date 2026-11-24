@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Z-Canon rebuilt: three Program Advances.** The folder is now BN6's own
+  Program Advance folder one tier down: Cannon A B C for GigaCan1,
+  FireBrn1 F G H for WideBrn1, FireHit1 D E F for FlmHook1, and LifeSrd's
+  three swords in S, with Standard's kind of support in \*. A Program
+  Advance came together in 1 battle in 100 with the old folder; now about
+  1 in 11, at about Standard's damage. It still opens with any Program
+  Advance used (issue #865).
+
 - **New: other players' MegaMen wear their own looks in the Net Square.**
   Your look travels with your name, and the players around you are drawn
   in theirs; a look changed there shows to the others at once. Where a

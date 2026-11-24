@@ -45,7 +45,7 @@ the other way.
   chip in any hand, higher busting levels and their better rewards). It
   flattens the folders built on codes: Blade keeps its swords and loses
   only its S, and the planned Lean (codes aligned for big hands) and
-  Z-Canon (Cannons in A, B and C) would have nothing left to offer such a
+  Z-Canon (three recipes of codes in a row) would have nothing left to offer such a
   run. A Chip Trader stops fixing codes (every chip fits) and stays the
   collector's machine. Accepted: it is a dial the player turns, off by
   default, and named.

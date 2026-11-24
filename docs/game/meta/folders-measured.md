@@ -314,3 +314,19 @@ needed a battle read), its hint and words on issue 864's shelf, a test
 row in `test_folders`, and a loot table: the code lean reads the
 folder's codes as each layer is made, so a folder in A and T makes runs
 find A and T ([Phase two](phase-two.md)).
+
+## 5. After: the folders built from BN6's presets
+
+What the owner's calls built ([Decisions and phase one](decisions.md),
+Z-Canon rebuilt), measured as above (`tools/folder_hands.py`, 4000
+draws; the autopilot on this build over seeds 1-12 at threat 1, Standard
+played again beside it so a change of build shows).
+
+| Folder | Kinds | Codes | In `*` | Attack power | Heal | Turn 1: damage, chips | Three turns: damage, heal, chips, PAs |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Standard | 12 | 5 | 8 | 1030 | 40 | 128, 2.5 | 303, 4, 6.5, 0.00 |
+| Z-Canon, rebuilt | 10 | 9 | 12 | 1110 | 40 | 113, 2.6 | 324, 12, 7.1, 0.09 |
+
+- **Z-Canon** now forms a Program Advance in 9 battles in 100 under the
+  greedy pick (GigaCan1 3.6, FlmHook1 2.5, WideBrn1 2.4, LifeSrd 0.3),
+  where the first Z-Canon formed 1, at Standard's damage within a tenth.
