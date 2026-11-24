@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Fast forward"
 description: "Fast forward's frame batches in `scene_emu.c`: where BN6's state allows it (`fast_forward_game.c`, never the Custom screen or a fight), the 10 ms budget, the music at its own pace on the engine's MP2K and handed back, the effects kept at pitch by crossfaded grains, run time in game frames."
 tags: [engine, emulation]
-generated: { by: claude-code/unrecorded, at: 2026-10-24T23:07:49Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T00:45:00Z }
 ---
 
 # Fast forward

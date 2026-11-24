@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-24T00:45:00Z
-* **Update**: engine/emulation/fast-forward.md (The music: the song at its own pace on the engine's MP2K while fast, followed and handed back, through the core's ring at the core's DirectSound's line, measured), engine/emulation/index.md (its line), GUIDE.md (Fast forward: the music at its own pace, `fast_music`), rom/sound.md (the carried music's row: SoundInfo's DMA count, ring and samples a frame, read as fast forward takes the song), code/gfx-and-audio.md (`music_fast.c`, `music_game.h`).
