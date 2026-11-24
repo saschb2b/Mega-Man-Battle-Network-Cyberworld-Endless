@@ -2,8 +2,8 @@
  * each, and none says Options or Forms: each word is set from their own
  * letters (letters.h), read from the player's ROM as the core starts, into
  * a copy of the labels' tiles that the PET's load list points at, Options'
- * one tile column more than Comm's after them; Forms' five columns for the
- * ninth row, which BN6 never draws, kept here for the menu's picture alone
+ * one tile column more than Comm's after them; Forms' and Colours' five
+ * columns each for the rows BN6 never draws, kept here for the menu's picture alone
  * (pet_menu_frame.c), out of the video memory, where tile 0x2FF is BN6's
  * blank (docs/rom/pet-and-second-screen.md, the PET menu's labels). */
 #include "pet_options.h"
@@ -25,6 +25,7 @@
 #define ADDED 2                    /* the tiles past BN6's: Options' fifth column */
 #define FORMS_TILES (2 * COLS)     /* Forms' word's tiles, its top row then its bottom: ours, never loaded */
 #define FORMS_FIRST (BN6_PET_LABEL_FIRST + BN6_PET_LABEL_COUNT + ADDED)   /* the numbers Forms' map gives them, past the copy's (pet_options_forms_tile) */
+#define LOOKS_FIRST (FORMS_FIRST + FORMS_TILES)   /* ... and Colours', after them */
 #define FORMS_INK BN6_PET_LABEL_INK_NEXT   /* its letters' colour: the one after the eight rows' (the menu sets it, pet_menu_frame.c) */
 #define SAVE 7                     /* the label Forms' is made on: Save's, its last row's */
 #define VRAM_LABELS 0x0600D340u    /* where the load list puts them: BN6_PET_LABEL_FIRST in BG character block 2 */
@@ -55,6 +56,15 @@ static const Pick forms_picks[] = {
 	{ BN6_PET_ENTRY_COMM, 2, false },    /* m */
 	{ BN6_PET_ENTRY_STATUS, 5, false },  /* s */
 };
+static const Pick looks_picks[] = {
+	{ CHIPFOLDER, 0, false },            /* C */
+	{ BN6_PET_ENTRY_COMM, 1, false },    /* o */
+	{ CHIPFOLDER, 6, false },            /* l */
+	{ BN6_PET_ENTRY_COMM, 1, false },    /* o */
+	{ BN6_PET_ENTRY_STATUS, 4, false },  /* u */
+	{ CHIPFOLDER, 9, false },            /* r */
+	{ BN6_PET_ENTRY_STATUS, 5, false },  /* s */
+};
 static const struct { uint8_t entry, letters; } cuts[] = {
 	{ CHIPFOLDER, 10 }, { MEGAMAN, 7 }, { BN6_PET_ENTRY_COMM, 4 }, { BN6_PET_ENTRY_STATUS, 6 },
 };
@@ -62,6 +72,9 @@ static const struct { uint8_t entry, letters; } cuts[] = {
 static bool installed;
 static uint16_t forms_map[2 * BN6_PET_LABEL_W];   /* Forms' tile entries, Save's with the word's columns */
 static uint8_t forms_tiles[FORMS_TILES][TILE];     /* ... the word's tiles they name */
+static bool looks_set;                             /* Colours' word set (it fits Save's columns) */
+static uint16_t looks_map[2 * BN6_PET_LABEL_W];    /* Colours' tile entries, as Forms' */
+static uint8_t looks_tiles[FORMS_TILES][TILE];
 static bool shown;      /* Options opened from the PET, until it closes */
 static uint32_t hush;   /* the keys held as it closed, kept from the game until let go */
 
@@ -141,10 +154,11 @@ bool pet_options_install(void) {
 	}
 	if (top[COLS - 1] != rom_u16(comm + 2u * BN6_PET_LABEL_BLANK) || bottom[COLS - 1] != rom_u16(comm + 2u * (BN6_PET_LABEL_W + BN6_PET_LABEL_BLANK)))
 		return false;
-	static uint8_t word[LH][COLS * 8], forms[LH][COLS * 8];
+	static uint8_t word[LH][COLS * 8], forms[LH][COLS * 8], looks[LH][COLS * 8];
 	if (!cut_as_read(labels) || !set_word(labels, picks, sizeof picks / sizeof *picks, BN6_PET_ENTRY_COMM, ink(BN6_PET_ENTRY_COMM), word) ||
 		!set_word(labels, forms_picks, sizeof forms_picks / sizeof *forms_picks, SAVE, FORMS_INK, forms))
 		return false;
+	looks_set = set_word(labels, looks_picks, sizeof looks_picks / sizeof *looks_picks, SAVE, FORMS_INK, looks);
 
 	/* the labels' tiles copied, Comm's four columns the word's, its fifth two tiles more */
 	static uint8_t block[BLOCK];
@@ -158,9 +172,12 @@ bool pet_options_install(void) {
 			word_tile(forms, c, r, forms_tiles[r * COLS + c]);
 			uint32_t se = rom_u16(rom_off(entry_map(SAVE)) + 2u * (uint32_t)(r * BN6_PET_LABEL_W + c + 1));
 			forms_map[r * BN6_PET_LABEL_W + c + 1] = (uint16_t)((se & ~0x3FFu) | (FORMS_FIRST + r * COLS + c));
+			/* (and Colours', as Forms') */
+			word_tile(looks, c, r, looks_tiles[r * COLS + c]);
+			looks_map[r * BN6_PET_LABEL_W + c + 1] = (uint16_t)((se & ~0x3FFu) | (LOOKS_FIRST + r * COLS + c));
 		}
 	for (int k = 0; k < 2 * BN6_PET_LABEL_W; ++k)
-		if (k % BN6_PET_LABEL_W == 0 || k % BN6_PET_LABEL_W > COLS) forms_map[k] = rom_u16(rom_off(entry_map(SAVE)) + 2u * (uint32_t)k);
+		if (k % BN6_PET_LABEL_W == 0 || k % BN6_PET_LABEL_W > COLS) looks_map[k] = forms_map[k] = rom_u16(rom_off(entry_map(SAVE)) + 2u * (uint32_t)k);
 	claims_begin("the PET's Options (pet_options.c)");
 	emu_write(FREE_PET_OPTIONS, block, sizeof block);
 	emu_write32(BN6_PET_LABEL_LOAD, FREE_PET_OPTIONS);
@@ -185,6 +202,11 @@ bool pet_options_forms_map(uint16_t out[2 * BN6_PET_LABEL_W]) {
 	return installed;
 }
 
+bool pet_options_looks_map(uint16_t out[2 * BN6_PET_LABEL_W]) {
+	if (installed && looks_set) memcpy(out, looks_map, sizeof looks_map);
+	return installed && looks_set;
+}
+
 void pet_options_describe(FILE *f) {
 	/* (a PET screen of BN6's, or its menu over the map) */
 	int mode = emu_read8(emu_read32(BN6_TOOLKIT));
@@ -197,6 +219,7 @@ void pet_options_describe(FILE *f) {
 }
 
 const uint8_t *pet_options_forms_tile(int n) {
+	if (installed && looks_set && n >= LOOKS_FIRST && n < LOOKS_FIRST + FORMS_TILES) return looks_tiles[n - LOOKS_FIRST];
 	return installed && n >= FORMS_FIRST && n < FORMS_FIRST + FORMS_TILES ? forms_tiles[n - FORMS_FIRST] : NULL;
 }
 

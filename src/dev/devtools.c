@@ -152,7 +152,7 @@ void devtools_veteran(void) {
 		profile.forms_open |= (uint8_t)(1u << RUN_FORM_SOUL_BN5 | 1u << RUN_FORM_SOUL_BN4);
 		profile_save();
 	}
-	if (dev.heard) { profile.shelf.heard |= (uint8_t)dev.heard; profile_save(); }
+	if (dev.heard) { profile.shelf.heard |= (uint16_t)dev.heard; profile_save(); }
 	if (dev.shelf) meta_shelf_seen();
 	/* (library=N: every Nth chip id held, for the Library's pages' pictures;
 	 * not saved by this, as when the screen filled them as it opened) */

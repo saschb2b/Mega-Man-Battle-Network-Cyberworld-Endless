@@ -16,11 +16,14 @@
  * its last post), 0 not yet; SHELF_KEPT once these bytes are the shelf's
  * (a profile of before held other data in them, cleared once) */
 typedef struct {
-	uint8_t heard, floored;
+	uint16_t heard, floored;
 	uint16_t floor_at;
-	uint32_t kept;
+	uint16_t kept;
 } FolderShelf;
-#define SHELF_KEPT 0x464C4853u   /* "SHLF" */
+/* "SW": the shelf wide enough for sixteen folders (issue #865). The first
+ * shelf's eight bytes, a byte a bit set and a 32-bit mark, were never
+ * released; a profile that held them starts its shelf afresh. */
+#define SHELF_KEPT 0x5753u
 
 typedef struct {
 	int runs;
