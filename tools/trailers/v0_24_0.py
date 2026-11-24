@@ -37,6 +37,16 @@ partly missing there), the climax last:
 The recap: the folders' shelf, the map kept open, fast forward's music,
 a request's reward at home and its chip chosen.
 
+What the build does not do yet, and the nearest that was filmed instead
+(24 November 2026, v0_24_0_online.py's MISSING): crewmates in different
+looks part before a shared field's first frame, so the crew's battle and
+the party's guardian are filmed in BN6's blue, and a look is seen on peers
+in the Net Square alone (on a dive's layer each game draws every MegaMan
+in its own); the party's bots never finish a guardian in a take, so the
+climax ends on one MegaMan in his look deleting layer 3's guardian. The
+colours screen was filmed on dev with PR 862's palettes merged in
+locally (`--dev looks=4095`); retake it from dev once 862 is there.
+
 Its footage: v0_24_0_footage.py's scripted runs of one game and
 v0_24_0_online.py's takes of several games on a local server, whole
 frames of the game from the developer's ROMs. A scene not taken yet draws
@@ -99,10 +109,47 @@ def ring(small, old, new, t):
                                   outline=house.WHITE)
 
 
+# ---- the colours screen (issue 854: PR 858's screen, PR 862's palettes earned) ----
+# Lan's room (seed 2), the arrival's words paged, the PET's start menu, Colours; every palette owned
+# (`--dev looks=4095`, the profile a player has after earning them) and a look worn to begin with (ProtoMan's
+# red armour, Nebula's violet suit, Tournament's gold). In the screen: the armour's grid, the cursor walked
+# (he takes each colour as it moves), the palettes paged with R, a pick; the suit's and the accent's the same;
+# then out to the room in the new look.
+
+
+def frames(script):
+    return sum(int(step.split(':')[0]) for step in script.split(',') if step)
+
+
+def _press(key, then):
+    return f'6:{key},{then}:,'
+
+
+COLOURS_OPEN = ('40:,' + '4:A,6:,' * 46 + '30:,' + _press('START', 40) + _press('DOWN', 6) * 5 + '4:,' + _press('A', 60))
+COLOURS = (COLOURS_OPEN + '30:,'
+           + _press('DOWN', 24) + _press('A', 24) + _press('RIGHT', 16) * 2 + _press('DOWN', 16)
+           + _press('R', 28) * 4 + _press('RIGHT', 16) + _press('A', 36)
+           + _press('DOWN', 24) + _press('A', 24) + _press('R', 28) * 3 + _press('LEFT', 16) + _press('DOWN', 16) + _press('A', 36)
+           + _press('DOWN', 24) + _press('A', 24) + _press('R', 28) * 2 + _press('UP', 16) + _press('A', 36)
+           + '20:,' + _press('B', 50) + _press('B', 60) + '60:')
+# the nearest the build comes to the party's win (a party's bots do not finish a guardian in a take, and crewmates
+# in different looks part before the first frame: the cut's docstring): layer 3's guardian (seed 3, DiveMan)
+# deleted by one MegaMan in his look, the autopilot playing (won at about frame 10500)
+GUARDIAN_WIN = (['--scene', 'emu', '--run-depth', '3', '--seed', '3', '--dev', 'quiet,god,look=11.5,4.4,11.7'],
+                {'CYBERWORLD_AUTOPILOT': '1'}, None, 10040, 10760)
+OWN = {
+    'guardian-win': GUARDIAN_WIN,
+    'colours-screen': (['--scene', 'town', '--seed', '2', '--dev', 'looks=4095,look=3.2,4.4,5.1'], {}, COLOURS,
+                       frames(COLOURS_OPEN) - 40, frames(COLOURS)),
+}
+
+
 # ---- the takes' names (v0_24_0_online.py's kept folders) ----
 SQUARE = Mosaic(('square-a', 'square-b', 'square-c', 'square-d'))
 WIDEN = Mosaic(('square-a', 'square-b', 'square-c', 'square-d'), widen=24)
 DIVE = Mosaic(('dive-a', 'dive-b', 'dive-c', 'dive-d'))
+# (four runs, four forms at their moment: TenguCross, NapalmSoul, ThunSoul, Beast Out)
+FORMS = Mosaic(('form-cross-tengu', 'form-soul5-napalm', 'form-soul4-thun', 'form-beast'), offsets=(160, 140, 284, 166))
 
 
 def hello_backdrop():
@@ -110,15 +157,15 @@ def hello_backdrop():
     a new Net on every dive (three areas); his advice, and the picture
     pulls back to four games in one Square; the hand-over: the crew in the
     week's net"""
-    return [(0, 'own-square', 0, 1),
-            (5, 'look-field', 20, 1), (7, 'form-cross-a', 10, 1), (9, 'look-battle', 30, 1),
-            (12, WIDEN, 20, 1),
-            (17, DIVE, 40, 1)]
+    return [(0, 'own-sol', 0, 1),
+            (5, 'look-field', 20, 1), (7, 'look-field', 230, 1), (9, 'look-battle', 166, 1),
+            (12, WIDEN, 0, 1),
+            (17, DIVE, 400, 1)]
 
 
 def thanks_backdrop():
     """behind his thanks: the party's fight, then the crew on its way"""
-    return [(0, 'party-fight-a', 120, 1), (4, DIVE, 120, 1), (8, SQUARE, 200, 1)]
+    return [(0, 'party-a', 1060, 1), (4, DIVE, 470, 1), (8, SQUARE, 100, 1)]
 
 
 HELLO = Narration('dad-hello', [(0, "Hi,everyone! It's Lan's dad."),
@@ -133,30 +180,49 @@ THANKS = Narration('dad-thanks', [(0, "And that's 0.24.0!"),
 def segments():
     return [
         Segment('DIVE TOGETHER', [
-            Shot('THE SQUARE', 'MEET IN THE NET SQUARE', [(0, 'square-a', 60, 1)]),
-            Shot("THE WEEK'S NET", "ONE PORTAL: THE WEEK'S NET, TOGETHER", [(0, 'dive-portal', 10, 1)]),
-            Shot('A CREW FORMS', 'WALK TOGETHER AND YOU ARE A CREW', [(0, 'dive-a', 60, 1)], count='UP TO 4'),
-            Shot('JOIN IN', "A CREWMATE'S BATTLE: YOU'RE IN AT ONCE", [(0, 'crew-battle-a', 20, 1), (2, 'crew-battle-b', 60, 1)]),
+            # (Sol's game: Kai, Nova and Rin round the week's portal, each in his own look)
+            Shot('THE SQUARE', 'MEET UP IN THE NET SQUARE', [(0, 'square-a', 40, 1)]),
+            # (the portal's page of the week, then layer 1's act card)
+            Shot("THE WEEK'S NET", "ONE PORTAL: THE WEEK'S NET, TOGETHER", [(0, 'dive-portal', 40, 1), (2, 'dive-portal', 184, 1)]),
+            # (Nova and Rin walk up to Sol and Kai: dotted rings, then the crew of four, a ring under each)
+            Shot('A CREW FORMS', "WALK TOGETHER AND YOU'RE A CREW", [(0, 'dive-a', 398, 1)], count='UP TO 4'),
+            # (Sol's battle, joined unasked by both crewmates; Kai's own view of it)
+            Shot('JOIN IN', "A CREWMATE'S BATTLE: YOU'RE IN AT ONCE", [(0, 'crew-battle-a', 196, 1), (2, 'crew-battle-b', 200, 1)]),
         ], icon='icon-follow'),
         Segment('MAKE HIM YOURS', [
-            Shot('COLOURS', "PICK MEGAMAN'S LOOK IN THE PET", [(0, 'colours-screen', 10, 1)]),
-            Shot('3 CHANNELS', 'ARMOUR, SUIT AND ACCENT, EACH YOURS', [(0, 'colours-channels', 10, 1)]),
-            Shot('12 PALETTES', 'PALETTES EARNED IN THE RUN', [(0, 'palette-earned', 10, 1)], count='12'),
-            Shot('IN EVERY FIGHT', 'ON THE FIELD, IN BATTLE, IN EVERY CHAT', [(0, 'look-battle', 40, 1), (2, 'look-chat', 10, 1)]),
-            Shot('THE CREW', 'EVERY DIVER IN HIS OWN LOOK', [(0, 'square-a', 160, 1)]),
+            # (the screen opening on the look worn, into the armour's grid, the cursor walked: he takes each colour)
+            Shot('COLOURS', "PICK MEGAMAN'S LOOK IN THE PET", [(0, 'colours-screen', 4, 1), (2, 'colours-screen', 40, 1)]),
+            # (the suit's grid, a colour picked; the accent's)
+            Shot('3 CHANNELS', 'ARMOUR, SUIT AND ACCENT, EACH YOURS', [(0, 'colours-screen', 200, 1), (2, 'colours-screen', 296, 1)]),
+            # (R through ProtoMan, Nebula, Tournament, Hazard and Central Town, each one's way to earn it in the box)
+            Shot('12 PALETTES', 'PALETTES EARNED ACROSS YOUR RUNS', [(0, 'colours-screen', 96, 1)], count='12'),
+            Shot('IN EVERY FIGHT', 'ON THE FIELD, IN BATTLE, IN EVERY CHAT', [(0, 'look-battle', 170, 1), (2, 'look-chat', 2, 1)]),
+            # (Sol's game in the Square: the other three in theirs, Nova's "Haha!")
+            Shot('THE CREW', 'IN THE SQUARE, EACH IN HIS OWN LOOK', [(0, 'square-a', 88, 1)]),
         ], icon='icon-star'),
         Segment('ONE FORM AFTER ANOTHER', [
-            Shot('FORM ROW', 'START A RUN AS CROSS, SOUL BN5 OR BN4', [(0, 'form-row', 0, 1)]),
-            Shot("FALZAR'S CROSSES", "FALZAR'S CROSSES JOIN GREGAR'S", [(0, 'form-cross-a', 0, 1), (2, 'form-cross-b', 0, 1)],
+            # (the setup's FORM row turning CROSS, SOUL BN5, SOUL BN4)
+            Shot('FORM ROW', 'START A RUN AS CROSS, SOUL BN5 OR BN4', [(0, 'form-row', 14, 1), (2, 'form-row', 104, 1)]),
+            # (each from MegaMan in his look: the dark, the flash, the Navi beside him, the form; TenguCross, then
+            # GroundCross)
+            Shot("FALZAR'S CROSSES", "FALZAR'S FIVE CROSSES JOIN GREGAR'S", [(0, 'form-cross-tengu', 184, 1), (2, 'form-cross-ground', 190, 1)],
                  count='+5'),
-            Shot('SOULS, IN BN6', "TEAM PROTOMAN'S SOULS IN BN6'S ENGINE", [(0, 'form-soul5-a', 0, 1), (2, 'form-soul5-b', 0, 1)]),
-            Shot("BN4'S SOULS", "BN4'S SOULS UNITE TOO", [(0, 'form-soul4-a', 0, 1), (2, 'form-beast', 0, 1)]),
+            # (NapalmSoul, then ProtoSoul)
+            Shot('SOULS IN BN6', "TEAM PROTOMAN'S SOULS, IN BN6'S ENGINE", [(0, 'form-soul5-napalm', 164, 1), (2, 'form-soul5-proto', 166, 1)]),
+            # (ThunSoul, then Beast Out's flare)
+            Shot("BN4'S SOULS", "BN4'S SOULS UNITE TOO. AND BEAST OUT!", [(0, 'form-soul4-thun', 304, 1), (2, 'form-beast', 184, 1)]),
+            # (DustCross's scrap, 79 to 19; GroundCross's drill)
+            Shot('BIG HITS', 'EVERY FORM HITS IN ITS OWN WAY', [(0, 'form-cross-dust', 392, 1), (2, 'form-cross-ground', 418, 1)]),
         ], icon='icon-swap'),
         Segment('ONE FIELD, ONE GUARDIAN', [
-            Shot('THE DOOR', "THE GUARDIAN'S DOOR WAITS FOR THE CREW", [(0, 'party-door', 40, 1)]),
-            Shot('ONE FIELD', 'THE CREW SIDE BY SIDE ON ONE FIELD', [(0, 'party-fight-a', 10, 1)], count='3'),
-            Shot('TEAM HP', "EACH PARTNER'S HP IN BN6'S OWN DIGITS", [(0, 'party-fight-b', 80, 1)]),
-            Shot('THE WIN', 'HIS HP TIMES THE PARTY. TAKE HIM DOWN!', [(0, 'party-win', 0, 1)]),
+            # (the door waits for the crew, counting down; PARTY OF 3!)
+            Shot('THE DOOR', "THE GUARDIAN'S DOOR WAITS FOR THE CREW", [(0, 'party-a', 224, 1), (2, 'party-a', 276, 1)]),
+            # (three MegaMen against DiveMan at three times his HP)
+            Shot('ONE FIELD', 'HIS HP TIMES THE PARTY, 3 ON ONE FIELD', [(0, 'party-a', 1000, 1)]),
+            # (Kai's own Custom screen, then his view of the same fight)
+            Shot('OWN SCREENS', 'EACH ON HIS OWN SCREEN, HIS OWN CHIPS', [(0, 'party-b', 0, 1), (2, 'party-b', 300, 1)]),
+            # (a guardian deleted: one MegaMan in his look, the nearest the build comes to the party's win)
+            Shot('DELETED!', 'ENEMY DELETED! ON TO THE NEXT LAYER', [(0, 'guardian-win', 108, 1), (2.5, 'guardian-win', 164, 1)]),
         ], icon='icon-full'),
     ]
 
@@ -165,12 +231,17 @@ FIXES = house.changelog(VERSION)[1]
 T = house.Trailer(
     version=VERSION, name=NAME, music=music, accent=ACCENT, field=field, cut=ring,
     # (a MegaMan in a look of his own transforming; then the crew's four games at once)
-    cold=[(0, 'form-cross-a', 0, 1), (4, SQUARE, 120, 1)],
+    cold=[(0, 'form-cross-dust', 150, 1), (4, FORMS, 0, 1)],
     hello=HELLO, thanks=THANKS, segments=segments(),
-    recap=[Tile('folders-shelf', 20, ('EVERY STARTING FOLDER', 'ON THE SHELF')),
-           Tile('map-open', 40, ('THE MAP STAYS OPEN', 'ON SELECT')),
-           Tile('fast-forward', 20, ('FAST FORWARD KEEPS', "THE MUSIC'S PACE")),
-           Tile('reward-home', 20, ("A REQUEST'S REWARD", "IN LAN'S HP"))],
+    # (the shelf is filmed last: 0.24.0 waits for issue 865's new starting folders, Z-Canon rebuilt, BN6's presets
+    # trimmed, Ember and Tide, the Soul forms starting with BN5's and BN4's own folders; retake folders-shelf
+    # once they are on dev, and its words with them)
+    # (a locked folder and its hint; the map open, more of it drawn; fast forward's mark on a layer; BN6's Chip
+    # Trader screen for a Bring request)
+    recap=[Tile('folders-shelf', 60, ('EVERY STARTING FOLDER', 'ON THE SHELF')),
+           Tile('map-open', 220, ('THE MAP STAYS OPEN', 'ON SELECT')),
+           Tile('fast-forward', 190, ('FAST FORWARD KEEPS', "THE MUSIC'S PACE")),
+           Tile('chip-choice', 260, ('PICK THE CHIP A REQUEST TAKES,', "ITS REWARD IN LAN'S HP"))],
     recap_caption=('AND FIXES ACROSS THE WHOLE RUN:', str(FIXES)))
 
 PLAY_LABEL = T.play_label
@@ -181,15 +252,15 @@ POSTER = T.poster
 # whole frame each with two or three words
 YOUTUBE_HOOK = 'Your MegaMan, Your Crew'
 THUMBNAILS = [
-    {'hero': ('party-fight-a', 60), 'region': (0, 60, 160), 'words': ('YOUR', 'CREW!'), 'lit': 1, 'side': 'right'},
+    {'hero': ('party-a', 1100), 'region': (0, 60, 160), 'words': ('YOUR', 'CREW!'), 'lit': 1, 'side': 'right'},
     {'hero': ('look-battle', 40), 'region': (0, 25, 240), 'words': ('YOUR', 'MEGAMAN!'), 'lit': 1, 'side': 'right'},
-    {'hero': ('form-cross-a', 30), 'region': (0, 12, 240), 'words': ('NEW', 'FORMS!'), 'lit': 1},
+    {'hero': ('form-cross-tengu', 208), 'region': (0, 12, 240), 'words': ('NEW', 'FORMS!'), 'lit': 1},
 ]
 
 
 def scenes():
     """the runs of one game; the takes of several are footage()'s"""
-    return T.scenes(dict(getattr(runs, 'SCENES', {})))
+    return T.scenes(dict(getattr(runs, 'SCENES', {}), **OWN))
 
 
 def footage(keep):

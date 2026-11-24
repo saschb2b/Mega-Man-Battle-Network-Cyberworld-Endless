@@ -41,7 +41,7 @@ from trailers import sketch_together_a as SKETCH  # noqa: E402  (the owner's pic
 from trailers.house_music import (BPM, CHORD_SAMPLES, DS_ENV, DS_GAIN, DS_LEVEL, HARDWARE, MIX,  # noqa: E402,F401
                                   REVERB, SAMPLED_LEADS, SAMPLED_PARTS, SOUNDFONT, TAIL, instruments)
 
-SEGMENTS = (5, 6, 5, 5)                      # each segment's bars, its section card the first
+SEGMENTS = (5, 6, 6, 5)                      # each segment's bars, its section card the first
 HELLO = 6                                    # four boxes: who he is, the game, friends, the hand-over
 WIDEN = 3                                    # the hello's bar the picture widens on (from one game to four)
 FORM = B.form(SEGMENTS, hello=HELLO)
