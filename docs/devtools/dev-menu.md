@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T17:28:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 ---
 
 # Dev menu: shorter test runs
@@ -75,7 +75,9 @@ included, so an autopilot run shows on the friend list and a capture of
 Options' Game page has its Discord line:
 [Discord's presence](../engine/discord.md)), `folders`
 (every starting folder open in the profile: the setup's Folder row turns
-through all six, [Decisions and phase one](../game/meta/decisions.md)), `heard=BITS`
+through all six, [Decisions and phase one](../game/meta/decisions.md);
+and both Soul forms, which the FORM row of `forms` then offers where
+their ROMs are read, [MegaMan's forms](../game/meta/forms.md)), `heard=BITS`
 (the starting folders heard of, `1 << FOLDER_*`: `heard=2` Blade, its
 plain milestone on the setup's shelf) and `shelf` (the shelf seen, as after a
 first setup, so a layer's whisper may tell how a locked folder opens; both

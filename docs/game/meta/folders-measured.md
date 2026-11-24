@@ -3,7 +3,7 @@ type: Analysis
 title: "Starting folders measured"
 description: "Issue 865's groundwork: the six starting folders measured (hands drawn, the autopilot's runs), BN6's five other preset folders and BN5's and BN4's starting folders read from their ROMs and judged as a run's start, and five archetypes of ours sketched; numbers for the owner's calls, no folder changed."
 tags: [game, meta, folders, measurement]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 sources:
   - id: roms
     resource: "BN6 Gregar's, BN5 Team Colonel's and BN4 Red Sun's ROMs, read by tools/folder_hands.py"
@@ -255,7 +255,10 @@ chip as MMKB's Folder page lists them.
   Standard in act 1 (their hands a little weaker, 0.88 and 0.81 of it).
   As shelf entries they fail the issue's own test (a first act unlike
   every other's); as the start a SOUL BN5 or SOUL BN4 run brings in place
-  of Standard they are a fidelity touch at no balance cost.
+  of Standard they are a fidelity touch at no balance cost. So they were
+  built ([MegaMan's forms](forms.md), Each game's start), BN4's with
+  AirShot \* and Vulcan1 S: drawn so, 115 on turn one and 283 over three
+  (Standard's 128 and 304).
 - **What else they hold.** BN5's table has five more (its story's extra
   folders: a stronger start like BN6's preset 1, a tutorial one, two
   Mega-chip folders and a dark one of DrkSword, DarkInvs, DarkThnd and

@@ -11,6 +11,14 @@
   Support folder was played and left out: its aimed and delayed chips
   are too slow for a run's first battles (issue #865).
 
+- **New: a Soul run starts with its own game's folder.** With the FORM
+  row on SOUL BN5 the Standard folder is BN5's own NEW GAME folder, on
+  SOUL BN4 BN4's, read from your ROMs: CrakOut in place of CrakShot, a
+  third AirShot, BN4's without BusterUp. BN4's AirShot A and Vulcan1 V
+  are codes BN6 never gives, so they come as AirShot * and Vulcan1 S, and
+  the setup says so. Neither start is stronger than BN6's; CROSS and every
+  other folder stay as they were (issue 865).
+
 - **Z-Canon rebuilt: three Program Advances.** The folder is now BN6's own
   Program Advance folder one tier down: Cannon A B C for GigaCan1,
   FireBrn1 F G H for WideBrn1, FireHit1 D E F for FlmHook1, and LifeSrd's

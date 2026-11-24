@@ -155,8 +155,13 @@ void devtools_veteran(void) {
 	if (dev_look_on) looks_set(looks_slot(), &dev_look_set);
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
 	dev_looks();
-	/* (a bit a folder but the Standard's, every one meta.h has) */
-	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
+	/* (a bit a folder but the Standard's, every one meta.h has; and the
+	 * Soul forms, which the setup offers where their ROMs are read) */
+	if (dev.folders) {
+		profile.folders_open |= 0xFFFEu;
+		profile.forms_open |= (uint8_t)(1u << RUN_FORM_SOUL_BN5 | 1u << RUN_FORM_SOUL_BN4);
+		profile_save();
+	}
 	if (dev.heard) { profile.shelf.heard |= (uint16_t)dev.heard; profile_save(); }
 	if (dev.shelf) meta_shelf_seen();
 	/* (library=N: every Nth chip id held, for the Library's pages' pictures;
