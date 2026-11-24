@@ -12,7 +12,6 @@
 #include "director_hold.h"
 #include "dive_link.h"
 #include "emu.h"
-#include "looks.h"
 #include "netmap.h"
 #include "netpass.h"
 #include "online_board.h"
@@ -22,7 +21,6 @@
 #include "online_visit.h"
 #include "party_play.h"
 #include "square_arena.h"
-#include "square_looks.h"
 #include "square_pet.h"
 #include "square_watch.h"
 #include "square_week.h"
@@ -73,14 +71,20 @@ static void square(FILE *f, const OnlineSnapshot *s) {
 		const OnlinePeer *p = &s->peers[i];
 		fprintf(f, "peer %s at %d %d in %s %s%s\n", p->name, (int)p->x, (int)p->y, part_at(p->x, p->y),
 			p->busy < sizeof busy / sizeof *busy ? busy[p->busy] : "busy", p->diving ? " diving" : "");
-		/* (his look as the wire says it, and whether the Square draws it: square_looks.h) */
-		int drawn = square_looks_shown(p->id);
-		fprintf(f, "peerlook %s %u.%u.%u/%u.%u.%u %s\n", p->name, p->look[0], p->look[1], p->look[2], p->look[3], p->look[4], p->look[5],
-			drawn > 0 ? "drawn" : drawn == 0 ? "classic" : "none");
 	}
-	Look own = looks_worn();
-	fprintf(f, "look %u.%u.%u/%u.%u.%u\nlookroom %d\nlookstale %d\n", own.palette[0], own.palette[1], own.palette[2],
-		own.colour[0], own.colour[1], own.colour[2], square_looks_room(), square_looks_stale());
+	/* (each one's look as the wire says it, and whether the Square draws it: square_looks.h; one line, a `~` finds each) */
+	fputs("peerlooks", f);
+	for (size_t i = 0; i < s->peer_count; ++i) {
+		const OnlinePeer *p = &s->peers[i];
+		int drawn = square_looks_shown(p->id);
+		Look l;
+		peer_looks_of(p->id, &l);   /* (as the Arena's pairing reads it) */
+		fprintf(f, "%s %s %u.%u.%u/%u.%u.%u %s", i ? "," : "", p->name, l.palette[0], l.palette[1], l.palette[2], l.colour[0], l.colour[1],
+			l.colour[2], drawn > 0 ? "drawn" : drawn == 0 ? "classic" : "none");
+	}
+	fputc('\n', f);
+	/* (MegaMan's own look is looks_describe's line) */
+	fprintf(f, "lookroom %d\nlookstale %d\n", square_looks_room(), square_looks_stale());
 	const OnlineEvent *sent = NULL, *heard = NULL;
 	unsigned sents = 0, heards = 0;
 	for (uint32_t k = 0; k < ONLINE_EVENT_HISTORY && k < s->event_serial; ++k) {

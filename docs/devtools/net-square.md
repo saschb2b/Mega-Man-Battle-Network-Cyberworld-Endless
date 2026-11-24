@@ -125,5 +125,5 @@ MegaMan's look is set in the slot worn by the dev step `look
 P,P,P,C,C,C` (a palette and a colour a channel, 255 BN6's own; `look
 plain` his own colours), as the PET's screen would set it: the Square
 sends it at once, and the others' state says how they draw him
-(`peerlook NAME P.P.P/C.C.C drawn|classic`; [Peers'
+(`peerlooks NAME P.P.P/C.C.C drawn|classic, ...`; [Peers'
 looks](../online/square/looks.md)).

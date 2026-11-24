@@ -10,7 +10,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "online_square.h"
+#include "looks.h"
+#include "online_types.h"
+#include "peer_looks.h"
+
+#define SQUARE_LOOKS_PEERS (ONLINE_MAX_PLAYERS - 1)   /* (online_square.h's SQUARE_PEERS) */
 
 #define SQUARE_LOOKS_HOLD 90   /* frames a pick is held while the same peers stand in the same part */
 #define SQUARE_LOOKS_KEEP 24   /* world units a peer drawn in his look keeps it against a nearer one */
@@ -21,17 +25,25 @@
  * room (BN6's own colours then, as before looks). */
 int square_looks_install(void);
 
-/* The looks a part of the Square has room for besides MegaMan's own (its
- * free OBJ palette slots, docs/rom/megaman-colours.md, The Square's slots). */
-int square_looks_cap(int part);
-
 /* This frame's looks: `shown`'s peers by slot, their puppets' scripts,
  * MegaMan's place and the part of the Square he is in (SQ_PART_*, -1 none). */
-void square_looks_frame(const OnlineSnapshot *shown, const uint32_t scripts[SQUARE_PEERS], int x, int y, int part);
+void square_looks_frame(const OnlineSnapshot *shown, const uint32_t scripts[SQUARE_LOOKS_PEERS], int x, int y, int part);
+
+/* A visit begun: the players' looks known forgotten, MegaMan's own sent. */
+void square_looks_begin(void);
+/* Each frame of a visit, from the SNAPSHOT as the link gave it: the looks
+ * each player is known by noted (peer_looks.h), MegaMan's own sent where
+ * it changed and the link is `up`. */
+void square_looks_update(const OnlineSnapshot *snapshot, bool up);
 
 /* MegaMan's own look over the wire where it changed since it was last
  * sent, or again (`again`: a visit begun or a resume's WELCOME). */
 void square_looks_send(bool again);
+
+/* MegaMan's own look as last sent (BN6's own before any): the look the
+ * others know him by, so a NetBattle's two games build the same pair from
+ * it and peer_looks_of (false where none was sent yet). */
+bool square_looks_sent(Look *out);
 
 /* For the state in words (online_describe.c): whether peer `peer` (his
  * session) is drawn in his own look (1), in BN6's own colours (0) or not

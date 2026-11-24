@@ -47,9 +47,3 @@ bool peer_looks_of(uint32_t session, Look *out) {
 	for (int k = 0; k < KEPT && session; ++k) if (known[k].seen && known[k].session == session) at = k;
 	return found(at, out);
 }
-
-bool peer_looks_of_identity(const uint8_t identity[ONLINE_IDENTITY_BYTES], Look *out) {
-	int at = -1;
-	for (int k = 0; k < KEPT; ++k) if (known[k].seen && !memcmp(known[k].identity, identity, ONLINE_IDENTITY_BYTES)) at = k;
-	return found(at, out);
-}

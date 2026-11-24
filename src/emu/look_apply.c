@@ -26,8 +26,6 @@ static uint16_t hue_to(uint16_t c, double hue) {
 	return (uint16_t)((int)lround(o[0] * 31) | (int)lround(o[1] * 31) << 5 | (int)lround(o[2] * 31) << 10);
 }
 
-void look_apply(const Look *look) { (void)look; }
-
 bool look_palette_of(const Look *look, int which, uint16_t out16[16]) {
 	if (which != LOOK_SPRITE_FIELD || !R.data) return false;
 	const uint8_t *pal = R.data + (BN6_LOOK_FIELD_PALS - 0x08000000u);

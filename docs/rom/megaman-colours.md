@@ -150,7 +150,7 @@ The Square draws each peer's look through one copy of the field sprite
   engine's check that its count of the slots held.
 
 Verify: `python3 build.py scenarios online_looks` (the state's
-`peerlook` lines and `lookstale 0`, and its pictures).
+`peerlooks` line and `lookstale 0`, and its pictures).
 
 ## NetBattles
 

@@ -27,7 +27,6 @@
 #include "pad_art.h"
 #include "puppet.h"
 #include "rom.h"
-#include "square_looks.h"
 #include "square_plan.h"
 #include "xnavi.h"
 

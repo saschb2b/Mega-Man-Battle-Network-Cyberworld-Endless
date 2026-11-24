@@ -26,7 +26,7 @@ frame can hold.
 Protocol v30 ([the wire](../../../shared/online/README.md), Protocol v30):
 the game sends LOOK, the look's six bytes, after each WELCOME (a visit
 begun, a resume) and again as the look worn changes (`square_looks_send`,
-from `online_scene.c`); the server bounds it by its own numbers, keeps the
+from `online_scene.c` through `square_looks_begin` and `square_looks_update`); the server bounds it by its own numbers, keeps the
 latest and puts it last in each SNAPSHOT's peer (56 bytes). A player
 whose game never sent one is all `look_none`: BN6's own colours. The
 server never knows which palettes a player owns, and an older game or
@@ -71,9 +71,9 @@ part's room is one look smaller for ten seconds.
 ## For the Arena
 
 `peer_looks.c` keeps the look each player of the Square was last seen in,
-by session and by public identity: `peer_looks_of(session, &look)` and
-`peer_looks_of_identity(identity, &look)` give it, BN6's own where he
-was never seen. A NetBattle's pairing reads its opponent's there; the
+by session: `peer_looks_of(session, &look)` gives it, BN6's own where
+he was never seen (the state's `peerlooks` line reads it the same way).
+A game's own side is `square_looks_sent`, the look the others know it by. A NetBattle's pairing reads its opponent's there; the
 two sides are drawn from it (issue #854's NetBattle step).
 
 ## Checked
@@ -82,6 +82,6 @@ two sides are drawn from it (issue #854's NetBattle step).
 their own seen by the third and a look changed there seen by the others;
 five games, the plaza past its room, the farthest in BN6's own colours
 and his look back as he comes nearest, no peer stale. The state's
-`peerlook NAME P.P.P/C.C.C drawn|classic`, `look`, `lookroom` and
+`peerlooks NAME P.P.P/C.C.C drawn|classic, ...`, `lookroom` and
 `lookstale` lines say it. `tests/test_online.c` holds the pick and the
 wire's bounds, `server/tests/test_looks.py` the server's.

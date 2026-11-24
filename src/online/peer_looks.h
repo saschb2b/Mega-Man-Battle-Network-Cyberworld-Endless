@@ -16,8 +16,6 @@ void peer_looks_note(const OnlineSnapshot *snapshot);
 /* Player `session`'s look as the Square last showed him: false, and
  * `out` BN6's own (look_plain), where he was never seen. */
 bool peer_looks_of(uint32_t session, Look *out);
-/* The same by his public identity (ARENA_STATE's 16 bytes). */
-bool peer_looks_of_identity(const uint8_t identity[ONLINE_IDENTITY_BYTES], Look *out);
 /* Forgotten: a visit begun. */
 void peer_looks_reset(void);
 

@@ -21,7 +21,9 @@
 #include "look_apply.h"
 #include "looks.h"
 #include "mapslot.h"
+#include "online_square.h"
 #include "online_transport.h"
+#include "peer_looks.h"
 #include "puppet.h"
 #include "rom.h"
 #include "square_looks_pick.h"
@@ -49,7 +51,7 @@ static bool ever_sent;
  * the plaza 3, Trade Central 9, the stage 10; the Arena's ring as the plaza until measured) */
 static const int caps[SQ_PARTS] = { [SQ_PART_PLAZA] = 3, [SQ_PART_TRADE] = 9, [SQ_PART_ARENA] = 3, [SQ_PART_STAGE] = 10 };
 
-int square_looks_cap(int part) { return part >= 0 && part < SQ_PARTS ? caps[part] : caps[SQ_PART_PLAZA]; }
+static int square_looks_cap(int part) { return part >= 0 && part < SQ_PARTS ? caps[part] : caps[SQ_PART_PLAZA]; }
 
 static uint32_t list_entry(int number) {
 	return emu_read32(BUS + R.layout->sprite_lists + LIST_NAVIS * 4) + (uint32_t)number * 4;
@@ -169,7 +171,7 @@ static void colour_slot(int i, const OnlinePeer *p) {
 	memcpy(S.colours[1 + i], c, sizeof c);
 }
 
-void square_looks_frame(const OnlineSnapshot *shown, const uint32_t scripts[SQUARE_PEERS], int x, int y, int part) {
+void square_looks_frame(const OnlineSnapshot *shown, const uint32_t scripts[SQUARE_LOOKS_PEERS], int x, int y, int part) {
 	if (!S.block) return;
 	int n = shown->connected && shown->peer_count < SQUARE_PEERS ? (int)shown->peer_count : shown->connected ? SQUARE_PEERS : 0;
 	Look own = looks_worn();
@@ -215,3 +217,20 @@ int square_looks_shown(uint32_t peer) {
 int square_looks_stale(void) { return S.stale; }
 
 int square_looks_room(void) { return S.block ? square_looks_cap(S.part) - S.cap_down : 0; }
+
+bool square_looks_sent(Look *out) {
+	*out = ever_sent ? sent : look_plain();
+	return ever_sent;
+}
+
+void square_looks_begin(void) {
+	peer_looks_reset();
+	square_looks_send(true);
+}
+
+void square_looks_update(const OnlineSnapshot *snapshot, bool up) {
+	peer_looks_note(snapshot);
+	if (up) square_looks_send(false);
+}
+
+_Static_assert(SQUARE_LOOKS_PEERS == SQUARE_PEERS, "a look a peer slot (online_square.h)");

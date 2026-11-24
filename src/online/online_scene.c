@@ -16,11 +16,9 @@
 #include "online_square.h"
 #include "online_trade.h"
 #include "online_transport.h"
-#include "peer_looks.h"
 #include "platform.h"
 #include "reconnect_draw.h"
 #include "square_arena.h"
-#include "square_looks.h"
 #include "square_pet.h"
 #include "square_watch.h"
 #include "trade_screen.h"
@@ -61,8 +59,7 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	square_watch_reset();
 	if (!online_transport_profile(card)) fprintf(stderr, "online: public Navi card could not be queued\n");
 	/* (MegaMan's look, protocol v30: sent with his card, and again as it changes) */
-	square_looks_send(true);
-	peer_looks_reset();
+	square_looks_begin();
 	const char *path = getenv("CYBERWORLD_ONLINE_TRACE");
 	trace = path && *path ? fopen(path, "w") : NULL;
 	if (path && *path && !trace) fprintf(stderr, "online: cannot write trace %s\n", path);
@@ -174,8 +171,7 @@ VisitEnd online_scene_update(void) {
 	online_mail_frame();
 	/* (the look each player is known by, for the Arena's pairing; MegaMan's
 	 * own sent where the PET's screen changed it: square_looks.h) */
-	peer_looks_note(&snapshot);
-	if (up) square_looks_send(false);
+	square_looks_update(&snapshot, up);
 	/* (BN6's PET: what it changed noted as it closes, square_pet.h) */
 	square_pet_frame();
 	/* (the director rests here: the cinema told when a screen of BN6's,
