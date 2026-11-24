@@ -2,20 +2,8 @@
  * first part: the interface, BN6's colours standing (no palette given yet). */
 #include "look_apply.h"
 
-#include <stddef.h>
-
 void look_apply(const Look *look) {
 	uint16_t pal[16];
 	for (int w = 0; w < LOOK_SPRITE_COUNT; ++w)
 		if (look_palette_of(look, w, pal)) return;
-}
-
-bool look_palette_of(const Look *look, int which, uint16_t out16[16]) {
-	(void)look; (void)which; (void)out16;
-	return false;
-}
-
-void look_apply_worn(void) {
-	Look w = looks_worn();
-	look_apply(&w);
 }

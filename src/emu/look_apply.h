@@ -23,10 +23,7 @@ enum {
 /* `look` (NULL: BN6's own) written onto his plain palettes in the ROM copy:
  * the battle's (0, 1 and 4), the field's, the mugshot's and the face's. */
 void look_apply(const Look *look);
-/* The profile's worn look applied (scene_emu's start: a run's start and a
- * CONTINUE) */
-void look_apply_worn(void);
-/* `look`'s sixteen BGR555 colours for sprite `which` (LOOK_SPRITE_*) into
+/* (look_palette.c) `look`'s sixteen BGR555 colours for sprite `which` (LOOK_SPRITE_*) into
  * `out16`, BN6's own where a channel is LOOK_NONE: for a peer's MegaMan in
  * the Square and a NetBattle's two sides. False, `out16` untouched, where
  * `which` is out of range or there is no ROM. */
