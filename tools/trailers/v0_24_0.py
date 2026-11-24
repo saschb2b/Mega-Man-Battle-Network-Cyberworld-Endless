@@ -261,9 +261,11 @@ POSTER = T.poster
 # whole frame each with two or three words
 YOUTUBE_HOOK = 'Your MegaMan, Your Crew'
 THUMBNAILS = [
-    {'hero': ('party-a', 1100), 'region': (0, 60, 160), 'words': ('YOUR', 'CREW!'), 'lit': 1, 'side': 'right'},
-    {'hero': ('look-battle', 40), 'region': (0, 25, 240), 'words': ('YOUR', 'MEGAMAN!'), 'lit': 1, 'side': 'right'},
-    {'hero': ('form-cross-tengu', 208), 'region': (0, 12, 240), 'words': ('NEW', 'FORMS!'), 'lit': 1},
+    # (three MegaMen against DiveMan on one field; the Square with four players each in his own look; Beast Out's
+    # beast before the Mettaurs)
+    {'hero': ('party-a', 1100), 'region': (0, 25, 240), 'words': ('YOUR', 'CREW!'), 'lit': 1, 'side': 'right'},
+    {'hero': ('square-a', 96), 'region': (0, 20, 240), 'words': ('YOUR', 'COLOURS!'), 'lit': 1, 'side': 'right'},
+    {'hero': ('form-beast', 212), 'region': (0, 25, 240), 'words': ('NEW', 'FORMS!'), 'lit': 1, 'side': 'right'},
 ]
 
 
