@@ -110,10 +110,13 @@ void looks_preview_colours(LooksPreview *p, const Look *look) {
 			p->have[k] = true;
 			continue;
 		}
-		for (int i = 0; p->have[k] && i < 16; ++i) {
-			p->pal[k][2 * i] = (uint8_t)pal[i];
-			p->pal[k][2 * i + 1] = (uint8_t)(pal[i] >> 8);
+		if (!p->have[k]) continue;
+		uint8_t bytes[32];
+		for (int i = 0; i < 16; ++i) {
+			bytes[2 * i] = (uint8_t)pal[i];
+			bytes[2 * i + 1] = (uint8_t)(pal[i] >> 8);
 		}
+		memcpy(p->pal[k], bytes, sizeof bytes);
 	}
 }
 
