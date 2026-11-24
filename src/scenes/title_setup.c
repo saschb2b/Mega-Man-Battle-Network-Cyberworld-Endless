@@ -416,7 +416,9 @@ static void run_row_draw(int x0, int y, int row) {
 	/* (the shelf turns through every folder, the open ones counted beside its name) */
 	bool turns[RUN_ROWS] = { meta_endless_open(), true, forms > 1, soul_form() ? souls > 0 : crosses_open() > 0, meta_threat_open() > 0 };
 	if (row == ROW_FOLDER) setup_folder_count(count, sizeof count, meta_folders_open(), FOLDER_COUNT);
-	label_draw(x0, y, setup_word(row == ROW_CROSS && soul_form() ? SW_SOUL : names[row]), row_new(row), row == ROW_FOLDER ? count : NULL);
+	/* (NEW, a folder opened, gives way to a locked one's tag while the row shows one) */
+	bool fresh = row_new(row) && (row != ROW_FOLDER || meta_folder_open(S.look));
+	label_draw(x0, y, setup_word(row == ROW_CROSS && soul_form() ? SW_SOUL : names[row]), fresh, row == ROW_FOLDER ? count : NULL);
 	value_draw(x0, y, values[row], turns[row], row == ROW_FOLDER && !meta_folder_open(S.look) ? setup_word(SW_LOCKED) : NULL);
 }
 
