@@ -128,6 +128,7 @@ typedef struct {
 	int nroads;
 	unsigned rules;    /* the thin books' rules of laying that hold here though the books are not thin (LAY_*, panels_lay.c) */
 	bool thin;         /* its books are thin (a road's): a panel taken up for how it meets its neighbours is laid again from another that meets them (panels_lay.c) */
+	bool gaps_apart;   /* a gap its picks paint as floor drawn as its two floors apart (TILES_GAPS_APART, tilemap.c) */
 } TileGrid;
 
 /* TileGrid.rules: an end's panels lend a panel that is no end nothing; a
@@ -253,6 +254,13 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * BN4's countries lay their green walkways two and three wide, whose
  * middles stood in their cream platforms' middles as green blotches. */
 #define TILES_WALK_HUE 0x8000000
+/* ... and with TILES_GAPS_APART, a gap one panel wide between two floors,
+ * open at both ends, that its tiles as picked paint as floor is picked
+ * again as its two floors apart (tilemap.c, gaps_apart): Mr. Weather
+ * Comp's maps draw their walled slots as sunken floor, which its layers
+ * laid in such a gap (issue 836). The other areas' picks keep theirs: in
+ * 19 of the tile test's layers drawing apart counted worse. */
+#define TILES_GAPS_APART 0x4000000
 /* ... and with TILES_UNDER, platform floor that passes under what its map
  * sets over it on the second layer is floor, whatever the walls and heights
  * there say, learned from the first layer: BN4's Park Area's conveyor

@@ -199,7 +199,7 @@ static void lay_whole(Picked *p) {
 	tiles_stats.whole += whole;
 }
 
-/* The gaps one panel wide between two floors whose tiles, as picked,
+/* (TileGrid.gaps_apart, TILES_GAPS_APART) The gaps one panel wide between two floors whose tiles, as picked,
  * paint half their background as floor or more (tiles_gap: Mr.
  * Weather Comp's slots, walled off inside its fields, laid where a gap is
  * open at both ends; issue 836) are picked again, each tile as its two
@@ -275,7 +275,7 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 			}
 		if (!changed) break;
 	}
-	gaps_apart(&p);
+	if (g->gaps_apart) gaps_apart(&p);
 	tiles_stats = first;
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {

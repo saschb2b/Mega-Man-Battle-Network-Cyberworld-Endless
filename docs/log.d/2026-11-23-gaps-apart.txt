@@ -1,3 +1,3 @@
 by: claude-code/claude-opus-5-5
-at: 2026-11-24T10:00:00Z
-* **Update**: world/level-design/generator.md (a gap one panel wide between two floors, open at both ends, that its tiles painted as floor is drawn as the two apart, each with its own edge: Mr. Weather Comp's sunken slot no longer laid in a generated gap; issue 836).
+at: 2026-11-24T11:00:00Z
+* **Update**: world/level-design/generator.md (Mr. Weather Comp's gaps one panel wide between two floors, which its tiles painted as its maps' sunken slot, drawn as the two floors apart, TILES_GAPS_APART; issue 836).
