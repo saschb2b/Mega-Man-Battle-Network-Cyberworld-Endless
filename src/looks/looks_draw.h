@@ -22,6 +22,7 @@
 #define LOOKS_PLAIN LOOK_COLOURS   /* the grid's cell under its sixteen: the channel as BN6 draws it */
 #define LOOKS_POPUP_ROWS LOOK_SLOTS   /* the pop-up's rows: a copy to each other look, all plain */
 #define LOOKS_FLASH 18                /* frames a pick's swatch flashes */
+enum { LOOKS_TOLD_NONE, LOOKS_TOLD_COPY, LOOKS_TOLD_PLAIN };
 
 /* what the picture shows */
 typedef struct {
@@ -36,6 +37,8 @@ typedef struct {
 	int page;                     /* the palette shown */
 	int cell;                     /* the grid's cursor, 0-15 or LOOKS_PLAIN */
 	int popup;                    /* the pop-up's cursor, -1 while it is shut */
+	bool asking, yes;             /* ... its question (a look to be replaced) up, and Yes chosen */
+	int told, told_from;          /* what the last pop-up did (LOOKS_TOLD_*), until the next press, and from which look */
 	int flash, flash_row;         /* a pick's swatch flashing: frames left, its row */
 	LooksPreview preview;         /* BN6's MegaMan in the look */
 } LooksView;
@@ -47,5 +50,7 @@ SDL_Rect looks_row_rect(int row);      /* a list's row */
 SDL_Rect looks_cell_rect(int cell);    /* a grid's cell, the plain one too */
 SDL_Rect looks_page_rect(bool right);  /* the palette window's page arrows */
 SDL_Rect looks_popup_rect(int row);    /* the pop-up's row */
+SDL_Rect looks_popup_box(void);        /* ... the pop-up whole */
+SDL_Rect looks_slot_value_rect(void);  /* the looks' row's letter between its pointers */
 
 #endif

@@ -31,7 +31,10 @@ typedef struct {
 
 /* The list's loop from its start, his front walking */
 void looks_preview_loop(LooksPreview *p);
-/* The grid's course: his battle stance, a shot of the buster first */
+/* The list's loop from its battle part: after a pick, the large body stays in sight */
+void looks_preview_list(LooksPreview *p);
+/* The grid's course: his battle stance, a shot of the buster first (one
+ * under way let finish), then left alone a slow turn round on the field */
 void looks_preview_hold(LooksPreview *p);
 /* The look changed whole (another look worn): seen from the front at once */
 void looks_preview_front(LooksPreview *p);

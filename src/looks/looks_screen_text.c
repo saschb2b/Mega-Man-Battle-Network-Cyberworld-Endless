@@ -9,6 +9,7 @@
 static const char *const words[LW_COUNT] = {
 	[LW_TITLE] = "COLOURS",
 	[LW_LOOK] = "Look",
+	[LW_LOOK_CAPS] = "LOOK",
 	[LW_PLAIN] = "PLAIN",
 	[LW_LOCKED] = "LOCKED",
 	[LW_INFORMATION] = "INFORMATION",
@@ -67,10 +68,12 @@ const char *looks_colour_word(uint16_t c) {
 	};
 	int k = 0;
 	while (h >= hues[k].to) ++k;
-	if (mx < 16) return hues[k].dark;
+	if (mx < 16 || (k == 1 && mx < 23)) return hues[k].dark;   /* (an orange not bright is brown) */
 	if (d * 100 < mx * 45 && mx > 24) return hues[k].pale;
 	return hues[k].name;
 }
+
+void looks_count_words(char *out, size_t n, int owned, int all) { snprintf(out, n, "%d/%d", owned, all); }
 
 void looks_copy_row(char *out, size_t n, int to) { snprintf(out, n, "Copy to %s", looks_slot_name(to)); }
 
@@ -80,18 +83,29 @@ static void colour_of(char *out, size_t n, const Look *l, int c) {
 	else snprintf(out, n, "%s %d", looks_palette_name(l->palette[c]), l->colour[c] + 1);
 }
 
-void looks_slot_words(char *out, size_t n, int slot, const Look *look) {
-	bool plain = true;
-	for (int c = 0; c < LOOK_CHANNELS; ++c) plain &= look->palette[c] == LOOK_NONE;
-	if (plain) {
-		snprintf(out, n, "Look %s: as he always is.", looks_slot_name(slot));
-		return;
+/* (the look's channels in words: those coloured by name and colour, the plain ones together) */
+static void look_words(char *out, size_t n, const Look *look) {
+	size_t at = 0;
+	int plains = 0, plain_of[LOOK_CHANNELS];
+	out[0] = 0;
+	for (int c = 0; c < LOOK_CHANNELS; ++c) {
+		if (look->palette[c] == LOOK_NONE) { plain_of[plains++] = c; continue; }
+		char col[24];
+		colour_of(col, sizeof col, look, c);
+		at += (size_t)snprintf(out + at, at < n ? n - at : 0, "%s%s %s, %s.", at ? " " : "", looks_channel_name(c), col,
+			looks_colour_word(looks_colour(look->palette[c], look->colour[c])));
 	}
-	char a[24], b[24], c[24];
-	colour_of(a, sizeof a, look, 0);
-	colour_of(b, sizeof b, look, 1);
-	colour_of(c, sizeof c, look, 2);
-	snprintf(out, n, "Look %s: %s, %s, %s.", looks_slot_name(slot), a, b, c);
+	if (plains == LOOK_CHANNELS) { snprintf(out, n, "as he always is."); return; }
+	if (!plains || at >= n) return;
+	at += (size_t)snprintf(out + at, n - at, " %s", looks_channel_name(plain_of[0]));
+	for (int k = 1; k < plains && at < n; ++k) at += (size_t)snprintf(out + at, n - at, "%s%s", k == plains - 1 ? " and " : ", ", looks_channel_name(plain_of[k]));
+	if (at < n) snprintf(out + at, n - at, " plain.");
+}
+
+void looks_slot_words(char *out, size_t n, int slot, const Look *look) {
+	char w[160];
+	look_words(w, sizeof w, look);
+	snprintf(out, n, "Look %s: %s", looks_slot_name(slot), w);
 }
 
 void looks_channel_words(char *out, size_t n, int c, const Look *look) {
@@ -112,7 +126,21 @@ void looks_colour_words(char *out, size_t n, int palette, int colour, bool owned
 
 void looks_locked_words(char *out, size_t n, int palette) { snprintf(out, n, "%s is locked. %s", looks_palette_name(palette), origin(palette)); }
 
-void looks_popup_words(char *out, size_t n, int slot, int row) {
-	if (row < LOOK_SLOTS - 1) snprintf(out, n, "Look %s over Look %s.", looks_slot_name(slot), looks_slot_name((slot + 1 + row) % LOOK_SLOTS));
+void looks_popup_words(char *out, size_t n, int slot, int row, const Look *there) {
+	char w[160];
+	look_words(w, sizeof w, there);
+	if (row < LOOK_SLOTS - 1) snprintf(out, n, "Look %s now: %s", looks_slot_name((slot + 1 + row) % LOOK_SLOTS), w);
 	else snprintf(out, n, "Look %s back to his own colours.", looks_slot_name(slot));
+}
+
+void looks_ask_words(char *out, size_t n, int slot, int row) {
+	if (row < LOOK_SLOTS - 1) snprintf(out, n, "Replace Look %s?", looks_slot_name((slot + 1 + row) % LOOK_SLOTS));
+	else snprintf(out, n, "Clear Look %s?", looks_slot_name(slot));
+}
+
+const char *looks_yes_no(bool yes) { return yes ? "Yes" : "No"; }
+
+void looks_told_words(char *out, size_t n, bool copied, int slot, int from) {
+	if (copied) snprintf(out, n, "Look %s is now Look %s's. MegaMan wears it.", looks_slot_name(slot), looks_slot_name(from));
+	else snprintf(out, n, "Look %s is back to his own colours.", looks_slot_name(slot));
 }

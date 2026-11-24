@@ -91,6 +91,8 @@ static void row_to(int row) {
 static void page_by(int d) {
 	LooksView *v = &S.v;
 	v->page = (v->page + d + LOOK_PALETTES) % LOOK_PALETTES;
+	/* (a locked page has no PLAIN: LOCKED stands there) */
+	if (v->cell == LOOKS_PLAIN && !looks_owned(v->page)) v->cell = 12;
 	audio_sfx(SFX_SELECT);
 	if (v->grid) try_cell();
 }
@@ -102,6 +104,7 @@ static void enter(void) {
 	v->grid = true;
 	v->before = v->look;
 	v->cell = cell_of(channel(), v->page);
+	if (v->cell == LOOKS_PLAIN && !looks_owned(v->page)) v->cell = 12;   /* (no PLAIN on a locked page) */
 	try_cell();
 	audio_sfx(SFX_SELECT);
 }
@@ -109,31 +112,67 @@ static void enter(void) {
 /* A on the looks' row: the pop-up of what can be done with the look */
 static void popup_open(void) {
 	S.v.popup = 0;
+	S.v.asking = false;
 	audio_sfx(SFX_SELECT);
 }
 
-/* the pop-up's row taken: the look copied to the other two in turn, or every channel plain */
-static void popup_take(void) {
+static bool plain(const Look *l) {
+	for (int c = 0; c < LOOK_CHANNELS; ++c)
+		if (l->palette[c] != LOOK_NONE) return false;
+	return true;
+}
+
+/* the pop-up's row's look: the one a copy goes over, or the worn one for All plain */
+static int popup_target(void) { return S.v.popup < LOOKS_POPUP_ROWS - 1 ? (S.v.slot + 1 + S.v.popup) % LOOK_SLOTS : S.v.slot; }
+
+/* the pop-up's row done: the look copied over another and that one worn,
+ * to be changed from there; or every channel of the worn one plain */
+static void popup_do(void) {
 	LooksView *v = &S.v;
+	int to = popup_target(), from = v->slot;
 	if (v->popup < LOOKS_POPUP_ROWS - 1) {
-		int to = (v->slot + 1 + v->popup) % LOOK_SLOTS;
 		looks_set(to, &v->look);
-		printf("looks: look %d copied to %d\n", v->slot, to);
+		slot_to(to);
+		v->told = LOOKS_TOLD_COPY;
+		printf("looks: look %d copied to %d\n", from, to);
 	} else {
 		v->look = look_plain();
 		looks_set(v->slot, &v->look);
 		apply();
 		looks_preview_front(&v->preview);
+		v->told = LOOKS_TOLD_PLAIN;
 		printf("looks: look %d plain\n", v->slot);
 	}
+	v->told_from = from;
 	v->popup = -1;
+	v->asking = false;
 	v->flash = LOOKS_FLASH;
 	v->flash_row = 0;
 	audio_sfx(SFX_CONFIRM);
 }
 
+/* A on the pop-up's row: done at once where nothing is lost, else asked first, No chosen */
+static void popup_take(void) {
+	LooksView *v = &S.v;
+	Look there = looks_get(popup_target());
+	bool same = v->popup == LOOKS_POPUP_ROWS - 1 && plain(&v->look);
+	if (same) { v->popup = -1; audio_sfx(SFX_CANCEL); return; }
+	if (v->popup < LOOKS_POPUP_ROWS - 1 && plain(&there)) { popup_do(); return; }
+	v->asking = true;
+	v->yes = false;
+	audio_sfx(SFX_SELECT);
+}
+
 static void popup_keys(void) {
 	LooksView *v = &S.v;
+	if (v->asking) {
+		if (btn_pressed(BTN_LEFT | BTN_RIGHT | BTN_UP | BTN_DOWN)) { v->yes = !v->yes; audio_sfx(SFX_CURSOR); }
+		if (btn_pressed(BTN_A)) {
+			if (v->yes) popup_do();
+			else { v->asking = false; audio_sfx(SFX_CANCEL); }
+		} else if (btn_pressed(BTN_B | BTN_START)) { v->asking = false; audio_sfx(SFX_CANCEL); }
+		return;
+	}
 	if (btn_repeat(BTN_UP)) { v->popup = (v->popup + LOOKS_POPUP_ROWS - 1) % LOOKS_POPUP_ROWS; audio_sfx(SFX_CURSOR); }
 	else if (btn_repeat(BTN_DOWN)) { v->popup = (v->popup + 1) % LOOKS_POPUP_ROWS; audio_sfx(SFX_CURSOR); }
 	if (btn_pressed(BTN_A)) popup_take();
@@ -152,7 +191,7 @@ static void pick(void) {
 	v->grid = false;
 	v->flash = LOOKS_FLASH;
 	v->flash_row = v->row;
-	looks_preview_loop(&v->preview);
+	looks_preview_list(&v->preview);
 	audio_sfx(SFX_CONFIRM);
 	printf("looks: %s set\n", channel() == 0 ? "armour" : channel() == 1 ? "suit" : "accent");
 }
@@ -163,7 +202,7 @@ static void back(void) {
 	v->look = v->before;
 	v->grid = false;
 	apply();
-	looks_preview_loop(&v->preview);
+	looks_preview_list(&v->preview);
 	audio_sfx(SFX_CANCEL);
 }
 
@@ -181,7 +220,7 @@ static void grid_keys(void) {
 	if (btn_repeat(BTN_LEFT) && v->cell != LOOKS_PLAIN && v->cell % 4) to = v->cell - 1;
 	else if (btn_repeat(BTN_RIGHT) && v->cell != LOOKS_PLAIN && v->cell % 4 < 3) to = v->cell + 1;
 	else if (btn_repeat(BTN_UP)) to = v->cell == LOOKS_PLAIN ? 12 : v->cell >= 4 ? v->cell - 4 : v->cell;
-	else if (btn_repeat(BTN_DOWN)) to = v->cell == LOOKS_PLAIN ? v->cell : v->cell >= 12 ? LOOKS_PLAIN : v->cell + 4;
+	else if (btn_repeat(BTN_DOWN)) to = v->cell == LOOKS_PLAIN ? v->cell : v->cell < 12 ? v->cell + 4 : looks_owned(v->page) ? LOOKS_PLAIN : v->cell;
 	if (to != v->cell) {
 		v->cell = to;
 		audio_sfx(SFX_CURSOR);
@@ -214,6 +253,13 @@ static void taps(void) {
 	x -= P.core_x;
 	y -= P.core_y;
 	if (v->popup >= 0) {
+		/* (a tap outside the pop-up is B; on its row the cursor, again on it A) */
+		if (v->asking || !inside(looks_popup_box(), x, y)) {
+			v->popup = v->asking ? v->popup : -1;
+			v->asking = false;
+			audio_sfx(SFX_CANCEL);
+			return;
+		}
 		for (int r = 0; r < LOOKS_POPUP_ROWS; ++r)
 			if (inside(looks_popup_rect(r), x, y)) {
 				if (r == v->popup) popup_take();
@@ -221,10 +267,12 @@ static void taps(void) {
 			}
 		return;
 	}
+	/* (on the looks' row: its letter and pointers turn to the next look, its word opens the pop-up) */
+	if (inside(looks_slot_value_rect(), x, y)) { slot_to(v->slot + 1); return; }
 	for (int d = 0; d < 2; ++d)
 		if (inside(looks_page_rect(d), x, y)) { page_by(d ? 1 : -1); return; }
 	if (v->row > 0)
-		for (int c = 0; c <= LOOKS_PLAIN; ++c)
+		for (int c = 0; c <= (looks_owned(v->page) ? LOOKS_PLAIN : LOOKS_PLAIN - 1); ++c)
 			if (inside(looks_cell_rect(c), x, y)) {
 				if (v->grid && c == v->cell) pick();
 				else {
@@ -238,7 +286,7 @@ static void taps(void) {
 	for (int r = 0; r <= v->n_chan; ++r)
 		if (inside(looks_row_rect(r), x, y)) {
 			if (v->grid) back();
-			if (r == 0 && v->row == 0) slot_to(v->slot + 1);
+			if (r == 0 && v->row == 0) popup_open();
 			else row_to(r);
 			return;
 		}
@@ -279,8 +327,9 @@ bool looks_screen_update(void) {
 		S.letting_go = false;
 		return false;
 	}
-	/* (its first frame's keys are the ones that opened it) */
+	/* (its first frame's keys are the ones that opened it; what the pop-up did is told until the next press) */
 	if (S.v.t > 0) {
+		if (btn_pressed(BTN_A | BTN_B | BTN_UP | BTN_DOWN | BTN_LEFT | BTN_RIGHT | BTN_L | BTN_R | BTN_START)) S.v.told = LOOKS_TOLD_NONE;
 		if (S.v.popup >= 0) popup_keys();
 		else {
 			if (btn_pressed(BTN_L)) page_by(-1);
@@ -312,6 +361,6 @@ void looks_screen_describe(FILE *f) {
 		if (v->cell == LOOKS_PLAIN) fprintf(f, " cell plain");
 		else fprintf(f, " cell %d", v->cell);
 	}
-	if (v->popup >= 0) fprintf(f, " popup %d", v->popup);
+	if (v->popup >= 0) fprintf(f, " popup %d%s", v->popup, v->asking ? v->yes ? " asking yes" : " asking no" : "");
 	fprintf(f, "\n");
 }

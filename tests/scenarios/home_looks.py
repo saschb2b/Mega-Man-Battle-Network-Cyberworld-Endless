@@ -2,7 +2,8 @@
 picked on the armour is the look worn (the state's `look` line), the grid's
 cursor recolours him only until A picks; B leaves the screen and the look
 stays worn. A locked palette's colour cannot be picked: A buzzes and the
-look is as it was (docs/game/looks.md)."""
+look is as it was. A on the Look row copies the look to another
+(docs/game/looks.md)."""
 import cw_routes
 
 START = '--scene town --seed 2'
@@ -46,10 +47,32 @@ MANY = {
             ('do', 'press DOWN; wait 8; press R; wait 8'),
             ('expect', 'looks~page Undernet locked'),
             ('do', 'press A; wait 8; press UP; wait 8; press A; wait 8'),
-            ('expect', 'looks~grid page Undernet locked cell 12'),     # still in the grid: nothing picked
+            ('expect', 'looks~grid page Undernet locked cell 8'),      # still in the grid: nothing picked
             ('expect', 'look=-,-,- slot 0'),
             ('do', 'press B; wait 8'),
             ('expect', 'looks~at armour list'),
             ('expect', 'look=-,-,- slot 0'),
+        ]),
+    'copy': dict(
+        GUARDS="The colours screen: a look copied with the Look row's pop-up is the other look's and worn; over a look that is not plain it asks first, No chosen.",
+        START=START,
+        STEPS=[
+            *OPEN,
+            ('do', 'press DOWN; wait 8; press A; wait 8; press UP; wait 8; press A; wait 8'),   # armour: Classic 12
+            ('expect', 'look=0.12,-,- slot 0'),
+            ('do', 'press UP; wait 8; press A; wait 8'),
+            ('expect', 'looks~popup 0'),
+            ('do', 'press A; wait 8'),                                                            # copied to B, B worn
+            ('expect', 'look=0.12,-,- slot 1'),
+            ('do', 'press A; wait 8; press A; wait 8'),                                           # B over C: C plain, no question
+            ('expect', 'look=0.12,-,- slot 2'),
+            ('do', 'press A; wait 8; press A; wait 8'),                                           # C over A: A not plain, asked, No chosen
+            ('expect', 'looks~popup 0 asking no'),
+            ('do', 'press A; wait 8'),                                                            # No: back to the pop-up, nothing lost
+            ('expect', 'look=0.12,-,- slot 2'),
+            ('do', 'press B; wait 8; press DOWN; wait 8; press DOWN; wait 8; press A; wait 8; press UP; wait 8; press UP; wait 8; press UP; wait 8; press A; wait 8'),   # suit: Classic 4 on C
+            ('expect', 'look=0.12,0.4,- slot 2'),
+            ('do', 'press UP; wait 8; press UP; wait 8; press A; wait 8; press A; wait 8; press RIGHT; wait 8; press A; wait 8'),     # C over A, Yes
+            ('expect', 'look=0.12,0.4,- slot 0'),
         ]),
 }

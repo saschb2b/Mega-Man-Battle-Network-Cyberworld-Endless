@@ -9,16 +9,24 @@
 
 #include "bn6.h"
 #include "look_apply.h"
+#include "pet_look.h"
 #include "rom.h"
 
 #define MEGAMAN 0x37    /* his field sprite's and his face's number in their lists */
+#define FACE_W 40       /* his face, as a chat box's */
+#define FACE_H 48
+#define FACE_IN 3
+#define FACE_LINE LOOK_GREEN_LO   /* the NAVIGATOR box's outline round it */
+#define FEET_UP 9       /* his feet from the slot's foot, his shadow inside it */
 #define WALK 8          /* the field's first walking animation */
 #define TURN 40         /* frames each direction is walked */
 #define STAND 0         /* the battle body's animations */
 #define BUSTER 9
 #define ONCE -1         /* a step held until its animation ends */
 #define FOREVER 0       /* ... a step held until the course changes */
-#define MARK 32         /* a channel's flash: frames, on and off by 4 */
+#define MARK 16         /* a channel's blink: frames, its colours turned over and back by 4, twice */
+#define REST 90         /* frames the grid's stance is held before he turns round */
+#define LOOK_ROUND 30   /* ... frames each way he faces then */
 
 typedef struct { bool battle; int anim, frames; } Step;
 
@@ -28,7 +36,14 @@ static const Step loop[] = {
 	{ false, WALK + 4, TURN },
 	{ true, STAND, 40 }, { true, BUSTER, ONCE }, { true, STAND, 24 }, { true, 12, ONCE }, { true, STAND, 24 }, { true, 8, ONCE }, { true, STAND, 40 },
 };
-static const Step hold[] = { { true, STAND, 8 }, { true, BUSTER, ONCE }, { true, STAND, FOREVER } };
+#define LOOP_BATTLE 9   /* the loop's first step of his battle body */
+/* (the grid's: the stance and a shot, the stance held, then, left alone, a
+ * slow turn round on the field, as the Square sees him; then from the stance held again) */
+static const Step hold[] = {
+	{ true, STAND, 8 }, { true, BUSTER, ONCE }, { true, STAND, REST },
+	{ false, WALK + 4, LOOK_ROUND }, { false, WALK + 6, LOOK_ROUND }, { false, WALK + 0, LOOK_ROUND }, { false, WALK + 2, LOOK_ROUND },
+};
+#define HOLD_AGAIN 2    /* the step the grid's course goes on from */
 
 /* each channel's indexes in each art, first to last (0 0: none) */
 static const uint8_t ramps[LOOKS_ARTS][LOOK_CHANNELS][2] = {
@@ -53,12 +68,21 @@ static void play(LooksPreview *p) {
 }
 
 void looks_preview_loop(LooksPreview *p) {
+	if (!p->anim.spr) p->mark = -1;
 	p->hold = false;
 	p->step = 0;
 	play(p);
 }
 
+void looks_preview_list(LooksPreview *p) {
+	p->hold = false;
+	p->step = LOOP_BATTLE;
+	play(p);
+}
+
 void looks_preview_hold(LooksPreview *p) {
+	/* (a shot under way is let finish: the cursor scrubbed fast does not stutter it) */
+	if (p->hold && p->step < HOLD_AGAIN) return;
 	p->hold = true;
 	p->step = 0;
 	play(p);
@@ -102,7 +126,7 @@ void looks_preview_step(LooksPreview *p) {
 	const Step *c = course(p, &n);
 	int frames = c[p->step].frames;
 	if (frames == FOREVER || (frames == ONCE ? !p->anim.done : p->held < frames)) return;
-	p->step = (p->step + 1) % n;
+	p->step = p->step + 1 < n ? p->step + 1 : p->hold ? HOLD_AGAIN : 0;
 	play(p);
 }
 
@@ -116,14 +140,19 @@ static void sprite(const LooksPreview *p, Sprite *s, int anim, int frame, int k,
 	uint8_t pal[32];
 	memcpy(pal, p->pal[k], 32);
 	const uint8_t *r = p->mark >= 0 && p->mark < LOOK_CHANNELS ? ramps[k][p->mark] : NULL;
+	/* (the channel blinking: its colours turned over, so it shows whatever it is) */
 	if (r && r[0] && p->mark_t > 0 && p->mark_t / 4 % 2)
-		for (int i = r[0]; i <= r[1]; ++i) pal[2 * i] = 0xFF, pal[2 * i + 1] = 0x7F;
+		for (int i = r[0]; i <= r[1]; ++i) pal[2 * i] ^= 0xFF, pal[2 * i + 1] ^= 0x7F;
 	sprite_draw_palette(s, anim, frame, x, y, false, pal);
 }
 
 void looks_preview_draw(const LooksPreview *p, int x, int y, int w, int h) {
-	/* (his face as a chat box draws it, its origin its middle: 40 x 48) */
-	sprite(p, sprite_get(SPR_MUGSHOT, MEGAMAN), 0, 0, LOOKS_ART_FACE, x + w / 2, y + 24);
+	/* (his face as a chat box draws it, its origin its middle, 40 x 48, in
+	 * the NAVIGATOR box's outline, 3 in from the slot's edges) */
+	int fx = x + (w - FACE_W) / 2, fy = y + FACE_IN;
+	fill_rect(fx - 1, fy - 1, FACE_W + 2, FACE_H + 2, FACE_LINE);
+	sprite(p, sprite_get(SPR_MUGSHOT, MEGAMAN), 0, 0, LOOKS_ART_FACE, fx + FACE_W / 2, fy + FACE_H / 2);
+	/* (his feet high enough that his shadow stays inside the slot) */
 	if (p->anim.spr)
-		sprite(p, p->anim.spr, p->anim.anim, p->anim.frame, p->battle ? LOOKS_ART_BATTLE : LOOKS_ART_FIELD, x + w / 2 + 1, y + h - 3);
+		sprite(p, p->anim.spr, p->anim.anim, p->anim.frame, p->battle ? LOOKS_ART_BATTLE : LOOKS_ART_FIELD, x + w / 2 + 1, y + h - FEET_UP);
 }
