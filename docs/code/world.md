@@ -3,7 +3,7 @@ type: Code Map
 title: "The real world"
 description: "What `src/world/` holds: the real world and Central Town, BN6's indoor maps taken over as home's places (Lan's house, AsterLand, the Academy), the town's folk and their words."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T22:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:47:40Z }
 ---
 
 # The real world
