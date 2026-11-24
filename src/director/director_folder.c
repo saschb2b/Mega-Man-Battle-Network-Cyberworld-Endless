@@ -240,10 +240,11 @@ static uint32_t pack_count_at(int entry) {
 }
 
 /* The run's starting folder in the game's first folder (docs/game/meta/): the
- * chosen one's 30 chips over the game's own (Standard keeps those), as
- * BN6's GiveFolder copies a folder in (bn6f sub_8021AB4). */
+ * chosen one's 30 chips over the game's own (BN6's Standard keeps those; a
+ * Soul form's Standard is its game's start, meta_start_chips), as BN6's
+ * GiveFolder copies a folder in (bn6f sub_8021AB4). */
 void set_start_folder(void) {
-	const uint16_t *chips = meta_folder_chips(run.folder);
+	const uint16_t *chips = meta_start_chips(run.folder, run.form);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	if (!chips || data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
 	/* the pack as if this folder had been given at NEW GAME, not the

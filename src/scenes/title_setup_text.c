@@ -44,6 +44,8 @@ static const char *const words[] = {
 	"BN5's Souls. Guardians give Souls",   /* SW_FORM_BN5_NOTE */
 	"BN4's Souls. Guardians give Souls",   /* SW_FORM_BN4_NOTE */
 	"More forms: delete BN5's or BN4's Navis",   /* SW_FORM_MORE */
+	"BN5's Souls and folder. Guardians give Souls",   /* SW_FORM_BN5_START_NOTE: with the Standard folder, BN5's own start */
+	"BN4's Souls and folder. Guardians give Souls",   /* SW_FORM_BN4_START_NOTE */
 	"From the first battle. Guardians give the rest",   /* SW_START_REST_NOTE */
 	"Win a Soul to start with it",   /* SW_SOUL_NONE_NOTE */
 	"Souls from the guardians we delete",   /* SW_SOUL_GUARDIANS_NOTE */

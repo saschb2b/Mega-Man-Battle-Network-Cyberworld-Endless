@@ -3,7 +3,7 @@ type: Design
 title: "Decisions and phase one"
 description: "The meta layer's decisions (options only, a short net by default, helpers counting toward unlocks, a setup screen), phase one as built (unlocks, threat rungs 1-5, helpers, the Blade and Storm folders) and the designed Z-Canon, Busting and Lean folders."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 sources:
   - id: owner
     resource: "The owner's decisions, given in the project's sessions and written down here"
@@ -178,6 +178,14 @@ The game-design reasoning:
   Tide's A brings Cannon, TankCan1, Rflectr1 and Elec (DolThdr1,
   ElcPuls2), which a bubble doubles; its T brings MachGun1 and BN6's
   second Fire tier (FireBrn2, FireHit2, BurnSqr2), off its element.
+
+## Each game's start (24 November 2026)
+
+The owner's call on issue 865: BN5's and BN4's NEW GAME folders
+([Starting folders measured](folders-measured.md), 3) are not shelf
+entries. With FORM on SOUL BN5 or SOUL BN4 the Standard folder is that
+game's start, read from its ROM; the other folders are the same in every
+form. Built in [MegaMan's forms](forms.md), Each game's start.
 
 ## Z-Canon rebuilt (24 November 2026)
 

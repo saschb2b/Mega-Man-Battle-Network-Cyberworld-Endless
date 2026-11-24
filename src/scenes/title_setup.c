@@ -297,6 +297,8 @@ static const char *form_note(char shut[][SHUT_MAX], int *nshut) {
 	static const SetupWord notes[RUN_FORMS] = { SW_FORM_CROSS_NOTE, SW_FORM_CROSS_NOTE, SW_FORM_BN5_NOTE, SW_FORM_BN4_NOTE };
 	setup_form_best(shut[(*nshut)++], SHUT_MAX, meta_form_best(S.c.form));
 	if (!form_offered(RUN_FORM_SOUL_BN5) || !form_offered(RUN_FORM_SOUL_BN4)) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", setup_word(SW_FORM_MORE));
+	/* (the Standard folder follows a Soul form: its game's own start) */
+	if (S.c.folder == FOLDER_STANDARD && soul_form()) return setup_word(S.c.form == RUN_FORM_SOUL_BN5 ? SW_FORM_BN5_START_NOTE : SW_FORM_BN4_START_NOTE);
 	return setup_word(notes[S.c.form < RUN_FORMS ? S.c.form : RUN_FORM_CROSS]);
 }
 
@@ -306,6 +308,12 @@ static const char *soul_note(void) {
 	int any = 0;
 	for (int p = 1; p <= FORM_POWERS; ++p) any += soul_offered(S.c.form, p);
 	return setup_word(S.c.soul ? SW_START_REST_NOTE : any ? SW_SOUL_GUARDIANS_NOTE : SW_SOUL_NONE_NOTE);
+}
+
+/* folder `k`'s line: its style and cost; a Soul form's Standard its
+ * game's start (meta_standard_about) */
+static const char *folder_about(int k) {
+	return k == FOLDER_STANDARD ? meta_standard_about(run_debug_forms ? S.c.form : RUN_FORM_MIX) : meta_folder(k)->about;
 }
 
 /* a RUN row's note */
@@ -321,7 +329,7 @@ static const char *run_note(int row, char *buf, size_t n, char shut[][SHUT_MAX],
 		if (state == SHELF_LOCKED && f->hint) setup_folder_hint(shut[(*nshut)++], SHUT_MAX, f->hint);
 		if (state == SHELF_HEARD && f->opens) setup_folder_heard(shut[(*nshut)++], SHUT_MAX, f->opens);
 		/* (a locked one's style in a line, so its hint has room under it) */
-		return state == SHELF_OPEN || !f->style ? f->about : f->style;
+		return state == SHELF_OPEN || !f->style ? folder_about(S.look) : f->style;
 	}
 	case ROW_FORM: return form_note(shut, nshut);
 	case ROW_CROSS: return soul_form() ? soul_note() : cross_note(buf, n, shut, nshut);
@@ -481,7 +489,8 @@ void title_setup_describe(FILE *f) {
 	fprintf(f, "folderlook %s\nfolderstate %s\nshelf", meta_folder(S.look)->name, states[meta_folder_state(S.look)]);
 	for (int k = 1; k < FOLDER_COUNT; ++k)
 		if (meta_folder_exists(k)) fprintf(f, "%s%s:%s", k > 1 ? "," : " ", meta_folder(k)->name, states[meta_folder_state(k)]);
-	fprintf(f, "\nendless %s\nfolders %d\ncrosses %d\nthreatmax %d\nhelpersshown %d\n", meta_endless_open() ? "open" : "shut", folders,
+	/* (the shown folder's line: a Soul form's Standard its game's start) */
+	fprintf(f, "\nfolderline %s\nendless %s\nfolders %d\ncrosses %d\nthreatmax %d\nhelpersshown %d\n", folder_about(S.look), meta_endless_open() ? "open" : "shut", folders,
 		crosses_open(), meta_threat_open(), meta_helpers_shown());
 }
 

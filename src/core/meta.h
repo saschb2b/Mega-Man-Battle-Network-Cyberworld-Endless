@@ -24,9 +24,19 @@ const FolderInfo *meta_folder(int folder);
 /* Whether `folder` is one (an id below FOLDER_COUNT that no folder holds
  * is not: the shelf, the setup and the posts pass it by). */
 bool meta_folder_exists(int folder);
+/* The Standard folder's line in a run of form `form` (RUN_FORM_*): BN6's
+ * own, or in a Soul form its game's start, a code BN6's records lack named
+ * where it was swapped (meta_start_chips) */
+const char *meta_standard_about(int form);
 /* A folder's 30 chips as BN6 keeps them (chip id | code << 9, code 26 for
  * *), or NULL for the Standard folder, which is the game's own. */
 const uint16_t *meta_folder_chips(int folder);
+/* ... the 30 a run of form `form` (RUN_FORM_*) starts with: a SOUL BN5
+ * run's Standard is BN5's own NEW GAME folder, a SOUL BN4 run's BN4's,
+ * read from their ROMs (xchips_folder.h; docs/game/meta/forms.md, Each
+ * game's start); NULL for BN6's own Standard (CROSS, the mix, or where
+ * that game's folder cannot be read) */
+const uint16_t *meta_start_chips(int folder, int form);
 bool meta_folder_open(int folder);
 /* The shelf of starting folders (issue #864, docs/game/meta/shelf.md;
  * meta_shelf.c): the setup shows all six, each open, or locked with a
