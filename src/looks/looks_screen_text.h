@@ -23,6 +23,7 @@ typedef enum {
 	LW_KEYS,          /* the band's hint: L/R */
 	LW_PAGES,         /* ... PALETTE */
 	LW_ALL_PLAIN,     /* the pop-up's last row */
+	LW_SELECT,        /* ... its band, as ChipFolder's */
 	LW_COUNT
 } LooksWord;
 const char *looks_word(LooksWord w);
@@ -36,8 +37,6 @@ const char *looks_band_name(int p);
 /* A colour's plain name ("dark red", "grey"), so no colour is told by its colour alone */
 const char *looks_colour_word(uint16_t bgr555);
 
-/* "3/12": the palettes owned */
-void looks_count_words(char *out, size_t n, int owned, int all);
 /* The pop-up's row: "COPY TO B" */
 void looks_copy_row(char *out, size_t n, int to);
 

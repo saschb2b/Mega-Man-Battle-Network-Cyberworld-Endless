@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 static const char *const words[] = {
-	"COLOURS", "Look", "LOOK", "PLAIN", "LOCKED", "INFORMATION", "L/R", "PALETTE", "ALL PLAIN",   /* (LooksWord's order) */
+	"COLOURS", "Look", "LOOK", "PLAIN", "LOCKED", "INFORMATION", "L/R", "PALETTE", "ALL PLAIN", "SELECT",   /* (LooksWord's order) */
 };
 _Static_assert(sizeof words / sizeof *words == LW_COUNT, "a word for each LooksWord");
 
@@ -66,8 +66,6 @@ const char *looks_colour_word(uint16_t c) {
 	return hues[k].name;
 }
 
-void looks_count_words(char *out, size_t n, int owned, int all) { snprintf(out, n, "%d/%d", owned, all); }
-
 void looks_copy_row(char *out, size_t n, int to) { snprintf(out, n, "COPY TO %s", looks_slot_name(to)); }
 
 /* (a channel's colour in words: "Classic 14" or "plain") */
@@ -124,7 +122,11 @@ void looks_locked_words(char *out, size_t n, int palette) { snprintf(out, n, "%s
 void looks_popup_words(char *out, size_t n, int slot, int row, const Look *there) {
 	char w[160];
 	look_words(w, sizeof w, there);
-	if (row < LOOK_SLOTS - 1) snprintf(out, n, "Look %s now. %s", looks_slot_name((slot + 1 + row) % LOOK_SLOTS), w);
+	bool plain = true;
+	for (int c = 0; c < LOOK_CHANNELS; ++c) plain &= there->palette[c] == LOOK_NONE;
+	const char *to = looks_slot_name((slot + 1 + row) % LOOK_SLOTS);
+	if (row < LOOK_SLOTS - 1 && plain) snprintf(out, n, "Look %s is as he always is.", to);
+	else if (row < LOOK_SLOTS - 1) snprintf(out, n, "Look %s has %s", to, w);
 	else snprintf(out, n, "Look %s back to his own colours.", looks_slot_name(slot));
 }
 
@@ -136,6 +138,6 @@ void looks_ask_words(char *out, size_t n, int slot, int row) {
 const char *looks_yes_no(bool yes) { return yes ? "Yes" : "No"; }
 
 void looks_told_words(char *out, size_t n, bool copied, int slot, int from) {
-	if (copied) snprintf(out, n, "Look %s is now Look %s's. MegaMan wears it.", looks_slot_name(slot), looks_slot_name(from));
+	if (copied) snprintf(out, n, "Look %s is a copy of Look %s. MegaMan wears it.", looks_slot_name(slot), looks_slot_name(from));
 	else snprintf(out, n, "Look %s is back to his own colours.", looks_slot_name(slot));
 }

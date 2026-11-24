@@ -159,9 +159,11 @@ Colours, a row of [the PET's start menu](pet-menu.md) after Forms, opens
 it outside battle. BN6 has no screen for it, so it is ours, in the PET's
 look and from its pieces ([The PET's screens](../engine/ui.md)), like
 [the forms screen](meta/forms-screen.md) beside it. It went through two
-rounds of review by three experts in their own roles (a BN6 pixel purist,
-a game UX designer, a Warframe fashion player), each round's findings
-built before the next.
+rounds of review and a final pass by three experts in their own roles (a
+BN6 pixel purist, a game UX designer, a Warframe fashion player), each
+round's findings built before the next; a count of the palettes owned and
+marks for each page were tried and taken out (no room under the grid; read
+as a page number).
 
 Reasoned with the game-design skill:
 
@@ -194,18 +196,17 @@ What it shows, at 240 x 160:
   over twice.
 - **The list** in a window, LOOK A on its band: `Look` with the look worn
   between Options' orange pointers, then Armour, Suit and Accent, each
-  with the colour he wears in a swatch (BN6's own shade where it is
-  plain). The orange arrow is on the cursor's row; in the grid it holds
+  with the colour he wears in a swatch (BN6's own shade inset in the
+  field's navy where it is plain, so plain reads by its shape). The orange arrow is on the cursor's row; in the grid it holds
   still and dim.
 - **The palette's window**: the palette's short name on its band between
   the Library's green page arrows, its sixteen colours in a 4x4 grid, and
-  PLAIN under them, the channel as BN6 draws it; under that FOLDER EDIT's
-  count pill, the palettes owned of twelve. The channel's colour is framed
+  PLAIN under them, the channel as BN6 draws it. The channel's colour is framed
   white, as STATUS frames its slot; EQUIP's orange corners in the gutters
   are the grid's cursor. A palette not owned has its cells dimmed and
   LOCKED where PLAIN stands.
-- **ChipFolder's SELECT pop-up** under the Look row: Copy to B, Copy to C,
-  All plain.
+- **ChipFolder's SELECT pop-up** under the Look row, SELECT on its band and
+  its rows in capitals as SELECT's: COPY TO B, COPY TO C, ALL PLAIN.
 - **KeyItem's INFORMATION box** says what the cursor is on: the look worn,
   channel by channel; a channel's parts and colour; a colour's palette,
   number and plain name and where the palette comes from; a locked

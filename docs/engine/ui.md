@@ -206,12 +206,12 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   look worn between Options' pointers, each channel's colour in a swatch
   framed white) and the palette's window, its short name between the
   Library's green arrows, its sixteen colours a 4x4 grid with PLAIN under
-  it and FOLDER EDIT's count pill of the palettes owned, EQUIP's orange
+  it, EQUIP's orange
   corners in the cells' gutters the grid's cursor (a grid has no row for
   the arrow; the list's arrow held still and dim meanwhile) and a white
   frame the colour worn, as STATUS frames its slot; a locked palette
   dimmed with LOCKED in PLAIN's place; ChipFolder's SELECT pop-up for a
-  look's copy, its question in the INFORMATION box with Yes and No behind
+  look's copy (SELECT on its band, its rows in capitals), its question in the INFORMATION box with Yes and No behind
   the green triangle, No chosen; `L/R:PALETTE` on the band.
 - One key's hint on the band where the key does something unguessed:
   the Jukebox's `START:REPEAT` (the mode), Options' `START:DEFAULT` (a

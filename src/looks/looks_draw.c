@@ -35,9 +35,6 @@
 #define CELL_STEP 15
 #define GRID_W (4 * CELL_STEP - (CELL_STEP - CELL))
 #define PLAIN_H 11
-#define PILL_W 30           /* the palettes owned, in FOLDER EDIT's count pill */
-#define PILL_H 12
-#define PILL_EDGE rgba(181, 255, 189, 255)
 #define INFO_Y (TOP + MID_H + 3)
 #define INFO_H (H - 3 - INFO_Y)
 #define POP_X (LIST_X + 1)  /* ChipFolder's SELECT pop-up, under the looks' row, inside the list */
@@ -103,10 +100,14 @@ static SDL_Color channel_colour(const LooksView *v, int c) {
 	return colour((uint16_t)(pal[2 * mid[c]] | pal[2 * mid[c] + 1] << 8));
 }
 
-/* a channel's swatch: its colour in white, its frame orange while a pick flashes */
+/* a channel's swatch: its colour in white, its frame orange while a pick
+ * flashes; a plain channel's BN6's own shade inset in the field's navy, so
+ * plain reads by its shape, not its colour alone */
 static void swatch(int x, int y, const LooksView *v, int c, bool flash) {
 	fill_rect(x - 1, y - 1, SWATCH + 2, SWATCH + 2, flash ? ORANGE : LOOK_PAGE);
-	fill_rect(x, y, SWATCH, SWATCH, channel_colour(v, c));
+	if (v->look.palette[c] != LOOK_NONE) { fill_rect(x, y, SWATCH, SWATCH, channel_colour(v, c)); return; }
+	fill_rect(x, y, SWATCH, SWATCH, LOOK_SLOT);
+	fill_rect(x + 2, y + 2, SWATCH - 4, SWATCH - 4, channel_colour(v, c));
 }
 
 static void list(int x, int y, const LooksView *v) {
@@ -160,21 +161,7 @@ static void worn_mark(int x, int y, const LooksView *v, int c) {
 	frame(x + r.x - 1, y + r.y - 1, r.w + 2, r.h + 2, LOOK_PAGE);
 }
 
-/* the palettes owned of the twelve, in FOLDER EDIT's count pill under PLAIN, gold where all are */
-static void count_pill(int x, int y) {
-	SDL_Rect f = field_of(PAL_X, PAL_W), p = looks_cell_rect(LOOKS_PLAIN);
-	int owned = 0;
-	for (int i = 0; i < LOOK_PALETTES; ++i) owned += looks_owned(i);
-	char s[8];
-	looks_count_words(s, sizeof s, owned, LOOK_PALETTES);
-	int px = x + f.x + (f.w - PILL_W) / 2, py = y + p.y + p.h + 2;
-	fill_rect(px + 1, py, PILL_W - 2, PILL_H, PILL_EDGE);
-	fill_rect(px, py + 1, PILL_W, PILL_H - 2, PILL_EDGE);
-	fill_rect(px + 1, py + 1, PILL_W - 2, PILL_H - 2, LOOK_NAVY);
-	look_title(px + (PILL_W - look_title_width(s)) / 2, py + 3, s, owned == LOOK_PALETTES ? LOOK_GOLD : PILL_EDGE);
-}
-
-/* the palette's window: its name between the green page arrows, its grid, PLAIN, the palettes owned */
+/* the palette's window: its name between the green page arrows, its grid, PLAIN */
 static void palette(int x, int y, const LooksView *v) {
 	bool owned = looks_owned(v->page);
 	look_window(x + PAL_X, y + TOP, PAL_W, MID_H, WIN_TOP, false);
@@ -189,7 +176,6 @@ static void palette(int x, int y, const LooksView *v) {
 		SDL_Rect c = looks_cell_rect(v->cell);
 		look_corners(x + c.x - 2, y + c.y - 2, c.w + 4, c.h + 4);
 	}
-	count_pill(x, y);
 }
 
 /* ChipFolder's SELECT pop-up over the list: the look's name on its band, a copy to each other look, all plain */
@@ -198,7 +184,7 @@ static void popup(int x, int y, const LooksView *v) {
 	SDL_Rect box = looks_popup_box();
 	look_window(x + box.x, y + box.y, box.w, box.h, WIN_TOP, false);
 	char label[16], row[24];
-	snprintf(label, sizeof label, "%s %s", looks_word(LW_LOOK_CAPS), looks_slot_name(v->slot));
+	snprintf(label, sizeof label, "%s", looks_word(LW_SELECT));
 	look_caps(x + box.x + LOOK_FRAME + 1, y + box.y + 4, label, LOOK_PAGE, LOOK_EDGE_LO);
 	for (int r = 0; r < LOOKS_POPUP_ROWS; ++r) {
 		SDL_Rect at = looks_popup_rect(r);
