@@ -315,26 +315,33 @@ void sprite_draw_frame(Sprite *s, int anim, int frame, int x, int y, bool flip, 
 }
 
 void sprite_draw_palette(Sprite *s, int anim, int frame, int x, int y, bool flip, const uint8_t pal[32]) {
-	/* (one frame kept: built again where the frame, the palette or the canvas's colours changed) */
-	static CachedFrame *kept_frame;
-	static const Sprite *kept_of;
-	static uint8_t kept_pal[32];
-	static unsigned kept_gen;
+	/* (a few frames kept, the oldest built again where the frame, the
+	 * palette or the canvas's colours changed: two sprites drawn a frame
+	 * each keep theirs) */
+	enum { OWN_KEPT = 4 };
+	static struct { CachedFrame *f; const Sprite *of; uint8_t pal[32]; unsigned gen; } kept_own[OWN_KEPT];
+	static int next;
 	const uint8_t *f = s ? frame_ptr(s, anim, frame) : NULL;
 	if (!f) return;
 	uint32_t off = (uint32_t)(f - s->base);
-	if (!kept_frame || kept_of != s || kept_frame->frame_off != off || memcmp(kept_pal, pal, 32) || kept_gen != lcd_canvas_gen()) {
-		if (kept_frame) {
-			if (kept_frame->tex) SDL_DestroyTexture(kept_frame->tex);
-			free(kept_frame);
+	unsigned gen = lcd_canvas_gen();
+	for (int i = 0; i < OWN_KEPT; ++i)
+		if (kept_own[i].f && kept_own[i].of == s && kept_own[i].f->frame_off == off && kept_own[i].gen == gen && !memcmp(kept_own[i].pal, pal, 32)) {
+			draw_cached(kept_own[i].f, x, y, flip, 0);
+			return;
 		}
-		memcpy(kept_pal, pal, 32);
-		own_pal = kept_pal;
-		kept_frame = build_frame(s, f, OWN_PAL, 0);
-		kept_of = s;
-		kept_gen = lcd_canvas_gen();
+	int k = next;
+	next = (next + 1) % OWN_KEPT;
+	if (kept_own[k].f) {
+		if (kept_own[k].f->tex) SDL_DestroyTexture(kept_own[k].f->tex);
+		free(kept_own[k].f);
 	}
-	draw_cached(kept_frame, x, y, flip, 0);
+	memcpy(kept_own[k].pal, pal, 32);
+	own_pal = kept_own[k].pal;
+	kept_own[k].f = build_frame(s, f, OWN_PAL, 0);
+	kept_own[k].of = s;
+	kept_own[k].gen = gen;
+	draw_cached(kept_own[k].f, x, y, flip, 0);
 }
 
 void anim_draw(const Anim *a, int x, int y, bool flip, int pal, int fx) {
