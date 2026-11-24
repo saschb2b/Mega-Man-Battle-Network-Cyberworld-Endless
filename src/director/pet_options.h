@@ -19,7 +19,9 @@ bool pet_options_here(void);
  * its 9 x 2 tile entries (Save's, the word's columns ours), for the menu's
  * picture (pet_menu_frame.c); false while the labels are BN6's */
 bool pet_options_forms_map(uint16_t out[2 * 9]);
-/* The word's tile a Forms entry names (4bpp, 32 bytes), NULL for any
+/* ... and the tenth's, Colours (false too where its word did not fit) */
+bool pet_options_looks_map(uint16_t out[2 * 9]);
+/* The word's tile a Forms or Colours entry names (4bpp, 32 bytes), NULL for any
  * other number: held here, never in the video memory, where BN6's screens
  * use the tiles past the labels' as their blank (docs/rom/pet-and-second-screen.md) */
 const uint8_t *pet_options_forms_tile(int n);

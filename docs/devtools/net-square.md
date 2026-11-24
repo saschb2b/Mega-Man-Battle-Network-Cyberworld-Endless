@@ -3,7 +3,7 @@ type: Tool
 title: "The Net Square: two games at once"
 description: "Testing the Net Square on a local server: `python3 build.py server-run`, a data folder's `network.ini` or `--dev online=URL`, two `tools/play.py` games, dev steps (`emote`, `netpass`, `trade`, `reconnect`, `look`) and `tools/link_relay.py` for dropped links."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
 ---
 
 # The Net Square: two games at once

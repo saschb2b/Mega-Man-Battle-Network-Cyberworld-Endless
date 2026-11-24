@@ -124,7 +124,7 @@ each. The shop's sale is its own got box. `profile.looks_told` keeps
 what has been said.
 
 The first palette past Classic brings Dad's mail, **Colors** (mail 24,
-NEW once): where MegaMan changes his colours, the PET's COLOURS, and that
+NEW once): where MegaMan changes his colours, Colours in the PET's start menu ([MegaMan's look](looks.md)), and that
 AsterLand sells some ([the PET](pet.md), E-Mail).
 
 ## Checks

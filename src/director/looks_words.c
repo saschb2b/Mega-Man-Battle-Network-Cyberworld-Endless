@@ -44,6 +44,6 @@ const char *looks_mail_subject(void) { return "Colors"; }
 
 const char *looks_mail_text(void) {
 	return "Lan,MegaMan showed\nme his new colors!\f"
-		"He can change them\nin the PET,under\nCOLOURS.\f"
+		"He can change them\nin the PET,under\nColours.\f"
 		"AsterLand sells some\ncolors too. Take a\nlook,OK?";
 }

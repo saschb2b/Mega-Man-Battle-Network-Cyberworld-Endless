@@ -141,12 +141,20 @@ void devtools_parse(const char *spec) {
 	run_debug_form = dev.form;
 }
 
+/* (looks=MASK: MegaMan's palettes owned and told, as earned in runs
+ * before: Classic always) */
+static void dev_looks(void) {
+	if (!dev.looks) return;
+	profile.looks_owned = (uint16_t)(dev.looks | 1);
+	profile.looks_told = (uint16_t)dev.looks;
+	profile_save();
+}
+
 void devtools_veteran(void) {
 	/* (the worn slot's look, saved: a CONTINUE without the switch keeps it) */
 	if (dev_look_on) looks_set(looks_slot(), &dev_look_set);
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
-	/* (palettes owned and told, as earned in runs before: Classic always) */
-	if (dev.looks) { profile.looks_owned = (uint16_t)(dev.looks | 1); profile.looks_told = (uint16_t)dev.looks; profile_save(); }
+	dev_looks();
 	/* (a bit a folder but the Standard's, every one meta.h has) */
 	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
 	if (dev.heard) { profile.shelf.heard |= (uint8_t)dev.heard; profile_save(); }

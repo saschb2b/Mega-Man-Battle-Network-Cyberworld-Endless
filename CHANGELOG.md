@@ -36,6 +36,14 @@
   the Square carries the other player's look, NetBattles stay in BN6's
   colours on both sides (issue #854).
 
+- **Fixed: more chips strike the way MegaMan faces when he turns round.**
+  On a liberation's Surrounded field, turned left with L, SandWrm,
+  BurnSqr, TenguMan's chip, AirRaid and Magnum, and BN4's GutsMan,
+  PanlSht, SeekBom, PitRng, RollAro, GutPnch, Meteors, Boomer, DrkVulcn
+  and DarkBomb aimed by his side alone: they struck behind him or
+  nothing at all. BlastMan's flames now start where he stands, so the
+  foe ahead burns, not the one behind, either way he faces (issue #846).
+
 - **New: MegaMan in colours of his own, the engine's part.** His plain
   body takes a look: the armour, the suit and the gold each coloured from
   one of twelve palettes (Classic, Undernet, Gregar, ProtoMan, Nebula,
@@ -45,13 +53,11 @@
   three looks; the PET's screen to pick them and the ways to earn the
   palettes follow (issue #854).
 
-- **Fixed: more chips strike the way MegaMan faces when he turns round.**
-  On a liberation's Surrounded field, turned left with L, SandWrm,
-  BurnSqr, TenguMan's chip, AirRaid and Magnum, and BN4's GutsMan,
-  PanlSht, SeekBom, PitRng, RollAro, GutPnch, Meteors, Boomer, DrkVulcn
-  and DarkBomb aimed by his side alone: they struck behind him or
-  nothing at all. BlastMan's flames now start where he stands, so the
-  foe ahead burns, not the one behind, either way he faces (issue #846).
+- **New: MegaMan in colours of your own.** Colours, a new entry of the
+  PET's start menu, opens a screen where his armour, suit and gold take any
+  colour of the palettes you own, previewed on MegaMan as the cursor
+  moves; three looks are kept, A to C. Palettes you don't own yet show
+  where they come from (epic #854).
 
 - **New: fast forward keeps the music at its own pace.** While the game
   runs fast, the song plays on as it would at BN6's speed instead of
