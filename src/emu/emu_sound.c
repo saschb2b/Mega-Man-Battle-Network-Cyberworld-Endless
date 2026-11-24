@@ -35,6 +35,13 @@ static AudioPace pace;   /* (the ring's averaged fill: the output rate's nudge) 
 
 bool emu_sound_ready(void) { return ring_lock != NULL; }
 
+static void (*volatile mixer)(int16_t *frames, int n);
+void emu_sound_mixer(void (*mix)(int16_t *frames, int n)) { mixer = mix; }
+void emu_sound_mix(int16_t *frames, int n) {
+	void (*mix)(int16_t *, int) = mixer;
+	if (mix) mix(frames, n);
+}
+
 void emu_sound_put(const int16_t *frames, int n) {
 	if (!ring_lock) return;
 	SDL_LockMutex(ring_lock);

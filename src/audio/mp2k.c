@@ -124,7 +124,7 @@ static Mp2kPlayer *player_of(int rom, int song, uint32_t *header) {
 }
 
 /* MPlayStart: an effects' player keeps a song of higher priority playing */
-static void player_start(Mp2kPlayer *pl, int rom, uint32_t header) {
+void mp2k_player_start(Mp2kPlayer *pl, int rom, uint32_t header) {
 	Mp2kTrack *first = &M.tracks[pl->first];
 	bool idle = (!pl->song || !(first->flags & TRK_START)) && (!(pl->status & 0xFFFF) || (pl->status & (uint32_t)PLAYER_PAUSE));
 	if (pl->check_priority && !idle && pl->priority > mp2k_u8(header + 2)) return;
@@ -155,7 +155,7 @@ static void player_start(Mp2kPlayer *pl, int rom, uint32_t header) {
 void mp2k_song_start_in(int rom, int song) {
 	uint32_t header = 0;
 	Mp2kPlayer *pl = player_of(rom, song, &header);
-	if (pl) player_start(pl, rom, header);
+	if (pl) mp2k_player_start(pl, rom, header);
 	mp2k_read(0);
 }
 

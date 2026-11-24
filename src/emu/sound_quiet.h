@@ -13,10 +13,16 @@
 #ifndef CW_SOUND_QUIET_H
 #define CW_SOUND_QUIET_H
 
+#include <stdbool.h>
+
 /* The hook, once (game_hooks.c) */
 void sound_quiet_install(void);
 /* Before each frame of BN6's core (emu_frame): a change taken in */
 void sound_quiet_frame(void);
+/* The music silenced in the core whatever its level, from the next frame
+ * (true), or heard at its level again: fast forward's music, which the
+ * engine plays meanwhile (audio.h, music_fast_update) */
+void sound_quiet_music_away(bool away);
 /* A state loaded into it (emu.c): every track told at the next frame */
 void sound_quiet_loaded(void);
 

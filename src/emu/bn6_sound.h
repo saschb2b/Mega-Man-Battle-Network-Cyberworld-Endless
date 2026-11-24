@@ -11,6 +11,11 @@
 #define BN6_SOUND_INFO        0x030045C0u /* SoundInfo ("Smsh", the BIOS's pointer at 0x03007FF0 reads it): +0x04 the DMA's count, +0x05 the reverb, +0x06 4 channels, +0x07 master volume 15, +0x08 rate index 3, +0x0B the ring's 9 frames, +0x10 176 samples a frame, +0x50 the channels, +0x350 the mix's ring */
 #define BN6_SOUND_CHANS       (BN6_SOUND_INFO + 0x50) /* its DirectSound channels, 0x40 bytes each */
 #define BN6_SOUND_PCM_FREQ    (BN6_SOUND_INFO + 0x14) /* s32: the mix's rate in Hz, 10512 (above its half the GBA's mix holds only images) */
+#define BN6_SOUND_DMA_COUNT   (BN6_SOUND_INFO + 0x04) /* u8: the frames till the ring's DMA starts again, from BN6_SOUND_DMA_PERIOD down to 1 */
+#define BN6_SOUND_DMA_PERIOD  (BN6_SOUND_INFO + 0x0B) /* u8: the ring's frames, 9 */
+#define BN6_SOUND_PER_FRAME   (BN6_SOUND_INFO + 0x10) /* s32: the mix's samples a frame, 176 */
+#define BN6_SOUND_RING        (BN6_SOUND_INFO + 0x350) /* s8 x 1584: the mix's ring, right (DMA A); a frame's part at its frame's index x BN6_SOUND_PER_FRAME */
+#define BN6_SOUND_RING_LEFT   (BN6_SOUND_RING + 0x630) /* s8 x 1584: ... left (DMA B) */
 #define BN6_SOUND_CGB_CHANS   0x03005600u /* the PSG's four CgbChannels, 0x40 bytes each */
 #define BN6_SOUND_MAX_CHANS   (BN6_SOUND_INFO + 0x06) /* u8: its DirectSound channels in use, 4 */
 #define BN6_SOUND_REVERB      (BN6_SOUND_INFO + 0x05) /* u8: the reverb, 13 at the start (a song's header may set its own) */

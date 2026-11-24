@@ -681,7 +681,11 @@ cursor, show in the picture's top right corner.
 
 Options' **Fast forward** line sets how fast: **2x**, **3x** (the default)
 or **4x**, or **Off**, where its button does nothing (`fast_forward` in
-`settings.ini`). The music keeps its pitch as it plays faster. A machine
+`settings.ini`). The music plays on at its own pace while the game runs
+fast, and the game takes the song up where it got to when fast forward
+stops; the game's sounds play fast with what is on screen, at their own
+pitch. `fast_music = off` in `settings.ini` plays the music faster with
+the game instead, at its own pitch. A machine
 that cannot run the game that fast runs it as fast as it can (the New 3DS
 gains little). The run's rules do not change with it: random battles come
 as often per step, every reward is the same, and the run's minutes count

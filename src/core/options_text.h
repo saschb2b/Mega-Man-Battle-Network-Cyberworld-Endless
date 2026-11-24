@@ -76,6 +76,7 @@ const char *options_lcd3x_note(void);
 const char *options_voxel_note(void);
 /* ... before fast forward's */
 const char *options_fast_note(void);
+const char *options_fast_music_note(void);
 /* ... before the controller's vibration and trigger effects */
 const char *options_vibration_note(void);
 const char *options_triggers_note(void);
