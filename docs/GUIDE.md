@@ -15,7 +15,7 @@ statistics, troubleshooting and building the game yourself.
 
 [What you need](#what-you-need) · [Install](#install) · [Playing](#playing) ·
 [A run](#a-run) · [Getting stronger](#getting-stronger) ·
-[What carries over](#what-carries-over) · [Saving and losing](#saving-and-losing) ·
+[What carries over](#what-carries-over) · [MegaMan's colours](#megamans-colours) · [Saving and losing](#saving-and-losing) ·
 [Moving saves between devices](#moving-saves-between-devices) · [Online](#online-the-net-square) · [Screen](#screen) · [Updates](#updates) · [Discord](#discord) · [Anonymous statistics](#anonymous-statistics) ·
 [Troubleshooting](#troubleshooting) · [Building](#building)
 
@@ -45,11 +45,20 @@ statistics, troubleshooting and building the game yourself.
   bystanders, their random battles BN5's own, fought in BN6's engine
   (every Cross and chip of the run works there). In half the runs a Navi
   of BN5's guards such an area (KnightMan, ShadowMan, NumberMan,
-  TomahawkMan, ToadMan, Colonel), and the Undernet's and the Graveyard's
-  acts draw their guardians from both games' Navis, BN5's LarkMan and
-  GridMan among them there; beaten, one of the six gives his
-  Soul, which MegaMan can UNITE with in every battle after (LarkMan and
-  GridMan have none: their Guardian Data holds their Navi chip). Each act of
+  TomahawkMan, ToadMan, Colonel). From act 2 a coin of the run's seed
+  puts his Team ProtoMan partner in his place: MagnetMan for KnightMan,
+  GyroMan for ShadowMan, SearchMan for NumberMan, NapalmMan for
+  TomahawkMan, Meddy for ToadMan, and DarkProto, BN5's ProtoMan, for
+  Colonel in the Undernet. Team Colonel's ROM draws none of those first
+  five on the net, so they stand in a HeelNavi's body. The Undernet's and
+  the Graveyard's acts draw their guardians from both games' Navis, all
+  twelve of these and BN5's LarkMan and GridMan among them there. Beaten,
+  one of the twelve gives his Soul, which MegaMan can UNITE with in every
+  battle after: Team Colonel's six, and GyroSoul, SearchSoul with its
+  SHUFFLE on the Custom screen, NapalmSoul, MagnetSoul, MeddySoul with
+  her capsules there, and ProtoSoul. A partner leaves a chip of his
+  Soul's kind where the others leave their Navi chip (LarkMan and
+  GridMan have no Soul: their Guardian Data holds their Navi chip). Each act of
   a run is about one virus family, named on the act's card ("BombCorn
   signal"): its first layer meets it alone, the second beside a partner,
   the third in a battle built around it, and that family can be BN5's
@@ -549,11 +558,14 @@ title too, in a battle as well, and saves nothing: **CONTINUE** takes the
 run up at its last checkpoint; what came after it is lost.
 
 **The PET's menu** in a run is BN6's own laid out in two columns:
-ChipFolder, SubChip, Library, MegaMan and Forms down the left, E-Mail,
-KeyItem, Options and Save down the right, your HP, Zenny and BugFrags in a
-strip under them and where you are on the band, EXIT under Save. Down from
-ChipFolder and Up to Save count as in BN6; Right goes across, and on to
-EXIT.
+ChipFolder, SubChip, Library, MegaMan, Forms and Colours down the left,
+E-Mail, KeyItem, Options and Save down the right, your HP, Zenny and
+BugFrags in a strip under them and where you are on the band, EXIT under
+Save. Down from ChipFolder and Up to Save count as in BN6; Right goes
+across, and on to EXIT. Forms holds the run's Crosses and Souls
+([Getting stronger](#getting-stronger)), Colours MegaMan's look
+([MegaMan's colours](#megamans-colours)). In the Net Square the menu
+stays BN6's own.
 
 **Options** holds the game's settings, a press away wherever you are: the
 title's menu has an **OPTIONS** line under NEW GAME and CONTINUE (Select
@@ -768,7 +780,9 @@ sells any chip the Library holds, in your folder's codes, one order a
 visit. Its list sorts as the folder editor's does: START goes on to the
 next of BN6's seven sorts (ID, ABCDE, Code, Attack, Element, No. for the
 copies you hold, MB), SELECT turns the order around, and the clerk says
-which it is; the list opens in the last one again. Beside the counter the
+which it is; the list opens in the last one again. The same clerk sells
+MegaMan's colours, a palette for 6000 zenny ([MegaMan's
+colours](#megamans-colours)). Beside the counter the
 SubChip seller stocks the keys the act ahead asks for, and its Chip
 Trader trades as in BN6, START sorting your Pack there.
 
@@ -845,16 +859,24 @@ With BN5 Team Colonel's ROM beside BN6's, one of the two ways at a fork
 from the second act can lead to a layer gone dark (MegaMan says so at the
 way, and the act's card names it): a Liberation Mission of BN5's, its
 board of dark panels, DarkHoles and their guardians, and a Darkloid at the
-far end. The Navis whose Souls you hold come along, as many as BN5's team
-of that stage has room for (two at act 2, up to five later). Each takes
-his turn every PLAYER PHASE: walk him beside a dark panel and press A for
-Liberation, his own command (Colonel's ScrenDiv, TomahawkMan's
-TomahawkSwing, NumberMan's NumberCheck, ShadowMan's SneakAttack, ToadMan's
-LifeMelody, MegaMan's LongSwrd; KnightMan has none, and nothing on the
-board hurts him or a Navi beside him) or Pass to rest; R hands play to
-the next Navi yet to act. A teammate's battles are MegaMan's in that
-Navi's Soul from the first turn, on that Navi's own HP: if it runs out,
-he leaves the board, not the run.
+far end. The Navis whose Souls you hold come along, and Gregar's Cross
+Navis whose Crosses you hold, as many as BN5's team of that stage has
+room for (two at act 2, up to five later); where you hold more, you pick
+the team as you arrive. Each takes his turn every PLAYER PHASE: walk him
+beside a dark panel and press A for Liberation, his own command or Pass
+to rest; R hands play to the next Navi yet to act. The commands are
+BN5's. Team Colonel's: Colonel's ScrenDiv, TomahawkMan's TomahawkSwing,
+NumberMan's NumberCheck, ShadowMan's SneakAttack, ToadMan's LifeMelody,
+MegaMan's LongSwrd; KnightMan has none, and nothing on the board hurts
+him or a Navi beside him. Team ProtoMan's: ProtoMan's WideSwrd, GyroMan's
+BombLiberation, SearchMan's PanelSearch, NapalmMan's Napalm and
+MagnetMan's MagnetBarrier; Meddy has none of her own yet. ProtoMan
+stands in BN6's own body, the other five in a HeelNavi's, as they do as
+guardians. The Cross Navis borrow Team ProtoMan's: HeatMan Napalm,
+ElecMan MagnetBarrier, SlashMan WideSwrd, EraseMan PanelSearch, ChargeMan
+BombLiberation. A teammate's battles are MegaMan's in that Navi's Soul
+or Cross from the first turn, on that Navi's own HP: if it runs out, he
+leaves the board, not the run.
 
 With BN4 Red Sun's ROM beside BN6's, once a run has reached the Nest, act
 3's arena in half the runs holds a tournament instead of one guardian (in
@@ -922,12 +944,15 @@ it pays one of BN6's GigaChips.
   Chaud's TagChip system for good: two chips tagged come to your hand
   together.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
-  gives MegaMan their Cross for the rest of the run, chosen in the Custom
-  screen as in BN6. CROSSSELECT lists five: **Forms** in the PET's menu
-  opens FORMS, where the Crosses held past five wait as spares, and A on one
-  Cross and A on another swaps them, as in the folder editor, whenever
-  you like. Its other page lists the Souls you hold and the chip each
-  takes.
+  as an act's guardian gives MegaMan their Cross for the rest of the run,
+  chosen in the Custom screen as in BN6. Falzar's five give theirs the
+  same way: SpoutMan, TomahawkMan, TenguMan, GroundMan and DustMan, for
+  SpoutCross, TomahawkCross, TenguCross, GroundCross and DustCross. A run
+  can hold all ten and CROSSSELECT lists five: **Forms** in the PET's
+  menu opens FORMS, where the Crosses held past five wait as spares, and
+  A on one Cross and A on another swaps them, as in the folder editor,
+  whenever you like and at no cost. Its other page lists the Souls you
+  hold and the kind of chip each takes.
 - **BeastOut.** Beat the Cybeast at the endless net's own Nest, and
   BeastOut joins the Custom screen for the rest of the run; the
   Graveyard's guardian only stirs the beast. Once the Cybeast has fallen
@@ -963,15 +988,36 @@ goes on to the next, JACK IN! at the last's starts the run, and START
 starts it from any page. RUN holds:
 
 - **Net:** the short net, or the endless net once a short one is won.
-- **Folder:** BN6's starting folder, or one opened in any run: Blade
-  (swords in S for LifeSword), once any guardian falls, and Storm (Elec
-  chips), once an Aqua guardian does. Chips the net gives lean to the
-  codes the folder holds most: the chip comes as it rolled, in one of
-  those codes where it can.
+- **Folder:** the starting folder. The row turns through all ten and
+  counts the open ones ("Folder 3/10"). An open folder says what it plays
+  like. A locked one is shown too, dim behind a LOCKED tag: you can look
+  at it, not take it, and under what it plays like stands a hint at the
+  kind of deed that opens it ("Opens when something big falls"), never
+  the deed. The deed is out in the Net: a bystander on a layer may tell
+  how one opens, as a friend's story, and from then on the setup and the
+  run's summary say it plainly ("Delete any guardian to open it"). When
+  three runs have ended with nothing new heard, the Endless Net BBS in
+  your mail posts the next one. Each opens in any run and stays open:
+
+  | Folder | What it plays like | To open it |
+  | --- | --- | --- |
+  | Standard | BN6's own starting folder | Open from the start |
+  | Blade | Swords in S for LifeSword; nothing reaches the back row | Delete any guardian |
+  | Storm | Elec chips: double on Aqua foes, plain on the rest | Delete an Aqua guardian (SpoutMan or DiveMan) |
+  | Z-Canon | Three Program Advances in codes in a row (GigaCan1, WideBrn1, FlmHook1) and LifeSword's three swords; most of it hits close | Use a Program Advance |
+  | Busting | Heavy hitters in L and R, and no Recovery chip | Clear an act without using a Recovery chip |
+  | Lean | Seven kinds of chip in B or \*: any five make a hand, and little else | Reach layer 10 |
+  | Steady | BN6's ExtraFolder with four Recov30: a step up from Standard, in few codes | Reach act 3 |
+  | Navi | BlastMan, DiveMan and CircusMan with small chips in their codes and help to hold a foe; the rest hits soft | Use a Navi chip |
+  | Ember | GrasSeed's grass, then Fire chips on it for double; short reach | Delete a guardian in HeatCross |
+  | Tide | Aqua chips in A and T: double on Fire foes, bubbles and ice to hold one | Delete a Fire guardian (HeatMan or BlastMan) |
+
+  Chips the net gives lean to the codes the folder holds most: the chip
+  comes as it rolled, in one of those codes where it can.
 - **Cross:** a Cross MegaMan has from the first battle, once its Navi
-  (HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan) has fallen as a
-  guardian. It is the run's only Cross: guardians' Cross data won't fit
-  beside it.
+  (HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan, or Falzar's SpoutMan,
+  TomahawkMan, TenguMan, GroundMan, DustMan) has fallen as a guardian. It
+  is the run's only Cross: guardians' Cross data won't fit beside it.
 - **Threat:** ten rungs that each add one constraint (stronger viruses
   from act 2, fewer heals, dearer dealers, EX guardians, SP Navis in
   Servers, Mystery Data of chips only, half the Chip Traders, drafts of two
@@ -1014,6 +1060,55 @@ own marks on the title: Gregar's head for a won short net, Bass for the
 endless net's Nest, the S for the Secret Area, the green disc for a win on
 the top threat rung, STD, MEGA and GIGA COMP for a class of the Library
 complete.
+
+### MegaMan's colours
+
+**Colours** in the PET's menu opens a screen for MegaMan's look. His
+plain body has three channels: **Armour** (his helmet, arms and legs),
+**Suit** (his bodysuit) and **Accent** (the gold of his fins and emblem).
+Each takes any of the sixteen colours of a palette you own, or PLAIN, the
+channel as BN6 draws it; his outline and his skin stay as they are. A on
+a channel opens the palette's grid, **L** and **R** turn through the
+twelve palettes, and MegaMan wears the colour under the cursor as it
+moves: A keeps it, B puts the old one back. A palette you don't own yet
+can be tried on him there, not kept, and the box says where it comes
+from. Three looks are kept, A to C: Left and Right on the Look row change
+the one he wears, and A there copies it over another or sets it all
+plain.
+
+He wears the look on the field, in battle, in a chat box and on the
+Custom screen. A Cross, a Soul and BeastOut keep their own colours, and
+the look is back with his plain body. It is a look and nothing else: no
+battle plays differently for it.
+
+Classic is yours from the start. The other eleven palettes are earned,
+each once for good:
+
+| Palette | How it is earned |
+| --- | --- |
+| Undernet | A run reaches the Undernet |
+| Gregar | The Cybeast falls at the endless net's Nest |
+| ProtoMan | Chaud's respect: the netbattle against ProtoMan won |
+| Nebula | One of BN5's Darkloids deleted |
+| Tournament | BN4's tournament won |
+| Hazard | A run won on the top threat rung |
+| Central Town, Seaside, Sky | Sold at AsterLand's counter beside the Order Service, 6000 zenny each |
+| Mystery | A find: ColrData in one blue Mystery Data of a run, on layer 4, 6 or 7 |
+| Glitch | The same find on a Glitch layer, in the runs that have one |
+
+A run hides one such find at most, never a palette you own, and a dive
+of the week's DeepNet earns no palette. MegaMan says where a new palette came from, the first
+one brings Dad's mail **Colors**, and a profile from before palettes gets
+the milestones it already holds at its next start.
+
+Other players see your look. In the Net Square it goes with your name,
+and the players around you are drawn in theirs. A part of the Square has
+room for only so many looks at once (in the plaza three besides yours,
+nine in Trade Central, ten on the stage): the nearest players get
+theirs, and the ones farther off are drawn in BN6's blue until they come
+nearer. In a NetBattle each MegaMan wears his player's look on both
+screens, with your own face in the emotion window; in a Team NetBattle
+fought side by side, all four keep BN6's colours.
 
 ### The Battle Lab
 
@@ -1197,10 +1292,15 @@ there. When the link is back, **Back online!** flashes and you play on.
 **B** on that screen gives up and takes you home at once; past the 30
 seconds you go home too, and MegaMan says the link broke.
 
-What was under way when the link dropped ends as if you had left: a
-NetBattle stops with no result for either of you, watching one stops, and
-a trade that wasn't done yet is off (nothing changes hands). A trade both
-of you had already agreed to still comes home with you.
+A NetBattle rides out the drop: the server holds the battle with your
+place, and once the link is back the two games catch each other up and
+fight on from the same frame, a Team NetBattle's relay and two a side
+too. If the wait passes 20 seconds the battle stops with no result for
+either of you, and the card that says why stays until B. A trade that
+wasn't done yet is off (nothing changes hands); a trade both of you had
+already agreed to still comes home with you. On a dive of the week's
+DeepNet the layer goes on without the link ([The week's
+DeepNet](#the-weeks-deepnet)).
 
 If the gate says **a newer version is out**, the server runs a newer
 version of the game than yours: update from the game's download page. If
@@ -1388,31 +1488,66 @@ week, and everyone on that server who dives it dives the same net, its
 layers' random battles the same for everyone, from the same start: the short net, the Standard folder, threat 0, no helpers
 and no Cross, nothing your other runs unlocked. The portal in the
 welcome plaza, a purple vortex, offers it to a pass with the DeepNet
-stamp; say Yes (the cursor starts on No), and it warps MegaMan straight
-into the dive's first layer.
+stamp in one question that says how many dive right now ("3 NAVIS
+DIVING! DIVE IN?"), and Yes warps MegaMan straight onto the dive's first
+layer. Your first dive of a week hears the week's dates first, its
+cursor on No; after that the cursor starts on Yes.
 
 You dive it together with everyone on the server who dives it at the
-same time. Whoever stands on your layer walks there as a MegaMan; you
-walk through each other. A band at the foot of
-the screen says what happens to the others: who was deleted on which
-layer, who beat a guardian, who cleared the net.
+same time. Whoever stands on your layer walks there as a MegaMan, his
+name over him; you walk through each other. On the layer's map each is a
+round dot. A band at the foot of the screen says what happens to the
+others: who was deleted on which layer, who beat a guardian, who cleared
+the net.
 
+- **Crews.** A crew is who walks with you. Stand near another diver for
+  a second and you are a crew, up to four: nothing to ask, nothing to
+  answer, strangers too. A dotted ring under a diver says a crew is about
+  to form. Your crewmates' names turn green, each with a green ring at
+  his feet, and on the map a crewmate's dot is white in a green ring,
+  with an arrowhead on the map's edge when he is off it. A crew holds
+  while you can see each other: walk out of sight and two seconds later
+  you are out of it. A crewmate who goes on to the next layer first stays
+  in for ten seconds, so a crew that goes down together arrives as one.
+  A fifth beside a crew of four is told it is full.
+- **The crew's plates.** Under the HP box a plate for each crewmate gives
+  his name, his HP over his max HP with a bar, and where he is when he
+  is not beside you: his layer ("L3"), BATTLE, BUSY (a chat, the PET, a
+  shop) or HOME between acts. A second screen lists the crew over its
+  map, each with his link's bars.
+- **A crew's battles.** A crewmate's random battle starts at once with
+  every free crewmate in it, all on one field against the viruses he met,
+  each with his own folder and his own reward after; the band says whose
+  it is ("Alpha's battle!"), and an ally's HP stands under his name. A
+  crewmate with a chat, the PET or a shop open stays where he is. A crew
+  of four fights up to about 1.4 times as many battles as a diver alone,
+  each of them together. On the New 3DS and the PSP you are in crews as
+  anyone, but their battles are not offered you.
+- **Pulled back.** A crewmate deleted in a crew's random battle that the
+  crew wins is pulled back onto the layer, once a dive: each crewmate
+  still standing gives a quarter of the HP he has left, and the fallen
+  comes back with the sum, half his max HP at most, and with nothing
+  from that battle. A second deletion ends the dive.
 - **A guardian's door.** Step into the arena with other divers on the
-  layer and you wait at its door for them; the first one there leads.
-  The leader's **A** goes in with everyone waiting (up to four), anyone's
-  **B** goes alone. A party meets the guardian stronger (his next
-  version for two, the one after for three or four, his HP times the
-  party) and fights him on one field, every MegaMan with his own folder
-  and chips, the guardian taking aim at each in turn. A MegaMan deleted
-  in it ends his own run, even if the party wins. On the New 3DS and the
-  PSP each of the party fights him on a field of his own, his HP shared.
-- **Crews.** **A** on another diver asks to team up (BN6's own Yes or
-  No, on both sides), up to four. A crew stays together across layers:
-  at Lan's HP a portal waits until the whole crew stands on it. A
-  crewmate's battle near you is yours to join: the band says so for a
-  few seconds, and **A** jumps in, the two of you on one field against
-  the viruses he met, each with his own reward after. A battle you join
-  counts as one of yours, so a crew fights about as many as one alone.
+  layer and you wait at its door; the first one there leads, and the
+  band says who waits. While the leader's crew is still on the layer,
+  the door waits ten seconds for them, counting down in the band and
+  calling them over: a press of A does nothing then, and **holding A**
+  goes in early. After the wait the leader's **A** goes in with everyone
+  waiting (up to four) and anyone's **B** goes alone. A fifth is told
+  the party is full: A takes him in alone, or he waits for a place.
+  While a party gathers, the plates list it, the leader first. A party
+  meets the guardian a diver alone meets, his HP times the party, and
+  fights him on one field, every MegaMan with his own folder and chips,
+  the guardian taking aim at each in turn. A MegaMan deleted in it ends
+  his own dive, even if the party wins. On the New 3DS and the PSP each
+  of the party fights him on a field of his own, his HP shared.
+- **A dropped link.** The dive goes on while the link is down. The band
+  says **Reconnecting...**, then that you dive alone, and the game keeps
+  calling the Square for as long as the dive lasts; **Back online!**,
+  and the others are there again, your crew forming as before. Of a
+  crewmate whose game went away the band says his signal is gone, and
+  that it is back when he returns.
 - **Traces of the week.** Where a diver was deleted this week a skull
   burst stays; **A** on it says who and to what. **R** on a layer opens
   the phrases you know from the Square: **A** leaves one on your panel
@@ -1424,14 +1559,19 @@ layer, who beat a guardian, who cleared the net.
   among the week's divers who fought the same battle.
 
 Your run in progress waits in its own save, untouched. While a dive is
-unfinished the title's CONTINUE takes you straight back into it (it says
-"Dive L3"), linked to the Square again as you land; when the dive ends,
-won or deleted, CONTINUE is your run again. The portal also offers an
-unfinished dive: Keep diving, Start over or Not now. Divers don't trade.
+unfinished the title's CONTINUE takes you straight back onto its layer
+(it says "Dive L3"), linked to the Square again as you land, the others
+on the layer there and your crew forming again once you stand together;
+when the dive ends, won or deleted, CONTINUE is your run again. The
+portal also offers an unfinished dive: Keep diving, Start over or Not
+now. Divers don't trade.
 
-How deep you got goes up on the board as your dive ends: the week's
+A dive's end has a RESULT of its own, DEEP NET on its band: the layer
+reached, the crew's battles fought and won, and the dive's place on the
+week's Board. How deep you got goes up on the Board as your dive ends,
+with no visit to the Square needed: the week's
 eight deepest dives (a **+** beside a dive that fought a guardian as a
-party), your own best and its place, and last week's three; who is
+party, a **\*** beside one its crew pulled back), your own best and its place, and last week's three; who is
 diving right now and on which layer; and the week's fastest busts of
 each guardian, alone and by party size. Dive as often as you like; your
 best counts. The board says the layers are as players report them, and
