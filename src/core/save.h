@@ -188,6 +188,13 @@ typedef struct {
 	uint16_t looks_owned;
 	uint8_t look_slot, looks_kept;
 	Look looks[LOOK_SLOTS];
+	/* the looks' routes (docs/game/looks.md): the run (its seed) whose rare
+	 * find (Mystery or Glitch) was picked up, the palettes MegaMan has
+	 * announced (a bit each), that run's palette and whether Dad's mail on
+	 * the colours was sent; a profile saved before reads them 0 */
+	uint32_t look_find_run;
+	uint16_t looks_told;
+	uint8_t look_find, looks_mailed;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
