@@ -330,3 +330,22 @@ played again beside it so a change of build shows).
 - **Z-Canon** now forms a Program Advance in 9 battles in 100 under the
   greedy pick (GigaCan1 3.6, FlmHook1 2.5, WideBrn1 2.4, LifeSrd 0.3),
   where the first Z-Canon formed 1, at Standard's damage within a tenth.
+
+The autopilot (this build, seeds 1-12 at threat 1, fresh data folders):
+
+| Folder | Layer reached, mean (each seed) | Act-1 guardian won | Deaths: guardian, virus battle | Act-1 virus battles: frames, chips used, HP lost |
+| --- | --- | --- | --- | --- |
+| Standard | 3.4 (3 3 3 6 3 5 3 3 3 3 3 3) | 2 of 11 | 10, 2 | 549, 3.4, 4 |
+| Z-Canon, rebuilt | 2.9 (3 3 3 3 3 2 3 3 3 3 3 3) | 0 of 11 | 11, 1 | 511, 3.4, 6 |
+
+- **Z-Canon's act 1 under the autopilot** clears its virus battles a
+  little faster than Standard's and loses its guardian every time (the
+  first Z-Canon won 4 of 12, Standard 2 of 11 on both builds). The
+  autopilot fires the largest legal hand from where it stands: FireHit1
+  (21% of its chip uses) reaches one panel and FireBrn1 two, which it
+  does not walk into range for; Cannon is 33%. It formed GigaCan1 twice
+  in 132 battles, where the hand model says 9 in 100 for a player who
+  sends what he holds. 0 of 11 against 2 of 11 is inside the autopilot's
+  noise (the six ranged from 2 of 11 to 10 of 12), so no wall is shown;
+  the players' statistics per folder are the measure that settles it.
+
