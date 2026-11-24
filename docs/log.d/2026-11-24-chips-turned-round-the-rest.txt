@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-24T19:30:00Z
+* **Update**: rom/chips-code.md (A chip used turned round, the rest: the side reads of BN6's and BN4's chips and BN4's moved way toward the enemy mended, what is left as the originals' own, issue #846), code/emu.md (turned_aim.c's line).
