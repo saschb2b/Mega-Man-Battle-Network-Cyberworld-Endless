@@ -234,7 +234,7 @@ def _crew(who):
     return c.at(3600).s
 
 
-# `party` (three games in BN6's own colours: crewmates in different looks build their fields apart, see MISSING):
+# `party` (three games, each in his own look, the shared field's fix for issue 879 on dev):
 # on layer 1 together as above, the dev menu's Next guardian (2200: layer 3, before DiveMan's arena), its arrival
 # paged with B, each put by the arena's way in (`by arena`, 2760 + 60 a game), his words there paged with A, walked
 # in; Sol, first, leads, and takes the party in with A at 3300: DiveMan's card (about 3400), his words (paged with
@@ -243,7 +243,7 @@ def _crew(who):
 # the first Custom screen, charged shots, a chip now and then, but it never opens the Custom screen again); Sol is
 # played by a loop that opens it (L) when it fills, takes chips (A, RIGHT) to OK, and uses them (A)
 _NEXT_GUARDIAN = '4:SELECT,6:SELECT+R,20:,' + '6:DOWN,6:,' * 8 + '6:A,'
-PARTY_DEV = ['hp=600', 'partyhpper=0']
+PARTY_DEV = []   # (no switch that changes what the battle is: the guardian at the build's HP times the party, each MegaMan his own HP)
 _FIGHT = '6:L,20:,' + '4:A,16:,4:RIGHT,16:,' * 6 + '4:A,30:,' * 4
 PARTY_END = 9000
 
@@ -261,8 +261,8 @@ def _party(who):
 
 
 def _party_dev(who):
-    # (joinwait=1 on Sol's game: a switch that takes the party's dev knobs in, partyhpper among them, without the bot)
-    return PARTY_DEV + (['joinwait=1'] if who == 'sol' else ['partybot=1'])
+    # (Sol played by the take's script, Kai and Nova by the Arena's bot as their pads)
+    return PARTY_DEV + ([] if who == 'sol' else ['partybot=1'])
 
 ONLINE_SCENES = {
     'meet': {'games': [
@@ -273,14 +273,14 @@ ONLINE_SCENES = {
         game('rin', _meet('rin'), {'square-d': (1880, 2180), 'dive-d': (2980, 4100)}),
     ]},
     'crew-battle': {'games': [
-        game('sol', _crew('sol'), look=False, keeps={'crew-battle-a': (2080, 3600)}, dev=['partybot=1'], quiet=False),
-        game('kai', _crew('kai'), look=False, keeps={'crew-battle-b': (2080, 3600)}, dev=['partybot=1'], quiet=False),
-        game('nova', _crew('nova'), look=False, keeps={'crew-battle-c': (2080, 3600)}, dev=['partybot=1'], quiet=False),
+        game('sol', _crew('sol'), keeps={'crew-battle-a': (2080, 3600)}, dev=['partybot=1'], quiet=False),
+        game('kai', _crew('kai'), keeps={'crew-battle-b': (2080, 3600)}, dev=['partybot=1'], quiet=False),
+        game('nova', _crew('nova'), keeps={'crew-battle-c': (2080, 3600)}, dev=['partybot=1'], quiet=False),
     ]},
     'party': {'games': [
-        game('sol', _party('sol'), {'party-a': (2600, PARTY_END)}, dev=_party_dev('sol'), look=False),
-        game('kai', _party('kai'), {'party-b': (4100, PARTY_END)}, dev=_party_dev('kai'), look=False),
-        game('nova', _party('nova'), dev=_party_dev('nova'), look=False),
+        game('sol', _party('sol'), {'party-a': (2600, PARTY_END)}, dev=_party_dev('sol')),
+        game('kai', _party('kai'), {'party-b': (4100, PARTY_END)}, dev=_party_dev('kai')),
+        game('nova', _party('nova'), dev=_party_dev('nova')),
     ]},
 }
 
