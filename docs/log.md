@@ -4,6 +4,7 @@
 * **Update**: engine/emulation/fast-forward.md (The music: the song at its own pace on the engine's MP2K while fast, followed and handed back, through the core's ring at the core's DirectSound's line, measured), engine/emulation/index.md (its line), GUIDE.md (Fast forward: the music at its own pace, `fast_music`), rom/sound.md (the carried music's row: SoundInfo's DMA count, ring and samples a frame, read as fast forward takes the song), code/gfx-and-audio.md (`music_fast.c`, `music_game.h`).
 
 ## 2026-11-23
+* **Update**: world/home/jobs.md (a request settled in Lan's HP by the courier in its asker's name, issue #841: the design, every kind, once either place; its description), world/home/lans-hp.md (the courier settles the held request), GUIDE.md (who pays a request).
 * **Update**: rom/liberation.md (a row for Catack's take of the panel it drives onto and the column timer that hands it back, BN6 and BN5, issue #837).
 * **Update**: rom/chips-code.md (a chip used turned round: BN6's search of a row and its way toward the enemy, mended for MegaMan between a Surrounded field's two sides, and the sweep of every chip turned left, issue #838), devtools/scenarios.md (the battle's `megamanfaces` and `foeshurt` lines), code/tools.md (`tools/turned_sweep.py`'s row), code/emu.md (`turned_aim.c`).
 * **Update**: game/fidelity.md (the layer's map: a press of SELECT opens it until the next, a hold shows it while held, issue #840), devtools/scenarios.md (the state's `map` line).
