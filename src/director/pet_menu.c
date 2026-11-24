@@ -1,5 +1,5 @@
 /* pet_menu.h. BN6's cursor follows ours, set to the entry's own row each
- * frame the menu takes input (Forms holds MegaMan's, EXIT 8), so BN6 lights
+ * frame the menu takes input (Forms and Colours hold MegaMan's, EXIT 8), so BN6 lights
  * that row and pulses EXIT itself; where BN6 moves its cursor (the menu
  * opened on ChipFolder, a screen left on its row) ours follows it. */
 #include "pet_menu.h"
@@ -12,6 +12,7 @@
 #include "claims.h"
 #include "emu.h"
 #include "free_space.h"
+#include "looks_screen.h"
 #include "pet_forms.h"
 #include "platform.h"
 #include "rom.h"
@@ -20,8 +21,8 @@
 #define BN6_EXIT 8                 /* BN6_PET_CURSOR on EXIT */
 #define DPAD (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)
 
-/* the entries' BN6 rows, ChipFolder to Save; Forms none */
-static const signed char bn6_rows[PM_ENTRIES] = { 0, 1, 2, 3, -1, 4, 5, 6, 7 };
+/* the entries' BN6 rows, ChipFolder to Save; Forms and Colours none */
+static const signed char bn6_rows[PM_ENTRIES] = { 0, 1, 2, 3, -1, -1, 4, 5, 6, 7 };
 
 static int cur = PM_FOLDER;        /* our cursor */
 static int written = -1;           /* BN6's cursor as we last set it */
@@ -144,10 +145,15 @@ uint32_t pet_menu_keys(uint32_t keys) {
 		pet_forms_open();
 		return keys & ~(uint32_t)(DPAD | KEY_A);
 	}
+	/* (A on Colours: ours too) */
+	if (cur == PM_LOOKS && (keys & KEY_A) && btn_pressed(BTN_A)) {
+		looks_screen_open();
+		return keys & ~(uint32_t)(DPAD | KEY_A);
+	}
 	return keys & ~(uint32_t)DPAD;
 }
 
 void pet_menu_describe(FILE *f) {
-	static const char *const names[PM_ENTRIES + 1] = { "ChipFolder", "SubChip", "Library", "MegaMan", "Forms", "E-Mail", "KeyItem", "Options", "Save", "EXIT" };
+	static const char *const names[PM_ENTRIES + 1] = { "ChipFolder", "SubChip", "Library", "MegaMan", "Forms", "Colours", "E-Mail", "KeyItem", "Options", "Save", "EXIT" };
 	if (pet_menu_up()) fprintf(f, "petmenu at %s\n", names[cur]);
 }

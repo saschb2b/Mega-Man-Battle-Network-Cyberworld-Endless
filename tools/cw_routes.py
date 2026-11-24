@@ -18,7 +18,7 @@ ROOM = 'wait 40; mash A 460; wait 30'
 # columns, Folder, SubChip, Library, MegaMan, Forms, E-Mail, KeyItem, then
 # Options in Comm's place; Up from the top is Save, which says nothing in Lan's room)
 PET = ROOM + '; press START; wait 40'
-PET_ROWS = ('folder', 'subchip', 'library', 'megaman', 'forms', 'mail', 'keyitem', 'options')
+PET_ROWS = ('folder', 'subchip', 'library', 'megaman', 'forms', 'looks', 'mail', 'keyitem', 'options')
 # (a layer: the arrival's words paged, then the run's opening gift picked,
 # its first offer; quiet keeps random battles off)
 NET = ['--scene', 'emu', '--dev', 'quiet']
@@ -50,7 +50,7 @@ ROUTES = {
     'room': (TOWN, ROOM, 'town'),
     'pet': (TOWN, PET, 'pet'),
     **{f'pet/{name}': (TOWN, pet_entry(row), screen) for row, (name, screen) in
-       enumerate(zip(PET_ROWS, ('folders', 'subchip', 'library', 'status', 'forms', 'mail', 'keyitem', 'options-display')))},
+       enumerate(zip(PET_ROWS, ('folders', 'subchip', 'library', 'status', 'forms', 'looks', 'mail', 'keyitem', 'options-display')))},
     'jukebox': (TOWN, pet_entry(PET_ROWS.index('keyitem')) + '; press DOWN; press RIGHT; wait 14; press A; wait 40', 'jukebox'),
     'layer': (NET, LAYER, 'map'),
     'battle': (NET, LAYER + '; battle; wait 240', 'battle'),

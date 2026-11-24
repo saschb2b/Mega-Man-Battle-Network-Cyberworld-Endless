@@ -46,7 +46,7 @@ changed is in issue #793.
   the band's right stripe in the band's navy, its letters BN6's.
 - **One grid of two columns**, BN6's 72 x 16 buttons with their labels at
   BN6's 16-pixel pitch, each with its BN6 row icon 3 pixels before it. A
-  column holds as many rows as the entries and EXIT fill (five for nine
+  column holds as many rows as the entries and EXIT fill (six for ten
   entries), so no row stands half empty; the grid stands in the middle,
   19 pixels from each side. The cursor's row is lit as BN6 lights it: its
   label white and its icon stepped 8 pixels out. Forms' button is Save's
@@ -55,7 +55,10 @@ changed is in issue #793.
   picture, never loaded into BN6's video memory, where the Chip Folder's
   screens use the tile past them as their blank
   ([The PET menu's labels](../rom/pet-and-second-screen.md)); its icon is BN6's Status icon, the one BN6 shows in
-  MegaMan's row for another Navi.
+  MegaMan's row for another Navi. Colours' button ([MegaMan's look](looks.md),
+  epic #854) is made the same way, its word set from the same letters (C
+  and r ChipFolder's, l ChipFolder's, o Comm's, u and s Status's), its
+  icon MegaMan's own, his colours being what it opens.
 - **EXIT** in the grid's last place, under Save and beside Forms: BN6's
   capsule, its plain body repeated so it spans the cell from the icons'
   column to the buttons' right edge, its letters in the labels' column. It
@@ -79,21 +82,23 @@ BN6's own list folded down the left column, then the right:
 | Library | Options (Comm's place) |
 | MegaMan | Save |
 | Forms | EXIT |
+| Colours | |
 
 So BN6's counts from ChipFolder hold at both ends: Down 1-3 SubChip,
 Library, MegaMan; Up 1-4 Save, Options, KeyItem, E-Mail. New entries go
 only in the middle, after Forms and before E-Mail, and none is ever shown or
-hidden during a run (Forms with no Cross yet opens to an empty screen). A
-tenth entry adds a sixth row, room for eleven and EXIT, and the gaps close
-to 9, 8 and 8 pixels.
+hidden during a run (Forms with no Cross yet opens to an empty screen).
+Colours, the tenth, added the sixth row, room for eleven and EXIT, and the
+gaps closed to 9, 8 and 8 pixels; Down 5 is Colours and Up 5 from
+ChipFolder too, across the fold.
 
 ## The keys
 
-- Up and Down walk the folded list and wrap (Forms to E-Mail, Save to
+- Up and Down walk the folded list and wrap (Colours to E-Mail, Save to
   ChipFolder, Up from ChipFolder to Save). EXIT stays out of it, as out of
   BN6's column, so BN6's counts hold.
 - Left and Right hop to the same row in the other column. Right from Forms,
-  beside EXIT, and from the right column goes to EXIT, as BN6's Right
+  beside EXIT, from Colours, under it, and from the right column goes to EXIT, as BN6's Right
   reaches EXIT from any row. Left from the left column does nothing.
 - On EXIT, Up goes to Save, over it, and Left to Forms, beside it.
 - A opens the entry; on EXIT it closes. B and START close, as BN6's do.
@@ -104,12 +109,13 @@ to 9, 8 and 8 pixels.
 
 BN6's menu runs underneath and draws everything the picture shows
 (`src/director/pet_menu.c`, `pet_menu_frame.c`). Each frame the menu takes
-input, BN6's cursor is set to the entry's own BN6 row (Forms holds
-MegaMan's, EXIT BN6's 8), so BN6 lights that row and pulses EXIT itself;
+input, BN6's cursor is set to the entry's own BN6 row (Forms and
+Colours hold MegaMan's, EXIT BN6's 8), so BN6 lights that row and pulses EXIT itself;
 the d-pad is ours and never reaches BN6. A on an entry is passed to BN6 on
 its own row, so ChipFolder, SubChip, MegaMan, E-Mail and KeyItem open as BN6
 opens them, with its sound and its transition, and Library, Options and Save
-through `pet.c`'s hook as before; A on Forms opens the forms screen. Where
+through `pet.c`'s hook as before; A on Forms opens the forms screen, on Colours the colours
+screen (`src/looks/`). Where
 BN6 moves its cursor itself (the menu opened, a screen given back) ours
 follows it.
 

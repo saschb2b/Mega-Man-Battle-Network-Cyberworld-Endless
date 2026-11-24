@@ -66,6 +66,9 @@ void anim_draw(const Anim *a, int x, int y, bool flip, int pal, int fx);
 extern int gfx_obj_mosaic;
 extern int gfx_obj_alpha;
 void sprite_draw_frame(Sprite *s, int anim, int frame, int x, int y, bool flip, int pal, int fx);
+/* ... in a palette of the caller's, 16 colours as the GBA's (MegaMan's
+ * look on its screen: his colours as the core's ROM copy holds them) */
+void sprite_draw_palette(Sprite *s, int anim, int frame, int x, int y, bool flip, const uint8_t pal[32]);
 /* ... drawn into memory (gfx_draw_into's), `scale` times as large, its
  * origin at (x, y): a face on the second screen */
 void sprite_draw_into(Sprite *s, int anim, int frame, int x, int y, int pal, int scale);
