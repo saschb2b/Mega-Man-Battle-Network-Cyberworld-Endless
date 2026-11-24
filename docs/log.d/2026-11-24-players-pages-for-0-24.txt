@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-24T21:06:00Z
+* **Update**: GUIDE.md (brought in step with the build for 0.24.0: the week's DeepNet rewritten for crews by nearness, names, rings, plates and the map's dots, a crew's battles at once, the pull back, the door that waits for the crew, the party's guardian at a diver's version, the portal's one question, a dropped link, the dive's RESULT and the Board; a new section, MegaMan's colours; the setup's Folder row as the shelf of ten with what opens each; Colours in the PET's menu; Falzar's five Crosses; Team ProtoMan's guardians, Souls and commands on a dark board; a NetBattle through a dropped link), game/meta/souls.md (Team ProtoMan's six Souls are given by their guardians: "never offered" corrected).
