@@ -1,9 +1,0 @@
-{
-  "branch": "looks-routes",
-  "what": "MegaMan's look (issue 854, step 3): palettes from milestones, the home shop and a rare find",
-  "takes": {},
-  "units": [
-    "MegaMan's look: palettes earned (milestones, home shop, rare find)"
-  ],
-  "run": false
-}

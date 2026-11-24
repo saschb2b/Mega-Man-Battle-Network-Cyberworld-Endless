@@ -60,7 +60,7 @@ static bool dev_switch(const char *t) {
 		{ "feel", &dev.feel }, { "settings", &dev.settings }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 }, { "shelf", &dev.shelf },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
-		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "library=", &dev.library }, { "alias=", &dev.alias }, { "reward=", &dev.reward }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },
+		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "looks=", &dev.looks }, { "pack=", &dev.pack }, { "library=", &dev.library }, { "alias=", &dev.alias }, { "reward=", &dev.reward }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },
 		{ "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny }, { "libpar=", &dev.lib_par }, { "libhp=", &dev.lib_hp },
 		{ "side=", &dev.side }, { "glitchstage=", &dev.glitch_stage }, { "battler=", &layer_battler_forced }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "heard=", &dev.heard }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak }, { "form=", &dev.form },
@@ -141,10 +141,20 @@ void devtools_parse(const char *spec) {
 	run_debug_form = dev.form;
 }
 
+/* (looks=MASK: MegaMan's palettes owned and told, as earned in runs
+ * before: Classic always) */
+static void dev_looks(void) {
+	if (!dev.looks) return;
+	profile.looks_owned = (uint16_t)(dev.looks | 1);
+	profile.looks_told = (uint16_t)dev.looks;
+	profile_save();
+}
+
 void devtools_veteran(void) {
 	/* (the worn slot's look, saved: a CONTINUE without the switch keeps it) */
 	if (dev_look_on) looks_set(looks_slot(), &dev_look_set);
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
+	dev_looks();
 	/* (a bit a folder but the Standard's, every one meta.h has) */
 	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
 	if (dev.heard) { profile.shelf.heard |= (uint16_t)dev.heard; profile_save(); }

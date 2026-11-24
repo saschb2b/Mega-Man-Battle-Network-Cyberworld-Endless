@@ -1,0 +1,22 @@
+{
+  "branch": "folders-archetypes",
+  "what": "Starting folders evolved (issue 865): new archetypes of ours, Ember and Tide first, Breaker after",
+  "takes": {
+    "folder_ids": [
+      [
+        "9",
+        "11"
+      ]
+    ],
+    "folder_feat_bits": [
+      [
+        "5",
+        "7"
+      ]
+    ]
+  },
+  "units": [
+    "Starting folders: new archetypes (Ember, Tide, Breaker)"
+  ],
+  "run": false
+}

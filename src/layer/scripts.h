@@ -12,6 +12,7 @@
 #define SCRIPTS_HP_MEMORY 0x70
 #define SCRIPTS_REG_UP1   0x72   /* RegUP1-3: +1, +2, +3 MB of Reg memory (bn6f sub_803CFB0: 4 + RegUP1 + 2 RegUP2 + 3 RegUP3, at most 99) */
 #define SCRIPTS_TAG_CHIP  0x0B   /* the TagChip system's key item (issue #51) */
+#define SCRIPTS_COLOR_DATA 0x4D  /* ColrData, the run's own key item: a rare find of colours for MegaMan (looks_routes.h) */
 #define SCRIPTS_BOSS_HP_MEMORIES 5
 #define SCRIPTS_EXP_MEMORY 0x71   /* ExpMemry, the NaviCust's board: 4x4, 5x4, 5x5 */
 
@@ -67,6 +68,9 @@ int ta_shop(TextArchive *t, int shop, int face, const char *greeting, const char
  * `closed_flag` is set (-1 never), `closed` instead and no screen (home's
  * one order a visit). */
 int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int closed_flag, const char *closed);
+/* BN6's shop `shop` opened, after the wait its shopkeepers' scripts make
+ * (ts_wait, ts_start_shop): a counter's script's last step */
+void ta_shop_open(TextArchive *t, int shop);
 
 /* Choices: Yes sets event flag `flag`, which the director acts on (a
  * challenge's, ta_challenge, below). The gate first wants three ScrtData. */
