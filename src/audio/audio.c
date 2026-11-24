@@ -47,24 +47,50 @@ static int louder_level(void) {
 	return m > e ? m : e;
 }
 
+/* (the engine's sound heard through the core's ring, audio_engine_add)
+ * The core's DirectSound plays a mix from the line of the GBA's 228 where
+ * BN6's sound interrupt starts its DMA again, about 175: 616 of a frame's
+ * 803 samples after the frame's edge, measured against the engine's, which
+ * starts it at the edge. Through the ring the engine's mix is played as
+ * late, its first part the last mix's end (ds_late); its PSG keeps the
+ * frame's edge, where the two hand its notes over (music_fast.c). */
+static bool in_ring;
+#define CORE_SOUND_LINE 175
+#define GBA_LINES 228
+static int8_t ds_late[2][704];
+
 static void engine_frame(void) {
 	int louder = louder_level();
 	mp2k_shares_set(sound_heard_share(music_level(), louder), sound_heard_share(sound_heard_effects(), louder));
 	mp2k_frame();
 	int n = mp2k_per_frame();
-	gba_sound_frame(prev_right, prev_left, n);
+	if (in_ring) {
+		int late = n * CORE_SOUND_LINE / GBA_LINES;
+		int8_t right[704], left[704];
+		memcpy(right, ds_late[0], (size_t)late);
+		memcpy(left, ds_late[1], (size_t)late);
+		memcpy(right + late, prev_right, (size_t)(n - late));
+		memcpy(left + late, prev_left, (size_t)(n - late));
+		gba_sound_frame(right, left, n);
+		memcpy(ds_late[0], prev_right + n - late, (size_t)late);
+		memcpy(ds_late[1], prev_left + n - late, (size_t)late);
+	} else gba_sound_frame(prev_right, prev_left, n);
 	memcpy(prev_right, mp2k_mix_right(), (size_t)n);
 	memcpy(prev_left, mp2k_mix_left(), (size_t)n);
 }
 
-/* `frames` of the engine's sound, at the music's volume (8, the default,
- * the game's own level) */
-static void render(int16_t *o, int frames) {
+/* `frames` of the engine's sound as the GBA plays it */
+static void render_plain(int16_t *o, int frames) {
 	int done = 0;
 	while (done < frames) {
 		while (gba_sound_avail() < frames - done) engine_frame();
 		done += gba_sound_read(o + done * 2, frames - done);
 	}
+}
+
+/* ... at the music's volume (8, the default, the game's own level) */
+static void render(int16_t *o, int frames) {
+	render_plain(o, frames);
 	if (music_volume == 8) return;
 	for (int i = 0; i < frames * 2; ++i) {
 		int v = o[i] * music_volume / 8;
@@ -105,7 +131,7 @@ static void mix_sources(int16_t *out, int frames) {
 	external(out, frames);
 	/* (a PET screen's sounds over the held game: the Arena's way in and its card, the NetPass, Trade Central;
 	 * the engine's music while a screen of its own holds the game: the game's song carried on, music_carry.h) */
-	if (!mp2k_busy()) return;
+	if (in_ring || !mp2k_busy()) return;
 	static int16_t fx[4096 * 2];
 	for (int done = 0; done < frames;) {
 		int n = frames - done < 4096 ? frames - done : 4096;
@@ -206,6 +232,42 @@ static void unlock(void) { if (dev) SDL_UnlockAudioDevice(dev); }
 void audio_lock(void) { lock(); }
 void audio_unlock(void) { unlock(); }
 bool audio_on(void) { return dev || offline; }
+
+void audio_engine_in_ring(bool on) {
+	lock();
+	in_ring = on;
+	memset(ds_late, 0, sizeof ds_late);
+	if (!on) gba_sound_pace(0);
+	unlock();
+}
+
+void audio_engine_prime(const int8_t *right, const int8_t *left, int n) {
+	lock();
+	/* (its first part, which the core plays itself in the frame the
+	 * engine's takes over, silent) */
+	int heard = n - n * CORE_SOUND_LINE / GBA_LINES;
+	for (int i = 0; i < n && i < (int)sizeof prev_right; ++i) {
+		prev_right[i] = i < heard ? 0 : right[i];
+		prev_left[i] = i < heard ? 0 : left[i];
+	}
+	unlock();
+}
+
+void audio_engine_add(int16_t *out, int frames) {
+	static int16_t own[1024 * 2];
+	if (frames > 1024) frames = 1024;
+	lock();
+	/* (a GBA frame of the engine's to each of the core's, as many samples:
+	 * the core's are paced to the loop's frames, not the GBA's 59.73 a
+	 * second, emu_sound.c) */
+	gba_sound_pace(frames);
+	render_plain(own, frames);
+	for (int i = 0; i < frames * 2; ++i) {
+		int v = out[i] + own[i];
+		out[i] = (int16_t)(v > 32767 ? 32767 : v < -32768 ? -32768 : v);
+	}
+	unlock();
+}
 
 /* (each song on the player BN6's song table names, as m4aSongNumStart
  * plays it: an effect over another on its player as its priority lets it) */

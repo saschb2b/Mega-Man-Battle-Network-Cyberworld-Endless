@@ -306,6 +306,8 @@ void home_update(void) {
 	home_gate_frame();
 	home_lab_frame();
 	home_order_watch();
+	/* (after BN6's Chip Trader's screen chose a Bring request's chip) */
+	home_jobs_bring();
 	home_places_frame(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
 	town_tint();
 	was_hp = hp;

@@ -3,7 +3,7 @@ type: Design
 title: "The PET's start menu"
 description: "The PET's start menu of ours (issue #793): BN6's own menu laid out again as one grid of two columns from BN6's own pieces (its buttons, labels, icons, panel, PLACE and EXIT), EXIT its last place, over the field darkened as BN6 darkens it, its list folded so BN6's press counts hold, BN6's menu run underneath to open each entry as BN6 opens it; the owner's calls and four rounds of reviews."
 tags: [game, pet, ui]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T00:40:00Z }
 sources:
   - id: issue-793
     resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/793"
@@ -51,7 +51,10 @@ changed is in issue #793.
   19 pixels from each side. The cursor's row is lit as BN6 lights it: its
   label white and its icon stepped 8 pixels out. Forms' button is Save's
   with Forms' label set from the labels' own letters beside Options'
-  (`pet_options.c`); its icon is BN6's Status icon, the one BN6 shows in
+  (`pet_options.c`), its word's tiles the engine's own and drawn by the
+  picture, never loaded into BN6's video memory, where the Chip Folder's
+  screens use the tile past them as their blank
+  ([The PET menu's labels](../rom/pet-and-second-screen.md)); its icon is BN6's Status icon, the one BN6 shows in
   MegaMan's row for another Navi.
 - **EXIT** in the grid's last place, under Save and beside Forms: BN6's
   capsule, its plain body repeated so it spans the cell from the icons'

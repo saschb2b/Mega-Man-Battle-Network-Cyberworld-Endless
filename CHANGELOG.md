@@ -2,10 +2,33 @@
 
 ## Unreleased
 
+- **New: fast forward keeps the music at its own pace.** While the game
+  runs fast, the song plays on as it would at BN6's speed instead of
+  hurrying along with the game, and when fast forward stops the game
+  picks the song up from there. A battle's theme and the win's start as
+  they come; the game's sounds still play fast, with what is on screen.
+  `fast_music = off` in `settings.ini` brings the faster music back
+  (issue #839). Thanks to agergo100 for the idea.
+
+- **New: a request's reward is taken in Lan's HP.** The Mr.Prog there
+  hands over a finished request's pay in its asker's name, carries a
+  Bring request's chip to the NetBattler and his trade back, and passes
+  on the asker's word where a request was not done, so the board opens
+  for a new one at once. No jack-out and walk to the asker any more; they
+  still settle it in the town for whoever goes to them first, once
+  either place. Thanks to agergo100 for the idea (issue #841).
+
 - **New: the layer's map stays open.** A press of SELECT opens the map
   and leaves it open while MegaMan walks; the next press closes it, as
   does a battle, a chat, the PET or a warp. Held, it shows while held,
   as before. Thanks to agergo100 for the idea (issue #840).
+
+- **New: you choose the chip a Bring request takes.** Where more than
+  one kind of chip in your Pack fits the NetBattler's request, he opens
+  BN6's Chip Trader screen over those alone: put in the one you can
+  spare, and he takes that one. B leaves it with nothing taken, the
+  request still yours. One kind alone goes as before (issue #842).
+  Thanks to agergo100 for the idea.
 
 - **New: Falzar's five Crosses.** SpoutMan, TomahawkMan, TenguMan,
   GroundMan and DustMan now give their Crosses when they fall as an

@@ -14,6 +14,9 @@ void home_jobs_flags(void);
 /* One of the jobs' flags set at home (EV_JOB): a request taken, the held
  * one settled. */
 void home_jobs_flag(int flag);
+/* Each frame at home: the asker on after BN6's Chip Trader's screen
+ * chose a Bring request's chip, or was left (bring_choice.h). */
+void home_jobs_bring(void);
 /* A battle begins (MegaMan's HP), runs (its frames), and ends: won or
  * not, MegaMan's HP after it, its frames (-1: as counted). */
 void home_jobs_battle_start(void);

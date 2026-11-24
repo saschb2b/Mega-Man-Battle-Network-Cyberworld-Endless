@@ -94,8 +94,8 @@ raised, and the loop's own lessons.
      generator makes (an unreachable-looking object, a crowded room) is
      first counted over the tests' 300 layers: the count sizes the problem
      and, kept as a check, holds the fix.
-7. **Fix, verify, commit** per AGENTS.md (its check table; `build.py test`;
-   a capture of the screen; `LAYER_MAKE` / `RUN_MAGIC` bumps; docs/rom/
+7. **Fix, verify, commit** per AGENTS.md (its check table, test and lint left
+   to CI as its Push first says; a capture of the screen; `LAYER_MAKE` / `RUN_MAGIC` bumps; docs/rom/
    for a new offset; CHANGELOG). A visual fix is verified by looking at
    a picture of the result, never by its code alone (sprite indexes that
    differed in the code drew one navi on the map for two sessions). One commit per change: the subject states

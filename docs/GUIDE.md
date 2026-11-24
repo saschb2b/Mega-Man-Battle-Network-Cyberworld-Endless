@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T00:45:00Z }
 ---
 
 # The player's guide
@@ -681,7 +681,11 @@ cursor, show in the picture's top right corner.
 
 Options' **Fast forward** line sets how fast: **2x**, **3x** (the default)
 or **4x**, or **Off**, where its button does nothing (`fast_forward` in
-`settings.ini`). The music keeps its pitch as it plays faster. A machine
+`settings.ini`). The music plays on at its own pace while the game runs
+fast, and the game takes the song up where it got to when fast forward
+stops; the game's sounds play fast with what is on screen, at their own
+pitch. `fast_music = off` in `settings.ini` plays the music faster with
+the game instead, at its own pitch. A machine
 that cannot run the game that fast runs it as fast as it can (the New 3DS
 gains little). The run's rules do not change with it: random battles come
 as often per step, every reward is the same, and the run's minutes count
@@ -774,7 +778,9 @@ and the man from the lab in the town. Win battles without a scratch or
 in ten seconds each, search every Mystery Data of a layer, hand over a
 chip of an element from the Pack, or vow to take no Mr.Prog's patch
 until the guardian falls. Lan takes one or none, as BN6's Request BBS
-has it, and the one who asked pays at the next visit. On a second
+has it, and the one who asked pays at the next visit: the Mr.Prog in
+Lan's HP hands it over in their name, or they do, where they stand in
+the town, for whoever goes to them first. On a second
 screen, the PET at home names the hour, the request held and how far
 along it is, and the ways on.
 

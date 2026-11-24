@@ -217,7 +217,15 @@
   "since": [
     {
       "date": "2026-11-23",
+      "what": "Catack's take of the panel it drives onto, and the column timer that hands it back, mapped in both games for issue #837 (closed as BN5's own design): BN6 0x0800CC14 the setter and 0x0800CC36 the timer (0x708 into the column record 0x02034010 +6), Catack's take 0x0810D8E2-0x0810D904, the countdown 0x0800C746; BN5 0x0800B2D6, 0x0800B2F8 (0x02034020), 0x081093B8-0x081093DA. Names only, no code uses them (src/emu/bn6_panels.h, src/emu/bn5_liberation_rules.h; docs/rom/liberation.md, A panel taken and handed back)."
+    },
+    {
+      "date": "2026-11-23",
       "what": "MegaMan's aim turned round on a Surrounded field located and mended (issue #838; docs/rom/chips-code.md, A chip used turned round): BN6's search of a row (bn6_panels.h BN6_ROW_SEARCH 0x0800D086, its start BN6_ROW_SEARCH_START 0x0800D09C, its loop BN6_ROW_SEARCH_LOOP 0x0800D09E) walks from the field's edge behind the searcher, so between the two sides GolmHit's fist (BN6_GOLMHIT_FIST 0x080E60F0, its search at 0x080E6144) fell on column 6 turned left and column 1 facing right; BN6's way toward the enemy (BN6_ENEMY_DIRECTION 0x0800E2C0) takes the side alone, where DiveMan's chip and 32 of BN4's moved chips aim; a BattleSettings' +6 its column pattern (bn6_forms.h BN6_SETTINGS_SIDES). Hooks start MegaMan's side's search at its own column and answer its facing, on a field none of BN6's plain three (src/emu/turned_aim.c); tools/turned_sweep.py swept 643 chips turned left, the rest open in issue #846."
+    },
+    {
+      "date": "2026-11-23",
+      "what": "BN6's Chip Trader screen (bn6f ChipTraderControl) driven as a Bring request's choice of one chip (issue 842): ts_start_chip_trader's amount 1 is the BugFrag Trader's and opens no screen, so the asker's script opens it for 2 and the list made (0x0804B150) sets 1 and keeps the request's element alone; its question for an amount but 3 (script 8 through 0x0804BCD8) is MegaMan's of ours; its Yes (0x0804B26E) leaves by BN6's own way out with no trade (0x0804B254), since a trade's sets the map's fade for the prize's cutscene and a screen left with none stayed black. Proved in a headless run: the screen at 0/ 1 over the Wood chips alone, the second put in, Yes, the asker handing it over (src/world/bring_choice.c; docs/rom/world.md, The Chip Trader's screen as a Bring's choice; tests/scenarios/home_bring_choice.py)."
     },
     {
       "date": "2026-11-23",
