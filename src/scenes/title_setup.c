@@ -401,10 +401,20 @@ static void value_draw(int x0, int y, const char *v, bool turns, const char *shu
 	look_pointer(r + 4, y, 4, false, PET_ORANGE);
 }
 
+/* a RUN row's name (a switch: the consoles' GCC read a table of them as
+ * indexed past its end once NEW's test was inlined beside it) */
+static SetupWord run_row_word(int row) {
+	switch (row) {
+	case ROW_NET: return SW_NET;
+	case ROW_FOLDER: return SW_FOLDER;
+	case ROW_FORM: return SW_FORM;
+	case ROW_CROSS: return soul_form() ? SW_SOUL : SW_CROSS;
+	default: return SW_THREAT;
+	}
+}
+
 /* a RUN row: its name and value */
 static void run_row_draw(int x0, int y, int row) {
-	static const SetupWord names[RUN_ROWS] = { SW_NET, SW_FOLDER, SW_FORM, SW_CROSS, SW_THREAT };
-	/* (a RUN row's number, said so: the consoles' GCC read row_new's test as a row past them) */
 	if (row < 0 || row >= RUN_ROWS) return;
 	char v[16], count[16];
 	snprintf(v, sizeof v, "%d", S.c.threat);
@@ -420,7 +430,7 @@ static void run_row_draw(int x0, int y, int row) {
 	if (row == ROW_FOLDER) setup_folder_count(count, sizeof count, meta_folders_open(), FOLDER_COUNT);
 	/* (NEW, a folder opened, gives way to a locked one's tag while the row shows one) */
 	bool fresh = row_new(row) && (row != ROW_FOLDER || meta_folder_open(S.look));
-	label_draw(x0, y, setup_word(row == ROW_CROSS && soul_form() ? SW_SOUL : names[row]), fresh, row == ROW_FOLDER ? count : NULL);
+	label_draw(x0, y, setup_word(run_row_word(row)), fresh, row == ROW_FOLDER ? count : NULL);
 	value_draw(x0, y, values[row], turns[row], row == ROW_FOLDER && !meta_folder_open(S.look) ? setup_word(SW_LOCKED) : NULL);
 }
 
