@@ -84,6 +84,11 @@ What a cut gives a `house.Trailer`:
 - Where even that is too tight (several games on screen at once, a
   board), a segment may take the big window for its bars; the header, the
   plate and the type stay.
+- `house.Mosaic(scenes, offsets, widen)`: two or four games of one take
+  in the big window at once, each whole at 2x, where a feed names a scene
+  (the cold open, a narrator's backdrop); with `widen` the first game
+  starts alone at 4x and pulls back into its corner as the others are
+  uncovered (0.24.0: one player's Square, then four players' at once).
 
 A scene whose footage is not taken yet draws as a card marked FOOTAGE TO
 COME, so a cut is laid on stand-ins and each is swapped as its run lands
