@@ -132,6 +132,14 @@ int lib_prize_chip(int tier, int depth, int *code);
  * own (bn5.h BN5_NAVI_SHADEMAN on: his SP, then his V1), 0 where none plays */
 int lib_darkloid_prize(int ai, int tier);
 
+/* (layer_whisper.c) A choice of `type` that is a line heard, not a Yes
+ * (the act's guardian named, a starting folder told): its flag, cleared,
+ * which the director watches. */
+int layer_heard_flag(LayerObjs *out, int type);
+/* ... the second bystander's whisper (rumor_lines.c), its script, -1 none:
+ * a starting folder's milestone heard once said (out->folder_told) */
+int layer_whisper_talk(TextArchive *text, LayerObjs *out, int who);
+
 /* The layer's shop stock written (again after a state load, whose RAM
  * holds the shop data as it was saved: `saved`, what was bought there
  * stays bought). */

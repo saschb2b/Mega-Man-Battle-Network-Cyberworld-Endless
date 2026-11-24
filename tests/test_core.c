@@ -5437,14 +5437,20 @@ static void test_folders(void) {
 	memset(&profile, 0, sizeof profile);
 	profile.short_wins = 1;
 	for (int f = FOLDER_BLADE; f <= FOLDER_STORM; ++f) profile.folders_open |= (uint16_t)(1u << f);
+	/* (the shelf's rule, issue #864: the hint while unheard, the milestone once heard) */
 	const char *goal = meta_next_goal();
-	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder."), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	CHECK(goal && !strcmp(goal, "The Z-Canon folder opens when chips work as one, in order."), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	meta_folder_hear(FOLDER_ZCANON);
+	goal = meta_next_goal();
+	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder."), "folders: the closest goal heard \"%s\"", goal ? goal : "(none)");
 	/* (each a sentence the information box holds in two of its three
 	 * lines) */
 	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {
 		char g[96];
 		meta_goal_words(g, sizeof g, GOAL_FOLDER, f);
 		CHECK(strlen(g) <= 56, "folders: the goal line \"%s\" past 56 letters", g);
+		meta_goal_words(g, sizeof g, GOAL_FOLDER_HINT, f);
+		CHECK(strlen(g) <= 64, "folders: the hint line \"%s\" past 64 letters", g);
 	}
 	profile.folder_feats = FEAT_PA;
 	meta_run_over(false);
