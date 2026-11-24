@@ -1,3 +1,3 @@
 by: claude-code/claude-opus-5-5
-at: 2026-11-24T23:40:00+01:00
-* **Update**: online/shared-dive.md (a crew in one column: each plate in the first spot beside its MegaMan that covers no MegaMan, plate or BN6 piece, issue #886; the field's marks and the crew's display in battle to match; the divers' names on the layer under the crew's plates), engine/ui.md (Ours: the battle field's labels and where they stand).
+at: 2026-11-24T22:40:00Z
+* **Update**: online/shared-dive.md (a crew in one column: each plate in the first spot beside its MegaMan that covers no MegaMan, plate or BN6 piece, none while the battle's clock holds, issue #886; the field's marks and the crew's display in battle to match; the divers' names on a layer kept off the crew's plates), engine/ui.md (Ours: the battle field's labels and where they stand).
