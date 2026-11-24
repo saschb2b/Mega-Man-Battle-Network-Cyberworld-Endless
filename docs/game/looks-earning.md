@@ -114,7 +114,9 @@ checkpoint from before the find gives it again, never a second.
 ## The moment
 
 A palette got is said at the first calm moment on the map (no chat box,
-the player's keys free, half a second), by MegaMan in a box of his own
+the player's keys free, half a second; one got in a layer's first five
+seconds, as the Undernet's is, waits for home, where no board's talk or
+guardian's staging is due), by MegaMan in a box of his own
 naming where it came from ("We beat the beast,Lan! I kept its colors!"),
 then BN6's "MegaMan got:" box naming it (`src/director/looks_words.c`).
 Several at once (a profile's from before palettes) are one word and a box

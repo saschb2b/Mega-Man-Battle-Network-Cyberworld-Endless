@@ -24,10 +24,15 @@
 /* (frames of calm on the map before MegaMan speaks: a map entered or a
  * chat box closed settles first) */
 #define CALM_FRAMES 30
+/* (a layer's first frames, its arrival's: a palette got by then, as the
+ * Undernet's is, waits for home, where nothing of a layer's own is due;
+ * a board's talk or a guardian's staging opened under MegaMan's word) */
+#define ARRIVAL_FRAMES 300
 
 static struct {
 	int calm;
 	unsigned found;   /* palettes BN6's own box named as ColrData */
+	unsigned home;    /* ... and those to be said at home (ARRIVAL_FRAMES) */
 } L;
 
 /* AsterLand's sales (order_looks.h): the clerk's script set the flag as it
@@ -51,6 +56,10 @@ void looks_due_frame(void) {
 	moments();
 	shop_watch();
 	unsigned untold = looks_untold();
+	bool layer = D.active && !D.town;
+	if (layer && D.frame < ARRIVAL_FRAMES) L.home |= untold;
+	if (!layer) L.home = 0;
+	untold &= ~L.home;
 	bool calm = on_map() && hold_save_ok() && !emu_read8(BN6_CHATBOX) && cinema_input_mode() == CINEMA_FREE;
 	if (!untold || !calm) {
 		L.calm = 0;
