@@ -32,9 +32,9 @@
  * alone, keeps 10-15) */
 #define BN6_LOOK_OUTLINE      1           /* the outline, every art's */
 #define BN6_LOOK_ARMOUR_FIRST 2           /* light blue: helmet, arms, legs, a four-shade ramp 2-5 */
-#define BN6_LOOK_ARMOUR_LAST  5
+#define BN6_LOOK_ARMOUR_LAST  5           /* ... the armour ramp's darkest */
 #define BN6_LOOK_SUIT_FIRST   6           /* dark blue: the bodysuit, 6-9 (6 the same colour as 2, its highlight) */
-#define BN6_LOOK_SUIT_LAST    9
+#define BN6_LOOK_SUIT_LAST    9           /* ... the suit ramp's darkest */
 #define BN6_LOOK_SHINE        10          /* white glints */
 #define BN6_LOOK_GOLD         11          /* the helmet's fins and the emblem's ring */
 #define BN6_LOOK_EMBLEM       12          /* the emblem's red; 13-15 skin */
@@ -58,9 +58,9 @@
  * palette in BN6_FACE_PALS, which soullook.c copies and repoints
  * (BN6_FACE_PALS_REF), so it is read through that word */
 #define BN6_LOOK_FACE_WINDOW_FIRST 1      /* the window's border and fill, which share the face's palette */
-#define BN6_LOOK_FACE_WINDOW_LAST 2
+#define BN6_LOOK_FACE_WINDOW_LAST 2       /* ... the window's fill */
 #define BN6_LOOK_FACE_BLUE_FIRST 11       /* the face's helmet blue, 11-13 */
-#define BN6_LOOK_FACE_BLUE_LAST 13
+#define BN6_LOOK_FACE_BLUE_LAST 13        /* ... the helmet ramp's last */
 
 /* The sprite renderer's OBJ palettes. Each frame every sprite's palette is
  * copied into the work palette's first free slot, or the slot already
