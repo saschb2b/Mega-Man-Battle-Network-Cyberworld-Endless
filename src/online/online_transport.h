@@ -32,6 +32,9 @@ bool online_transport_start(const char *url, const char *name, const uint8_t ide
 void online_transport_poll(int32_t x, int32_t y, int32_t z, uint8_t facing);
 void online_transport_snapshot(OnlineSnapshot *out);
 bool online_transport_profile(const OnlineProfile *profile);
+/* MegaMan's look (v30, issue #854): its six bytes as src/core/looks.h's Look holds them, sent after each
+ * WELCOME and as the look worn changes (square_looks.c); false where out of the wire's bounds. */
+bool online_transport_look(const uint8_t look[2 * ONLINE_LOOK_CHANNELS]);
 bool online_transport_inspect(uint32_t player_id);
 /* A phrase (kind 0) or an emote (1), an emote aimed at player `target`
  * (0 none; ONLINE_EMOTE_AIMED's alone) */

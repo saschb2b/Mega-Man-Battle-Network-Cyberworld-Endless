@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **New: other players' MegaMen wear their own looks in the Net Square.**
+  Your look travels with your name, and the players around you are drawn
+  in theirs; a look changed there shows to the others at once. Where a
+  part of the Square has no room left for one more set of colours (the
+  plaza takes three besides yours), the players farthest from you are
+  drawn in BN6's blue until they come nearer, never in wrong colours
+  (issue #854). The server needs this version to play with it.
+
 - **New: fast forward keeps the music at its own pace.** While the game
   runs fast, the song plays on as it would at BN6's speed instead of
   hurrying along with the game, and when fast forward stops the game

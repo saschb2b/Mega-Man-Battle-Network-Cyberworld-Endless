@@ -130,7 +130,8 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         for _ in range(100):
             data = await client.message(SPEC["snapshot"])
             if data[1] == count:
-                return [(protocol.PEER.unpack_from(data, 2 + k * 50)[0], data[2 + k * 50 + 49]) for k in range(count)]
+                size = SPEC["peer_bytes"]
+                return [(protocol.PEER.unpack_from(data, 2 + k * size)[0], data[2 + k * size + 49]) for k in range(count)]
         raise AssertionError("No such snapshot")
 
     # -- rooms --

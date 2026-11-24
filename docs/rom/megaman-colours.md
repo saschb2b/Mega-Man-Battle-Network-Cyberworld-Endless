@@ -112,6 +112,46 @@ stage 2. So the plaza can show **three looks besides the player's own**
 before BN6 runs out; Trade Central and the stage nine and ten. A peer in
 Classic beside a player in a look of his own is a look too.
 
+## Peers' looks
+
+The Square draws each peer's look through one copy of the field sprite
+(`src/online/square_looks.c`; [Peers' looks](../online/square/looks.md)):
+
+- **The frames** (`BN6_LOOK_FRAME_SIZE`, `_TILES`, `_PALS`, `_SUB`,
+  `_OAM`, `_FLAGS`, `_LAST`): past the sprite's 4-byte header a u32 per
+  animation, its first frame's offset; a frame is 20 bytes, +0 its tiles,
+  +4 its palettes (a size word, then `BN6_LOOK_PAL_SIZE` each), +8 its
+  sub-animation, +12 its objects, each an offset from the data past the
+  header, and +18 bit `0x80` its animation's last (gfx.c's sprite layout,
+  `xnavi_sprite_len`'s walk). List 6's 0x37 has 73 animations and 231
+  frames, every frame's palettes at one offset (`0x7ECC`, whose size word
+  reads 0x20), counted from the ROM. A copy of the header and frames
+  elsewhere, its offsets turned by the distance (as u32s: the copy lies
+  past the sprite, so they wrap), draws BN6's own tiles and objects, the
+  renderer adding each to the sprite's address: seen in the Square's
+  scenario, each peer walking and posing as BN6 draws him.
+- **The NPC's palette** (`BN6_NPC_PALETTE`, the NPC object's `+0x16`,
+  bn6f PaletteIndex): `npc.s` calls `sprite_setPalette` with it after
+  `sprite_update` on every NPC every frame (`loc_809E658`), NPC command
+  0x0F sets it and `set_sprite` sets it to 0 or its variation's; the
+  renderer draws that palette of the frame's block. The engine writes it
+  for each peer's puppet, its object found by `BN6_NPC_SCRIPT_AT`
+  (`+0x4C`, bn6f AnimationScriptPtr: where its script stands, within the
+  puppet's `PUPPET_BYTES`).
+- **A free list-6 number** (`BN6_LOOK_FIELD_SPARE`, `0x59`): list 6
+  (`0x08032194`, 96 words) points at the placeholder sprite `0x084DC040` at
+  0x07, 0x28, 0x29, 0x30, 0x31, 0x35, 0x48, 0x4A, 0x4C-0x4E and 0x59
+  (read from the ROM); `xnavi.c` takes all but 0x59 (0x30 its yardstick
+  of an empty entry), so the copy takes 0x59. Its mugshot (list 8's 0x59)
+  is the black one, never shown: a peer has no chat box.
+- **The stale mark** (`BN6_SPRITE_PAL_STALE_AT`, `BN6_SPRITE_PAL_STALE`):
+  the sprite state's `+3` bit `0x10` above, read on each peer's object
+  (its sprite state at `BN6_OBJ_SPRITE_AT`'s high nibble x 16) as the
+  engine's check that its count of the slots held.
+
+Verify: `python3 build.py scenarios online_looks` (the state's
+`peerlook` lines and `lookstale 0`, and its pictures).
+
 ## NetBattles
 
 The Arena hashes each core's whole state (`arena_pair.c`, `pair_hash`:

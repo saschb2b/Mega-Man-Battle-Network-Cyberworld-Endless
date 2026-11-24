@@ -80,6 +80,9 @@
 #define BN6_NPC_X16           0x26        /* X16, Y16, Z16: its position's whole world units (s16) */
 #define BN6_NPC_Y16           0x2A
 #define BN6_NPC_Z16           0x2E
+#define BN6_NPC_PALETTE       0x16        /* PaletteIndex: the palette of its sprite's block it is drawn in, set into its sprite each frame
+                                             (bn6f npc.s, sprite_setPalette after sprite_update; NPC command 0x0F sets it) */
+#define BN6_NPC_SCRIPT_AT     0x4C        /* AnimationScriptPtr: where its NPC script stands (a puppet's within its script, puppet.h) */
 #define BN6_MUSIC_PLAYER      0x02010890u /* MP2K MusicPlayerInfo of the music (player 31) */
 #define BN6_MUSIC_STATUS      (BN6_MUSIC_PLAYER + 4)  /* its status: bit 31 stopped */
 #define BN6_MUSIC_STOPPED     (1u << 31)  /* BN6_MUSIC_STATUS: stopped */

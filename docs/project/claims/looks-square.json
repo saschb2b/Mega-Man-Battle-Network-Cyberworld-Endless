@@ -1,0 +1,22 @@
+{
+  "branch": "looks-square",
+  "what": "MegaMan's look (issue 854, step 4): the look on the wire and on peers in the Net Square; list 6 0x59, the placeholder its copy of BN6's field MegaMan takes",
+  "takes": {
+    "wire_protocol": [
+      [
+        "30",
+        "30"
+      ]
+    ],
+    "list6": [
+      [
+        "0x59",
+        "0x59"
+      ]
+    ]
+  },
+  "units": [
+    "MegaMan's look: the wire and the Square's peers"
+  ],
+  "run": false
+}

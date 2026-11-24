@@ -226,7 +226,7 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
             data = await client.message(SPEC["snapshot"])
             for k in range(data[1]):
                 peer = protocol.PEER.unpack_from(data, 2 + k * protocol.PEER.size)
-                if peer[0] == peer_id and peer[-1] == want:
+                if peer[0] == peer_id and peer[-2] == want:
                     return
         raise AssertionError(f"No such byte {want:#x}")
 
@@ -376,7 +376,7 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         b, b_id = await self.connect("Beta", bn4=False, one_extra=True)
         self.assertEqual(self.server.players[b_id].roms, SPEC["roms_bn5"] | SPEC["roms_one_extra"])
         # (SNAPSHOT tells the others: his game, and that his system reads one at most)
-        self.assertEqual(protocol.snapshot(self.server.players, a_id)[-1], SPEC["roms_bn5"] | SPEC["roms_one_extra"])
+        self.assertEqual(protocol.snapshot(self.server.players, a_id)[-7], SPEC["roms_bn5"] | SPEC["roms_one_extra"])
         # (a BN4 chip to it, and one it could not hold from it: outside the common ground, nothing begun)
         await a.send(trade(1, b_id, (700, 2)))
         self.assertEqual(await self.notice(a), ground)
