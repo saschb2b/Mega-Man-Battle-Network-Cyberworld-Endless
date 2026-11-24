@@ -379,9 +379,12 @@ least waits and the least is done twice:
 
 1. **Merge them all together first, locally**, on a scratch branch from
    `origin/dev` (in `.build/`), in the order below; resolve each
-   conflict there once, and run `CI=1 build.py test` and `CI=1 build.py
-   lint` on the whole. That finds every conflict and every clash between
-   them before anything lands.
+   conflict there once. That finds every conflict before anything lands.
+   Where a resolution changed code, or one PR calls what another
+   changed, run `CI=1 build.py test && CI=1 build.py lint` on the whole,
+   once: one run here in place of a wait on CI per PR. Where the
+   conflicts were in text alone (the CHANGELOG, a doc), run nothing:
+   `dev`'s CI on the merges is the check.
 2. **The order:** first the PRs no other open PR shares a hand-written
    file with, then the rest from the fewest shared files to the most;
    between two that tighten the run (prices, heals, sinks, battles), the
@@ -390,9 +393,9 @@ least waits and the least is done twice:
    merges as it stands where GitHub calls it mergeable and step 1 showed
    no clash with what went before; otherwise bring `dev` in, reuse step
    1's resolution, and set counted values anew. A PR whose only change
-   since its green checks is `dev` brought in, its resolution step 1
-   tested, merges at once without waiting on CI again; any other change
-   waits for green.
+   since its green checks is `dev` brought in, its resolution in text
+   alone or tested in step 1, merges at once without waiting on CI
+   again; any other change waits for green.
 4. **After the last**, `dev`'s own CI on the merge is the check of the
    whole: a red there is fixed before anything else merges.
 
@@ -496,10 +499,41 @@ sanitizers, then `tests/test_add_to_steam.py`; its android job runs
 `tests/test_android_saves.py`. Everything that needs the game (captures, autopilot, atlas,
 pacing) stays local.
 
+### Push first: CI's checks are CI's
+
+What CI runs, a session does not run before it pushes: the builds with
+`-Werror`, `build.py lint` and `build.py test`. Run here as a gate they
+were done twice, queued behind every other session's on one machine, and
+again after each time `dev` was brought in (the owner's call, 2026-11-24:
+"husky's pre-commit hooks all over again").
+
+- **Push as soon as the change does what it should** in the one look that
+  shows it (the capture, the scenario, the test written for it). Open the
+  PR then, a draft while its own checks still run. CI's red is the report:
+  `gh pr checks N`, `gh run view RUN --log-failed`, the fix in the next
+  push. The app's Auto-fix wakes the session on a red; nobody polls.
+- **Here, only what CI cannot do:** what needs the ROM (scenarios,
+  captures, `tiles`, `town`, `pacing`, `economy`, `xdiff`, `mp2k_verify`,
+  an autopilot run) and a look by eye. They run while CI runs, not before
+  the push.
+- **As much of it as the change reaches.** While working, the scenarios of
+  the part touched, by name. The whole set (`build.py scenarios`) once, on
+  the commit that is to merge, and not again because `dev` was brought in,
+  unless what came in changes the same code.
+- **In the table below, `build.py test` and `build.py lint` name what CI
+  holds the change to**, so a red there can be read; they are no step to
+  run here before a push.
+- **Run here all the same** where it is the work itself: a unit test
+  being written (its own run), a lint baseline to shrink
+  (`build.py lint --update` writes `tests/lint/`), a red of CI's whose log
+  does not explain it, and a merge of several PRs whose resolution changed
+  code (Merging, step 1). A host build made anyway for a capture costs
+  nothing more with `CI=1` set, and shows CI's warnings early.
+
 | Change | Checks |
 | --- | --- |
 | The knowledge base (`docs/`) | The okf skill's bookkeeping (a new concept's frontmatter, the folder's `index.md`, the change's entry in `docs/log.d/` with its `by` and `at`, a link; no `generated` line of a concept that exists, no line in `docs/log.md`); `build.py lint` (the bundle validated, every `docs/` path named exists) |
-| Engine code | `build.py test`, `build.py lint`, `build.py scenarios` (every scenario passes; the autopilot's run of a layer and NEW GAME's way to the net are among them), a headless capture of the affected screen (`shot` with its route, `ref` against the base where it was there before) |
+| Engine code | `build.py test`, `build.py lint`, `build.py scenarios` (every scenario passes, once on the commit to merge; the autopilot's run of a layer and NEW GAME's way to the net are among them), a headless capture of the affected screen (`shot` with its route, `ref` against the base where it was there before) |
 | A bug fixed that only a sequence of play shows (a run's end and the next run, a quit and CONTINUE, a button through one screen into the next, an order between the engine and BN6) | Its play kept as a scenario, `tests/scenarios/NAME.py` (docs/devtools/scenarios.md, Writing one for a fix): seen to fail on the code before the fix at the step that names the bug, then to pass; what went wrong a line of the state where it was not one |
 | Checkpoints, the quit's save, CONTINUE (`director_save.c`, `director_settle.c`, `director_hold.c`, `emu_keep_run`, what a state holds) | The Engine code row's, and `build.py scenarios --fuzz` on three seeds (no FAIL; a find is a seed, docs/devtools/scenarios.md, A quit at any frame) |
 | Layer generation or maps | `build.py test` (connectivity over 300 seeds), `build.py tiles` (no layer worse than `tests/atlas_baseline.txt`, the close-ups looked over), captures of every area (`--net-biome 0`-`7`) |
@@ -534,16 +568,18 @@ Measured over 50 sessions (2026-11): 184 commands that ran over a minute
 took 10 of the 15 hours spent in tools, most of them a `sleep` loop
 watching a build's log.
 
-- A command that may run over half a minute (`build.py` and its `test`,
-  `lint`, `xdiff`, a `tools/cw.py` shot or play, anything in Docker) runs
+- A command that may run over half a minute (`build.py` and its
+  `scenarios`, `tiles`, `xdiff`, a `tools/cw.py` shot or play, anything in
+  Docker) runs
   in the harness's background mode, its output in a file under `.build/`.
   The harness reports when it exits: no `sleep` or `until grep` loop
   watching the log.
 - While it runs, do what does not depend on it (the next edit, the test,
   the docs). With nothing left, end the turn; the exit starts the next.
 - Checks that always follow each other go in one command
-  (`build.py test && build.py lint`), not a call each, and never side by
-  side in one worktree.
+  (`build.py scenarios NAMES && build.py tiles`), not a call each, and
+  never side by side in one worktree. `build.py test` and `build.py lint`
+  are CI's (Push first, above), not a command to wait on here.
 - Looks that do not depend on each other (`grep`, `sed -n`, `git log`,
   file reads) go out together in one message.
 - Several edits to one file are one script or one message of edits, not a
