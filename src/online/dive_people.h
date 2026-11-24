@@ -24,6 +24,12 @@ bool dive_people_in_sight(uint32_t session);
  * a layer whose own NPCs leave little room gives (issue #755). */
 void dive_people_dev_room(int most);
 
+/* MegaMan's own look sent again on the next dive_people_look_send (a link
+ * begun or back), and sent each frame the link is heard where it is due or
+ * changed (protocol v30; dive_looks.h). */
+void dive_people_look_due(void);
+void dive_people_look_send(void);
+
 /* Each frame on a layer: the room's divers as the snapshot has them. */
 void dive_people_frame(const OnlineSnapshot *s);
 

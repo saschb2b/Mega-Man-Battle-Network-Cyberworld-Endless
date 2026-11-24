@@ -69,6 +69,7 @@ static void link_up(uint16_t week, uint32_t seed) {
 	L.week = week;
 	L.seed = seed;
 	dive_people_on(true);
+	dive_people_look_due();
 }
 
 void dive_link_adopt(void) {
@@ -238,6 +239,7 @@ static void back_or_down(const OnlineSnapshot *s, uint32_t now) {
 	if (!again) return;
 	memset(&L.room, 0, sizeof L.room);
 	dive_crew_reset();
+	dive_people_look_due();
 	fprintf(stderr, "dive: the link back; the layer's room entered again\n");
 }
 
@@ -315,6 +317,8 @@ void dive_link_frame(void) {
 	L.x = bn6_player_x(); L.y = bn6_player_y(); L.z = bn6_player_z();
 	online_transport_poll(L.x, L.y, L.z, emu_read8(BN6_PLAYER_FACING) & 7u);
 	if (heard) dive_people_frame(&s);
+	/* (MegaMan's look, which the others draw him in: again after a link begun or back, else as it changes) */
+	if (heard) dive_people_look_send();
 	dive_traces_frame();
 	dive_finds_frame();
 	dive_splits_frame();
