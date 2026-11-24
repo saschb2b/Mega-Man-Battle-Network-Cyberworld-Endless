@@ -9,6 +9,7 @@
   window. A Cross, a Soul and Beast Out keep their own colours. Until
   the Square carries the other player's look, NetBattles stay in BN6's
   colours on both sides (issue #854).
+
 - **New: MegaMan in colours of his own, the engine's part.** His plain
   body takes a look: the armour, the suit and the gold each coloured from
   one of twelve palettes (Classic, Undernet, Gregar, ProtoMan, Nebula,

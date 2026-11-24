@@ -12,8 +12,8 @@ sources:
 
 # Looks in a NetBattle
 
-Each profile's MegaMan wears a look of his own ([MegaMan's colours](../../rom/megaman-colours.md)
-measured where his colours are). In a NetBattle each player's MegaMan
+Each profile's MegaMan wears a look of his own ([MegaMan's look](../../game/looks.md);
+[MegaMan's colours](../../rom/megaman-colours.md) measured where his colours are). In a NetBattle each player's MegaMan
 wears **that player's look on both GBAs of both games**: mine on my
 screen and on the other's, his on both. The Arena's lockstep holds every
 core of both games to the same state ([What runs](what-runs.md), the pair

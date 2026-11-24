@@ -125,6 +125,20 @@ Mystery the crystals' greens, blues and violets; Glitch pure colours and
 static greys). `python3 tools/looks_sheet.py OUT.png [FRAMES]` draws them
 as a contact sheet, with whole frames of the game beside them.
 
+### In a NetBattle
+
+Each player's MegaMan wears that player's look on both GBAs of both games
+([Looks in a NetBattle](../online/arena/looks.md)): both looks, computed by
+`look_palette_of` from BN6's own bytes, go into eight palettes of his
+battle block BN6 never picks, in every Arena core before it starts, and
+three hooks answer BN6's picks of his palette by the object's side. Both
+MegaMen and each GBA's own emotion face take their player's look; a Cross,
+a Soul and BeastOut keep their colours; the looks are in the pair's hash,
+so two games given different ones part before the first frame. Until the
+Square's wire carries the peer's look, a NetBattle keeps BN6's colours on
+both sides (`--dev arenalook=MINE/THEIRS` gives them for tests); the stands
+and two MegaMen a side keep BN6's.
+
 ### For tests and the other parts
 
 - `--dev look=P.C,P.C,P.C` sets the worn slot's look and saves it, a
