@@ -332,6 +332,14 @@ commit checked: `gh pr merge N --merge --match-head-commit SHA`; never
 `--auto`, which merges at once here (`dev` has no required checks). A
 check that cannot be made green goes back to the owner with why, unmerged.
 
+One exception (the owner's call, 2026-11-24): a macOS or iOS job that
+never started, queued or cancelled with no step run, does not hold a
+pull request whose other checks are green. GitHub's macOS runners are
+few, and with several pull requests in flight their jobs waited half an
+hour and were cancelled unrun. Merge without it; `dev`'s CI on the merge
+is that build, and a red there is the merging session's to fix at once.
+A macOS or iOS job that ran and failed is a red like any other.
+
 **A PR brings `dev` in only when it must.** Every time costs a commit, a
 run of CI and a wait, and in a month 261 of `dev`'s 600 merge commits
 were one (docs/project/merging.md has the count and what conflicted).
