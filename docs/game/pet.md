@@ -118,6 +118,9 @@ again on each layer, read and never marked NEW:
   each new code ([The meta layer](meta/overview.md)).
 - **Endless Net** (from NetBBS): netizens' threads about the net, more as
   the profile goes deeper, NEW with each new post ([Rumors](meta/rumors.md)).
+- **Colors**, from the first palette past Classic, NEW once: where MegaMan
+  changes his colours and that AsterLand sells some
+  ([MegaMan's palettes, earned](looks-earning.md)).
 
 They were once a screen of the engine's own behind Comm (the SciLab
 link), drawn over the PET: it held the game still, its music with it, and

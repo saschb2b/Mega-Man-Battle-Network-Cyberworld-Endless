@@ -14,6 +14,7 @@
 #include "flags.h"
 #include "guardians.h"
 #include "lab_keeper.h"
+#include "looks_words.h"
 #include "layer_objs.h"
 #include "meta.h"
 #include "navicust.h"
@@ -36,7 +37,7 @@
 
 /* the run's own key items, in ids BN6 leaves nameless (0x47-0x4F; each
  * its own place in the screen's order, Gregar's table at 0x0812A4A0) */
-enum { ITEM_SCRT = 0x31, ITEM_CODES = 0x47, ITEM_PASS = 0x48, ITEM_LIBRARY = 0x49, ITEM_NETPASS = PET_ITEM_NETPASS, ITEM_JUKEBOX = PET_ITEM_JUKEBOX, ITEM_LAB = 0x4C };
+enum { ITEM_SCRT = 0x31, ITEM_COLORS = 0x4D /* ColrData: scripts.h's SCRIPTS_COLOR_DATA */, ITEM_CODES = 0x47, ITEM_PASS = 0x48, ITEM_LIBRARY = 0x49, ITEM_NETPASS = PET_ITEM_NETPASS, ITEM_JUKEBOX = PET_ITEM_JUKEBOX, ITEM_LAB = 0x4C };
 
 typedef struct { const uint8_t *b; int len; } Script;
 
@@ -189,7 +190,7 @@ static void install_names(void) {
 		if (j + 1 > end) end = j + 1;
 	}
 	static const uint8_t e6[] = { 0xE6 };
-	static uint8_t out[NAMES_MAX], codes[16], pass[16], library[16], netpass[16], jukebox[16], lab[16];
+	static uint8_t out[NAMES_MAX], codes[16], pass[16], library[16], netpass[16], jukebox[16], lab[16], colors[16];
 	Script rep[256] = { 0 };
 	rep[ITEM_CODES] = (Script){ codes, words("NaviCode", e6, 1, codes, sizeof codes) };
 	rep[ITEM_PASS] = (Script){ pass, words("DarkPass", e6, 1, pass, sizeof pass) };
@@ -197,6 +198,7 @@ static void install_names(void) {
 	rep[ITEM_NETPASS] = (Script){ netpass, words("NetPass", e6, 1, netpass, sizeof netpass) };
 	rep[ITEM_JUKEBOX] = (Script){ jukebox, words("Jukebox", e6, 1, jukebox, sizeof jukebox) };
 	rep[ITEM_LAB] = (Script){ lab, words("LabPass", e6, 1, lab, sizeof lab) };
+	rep[ITEM_COLORS] = (Script){ colors, words("ColrData", e6, 1, colors, sizeof colors) };
 	int size = rebuild(a, end, n, rep, out, sizeof out);
 	if (!size) return;
 	emu_write(NAMES_AT, out, (size_t)size);
@@ -220,7 +222,11 @@ static void item_set(int id, int count) {
 /* a guardian's mail: its id is the navi's (BN6's own mails 1-18 are the
  * story's, which a run never delivers); then the lab's two */
 static bool mail_of(int navi) { return guardian_mailed(navi); }
-enum { MAIL_REPORT = 19, MAIL_RECORDS = 20, MAIL_CODES = 21, MAIL_BBS = 22, MAIL_LAB = 23, MAIL_LAST = MAIL_LAB };
+enum { MAIL_REPORT = 19, MAIL_RECORDS = 20, MAIL_CODES = 21, MAIL_BBS = 22, MAIL_LAB = 23, MAIL_LOOKS = 24, MAIL_LAST = MAIL_LOOKS };
+
+/* (the profile owns a palette past Classic: Dad's mail on the colours,
+ * docs/game/looks.md, Earning) */
+static bool looks_there(void) { return (profile.looks_owned & ~1u) != 0; }
 
 /* `s` into a mail's pages: lines of twenty letters at most, three a page,
  * a page's end waiting and clearing (E7 00 F2) as BN6's mails do, '\f'
@@ -482,13 +488,14 @@ static void install_mails(void) {
 	for (int m = 1; m <= MAIL_LAST; ++m) {
 		if (m >= MAIL_REPORT) {
 			static char text[2000];
-			static const char *const subjects[] = { "Dive report", "Records", "Compression", "Endless Net", "Battle Lab" };
+			static const char *const subjects[] = { "Dive report", "Records", "Compression", "Endless Net", "Battle Lab", NULL };
 			if (m == MAIL_REPORT) report_text(text, sizeof text);
 			else if (m == MAIL_RECORDS) records_text(text, sizeof text);
 			else if (m == MAIL_LAB) lab_mail_text(text, sizeof text);
+			else if (m == MAIL_LOOKS) snprintf(text, sizeof text, "%s", looks_mail_text());
 			else codes_text(text, sizeof text);
 			srep[2 * m] = (Script){ from[m], words(m == MAIL_BBS ? "NetBBS" : "Dad", tail, 3, from[m], sizeof from[m]) };
-			srep[2 * m + 1] = (Script){ about[m], words(subjects[m - MAIL_REPORT], tail, 3, about[m], sizeof about[m]) };
+			srep[2 * m + 1] = (Script){ about[m], words(m == MAIL_LOOKS ? looks_mail_subject() : subjects[m - MAIL_REPORT], tail, 3, about[m], sizeof about[m]) };
 			brep[m] = (Script){ body[m], m == MAIL_BBS ? bbs_body(body[m], sizeof body[m]) : dad_mail(text, body[m], sizeof body[m]) };
 			uint8_t row[4] = { 0x04, emu_read8(BN6_MAIL_TABLE + 4u * (uint32_t)m + 1), 0x08, (uint8_t)(0x20 + m) };
 			emu_write(BN6_MAIL_TABLE + 4u * (uint32_t)m, row, sizeof row);
@@ -515,7 +522,7 @@ static void install_mails(void) {
 
 int pet_mail_face(int m) {
 	if (m == MAIL_BBS) return FACE_NONE;
-	return (m >= MAIL_REPORT && m <= MAIL_CODES) || m == MAIL_LAB || mail_of(m) ? FACE_DAD : FACE_NONE;
+	return (m >= MAIL_REPORT && m <= MAIL_CODES) || m == MAIL_LAB || m == MAIL_LOOKS || mail_of(m) ? FACE_DAD : FACE_NONE;
 }
 
 /* The game's own giving of mail `m` (bn6f addMail_802f238), done here:
@@ -607,9 +614,13 @@ int pet_text_refresh(void) {
 	int data = battle_data_families_complete();
 	bool lab_news = lab_there() && (data > profile.lab_mailed || !profile.lab_mailed);
 	if (lab_news) { profile.lab_mailed = (uint8_t)(data ? data : 1); profile_save(); }
+	/* (and the colours', from the first palette past Classic: NEW once) */
+	bool looks_news = looks_there() && !profile.looks_mailed;
+	if (looks_news) { profile.looks_mailed = 1; profile_save(); }
 	for (int m = MAIL_LAST; m >= MAIL_REPORT; --m) {
-		if ((m == MAIL_CODES && !entered) || (m == MAIL_LAB && !lab_there())) continue;
-		bool news = m == MAIL_REPORT ? report_news : m == MAIL_RECORDS ? records_news : m == MAIL_CODES ? codes_news : m == MAIL_LAB ? lab_news : bbs_news;
+		if ((m == MAIL_CODES && !entered) || (m == MAIL_LAB && !lab_there()) || (m == MAIL_LOOKS && !looks_there())) continue;
+		bool news = m == MAIL_REPORT ? report_news : m == MAIL_RECORDS ? records_news : m == MAIL_CODES ? codes_news : m == MAIL_LAB ? lab_news
+			: m == MAIL_LOOKS ? looks_news : bbs_news;
 		mail_deliver(m);
 		if (news) { flag_set(BN6_FLAG_MAIL_NEW + m); flag_clear(BN6_FLAG_MAIL_READ + m); }
 		mail_first(m);

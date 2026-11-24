@@ -126,6 +126,7 @@ void director_describe(FILE *f) {
 		fprintf(f, "battlestep %s\n", battle_word());
 	}
 	director_quit_describe(f);
+	looks_describe(f);
 	describe_turns(f);
 	battle_describe(f);
 	battle_state_describe(f);

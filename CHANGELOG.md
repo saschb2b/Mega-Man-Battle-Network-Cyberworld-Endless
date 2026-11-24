@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **New: colors for MegaMan, earned.** Six come with milestones a
+  profile reaches (the Undernet, the Cybeast's fall, Chaud's respect, a
+  Darkloid, the tournament, the top threat rung), three are sold at
+  AsterLand's counter for 6000 zenny each, and two hide in the net, one
+  run in a while: a Mystery Data's ColrData, or a Glitch layer's. MegaMan
+  says where each came from, and Dad mails where to change them. A
+  profile gets the milestones it already holds at its next start
+  (issue #854).
+
 - **New: fast forward keeps the music at its own pace.** While the game
   runs fast, the song plays on as it would at BN6's speed instead of
   hurrying along with the game, and when fast forward stops the game

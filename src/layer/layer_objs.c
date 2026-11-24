@@ -106,6 +106,13 @@ static void spin_content(uint8_t out[8], int colour) {
 	for (int i = 0; i < 8; ++i) out[i] = c[i];
 }
 
+/* The run's rare find of colours (docs/game/looks.md, Earning): a key
+ * item of the run's own, ColrData, whose pick-up grants its palette. */
+static void colour_content(uint8_t out[8]) {
+	const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_COLOR_DATA, 0, 0, 0 };
+	memcpy(out, c, 8);
+}
+
 /* A ScrtData, as the game's key item Mystery Data hold one. */
 static void fragment_content(uint8_t out[8]) {
 	const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_SECRET_DATA, 0, 0, 0 };
@@ -267,13 +274,31 @@ typedef struct {
 	bool fragment, fragment_placed, key_here;
 	const ShopItem *stock;
 	int nstock;
+	int look_palette, look_md;   /* the run's rare find of colours here (looks_routes.h), -1 none; its Mystery Data */
 } MysteryPlan;
+
+/* The find's Mystery Data: the best blue one, the last of the best, never
+ * a purple one, the Spin's or the RegUp's; -1 none. Its content is rolled
+ * as any other's and then swapped for the find, so a profile that owns the
+ * palette finds the same layer otherwise (docs/game/looks.md, Earning). */
+static int look_md(const MysteryPlan *p) {
+	int best = -1;
+	for (int i = 0, k = 0; i < layer.nobj && k < 16; ++i) {
+		const NetObj *o = &layer.obj[i];
+		if (o->type != OBJ_MYSTERY) continue;
+		++k;
+		if (i == p->spin_md || i == p->reg_md || o->param == MD_PURPLE || o->param < 1) continue;
+		if (best < 0 || o->param >= layer.obj[best].param) best = i;
+	}
+	return best;
+}
 
 /* The plan's RegUp: its MB and Mystery Data, where the layer has one
  * (planned as the first Mystery Data is filled: reg_mb -1 till then). */
 static void plan_regup(MysteryPlan *p) {
 	p->reg_mb = layer_regup(run.depth, run.side_kind);
 	p->reg_md = p->reg_mb ? regup_md(p->spin_md) : -1;
+	p->look_md = p->look_palette >= 0 ? look_md(p) : -1;
 }
 
 static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p, LayerObjs *out) {
@@ -302,8 +327,13 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 		static const uint8_t key[8] = { 4, 0x20, 0xFF, 0xFF, SUB_UNLOCKER, 0, 0, 0 };
 		p->key_here = false;
 		memcpy(m->content, key, 8);
-	} else if (mystery_content(o, m->content)) {
-		m->type = MYSTERY_BLUE;
+	} else {
+		if (mystery_content(o, m->content)) m->type = MYSTERY_BLUE;
+		if (i == p->look_md) {
+			colour_content(m->content);
+			out->look_palette = p->look_palette;
+			if (emu_debug_on()) fprintf(stderr, "looks: palette %d in the Mystery Data at %d %d\n", p->look_palette, m->x, m->y);
+		}
 	}
 	if (emu_debug_on()) fprintf(stderr, "mystery: kind %d value %d code %d at %d %d\n", m->content[0], m->content[4] | m->content[5] << 8, m->content[3], m->x, m->y);
 	if (out->nmd < 16) {
@@ -512,6 +542,7 @@ static void install_begin(Install *in) {
 	out->fragment_found = -1;
 	out->spin_found = -1;
 	out->spin_colour = out->nmd = 0;
+	out->look_palette = -1;
 	for (int i = 0; i < OBJ_KINDS; ++i) out->script_of[i] = -1;
 	out->gate_navi = 0;
 	out->gate_reward = -1;
@@ -535,7 +566,10 @@ static void install_begin(Install *in) {
 	/* the run's Spin, in the best Mystery Data of one layer of 4-8 (docs/
 	 * docs/game/meta/spins.md: one a run, a colour the profile lacks, kept for good) */
 	int spin_colour = meta_spin_here() ? meta_spin_colour() : 0;
-	in->plan = (MysteryPlan){ spin_colour ? best_mystery() : -1, spin_colour, -1, -1, fragment, false, false, NULL, 0 };
+	in->plan = (MysteryPlan){ spin_colour ? best_mystery() : -1, spin_colour, -1, -1, fragment, false, false, NULL, 0, -1, -1 };
+	/* the run's rare find of colours, one a run (looks_routes.h): Glitch on
+	 * its Glitch layer, Mystery on one normal layer of 4-8 */
+	in->plan.look_palette = layer_look_find();
 	in->spin_first = meta_spins() == 0;
 	/* the Net Dealer's stock, before his words (they say how many of his
 	 * answer he brought) */

@@ -60,7 +60,7 @@ static bool dev_switch(const char *t) {
 		{ "feel", &dev.feel }, { "settings", &dev.settings }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
-		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "library=", &dev.library }, { "alias=", &dev.alias }, { "reward=", &dev.reward }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },
+		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "looks=", &dev.looks }, { "pack=", &dev.pack }, { "library=", &dev.library }, { "alias=", &dev.alias }, { "reward=", &dev.reward }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },
 		{ "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny }, { "libpar=", &dev.lib_par }, { "libhp=", &dev.lib_hp },
 		{ "side=", &dev.side }, { "glitchstage=", &dev.glitch_stage }, { "battler=", &layer_battler_forced }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak }, { "form=", &dev.form },
@@ -116,6 +116,8 @@ void devtools_parse(const char *spec) {
 
 void devtools_veteran(void) {
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
+	/* (palettes owned and told, as earned in runs before: Classic always) */
+	if (dev.looks) { profile.looks_owned = (uint16_t)(dev.looks | 1); profile.looks_told = (uint16_t)dev.looks; profile_save(); }
 	/* (a bit a folder but the Standard's, every one meta.h has) */
 	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
 	/* (library=N: every Nth chip id held, for the Library's pages' pictures;

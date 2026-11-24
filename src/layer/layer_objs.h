@@ -88,6 +88,7 @@ typedef struct {
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
 	int spin_found;            /* ... and the run's Spin (docs/game/meta/), -1 for none */
 	int spin_colour;           /* its colour (1-6), 0 for none on this layer */
+	int look_palette;          /* the run's rare find of colours in a Mystery Data here (looks_routes.h), -1 none */
 	int script_of[OBJ_KINDS];   /* each kind's first talker's script, -1 none (for --talk) */
 	int gate_navi, gate_reward;    /* the Navi gate's Navi and the script his SP chip is given by, -1 none */
 	int trader_kind;           /* the layer's trader's script in the game's trader archive (TraderKind), -1 none (for --talk) */
@@ -199,5 +200,9 @@ extern const char *layer_objs_server_navi;
 extern bool layer_objs_undernet_server;
 extern bool layer_objs_dark_first;
 extern bool layer_objs_duel_later;
+
+/* The run's rare find of colours on this layer (layer_looks.c;
+ * looks_routes.h): its palette where the layer is the find's, -1 none. */
+int layer_look_find(void);
 
 #endif
