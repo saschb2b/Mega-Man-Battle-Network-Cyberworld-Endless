@@ -10,7 +10,7 @@ sources:
     title: "Issue #854: MegaMan's look, the design and the owner's calls of 24 November 2026"
     author: human:saschb2b
   - id: colours
-    resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/pull/855"
+    resource: "docs/rom/megaman-colours.md"
     title: "MegaMan's colours as BN6 keeps them (step 1)"
 ---
 
@@ -29,8 +29,8 @@ the Square's social layer.
   the playstyle.
 - **Channels and palettes.** His plain body has three channels: 0 the armour
   (BN6's light blue ramp), 1 the suit (the dark blue), 2 an accent (the
-  gold), the channels his art separates (step 1, the map of
-  his colours). Each takes any colour of any
+  gold), the channels his art separates (step 1, [MegaMan's
+  colours](../rom/megaman-colours.md)). Each takes any colour of any
   palette the profile owns. The outline and the skin never change.
 - **Twelve palettes of sixteen colours,** named and coloured for where
   they are earned: Classic free (BN6's own blue and a starter spread);

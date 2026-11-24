@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T16:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:30:00Z }
 ---
 
 # Sources
@@ -609,6 +609,19 @@ how it is known:
   scripts' whole region: one, in a table of triples, no script), none
   (`tools/bn4_songs.py`). Not here: Team ProtoMan's version. A player who knows where one plays is the lead to verify
   (Learned from players, below).
+
+## MegaMan's colours, BN2 to BN6 (24 November 2026)
+
+The look's epic (#854) cited Style Change in BN2 and BN3 as the series'
+precedent for recolouring MegaMan. MMKB's Style Change page says an
+element sets his colour and a style his shape (Guts's fist, Shield's arm,
+Team's crest): **verified** there that colour and shape were separate
+axes; that the games swap palettes of one sprite is **assumed** (the page
+does not say). MMKB's BN4 and BN5 pages name no body recolour but Souls,
+Dark and Chaos; TCRF's pages could not be read (they returned no game
+text). BN6 itself, **verified** in the ROM: his battle sprite keeps a
+palette per Cross, Full Synchro's, a pale twin and four tints by a
+NaviStats byte no code was found writing ([MegaMan's colours](../rom/megaman-colours.md)).
 
 ## Sound settings (2 November 2026)
 
