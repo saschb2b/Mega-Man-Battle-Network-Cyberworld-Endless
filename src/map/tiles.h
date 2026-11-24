@@ -382,6 +382,16 @@ int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const uint32
 typedef struct { uint16_t e0, e1; uint32_t look; uint64_t mask; const uint32_t *side; } TilePick;
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
 	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n, TilePick *out);
+/* A gap one panel wide between two floors, open to the void at both its
+ * ends, at tile (tx, ty): its panel (A, B), and the tile's pixels on it
+ * well past the faces hanging from the floor above, where it shows the
+ * background (sky). False none (issue 836). */
+typedef struct { int A, B; uint64_t sky; } TileGap;
+bool tiles_gap(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, TileGap *out);
+/* While set, tiles_pick draws a gap's tile (tiles_gap) as its two floors
+ * apart, each as if the other were not there: tilemap.c's pass over a gap
+ * whose picks painted it as floor (Mr. Weather Comp's slots). */
+extern bool tiles_pick_gaps;
 /* Where floors `fa` and `fb`, drawn apart on the two tile layers, overlap
  * in tile (tx, ty): whether fa shows in front. A floor's top in front of the
  * other's side faces; where only faces meet, the floor lower on screen. */

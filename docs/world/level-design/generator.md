@@ -364,18 +364,23 @@ Breaks. A tile that draws nothing over part of the floor's top, a hole
 where the background shows through, is mended once the map is whole:
 [holes in the floor](floor-holes.md).
 
-A void panel with floor on two opposite sides, a gap one panel wide
-between two pads or rooms, is drawn as the two floors apart, each with
-its own edge and the gap open (`tiles_pick.c`, `gap_pick`; issue 836).
-The originals hold such a void only inside a field: Mr. Weather Comp's
-maps draw it as a sunken slot of shaded floor, walled off. Its pairs,
-an exact class, drew a generated gap between two pads as floor cut
-straight down on the tiles' grid, sky through it and a dark square of
-the slot at its end, which a player took for a walkway. Each side is
-now picked as if the other were not there (the other side of the line
-through the gap taken for void, the line itself kept for both), the one
-alone where only one draws on a tile, else the floor in front whole; a
-pit, floor on all four sides, keeps its pick.
+A gap one panel wide between two floors, open to the void at both its
+ends, is drawn as the two floors apart, each with its own edge, where
+its tiles as picked painted it as floor (`tilemap.c`, `gaps_apart`;
+`tiles_pick.c`, `tiles_gap`; issue 836). The originals hold such a void
+only inside a field: Mr. Weather Comp's maps draw it as a sunken slot
+of shaded floor, walled off. Its pairs, an exact class, drew a
+generated gap between two pads as floor cut straight down on the tiles'
+grid, sky through it and a dark square of the slot at its end, which a
+player took for a walkway. Once the map is picked, a gap's panel whose
+tiles paint half or more of the background past the faces above it is
+picked again, each tile's two sides as if the other were not there (the
+other side of the line through the gap taken for void), the one alone
+where only one draws on a tile, else the floor in front whole. The
+other areas' pairs leave such a gap open, and a notch (closed by floor
+at an end) and a pit keep their picks: drawing either apart, or a gap
+tile by tile, left steps along a long edge (seeds 17672 and 1256762 of
+Weather Comp's atlas).
 
 BN4's ACDC Area leaves out its cyan roads and ringed hubs by their hues
 (`skip_styles`). Any 8 pixels of the roads' hue on a panel's top did it,

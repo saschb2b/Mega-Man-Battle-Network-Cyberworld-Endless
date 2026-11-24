@@ -508,29 +508,44 @@ static int gap_axis(const TileAt *at, TileFloor floor, const void *ctx, int *A, 
 	return across_a == across_b ? -1 : across_b;
 }
 
-/* Whether a pair (its pixels `mask`) paints a gap's top as floor: of the
- * tile's pixels on the gap's panel well past the reach of the faces and
- * legs hanging from the floor above them, where the gap shows the
- * background, it draws three in four. Mr. Weather Comp's slots do; the other areas' own pairs
- * for the place draw the two floors' edges and leave it open. */
-#define GAP_SKY_LEAST 8
+/* Whether the gap through panel (A, B) across `axis` opens to the void at
+ * both its ends: along it, the panels flanked on both sides go on, and the
+ * first that is not is void. A notch, closed by floor at an end, is the
+ * floor's own dent, which the area's pairs draw as they are. */
+#define GAP_LONGEST 16
+static bool gap_open(TileFloor floor, const void *ctx, int A, int B, int axis) {
+	int da = axis ? 0 : 1, db = axis ? 1 : 0;   /* (across) */
+	for (int dir = -1; dir <= 1; dir += 2)
+		for (int k = 1;; ++k) {
+			if (k > GAP_LONGEST) return false;
+			int PA = A + dir * db * k, PB = B + dir * da * k;   /* (along) */
+			if (TILE_MATERIAL(floor(PA, PB, ctx))) return false;
+			if (!TILE_MATERIAL(floor(PA - da, PB - db, ctx)) || !TILE_MATERIAL(floor(PA + da, PB + db, ctx))) break;
+		}
+	return true;
+}
+
+bool tiles_pick_gaps;
+
 #define GAP_PAST_FACES 8   /* (an edge's outline and the face's foot drawn past its reach) */
-static bool paints_gap(const TileAt *at, TileFloor floor, const void *ctx, int A, int B, uint64_t mask) {
-	const TileGrid *g = at->g;
-	uint64_t sky = ~tl_above_floor(g, at->tx, at->ty, floor, ctx, tl_reach_of(g->face, g->hang) + GAP_PAST_FACES);
+bool tiles_gap(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, TileGap *out) {
+	const TileAt at = { NULL, 0, g, tx, ty, NULL };
+	int axis = gap_axis(&at, floor, ctx, &out->A, &out->B);
+	if (axis < 0 || !gap_open(floor, ctx, out->A, out->B, axis)) return false;
+	uint64_t sky = ~tl_above_floor(g, tx, ty, floor, ctx, tl_reach_of(g->face, g->hang) + GAP_PAST_FACES);
 	for (int i = 0; i < 64; ++i) {
 		int PA, PB;
-		tl_pixel_panel(g, at->tx * 8 + i % 8, at->ty * 8 + i / 8, &PA, &PB);
-		if (PA != A || PB != B) sky &= ~(1ull << i);
+		tl_pixel_panel(g, tx * 8 + i % 8, ty * 8 + i / 8, &PA, &PB);
+		if (PA != out->A || PB != out->B) sky &= ~(1ull << i);
 	}
-	int n = tl_popcount64(sky);
-	return n >= GAP_SKY_LEAST && 4 * tl_popcount64(sky & mask) > 3 * n;
+	out->sky = sky;
+	return true;
 }
 
 /* A gap one panel wide between two floors (gap_axis; issue 836). The originals show
  * such a void only inside a field, Mr. Weather Comp's dark slots drawn as
  * sunken floor, so its pairs drew a gap between two pads or rooms as a
- * floor cut on the tiles' grid, sky through it (paints_gap). Each side is drawn as if
+ * floor cut on the tiles' grid, sky through it (tilemap.c, gaps_apart). Each side is drawn as if
  * the other were not there, as apart() draws two materials: its own edge,
  * the gap void; where both draw on a tile, the one in front. */
 static bool gap_pick(const TileAt *at, TileFloor floor, const void *ctx, TilePick *out) {
@@ -579,6 +594,9 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 		*out = pick_of(mc);
 		return true;
 	}
+	const TileAt at = { books, nbooks, g, tx, ty, n };
+	TileGap gap;
+	if (tiles_pick_gaps && tiles_gap(g, tx, ty, floor, ctx, &gap) && gap_pick(&at, floor, ctx, out)) return true;
 	if (apart(books, nbooks, oa, ob)) {
 		Only oa_only = { floor, ctx, TILE_A }, ob_only = { floor, ctx, TILE_B };
 		const TileCand *pa = best(books, nbooks, g, tx, ty, phase, oa, 0, pad, only, &oa_only, true, NULL, n, &dist, &off);
@@ -600,10 +618,6 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 	const TileCand *c = best(books, nbooks, g, tx, ty, phase, oa, ob, pad, floor, ctx, false, seams, n, &dist, &off);
 	count(dist, c);
 	if (!c) return false;
-	/* a gap between two floors that its pair paints as floor: drawn apart */
-	const TileAt at = { books, nbooks, g, tx, ty, n };
-	int GA, GB;
-	if (gap_axis(&at, floor, ctx, &GA, &GB) >= 0 && paints_gap(&at, floor, ctx, GA, GB, c->mask) && gap_pick(&at, floor, ctx, out)) return true;
 	tiles_pick_off = off;
 	*out = pick_of(c);
 	return true;
