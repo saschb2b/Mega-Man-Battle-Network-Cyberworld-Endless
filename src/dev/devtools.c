@@ -147,7 +147,7 @@ void devtools_veteran(void) {
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
 	/* (a bit a folder but the Standard's, every one meta.h has) */
 	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
-	if (dev.heard) { profile.shelf.heard |= (uint8_t)dev.heard; profile_save(); }
+	if (dev.heard) { profile.shelf.heard |= (uint16_t)dev.heard; profile_save(); }
 	if (dev.shelf) meta_shelf_seen();
 	/* (library=N: every Nth chip id held, for the Library's pages' pictures;
 	 * not saved by this, as when the screen filled them as it opened) */
