@@ -82,6 +82,11 @@ something Standard keeps.
 | Busting | TankCan1 R x4, HiCannon L x3, WideSwrd L x3, Sword L x3, MiniBomb L x3 R x2, Thunder R x3, Barrier R x2, AreaGrab * x2, PanlGrab *, Atk+10 * x4 | The heaviest chips act 1 allows, in two codes; Thunder holds a foe for TankCan1's wind-up | No Recovery chip: every heal is the net's (a Mr.Prog's, a find's). No LongSwrd, so LifeSword stays Blade's | An act cleared with no Recovery chip used in it (its guardian deleted; the Secret Area's master ends no act) |
 | Lean | Cannon B x5, MiniBomb B x5, Vulcan1 B x5, Thunder B x5, AreaGrab B x4, Atk+10 * x3, Recov10 * x3 | Seven kinds, all in B or *: any five chips make a hand, every turn | Every chip weak and near the same; and the code lean (phase two) brings its finds in B too, so a strong find off B breaks the hands it is built on | Layer 10 reached in any run (the best depth, so a veteran's profile has it) |
 
+On the setup all six stand on one shelf, the locked ones with a hint at
+their milestone rather than the milestone itself, which a rumor in the net
+or the BBS's late post tells ([The shelf of starting folders](shelf.md), 24
+November 2026).
+
 The game-design reasoning, the part the design left open:
 
 - **The dialectic** is the meta layer's, what you bring against what you

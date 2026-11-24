@@ -1,7 +1,7 @@
 ---
 type: Design
 title: "What MegaMan knows"
-description: "What MegaMan knows: guardians, super bosses and virus families known only after a first battle in any run (`guardian_known`, `families_fought` in rivals.sav and the profile), hearsay from bystanders and the Net Dealer before."
+description: "What MegaMan knows: guardians, super bosses and virus families known only after a first battle in any run (`guardian_known` in rivals.sav), hearsay from bystanders and the Net Dealer before, and how a starting folder opens heard in the net."
 tags: [game, meta]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:42:25Z }
 ---
@@ -58,9 +58,15 @@ the PET's battle data on a copy exists once they have fought it.
   Their title card is the reveal; from their first battle on they are
   named everywhere, Bass's form said at the gate before it opens.
 - **Virus families.** The area's warnings for the viruses BN6 never
-  explains (ScarCrows healed by Elec, DarkMechs warping in to slash) come
-  once the family has been battled in any run (the profile's
-  `families_fought`, noted as each battle ends).
+  explained (ScarCrows healed by Elec, DarkMechs warping in to slash)
+  came once the family had been battled in any run; they went in the
+  voice sweep of 19 October 2026 (strategy is the BBS's), and the
+  profile's bytes that counted the families keep the shelf now.
+- **Starting folders.** How a locked folder opens is hearsay too: a
+  bystander's rumor tells it in a friend's words, or the BBS's post when
+  a player is stuck, and the profile keeps it heard (`Profile.shelf`):
+  the setup and the summary say the milestone plainly from then on
+  ([The shelf of starting folders](shelf.md)).
 - **Kept, as resonant:** what MegaMan can sense or read (the services on
   a layer, a strong virus signal's strength, a strong Navi's signal at
   an act's end, the act card), the net's physics he knows as any Navi does

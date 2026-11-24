@@ -11,6 +11,7 @@
 #include "flags.h"
 #include "guardians.h"
 #include "mapslot.h"
+#include "meta.h"
 #include "net_shapes.h"
 #include "netmap.h"
 #include "rivals.h"
@@ -32,6 +33,8 @@ void layer_describe(FILE *f) {
 	int locks = 0;
 	for (int k = 0; k < layer.nblocks; ++k) locks += flag_get(BLOCK_PRESENT_FLAG + k);
 	fprintf(f, "locks %d\npcode %s\n", locks, flag_get(LAYER_PCODE_FLAG) ? "told" : "untold");
+	/* (the starting folder the layer's whisper tells how to open, issue #864) */
+	fprintf(f, "whisperfolder %s\n", D.objs.folder_told ? meta_folder(D.objs.folder_told)->name : "none");
 	/* (a Navi gate's Navi, and whether his code is earned) */
 	if (D.objs.gate_navi)
 		fprintf(f, "gate %s %s\n", guardian(D.objs.gate_navi)->name, rival(D.objs.gate_navi)->megaman_won >= GATE_CODE ? "earned" : "sealed");

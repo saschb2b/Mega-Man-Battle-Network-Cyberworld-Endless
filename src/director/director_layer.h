@@ -17,6 +17,9 @@ void map_label(void);
  * Battler, DarkChips (docs/devtools/scenarios.md, The extras) */
 void extras_describe(FILE *f);
 bool guardian_heard(void);
+/* The layer's whisper was said: what it told is heard (a starting folder,
+ * meta_folder_hear). */
+void layer_whisper_heard(void);
 void set_encounter(const Encounter *e, bool force);
 void lock_run(void);
 void roll_encounter(void);

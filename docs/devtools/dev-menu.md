@@ -75,7 +75,11 @@ included, so an autopilot run shows on the friend list and a capture of
 Options' Game page has its Discord line:
 [Discord's presence](../engine/discord.md)), `folders`
 (every starting folder open in the profile: the setup's Folder row turns
-through all six, [Decisions and phase one](../game/meta/decisions.md)) and `duels=N`
+through all six, [Decisions and phase one](../game/meta/decisions.md)), `heard=BITS`
+(the starting folders heard of, `1 << FOLDER_*`: `heard=2` Blade, its
+plain milestone on the setup's shelf) and `shelf` (the shelf seen, as after a
+first setup, so a layer's whisper may tell how a locked folder opens; both
+[The shelf of starting folders](../game/meta/shelf.md)) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his
 words naming the third act before it, `duels=1` opens the official gates
 of level 1; [The rival: Chaud and ProtoMan](../game/rival.md)), and `hp=N` (MegaMan's max HP made N, and his

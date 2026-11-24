@@ -57,12 +57,12 @@ static bool dev_switch(const char *t) {
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "groups", &dev.groups }, { "noarc", &dev.noarc }, { "dark", &dev.dark }, { "bootplayed", &dev.bootplayed }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "glitchhold", &dev.glitch_hold }, { "tourney", &dev.tourney }, { "forms", &dev.forms },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy }, { "nocarry", &dev.no_carry },
 		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end }, { "discord", &dev.discord },
-		{ "feel", &dev.feel }, { "settings", &dev.settings }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 },
+		{ "feel", &dev.feel }, { "settings", &dev.settings }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 }, { "shelf", &dev.shelf },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
 		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "library=", &dev.library }, { "alias=", &dev.alias }, { "reward=", &dev.reward }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },
 		{ "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny }, { "libpar=", &dev.lib_par }, { "libhp=", &dev.lib_hp },
-		{ "side=", &dev.side }, { "glitchstage=", &dev.glitch_stage }, { "battler=", &layer_battler_forced }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
+		{ "side=", &dev.side }, { "glitchstage=", &dev.glitch_stage }, { "battler=", &layer_battler_forced }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "heard=", &dev.heard }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak }, { "form=", &dev.form },
 		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenacarry=", &dev.arena_carry }, { "arenadesync=", &dev.arena_desync },
 		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "party=", &dev.party }, { "partyhp=", &dev.party_hp }, { "partyend=", &dev.party_end }, { "partydel=", &dev.party_del }, { "partyreward=", &dev.party_reward }, { "partycore=", &dev.party_core }, { "partytwin=", &dev.party_twin }, { "partyroll=", &dev.party_roll }, { "partybot=", &dev.party_bot }, { "partyview=", &dev.party_view }, { "joinwait=", &dev.join_wait }, { "partyscale=", &dev.party_scale }, { "partyaim=", &dev.party_aim }, { "partyhpper=", &dev.party_hp_per }, { "partysteps=", &dev.party_steps }, { "partydelay=", &dev.party_delay }, { "partyearly=", &dev.party_early }, { "partylead=", &dev.party_lead }, { "diveroom=", &dev.dive_room }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
@@ -147,6 +147,8 @@ void devtools_veteran(void) {
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
 	/* (a bit a folder but the Standard's, every one meta.h has) */
 	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
+	if (dev.heard) { profile.shelf.heard |= (uint8_t)dev.heard; profile_save(); }
+	if (dev.shelf) meta_shelf_seen();
 	/* (library=N: every Nth chip id held, for the Library's pages' pictures;
 	 * not saved by this, as when the screen filled them as it opened) */
 	for (int id = dev.library; dev.library > 0 && id < META_LIBRARY_IDS; id += dev.library) meta_library_add(id);
