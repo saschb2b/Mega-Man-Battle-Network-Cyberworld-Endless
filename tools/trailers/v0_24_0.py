@@ -30,8 +30,10 @@ partly missing there), the climax last:
 02 MAKE HIM YOURS: MegaMan's look (issue 854): the PET's colours screen,
    three channels, twelve palettes, earned in runs, three saved looks,
    shown everywhere, a crew each in his own.
-03 ONE FORM AFTER ANOTHER: the run's FORM row; Falzar's five Crosses;
-   Team ProtoMan's Souls and BN4's in BN6's engine; Beast Out.
+03 ONE FORM AFTER ANOTHER: the PET's Forms; Falzar's five Crosses; Team
+   ProtoMan's Souls in BN6's engine (BN5's ROM beside); Beast Out. Not the
+   setup's FORM row nor BN4's Souls: no player reaches them in 0.24.0
+   (the row shows only with --dev forms).
 04 ONE FIELD, ONE GUARDIAN: the door waiting for the crew, three
    MegaMen on one field, the guardian's HP times the party, the win.
 The recap: the folders' shelf, the map kept open, fast forward's music,
@@ -45,7 +47,7 @@ in the Net Square alone (on a dive's layer each game draws every MegaMan
 in its own); the party's bots never finish a guardian in a take, so the
 climax ends on one MegaMan in his look deleting layer 3's guardian. The
 colours screen was filmed on dev with PR 862's palettes merged in
-locally (`--dev looks=4095`); retake it from dev once 862 is there.
+locally (`--dev looks=4095`), and retaken from dev once 862 was there.
 
 Its footage: v0_24_0_footage.py's scripted runs of one game and
 v0_24_0_online.py's takes of several games on a local server, whole
@@ -137,7 +139,16 @@ COLOURS = (COLOURS_OPEN + '30:,'
 # deleted by one MegaMan in his look, the autopilot playing (won at about frame 10500)
 GUARDIAN_WIN = (['--scene', 'emu', '--run-depth', '3', '--seed', '3', '--dev', 'quiet,god,look=11.5,4.4,11.7'],
                 {'CYBERWORLD_AUTOPILOT': '1'}, None, 10040, 10760)
+# the PET's Forms (issue 774): a run holding all ten Crosses (their flags) and Team ProtoMan's Souls (BN5's ROM
+# beside), the arrival's words paged; START, Forms; ElecCross swapped out for a spare; R to the Souls' page
+FORMS_OPEN = ('150:,' + '4:A,6:,' * 30 + '20:,' + '4:A,6:,' * 6 + '30:,' + '4:A,6:,' * 6 + '60:,'
+              + '0:flags 0xE3 0xEC 1,4:,' + _press('START', 60) + _press('DOWN', 6) * 4 + _press('A', 50))
+FORMS_SCREEN = (FORMS_OPEN + _press('DOWN', 16) * 2 + _press('A', 16) + _press('RIGHT', 16) + _press('DOWN', 16)
+                + _press('A', 40) + _press('R', 50) + _press('DOWN', 16) * 2 + '60:')
 OWN = {
+    'forms-screen': (['--scene', 'emu', '--seed', '1', '--run-depth', '2', '--setup', 'short,0,0,0,8',
+                      '--dev', 'quiet,god,souls=0xFC0,look=3.2,4.4,5.1'], {}, FORMS_SCREEN, frames(FORMS_OPEN) - 120,
+                     frames(FORMS_SCREEN)),
     'guardian-win': GUARDIAN_WIN,
     'colours-screen': (['--scene', 'town', '--seed', '2', '--dev', 'looks=4095,look=3.2,4.4,5.1'], {}, COLOURS,
                        frames(COLOURS_OPEN) - 40, frames(COLOURS)),
@@ -148,8 +159,8 @@ OWN = {
 SQUARE = Mosaic(('square-a', 'square-b', 'square-c', 'square-d'))
 WIDEN = Mosaic(('square-a', 'square-b', 'square-c', 'square-d'), widen=24)
 DIVE = Mosaic(('dive-a', 'dive-b', 'dive-c', 'dive-d'))
-# (four runs, four forms at their moment: TenguCross, NapalmSoul, ThunSoul, Beast Out)
-FORMS = Mosaic(('form-cross-tengu', 'form-soul5-napalm', 'form-soul4-thun', 'form-beast'), offsets=(160, 140, 284, 166))
+# (four runs, four forms at their moment: TenguCross, NapalmSoul, MagnetSoul, Beast Out)
+FORMS = Mosaic(('form-cross-tengu', 'form-soul5-napalm', 'form-soul5-magnet', 'form-beast'), offsets=(160, 140, 146, 166))
 
 
 def hello_backdrop():
@@ -201,16 +212,16 @@ def segments():
             Shot('THE CREW', 'IN THE SQUARE, EACH IN HIS OWN LOOK', [(0, 'square-a', 88, 1)]),
         ], icon='icon-star'),
         Segment('ONE FORM AFTER ANOTHER', [
-            # (the setup's FORM row turning CROSS, SOUL BN5, SOUL BN4)
-            Shot('FORM ROW', 'START A RUN AS CROSS, SOUL BN5 OR BN4', [(0, 'form-row', 14, 1), (2, 'form-row', 104, 1)]),
+            # (the PET's Forms: CROSSSELECT's five and the spares, EraseCross swapped for DustCross; R to the Souls)
+            Shot('FORMS', 'PICK FIVE CROSSES AND SEE YOUR SOULS', [(0, 'forms-screen', 40, 1), (2.5, 'forms-screen', 140, 1)]),
             # (each from MegaMan in his look: the dark, the flash, the Navi beside him, the form; TenguCross, then
             # GroundCross)
             Shot("FALZAR'S CROSSES", "FALZAR'S FIVE CROSSES JOIN GREGAR'S", [(0, 'form-cross-tengu', 184, 1), (2, 'form-cross-ground', 190, 1)],
                  count='+5'),
             # (NapalmSoul, then ProtoSoul)
             Shot('SOULS IN BN6', "TEAM PROTOMAN'S SOULS, IN BN6'S ENGINE", [(0, 'form-soul5-napalm', 164, 1), (2, 'form-soul5-proto', 166, 1)]),
-            # (ThunSoul, then Beast Out's flare)
-            Shot("BN4'S SOULS", "BN4'S SOULS UNITE TOO. AND BEAST OUT!", [(0, 'form-soul4-thun', 304, 1), (2, 'form-beast', 184, 1)]),
+            # (GyroSoul, then Beast Out's flare)
+            Shot('BEAST OUT', 'MORE SOULS TO UNITE. AND BEAST OUT!', [(0, 'form-soul5-gyro', 164, 1), (2, 'form-beast', 184, 1)]),
             # (DustCross's scrap, 79 to 19; GroundCross's drill)
             Shot('BIG HITS', 'EVERY FORM HITS IN ITS OWN WAY', [(0, 'form-cross-dust', 392, 1), (2, 'form-cross-ground', 418, 1)]),
         ], icon='icon-swap'),
@@ -233,12 +244,10 @@ T = house.Trailer(
     # (a MegaMan in a look of his own transforming; then the crew's four games at once)
     cold=[(0, 'form-cross-dust', 150, 1), (4, FORMS, 0, 1)],
     hello=HELLO, thanks=THANKS, segments=segments(),
-    # (the shelf is filmed last: 0.24.0 waits for issue 865's new starting folders, Z-Canon rebuilt, BN6's presets
-    # trimmed, Ember and Tide, the Soul forms starting with BN5's and BN4's own folders; retake folders-shelf
-    # once they are on dev, and its words with them)
-    # (a locked folder and its hint; the map open, more of it drawn; fast forward's mark on a layer; BN6's Chip
+    # (the shelf as 0.24.0 ships it, issue 865: ten folders, Steady, Navi, Ember and Tide new, Z-Canon rebuilt;
+    # Ember locked, its hint; the map open, more of it drawn; fast forward's mark on a layer; BN6's Chip
     # Trader screen for a Bring request)
-    recap=[Tile('folders-shelf', 60, ('EVERY STARTING FOLDER', 'ON THE SHELF')),
+    recap=[Tile('folders-shelf', 330, ('TEN STARTING FOLDERS,', 'FOUR NEW, ON THE SHELF')),
            Tile('map-open', 220, ('THE MAP STAYS OPEN', 'ON SELECT')),
            Tile('fast-forward', 190, ('FAST FORWARD KEEPS', "THE MUSIC'S PACE")),
            Tile('chip-choice', 260, ('PICK THE CHIP A REQUEST TAKES,', "ITS REWARD IN LAN'S HP"))],

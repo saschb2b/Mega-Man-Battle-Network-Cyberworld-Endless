@@ -92,8 +92,8 @@ BEAST = ('150:,' + '6:A,4:,' * 60 + '30:,0:foes 254@52/20C@41/260@63,260:,' + '6
          + '6:DOWN,6:,10:,6:A,6:,90:,6:START,6:,20:,6:A,6:,240:,'
          + '60:B,6:,4:A,30:,6:UP,10:,60:B,6:,4:A,30:,6:DOWN,10:,' * 4)
 
-# the setup's FOLDER row (screens_shelf.py): Down to it, Right through all six and round
-SHELF = '90:,6:DOWN,20:,6:DOWN,40:,' + '6:RIGHT,90:,' * 6 + '6:RIGHT,60:'
+# the setup's FOLDER row (screens_shelf.py): Down to it, Right through all ten and round
+SHELF = '90:,6:DOWN,20:,6:DOWN,40:,' + '6:RIGHT,70:,' * 10 + '6:RIGHT,60:'
 # the layer's map (layer_map.py): a press of SELECT, MegaMan walks under it, the next press closes it
 MAP = ARRIVE + '60:DOWN,20:,6:SELECT,40:,150:DOWN,150:LEFT,150:DOWN,150:RIGHT,20:,6:SELECT,90:DOWN,30:'
 # fast forward (FAST: its button, fast_forward.h), the weak autopilot walking: off, pressed on, off again
