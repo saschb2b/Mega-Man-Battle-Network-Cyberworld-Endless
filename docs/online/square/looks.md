@@ -82,6 +82,6 @@ two sides are drawn from it (issue #854's NetBattle step).
 their own seen by the third and a look changed there seen by the others;
 five games, the plaza past its room, the farthest in BN6's own colours
 and his look back as he comes nearest, no peer stale. The state's
-`peerlooks NAME P.P.P/C.C.C drawn|classic, ...`, `lookroom` and
+`peerlooks NAME P.P.P/C.C.C drawn|classic, ...`, `looksent`, `lookroom` and
 `lookstale` lines say it. `tests/test_online.c` holds the pick and the
 wire's bounds, `server/tests/test_looks.py` the server's.

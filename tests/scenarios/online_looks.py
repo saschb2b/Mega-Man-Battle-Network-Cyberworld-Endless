@@ -24,6 +24,7 @@ MANY = {
         online.into_square('beta'),
         online.into_square('gamma'),
         ('@beta', 'do', f'look {BETA}; place 36 120 5; wait 10'),
+        soon(f'looksent={said(BETA)}', 'beta'),
         ('@gamma', 'do', f'look {GAMMA}; place 36 88 5; wait 10'),
         ('do', 'place -4 120 1; wait 10'),
         soon(f'peerlooks~Beta {said(BETA)} drawn'),

@@ -84,7 +84,10 @@ static void square(FILE *f, const OnlineSnapshot *s) {
 	}
 	fputc('\n', f);
 	/* (MegaMan's own look is looks_describe's line) */
-	fprintf(f, "lookroom %d\nlookstale %d\n", square_looks_room(), square_looks_stale());
+	Look mine;
+	square_looks_sent(&mine);   /* (the look the others know him by, a NetBattle's own side) */
+	fprintf(f, "looksent %u.%u.%u/%u.%u.%u\nlookroom %d\nlookstale %d\n", mine.palette[0], mine.palette[1], mine.palette[2],
+		mine.colour[0], mine.colour[1], mine.colour[2], square_looks_room(), square_looks_stale());
 	const OnlineEvent *sent = NULL, *heard = NULL;
 	unsigned sents = 0, heards = 0;
 	for (uint32_t k = 0; k < ONLINE_EVENT_HISTORY && k < s->event_serial; ++k) {
