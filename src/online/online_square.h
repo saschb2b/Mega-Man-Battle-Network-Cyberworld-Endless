@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "online_types.h"
+#include "square_looks.h"
 #include "square_plan.h"
 
 /* The peers a channel shows: every player of it but MegaMan himself. */

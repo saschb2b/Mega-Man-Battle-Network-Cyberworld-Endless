@@ -1,10 +1,10 @@
-# Net Square protocol v29
+# Net Square protocol v30
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v29`. The server also
+`/presence` with subprotocol `cyberworld.presence.v30`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -14,7 +14,7 @@ side is behind, rather than a refused upgrade (v10).
 | HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1, then BN4 Red Sun's (v17; each all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one; its top bit, `hello_resume` 32768, takes back a place held: below; v18: bit 14, `hello_one_extra` 16384, the game's system reads one extra ROM beside BN6's at most; v19: bit 13, `hello_no_arena` 8192, the game's system cannot run the Arena, a party's linked fighter), u8 name length, name bytes |
 | WELCOME (2) | server → client | u32 world seed, u32 session player ID, u16 tick Hz, u8 room capacity, u16 channel, 16-byte public identity, u16 channel count, u32 the week's seed (never 0), u16 the week's number (weeks since Monday 5 January 1970, `week_epoch`) |
 | STATE (3) | client → server | i32 x, i32 y, i32 z in whole world units, u8 facing (0..7) |
-| SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs and more (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; v17: bit 5, `roms_bn4`, BN4 Red Sun's; v13: bits 1-2, from `busy_shift`, what he is busy with, 0 free, `busy_battle` 1 a NetBattle under way (his own or his team match's), `busy_watch` 2 watching one, `busy_trade` 3 a trade; bits 3-4, from `link_shift`, his link's bars from the round trip his PING said, 0 unknown, 3 under `link_good_ms` (100), 2 under `link_fair_ms` (200), else 1; v18: bit 6, `roms_one_extra`, his system reads one extra ROM at most; v19: bit 7, `peer_diving`, he dives: a dive room's peers, never a Square channel's; every bit has its meaning) |
+| SNAPSHOT (4) | server → client | u8 peer count, then 56 bytes per peer (50 before v30): u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs and more (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; v17: bit 5, `roms_bn4`, BN4 Red Sun's; v13: bits 1-2, from `busy_shift`, what he is busy with, 0 free, `busy_battle` 1 a NetBattle under way (his own or his team match's), `busy_watch` 2 watching one, `busy_trade` 3 a trade; bits 3-4, from `link_shift`, his link's bars from the round trip his PING said, 0 unknown, 3 under `link_good_ms` (100), 2 under `link_fair_ms` (200), else 1; v18: bit 6, `roms_one_extra`, his system reads one extra ROM at most; v19: bit 7, `peer_diving`, he dives: a dive room's peers, never a Square channel's; every bit has its meaning), then (v30) his MegaMan's look, six bytes as LOOK carries it (all `look_none` until his game sends one) |
 | ERROR (5) | server → client | u16 reason code, at most 96 printable ASCII bytes |
 | PING (6) / PONG (7) | client → server / server → client | u32 client clock value, echoed unchanged (PONG: 5 bytes); since v13 PING is `ping_bytes` (7): the clock, then u16 the sender's round trip in ms as it measures it (0 unknown; a game on the server's own machine says 1), for its link's bars in the others' SNAPSHOT. A 5-byte PING is still answered, its round trip unknown |
 | PROFILE (8) | client → server | 69-byte public profile, described below |
@@ -58,6 +58,7 @@ side is behind, rather than a refused upgrade (v10).
 | PARTY_DAMAGE (51) | client → server → seat 0 | v19, a linked fighter's: u32 battle ID, u16 his damage to the guardian so far, u16 his HP (9 bytes); seat 0 hears it as ARENA_SEAT, the sender's seat first |
 | PARTY_HP (52) | client → server → linked fighters | v19, seat 0's: u32 battle ID, u16 the guardian's HP, u16 its max HP (9 bytes), to every linked fighter of the battle as sent |
 | WEEK_SPLITS (53) | server → client | v19, with every WEEK_BOARD: u16 this week, then sixteen entries, act 1's first, each act's alone then parties of two, three and four: u16 tenths of the week's fastest bust of that act's guardian (0 none), 16-byte name (291 bytes) |
+| LOOK (54) | client → server | v30: MegaMan's look, six bytes (`look_bytes` 7 with the type): u8 a palette for each of `look_channels` (3: the armour, the suit, the accent), then u8 a colour for each; a channel either `look_none` (255) twice, BN6's own colours, or a palette under `look_palettes` (12) and a colour under `look_colours` (16); else the connection's ERROR 6 (1 for another size). Sent after each WELCOME and as the look worn changes; the server keeps the latest and shows it in every SNAPSHOT that shows the sender |
 
 HELLO's fixed prefix is 76 bytes, WELCOME is 38, CARD is 90, TRADE 12,
 TRADE_STATE 32, ARENA 9 (8 before v15), ARENA_STATE 45 (28 before v15), OFFER 5, WEEK_POST 18 (17 before v19),
@@ -144,6 +145,17 @@ was retired with them; v18 gives the number to `notice_ground`, a
 trade's chip outside its pair's common ground (below). NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v30 (issue #854; docs/online/square/looks.md): **a player's
+look.** LOOK (54) is a game's MegaMan's look, a palette and a colour per
+channel, sent after each WELCOME and again as the look worn changes; the
+server bounds it by its own numbers (`look_channels`, `look_palettes`,
+`look_colours`, `look_none`, held to the game's `src/core/looks.h` by
+`server/tests/test_looks.py`), never asks which palettes a player owns,
+keeps the latest and passes it on: SNAPSHOT's peer grows from 50 bytes to
+56, the six look bytes last, `look_none` each until a LOOK came. A v29
+game is told ERROR 2 as any older version is, and a v29 server a v30
+game's HELLO with ERROR 17.
 
 Protocol v29 (issue #758, docs/online/shared-dive.md, Comings and
 goings): DIVE where's `where_busy` (3): on a layer, not free (a chat, the

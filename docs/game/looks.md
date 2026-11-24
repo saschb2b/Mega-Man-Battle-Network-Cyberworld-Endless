@@ -134,10 +134,20 @@ battle block BN6 never picks, in every Arena core before it starts, and
 three hooks answer BN6's picks of his palette by the object's side. Both
 MegaMen and each GBA's own emotion face take their player's look; a Cross,
 a Soul and BeastOut keep their colours; the looks are in the pair's hash,
-so two games given different ones part before the first frame. Until the
-Square's wire carries the peer's look, a NetBattle keeps BN6's colours on
-both sides (`--dev arenalook=MINE/THEIRS` gives them for tests); the stands
-and two MegaMen a side keep BN6's.
+so two games given different ones part before the first frame. Each game
+takes the two looks from the Square's wire (its own as last sent, the
+other's as the Square knows him), and so do the stands; `--dev
+arenalook=MINE/THEIRS` gives them for tests; two MegaMen a side keep
+BN6's.
+
+### In the Net Square
+
+A player's look travels with his name (protocol v30's LOOK, in every
+SNAPSHOT), and the other players' MegaMen are drawn in theirs ([Peers'
+looks](../online/square/looks.md)): as many looks as the part of the
+Square has free OBJ palette slots (the plaza three besides one's own),
+the nearest first, the rest in BN6's blue, never in a stale slot's
+colours. The Square shows forms on nobody.
 
 ### For tests and the other parts
 

@@ -58,6 +58,8 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	square_arena_reset();
 	square_watch_reset();
 	if (!online_transport_profile(card)) fprintf(stderr, "online: public Navi card could not be queued\n");
+	/* (MegaMan's look, protocol v30: sent with his card, and again as it changes) */
+	square_looks_begin();
 	const char *path = getenv("CYBERWORLD_ONLINE_TRACE");
 	trace = path && *path ? fopen(path, "w") : NULL;
 	if (path && *path && !trace) fprintf(stderr, "online: cannot write trace %s\n", path);
@@ -137,6 +139,7 @@ static VisitEnd resumed(void) {
 	if (snapshot.player_id != session) online_trade_lost();
 	session = snapshot.player_id;
 	if (!online_transport_profile(&carried_card)) fprintf(stderr, "online: public Navi card could not be queued\n");
+	square_looks_send(true);
 	return VISIT_END_NONE;
 }
 
@@ -166,6 +169,9 @@ VisitEnd online_scene_update(void) {
 		if (why != VISIT_END_NONE) return why;
 	}
 	online_mail_frame();
+	/* (the look each player is known by, for the Arena's pairing; MegaMan's
+	 * own sent where the PET's screen changed it: square_looks.h) */
+	square_looks_update(&snapshot, up);
 	/* (BN6's PET: what it changed noted as it closes, square_pet.h) */
 	square_pet_frame();
 	/* (the director rests here: the cinema told when a screen of BN6's,

@@ -252,6 +252,10 @@ static void started(const WatchState *st) {
 	/* (a 2v2, protocol v15: four seats run from four streams) */
 	W.four = st->form != 0;
 	if (W.four) arena_watch_four(W.w);
+	/* (the players' looks as this game's Square knows them, protocol v30) */
+	Look looks[2];
+	bool known = peer_looks_of(st->side[0], &looks[0]) && peer_looks_of(st->side[1], &looks[1]);
+	arena_watch_looks(W.w, known ? &looks[0] : NULL, known ? &looks[1] : NULL);
 	W.stage = W_ON;
 	W.watched_at = SDL_GetTicks();
 	W.view = 0;
