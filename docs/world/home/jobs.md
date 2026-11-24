@@ -3,7 +3,7 @@ type: Feature
 title: "5. Jobs (the Request BBS)"
 description: "Jobs on the Request BBS (`jobs.c`, `director_jobs.c`, `request_bbs.c`, issue #88): three townsfolk post a request each visit on BN6's own Request BBS at AsterLand, Lan takes one at most, the asker pays at the next visit or the courier in Lan's HP in their name, and how vows work."
 tags: [world, home]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:00:00Z }
 ---
 
 # 5. Jobs (the Request BBS)
