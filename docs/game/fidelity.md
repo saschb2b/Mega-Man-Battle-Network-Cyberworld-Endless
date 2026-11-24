@@ -3,7 +3,7 @@ type: Fidelity Map
 title: "Fidelity"
 description: "Each element the player sees, from the title and town to battles, the PET's look and the second screen, marked original (from the ROM), generated (in the game's formats) or adapted (ours), with known gaps."
 tags: [game, fidelity]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:40:00Z }
 ---
 
 # Fidelity

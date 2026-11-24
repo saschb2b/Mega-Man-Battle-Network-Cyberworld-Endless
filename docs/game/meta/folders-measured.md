@@ -3,7 +3,7 @@ type: Analysis
 title: "Starting folders measured"
 description: "Issue 865's groundwork: the six starting folders measured (hands drawn, the autopilot's runs), BN6's five other preset folders and BN5's and BN4's starting folders read from their ROMs and judged as a run's start, and five archetypes of ours sketched; numbers for the owner's calls, no folder changed."
 tags: [game, meta, folders, measurement]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:40:00Z }
 sources:
   - id: roms
     resource: "BN6 Gregar's, BN5 Team Colonel's and BN4 Red Sun's ROMs, read by tools/folder_hands.py"

@@ -3,7 +3,7 @@ type: Feature
 title: "All *, a fourth helper"
 description: "All *, the fourth helper (issue #18): every chip of the run in BN6's `*` wildcard through the core's chip records, Program Advances still forming, an opt-in assist that counts toward unlocks."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T18:02:58Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:40:00Z }
 ---
 
 # All *, a fourth helper (4 October 2026, issue #18)

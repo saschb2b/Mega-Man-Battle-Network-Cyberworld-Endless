@@ -3,7 +3,7 @@ type: Design
 title: "MegaMan's palettes, earned"
 description: "How a profile earns MegaMan's palettes (epic #854): six by milestones it already records, three at AsterLand's counter for 6000 zenny each, two as a rare find one run in a while by the Spins' rule; each ends in looks_grant, MegaMan's word and BN6's got box, and Dad's mail the first time."
 tags: [game, meta, looks]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:47:10Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:47:40Z }
 sources:
   - id: owner
     resource: "The owner's calls on issue 854, 24 November 2026"
