@@ -33,10 +33,14 @@ void look_apply(const Look *look);
  * CONTINUE), and applied again whenever the worn look changes (a slot set
  * or selected, the dev switch) from now on */
 void look_apply_worn(void);
-/* `look`'s sixteen BGR555 colours for sprite `which` (LOOK_SPRITE_*) into
+/* (look_palette.c) `look`'s sixteen BGR555 colours for sprite `which` (LOOK_SPRITE_*) into
  * `out16`, BN6's own where a channel is LOOK_NONE: for a peer's MegaMan in
  * the Square and a NetBattle's two sides. False, `out16` untouched, where
  * `which` is out of range or there is no ROM. */
 bool look_palette_of(const Look *look, int which, uint16_t out16[16]);
+/* (look_palette.c) Where BN6 keeps sprite `which`'s palette in its ROM (0
+ * out of range); the face's is BN6_FACE_PALS's face 0, which the game's
+ * core reads through BN6_FACE_PALS_REF */
+uint32_t look_palette_at(int which);
 
 #endif
