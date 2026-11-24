@@ -23,6 +23,7 @@ uint32_t puppet_make(int category, int index) {
 		0x10, 1, 0x02, 0, 0, 0, 0,
 		0x28, 0, 0, 0x02, 0, 0, 0, 0,
 	};
+	_Static_assert(sizeof script == PUPPET_BYTES, "a puppet's bytes (puppet.h)");
 	uint32_t at = mapslot_alloc(script, sizeof script);
 	if (!at) return 0;
 	put32(script + SCRIPT_JUMP, at + SCRIPT_LOOP);

@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #define PUPPET_MEGAMAN 55   /* list 6's MegaMan, bn6f npcSpritePtrs[0x37] */
+#define PUPPET_BYTES 34   /* a puppet's script, its loop within it (an NPC object's BN6_NPC_SCRIPT_AT names where it stands) */
 #define PUPPET_WALK 8       /* a facing's walking animation is its standing one + this */
 
 /* A puppet of sprite `index` of list `category`, hidden, in the map's

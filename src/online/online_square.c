@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bn6_fields.h"
 #include "bytes.h"
 #include "claims.h"
 #include "director.h"
@@ -161,9 +162,12 @@ static bool people(NpcList *npcs) {
 	talk_room = mapslot_alloc(empty, TALK_ROOM);
 	progs(npcs, empty);
 	desk(npcs, empty);
-	if (!npc_need_sprite(npcs, 6, PUPPET_MEGAMAN)) return false;
+	/* (the peers draw a copy of BN6's MegaMan whose palettes are their
+	 * looks', square_looks.h) */
+	int peer_sprite = square_looks_install();
+	if (!npc_need_sprite(npcs, 6, peer_sprite)) return false;
 	for (int i = 0; i < SQUARE_PEERS; ++i) {
-		actors[i].script = puppet_make(6, PUPPET_MEGAMAN);
+		actors[i].script = puppet_make(6, peer_sprite);
 		if (!actors[i].script) return false;
 		npcs->script[npcs->n++] = actors[i].script;
 	}
@@ -384,6 +388,11 @@ void online_square_peers(const OnlineSnapshot *shown) {
 	claims_begin(SQUARE_WRITER);
 	for (unsigned i = 0; i < SQUARE_PEERS; ++i)
 		peer_at(i, shown->connected && i < shown->peer_count ? &shown->peers[i] : NULL);
+	/* (their looks, as many as the part MegaMan stands in has room for: square_looks.h) */
+	int x = bn6_player_x(), y = bn6_player_y(), gx, gy;
+	uint32_t scripts[SQUARE_PEERS];
+	for (unsigned i = 0; i < SQUARE_PEERS; ++i) scripts[i] = actors[i].script;
+	square_looks_frame(shown, scripts, x, y, netmap_panel(x, y, &gx, &gy) ? square_plan_part(&plan, gx, gy) : -1);
 	claims_end();
 }
 

@@ -173,7 +173,7 @@ async def split_frames(reader, writer):
     assert opcode == 2 and hello[0] == protocol.SPEC["hello"]
     welcome = websocket.frame(protocol.WELCOME.pack(protocol.SPEC["welcome"], 120, 1, 20, 8, 1, b"t" * 16, 8, 0x5EED, 2963))
     peers = [protocol.PEER.pack(10 + i, bytes([i + 1]) * 16, *((321, -123, 0, 7) if i == 3 else (i, 0, 0, 0)),
-                                b"ProbePeer" if i == 3 else f"Peer{i}".encode(), 0)
+                                b"ProbePeer" if i == 3 else f"Peer{i}".encode(), 0, protocol.LOOK_NONE)
              for i in range(protocol.SPEC["max_players"] - 1)]
     snapshot = websocket.frame(bytes((protocol.SPEC["snapshot"], len(peers))) + b"".join(peers))
     for data, cuts in ((welcome, (5,)), (snapshot, (3, 200))):

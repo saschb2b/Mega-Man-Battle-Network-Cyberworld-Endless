@@ -88,7 +88,7 @@ ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST', 'AHEAD'}   # (FAST: fast forward's button, BTN_FAST; AHEAD: the d-pad the way MegaMan faces)
 SCALE = 3
 DEV_STEPS = ('place', 'flags', 'battle', 'home', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'guardian', 'by', 'board', 'dump', 'second',
-             'stuck', 'drop', 'emote', 'netpass', 'trade', 'reconnect')   # (steps of no frames)
+             'stuck', 'drop', 'emote', 'netpass', 'trade', 'reconnect', 'look')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -146,9 +146,9 @@ def steps(commands):
                 out.append(('chip', ' '.join([args[0]] + [a.upper() for a in args[1:2]] + args[2:3])))
             elif op == 'cross':
                 out.append(('cross', str(int(args[0], 0))))
-            elif op in ('emote', 'netpass', 'trade', 'reconnect'):
+            elif op in ('emote', 'netpass', 'trade', 'reconnect', 'look'):
                 # (online play's dev steps, docs/devtools/net-square.md: an emote sent in the Square, the NetPass
-                # opened, Trade Central's screens in a run, a dropped link's wait drawn)
+                # opened, Trade Central's screens in a run, a dropped link's wait drawn; MegaMan's look worn, issue #854)
                 out.append((op, ' '.join(args)))
             elif op in ('sig', 'guardian'):
                 out.append((op,))
@@ -164,7 +164,7 @@ def steps(commands):
                 # (a file dropped on the game's window: a ROM on the ROMs screen, a .cwsave on the title)
                 out.append(('drop', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, home, foes, lab, swap, status, xrecord, chip, cross, sig, guardian, by, board, stuck, dump, drop, emote, netpass, trade, reconnect)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, home, foes, lab, swap, status, xrecord, chip, cross, sig, guardian, by, board, stuck, dump, drop, emote, netpass, trade, reconnect, look)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -363,7 +363,7 @@ def send(h, seq, record=None):
             items.append(s[0])
         elif s[0] == 'stuck':
             items.append(f'stuck {s[1]}')
-        elif s[0] in ('foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'by', 'board', 'emote', 'netpass', 'trade', 'reconnect'):
+        elif s[0] in ('foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'by', 'board', 'emote', 'netpass', 'trade', 'reconnect', 'look'):
             items.append(f'{s[0]} {s[1]}'.strip())
         elif s[0] == 'drop':
             items.append(f'drop {short(s[1]) if os.path.isabs(s[1]) else s[1]}')

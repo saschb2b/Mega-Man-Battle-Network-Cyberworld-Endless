@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 29
+#define ONLINE_PROTOCOL_VERSION 30
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v29"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v30"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -28,7 +28,7 @@
 #define ONLINE_PHRASE_COUNT 8
 #define ONLINE_EMOTE_COUNT 12
 #define ONLINE_PROFILE_BYTES 69
-#define ONLINE_PEER_BYTES 50
+#define ONLINE_PEER_BYTES 56
 #define ONLINE_WELCOME_BYTES 38
 #define ONLINE_TRADE 15
 #define ONLINE_TRADE_STATE 16
@@ -149,6 +149,12 @@
 #define ONLINE_PARTY_DAMAGE 51        /* linked fighter -> server -> seat 0 (as ARENA_SEAT) */
 #define ONLINE_PARTY_HP 52            /* seat 0 -> server -> the linked fighters */
 #define ONLINE_WEEK_SPLITS 53         /* server -> client, with WEEK_BOARD */
+#define ONLINE_LOOK 54                /* v30, client -> server: MegaMan's look, its six bytes, as it changes (issue #854) */
+#define ONLINE_LOOK_BYTES 7
+#define ONLINE_LOOK_CHANNELS 3        /* a look's channels: a palette byte each, then a colour byte each (src/core/looks.h's Look) */
+#define ONLINE_LOOK_PALETTES 12       /* a palette byte under this, or ONLINE_LOOK_NONE with its colour */
+#define ONLINE_LOOK_COLOURS 16        /* a colour byte under this, or ONLINE_LOOK_NONE with its palette */
+#define ONLINE_LOOK_NONE 255          /* the channel as BN6 draws it (LOOK_NONE) */
 #define ONLINE_DIVE_ENTER 1           /* DIVE's actions ... */
 #define ONLINE_DIVE_LEAVE 2
 #define ONLINE_DIVE_END 3

@@ -67,6 +67,7 @@ of one name, so the names below are the ones to use:
 | `virus_ai`, `navi_ai` | AI numbers | the same |
 | `dispatch3`, `dispatch4` | The moved table's types of the third and fourth kind | `tools/xchiprecipe_bn4.py`, `tools/bn5_twins.py` |
 | `list2`, `list4` | Sprite lists' numbers | `tools/xnavirecipe.py`, the families' recipes |
+| `list6` | List 6's numbers left on the placeholder sprite (the Navis and Mr.Progs on a map) | `src/layer/xnavi.c`, `src/online/square_looks.c` |
 | `song_slots` | Slots of BN6's song table | `src/audio/xsong.c`, `src/emu/song_table.c` |
 | `free_rom`, `free_ram` | Spans of the free space, as offsets from `EMU_FREE` and as RAM addresses | `src/emu/free_space.plan` |
 

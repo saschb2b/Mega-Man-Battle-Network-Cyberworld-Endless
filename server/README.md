@@ -285,12 +285,18 @@ server wants. Port 0 chooses a free port and reports it in the
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v16`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v30`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world. A
 game offering another version's `cyberworld.presence.vN` is let through
 the upgrade so its HELLO can be answered with which side is behind (ERROR
 2, the game older, or 17, the server older), which its gate says; before
 v10 it was refused at the upgrade and could only say "no answer".
+Since v30 each player's MegaMan's look (LOOK, six bytes) is kept and
+passed on in the SNAPSHOTs that show him, bounded by the server's own
+numbers in `protocol.json`; it never knows which palettes a player owns
+(`tests/test_looks.py`, shared/online/README.md's Protocol v30). A
+server older than v30 turns a v30 game away with ERROR 17: the official
+server needs a redeploy for it.
 
 ## Container
 
