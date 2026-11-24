@@ -43,6 +43,9 @@ MANY = {
         soon(f'divelooks~Beta {said(BETA)} drawn', 'gamma', 300),
         ('expect', 'divelookstale=0'),
         ('@beta', 'expect', 'divelookstale=0'),
+        # (a step apart, each seen on his own)
+        ('@beta', 'do', 'hold DOWN+RIGHT 24; wait 10'),
+        ('@gamma', 'do', 'hold DOWN+LEFT 24; wait 10'),
         ('do', 'wait 30; shot'),
         ('@beta', 'do', 'wait 1; shot'),
         # (a look changed on the layer: the others see it come)
@@ -63,6 +66,8 @@ MANY = {
         # (the game with no cap still draws both in theirs)
         soon(f'divelooks~Alpha {said(ALPHA)} drawn', 'beta', 300),
         soon(f'divelooks~Gamma {said(GAMMA)} drawn', 'beta', 300),
+        ('@beta', 'do', 'hold DOWN+RIGHT 24; wait 10'),
+        ('@gamma', 'do', 'hold DOWN+LEFT 24; wait 10'),
         ('do', 'wait 30; shot'),
     )),
 }
