@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-24
+* **Update**: online/shared-dive.md (Each in his own look: the divers on a layer drawn in their own looks, the room read off BN6's renderer, issue #878), online/square/looks.md (On a dive's layer), code/online.md (look_sprite.c, dive_looks.c), GUIDE.md (MegaMan's colours: the divers on the DeepNet in their looks).
 * **Update**: releases/overview.md (a release's notes carry an invitation to the Discord server under their opening paragraph, the CHANGELOG at its top).
 * **Update**: GUIDE.md (brought in step with the build for 0.24.0: the week's DeepNet rewritten for crews by nearness, names, rings, plates and the map's dots, a crew's battles at once, the pull back, the door that waits for the crew, the party's guardian at a diver's version, the portal's one question, a dropped link, the dive's RESULT and the Board; a new section, MegaMan's colours; the setup's Folder row as the shelf of ten with what opens each; Colours in the PET's menu; Falzar's five Crosses; Team ProtoMan's guardians, Souls and commands on a dark board; a NetBattle through a dropped link), game/meta/souls.md (Team ProtoMan's six Souls are given by their guardians: "never offered" corrected).
 * **Update**: game/meta/decisions.md (Steady and Navi from BN6's Extra and Navi presets: their 30, what each gives up, what opens it; Support played and not taken), game/meta/design.md (Steady's and Navi's rows), game/meta/shelf.md (their hints), game/meta/folders-measured.md (Steady and Navi measured), game/fidelity.md (the presets made Steady and Navi).

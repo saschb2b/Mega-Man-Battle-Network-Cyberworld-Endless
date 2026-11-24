@@ -228,6 +228,9 @@ SCENES = [
     # his PC: "MegaMan isn't in the PET..." before, Lan's HP after)
     ('jackin-pet', ['--scene', 'town', '--seed', '2', '--input',
                     '40:,' + '4:A,6:,' * 46 + '30:,0:flags 5917 5917 0,30:,0:place -40 -8 7,10:,6:R,400:'], {}, 720),
+    # (0.24.0's, issue #864: the JACK-IN SETUP of a new profile at its Folder row, Right pressed: one folder and
+    # every shut one's deed listed before, the shelf turned to Blade after, locked with its hint)
+    ('setup-folder', ['--scene', 'setup', '--input', build.N24_SHELF + '6:RIGHT,10:,80:'], {}, 206),
 ]
 # (0.23.0's fixes, against 0.22.2, each the course of its fix's scenario to the moment that shows it: name, START,
 # STEPS (or OLD's and NEW's), the ROMs it NEEDS beside BN6's. Their 0.22.2 is built with #705's dev switch and step
@@ -273,6 +276,25 @@ PLAYS = [
     ('bn4-firehit', 'layer --seed 15 --net-biome 0 --dev god,quiet,hp=2000', FIREHIT, ('bn4',)),
     ('guardian-slide', '--scene emu --seed 3 --run-depth 3 --guardian 1 --dev onehit,quiet,sliprun', SLID, ()),
     ('liberation-body', '--scene emu --seed 5 --run-depth 5 --dev dark,souls=1', NEXT_AS_COLONEL, ('bn5',)),
+]
+# 0.24.0 (media b)
+# (0.24.0's fixes against 0.23.0, each one scripted run of build.py's (N24B, its SCREENSHOTS) in both builds: seed
+# 4's second layer's Security Cube, over its panel's edge before and on its middle after (#735); GolmHit1 with
+# MegaMan turned left on a Surrounded field, the fist behind him before and on the foe he faces after (#838);
+# CosmoMn SP's card in Folder Edit, 6544 before and 80 after (#835); ColonelDS's row in the Pack, nine letters and
+# the next row a cell late before, ColonlDS after (#732); HubBatc's card, ColForce's picture before and BN6's blank
+# after (#731). A name with bn5 runs on the whole ROM folder.)
+def n24b(name, shot=-1):
+    _, args, shots, env = build.N24B[name]
+    return args, env, shots[shot][0]
+
+
+SCENES += [
+    ('security-cube', next(e for e in build.SCREENSHOTS if e[0] == 'lock-cube')[1], {}, 660),
+    ('golmhit-turned', *n24b('golmhit-turned-left')),
+    ('bn5-cosmoman-card', *n24b('card-cosmoman-sp')),
+    ('bn5-colonelds-pack', *n24b('pack-colonlds')),
+    ('hubbatc-card', *n24b('card-hubbatc')),
 ]
 # (--clips: the same walk in both builds as moving pictures, OLD's on the
 # left, docs/clips/NAME.webm, .mp4, .png and .gif (build.py's README_GIFS

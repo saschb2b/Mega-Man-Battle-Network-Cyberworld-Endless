@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-24T21:06:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T23:00:00Z }
 ---
 
 # The player's guide
@@ -1106,7 +1106,9 @@ and the players around you are drawn in theirs. A part of the Square has
 room for only so many looks at once (in the plaza three besides yours,
 nine in Trade Central, ten on the stage): the nearest players get
 theirs, and the ones farther off are drawn in BN6's blue until they come
-nearer. In a NetBattle each MegaMan wears his player's look on both
+nearer. On the week's DeepNet the other divers on your layer wear
+their looks the same way, your crew first, as many as the layer has room
+for. In a NetBattle each MegaMan wears his player's look on both
 screens, with your own face in the emotion window; in a Team NetBattle
 fought side by side, all four keep BN6's colours.
 

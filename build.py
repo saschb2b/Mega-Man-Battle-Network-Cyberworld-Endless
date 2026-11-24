@@ -2897,6 +2897,240 @@ CLIPS += [
     ('desk-jack-in', ['--scene', 'town', '--seed', '2'], {}, N22_ROOM + '0:place -24 8 7,30:,6:R,300:', 540, 800),
 ]
 README_GIFS.update({'net-climb': (None, 10), 'net-climb-ladder': (None, 10), 'glitch-copy-bodies': (None, 12), 'desk-jack-in': (None, 15)})
+# 0.24.0 (media a): MegaMan's colours (docs/game/looks.md), the setup's shelf of starting folders
+# (docs/game/meta/shelf.md) and issue #865's folders
+# (Lan's room, Dad's call paged, START, down the PET's left column to Colours, A: the Colours screen up by 712)
+N24_COLOURS = N22_ROOM + '6:START,40:,' + '6:DOWN,6:,' * 5 + '10:,6:A,60:,'
+N24_KEY = '6:%s,9:,'
+# (a look picked a channel at a time, every palette owned (looks=4094): Armour, R to ProtoMan's page, up the
+# grid from PLAIN and across to its red, A; Suit, R to the Undernet's, its indigo; Accent, L to Glitch's, its
+# cyan; the look the pictures after it wear, 3.2,1.5,11.7)
+N24_PICK = (N24_KEY % 'DOWN' + N24_KEY % 'A' + N24_KEY % 'R' * 3 + N24_KEY % 'UP' * 4 + N24_KEY % 'RIGHT' * 2 + '20:,' + N24_KEY % 'A' +
+            N24_KEY % 'DOWN' + N24_KEY % 'A' + N24_KEY % 'R' + N24_KEY % 'UP' * 3 + N24_KEY % 'RIGHT' + '20:,' + N24_KEY % 'A' +
+            N24_KEY % 'DOWN' + N24_KEY % 'A' + N24_KEY % 'L' + N24_KEY % 'UP' * 3 + N24_KEY % 'RIGHT' * 3 + '20:,' + N24_KEY % 'A' + '90:')
+N24_TOWN = ['--scene', 'town', '--seed', '2']
+N24_LOOK = '3.2,1.5,11.7'
+# (seed 1's first layer in that look, its arrival paged; a Mettaur's battle at once (0:foes), the Custom screen
+# OKed with no chip; with HeatCross brought (--setup's CROSS 1), Up and A on the Custom screen first)
+N24_WORN = ['--scene', 'emu', '--seed', '1', '--run-depth', '1', '--dev', f'quiet,god,look={N24_LOOK}']
+N24_FIGHT = '30:,0:foes 01@52,330:,%s6:START,20:,6:A,400:'
+# (a first layer's arrival paged and the run's opening gift taken, its first offer: MegaMan free by 602)
+N24_ARRIVE = '150:,' + '4:A,6:,' * 30 + '20:,6:A,60:,6:A,60:,'
+# (a Practice NetBattle between two cores of one machine, both scripted (docs/devtools/arena.md): the first
+# MegaMan in that look, the other in Hazard's yellow, black and red (arenalook's twelve hex digits a look, the
+# three palettes then their colours); BN5's ROM beside BN6's, as every NetBattle's rules ask)
+N24_ARENA = ['--scene', 'emu', '--dev', 'quiet,arena,arenaboth,arenaseed=7,arenalook=03010B020507/060606010B04']
+WHOLE_ROMS_A += ('netbattle-looks',)
+# (the JACK-IN SETUP at its Folder row, by 132; Right turns the shelf)
+N24_SHELF = '60:,6:DOWN,20:,6:DOWN,40:,'
+
+
+def n24_shelf(name, turns, dev=None):
+    return (name, ['--scene', 'setup'] + (['--dev', dev] if dev else []) + ['--input', N24_SHELF + '6:RIGHT,10:,' * turns + '80:'],
+            [(190 + 16 * turns, name)], {})
+
+
+# (a run's first layer with a starting folder, --setup's FOLDER (9 Ember, 3 Z-Canon): the arrival paged, the
+# opening gift's first offer taken, a Mettaur's battle at once, its first hand on the Custom screen)
+def n24_hand(folder, seed, dev='god,quiet'):
+    return ['--scene', 'emu', '--seed', str(seed), '--net-biome', '0', '--setup', f'short,{folder},0,0', '--dev', dev]
+
+
+N24_HAND = '150:,' + '4:A,6:,' * 30 + '20:,6:A,60:,6:A,60:,30:,0:foes %s@52,330:,'
+# (seed 1's Ember hand, AirShot *, GrasSeed F, FireHit1 D, FireBrn1 F, AreaGrab F: the second and the fourth, OK,
+# then A for each)
+N24_EMBER = '30:,6:RIGHT,14:,6:A,14:,6:RIGHT,10:,6:RIGHT,14:,6:A,20:,6:START,14:,6:A,200:,6:A,90:,6:A,200:'
+# (a battle of one buster shot (onehit): OK with no chip, B until the Mettaur is gone, RESULT paged, and the
+# next battle's first hand; 1136 frames)
+N24_NEXT = '6:START,14:,6:A,200:,' + '4:B,8:,' * 10 + '4:A,6:,' * 34 + '120:,0:foes 01@52,330:,'
+# (seed 3's Z-Canon run: its fifth battle's first hand is Atk+10 *, Cannon A, Cannon B, Atk+10 *, Cannon C, up
+# by 5480 (a hand follows the battles before it, not the seed alone: four won with a buster shot first); the
+# three Cannons picked in order, OK, GigaCan1 forms, A fires it)
+N24_ZCANON = (N24_HAND % '01' + N24_NEXT * 4 + '30:,6:RIGHT,14:,6:A,20:,6:RIGHT,14:,6:A,20:,6:RIGHT,10:,6:RIGHT,14:,6:A,40:,'
+              '6:START,14:,6:A,330:,6:A,200:')
+SCREENSHOTS += [
+    # (MegaMan's colours, issue #854: the Colours screen with the look picked; a palette not owned yet on a new
+    # profile, Undernet's page and its colour's line; the look worn in a chat box, on the field, on the Custom
+    # screen and in a battle; HeatCross in its own colours over it; a NetBattle's two MegaMen, each in his look)
+    ('colours', N24_TOWN + ['--dev', 'looks=4094', '--input', N24_COLOURS + N24_PICK], [(1250, 'colours')], {}),
+    ('colours-locked', N24_TOWN + ['--input', N24_COLOURS + N24_KEY % 'DOWN' + N24_KEY % 'R' + N24_KEY % 'A' + N24_KEY % 'UP' + '80:'],
+     [(820, 'colours-locked')], {}),
+    ('colours-worn', N24_WORN + ['--input', N24_ARRIVE + N24_FIGHT % ''],
+     [(190, 'colours-chat'), (620, 'colours-field'), (900, 'colours-custom'), (1200, 'colours-battle')], {}),
+    ('colours-cross', N24_WORN + ['--setup', 'short,0,0,0,1', '--input', N24_ARRIVE + N24_FIGHT % '6:UP,30:,6:A,60:,'],
+     [(1400, 'colours-cross')], {}),
+    ('netbattle-looks', N24_ARENA, [(510, 'netbattle-looks')], {}),
+    # (the setup's shelf, issue #864: a new profile's FOLDER row on Standard, open, 1/10; Right, Blade locked
+    # with its hint; Blade heard of (heard=2), its deed said plainly)
+    n24_shelf('shelf-open', 0), n24_shelf('shelf-locked', 1), n24_shelf('shelf-heard', 1, 'heard=2'),
+    # (issue #865's folders on the shelf, every one open (folders): Z-Canon rebuilt, Steady, Navi, Ember, Tide)
+    n24_shelf('shelf-zcanon', 3, 'folders'), n24_shelf('shelf-steady', 6, 'folders'), n24_shelf('shelf-navi', 7, 'folders'),
+    n24_shelf('shelf-ember', 8, 'folders'), n24_shelf('shelf-tide', 9, 'folders'),
+    # (Ember's first hand, GrasSeed under the cursor; the grass laid under a Mettaur3; FireBrn1 on it. Z-Canon's
+    # hand with Cannon A, B and C in it; GigaCan1 formed)
+    ('folder-ember-hand', n24_hand(9, 1) + ['--input', N24_HAND % '03' + N24_EMBER],
+     [(1010, 'folder-ember-hand'), (1392, 'folder-ember-grass'), (1432, 'folder-ember-fire')], {}),
+    ('folder-zcanon-hand', n24_hand(3, 3, 'god,quiet,onehit') + ['--input', N24_ZCANON],
+     [(5550, 'folder-zcanon-hand'), (5800, 'folder-zcanon-advance')], {}),
+]
+SCREENSHOT_SHEETS.update({
+    'shelf-states': [[('shelf-open', 'Open'), ('shelf-locked', 'Locked: a hint'), ('shelf-heard', 'Heard in the Net')]],
+    'shelf-folders': [[('shelf-steady', 'Steady'), ('shelf-navi', 'Navi')], [('shelf-ember', 'Ember'), ('shelf-tide', 'Tide')]],
+})
+CLIPS += [
+    # (the Colours screen: the three channels picked, the preview following the cursor)
+    ('colours-pick', N24_TOWN + ['--dev', 'looks=4094'], {}, N24_COLOURS + N24_PICK, 700, 1280),
+    # (Ember's first hand at a Mettaur3: GrasSeed F and FireBrn1 F picked, OK; the seed lays grass under it, the
+    # flame burns it for double)
+    ('folder-ember', n24_hand(9, 1), {}, N24_HAND % '03' + N24_EMBER, 990, 1490),
+    # (Z-Canon: Cannon A, B and C picked in order, OK, the Program Advance forming and fired)
+    ('folder-zcanon', n24_hand(3, 3, 'god,quiet,onehit'), {}, N24_ZCANON, 5540, 6130),
+]
+README_GIFS.update({'colours-pick': (None, 15), 'folder-ember': (None, 15), 'folder-zcanon': (None, 15)})
+
+
+# 0.24.0 (media b)
+# 0.24.0's notes: Team ProtoMan and their Souls, Falzar's Crosses, Forms, the PET's menu, the link, the map, the
+# requests in Lan's HP, the fixes. Each run is written as a playtest's batch is (tools/play.py's commands: press,
+# hold, wait, mash and its dev steps), a `shot` at each picture.
+def n24_script(commands):
+    """tools/play.py's commands as --input's steps, and the frame of each `shot` among them."""
+    steps, shots, at = [], [], 0
+    for cmd in commands.split(';'):
+        w = cmd.split()
+        if not w:
+            continue
+        if w[0] == 'shot':
+            shots.append(at)
+            continue
+        if w[0] == 'press':
+            run = [(int(w[2]) if len(w) > 2 else 6, w[1]), (6, '')]
+        elif w[0] == 'hold':
+            run = [(int(w[2]), w[1])]
+        elif w[0] == 'wait':
+            run = [(int(w[1]), '')]
+        elif w[0] == 'mash':
+            run = [(4, w[1]), (6, '')] * max(1, int(w[2]) // 10)
+        else:
+            steps.append('0:' + ' '.join(w))   # (a dev step, as play.py sends it)
+            continue
+        for frames, buttons in run:
+            steps.append(f'{frames}:{buttons}')
+            at += frames
+    return ','.join(steps), shots
+
+
+def n24_run(names, start, commands, env=None):
+    """A SCREENSHOTS entry: the game's options, the commands, a name for each `shot`."""
+    script, shots = n24_script(commands)
+    assert len(shots) == len(names), names
+    return (names[0], start.split() + ['--input', script], list(zip(shots, names)), env or {})
+
+
+# (a run's first layer, its arrival's words paged and the opening gift's first offer taken, as tools/cw_routes.py's
+# LAYER; Lan's room at a new run, Dad's call paged, as its ROOM; Lan's HP after an act, its words paged, the
+# courier spoken to from below him, as tests/scenarios/home_requests.py's COURIER)
+N24_LAYER = 'wait 150; mash A 300; wait 20; press A; wait 60; press A; wait 60; '
+N24_ROOM = 'wait 40; mash A 460; wait 30; '
+N24_COURIER = 'wait 300; mash A 900; wait 60; place -84 54 7; wait 10; press A; wait 40; '
+N24_FIRST = '--scene emu --seed 15 --net-biome 0 --dev god,quiet,hp=2000'
+N24_SECOND = '--scene emu --seed 3 --run-depth 2 --dev quiet'
+N24_FORMS = '--scene emu --seed 1 --run-depth 2 --setup short,0,0,0,1 --dev quiet,god'
+N24_TO_FORMS = 'press START; wait 60; ' + 'press DOWN; wait 6; ' * 4 + 'press A; wait 60; '
+N24_UNITE = 'wait 300; press A; wait 10; press START; wait 10; press DOWN; wait 10; '
+N24_FOLDER_EDIT = 'wait 5; press A; wait 60; press A; wait 60; press A; wait 40; '
+# (a dark layer's board, BN5's with ProtoSoul held (souls=64): Lan's briefing and the phase's banner paged, R
+# passes play to ProtoMan and his word is paged, the dev step stands him by a dark panel, A opens his window
+# (Liberation, WideSwrd, Pass), A takes Liberation: its battle's first turn, ProtoMan in person)
+N24_BOARD = ('wait 242; ' + 'press A; wait 20; ' * 8 + 'wait 30; ' + 'press A; wait 20; ' * 12 + 'press R; wait 10; '
+             + 'press A; wait 20; ' * 6 + 'wait 30; shot; board dark; wait 4; press A; wait 10; shot; wait 30; press A; wait 300; '
+             'press START; wait 10; press A; wait 206; shot')
+# (a liberation's battle by MegaMan alone, its three turns left by OK with no chip, to TIME UP! and LIBERATE FAILED!)
+N24_TIME_UP = ('wait 150; mash A 700; wait 60; board dark; wait 4; press A; wait 40; press A; wait 270; '
+               + 'press START; wait 10; press A; wait 700; ' * 2 + 'press START; wait 10; press A; wait 674; shot; wait 30; shot')
+N24B_SHOTS = [
+    # (Team ProtoMan guarding: DarkProto's card in BN5's Undernet and his slash, Meddy in a HeelNavi's body on
+    # BN5's ACDC Area and her capsules in the fight, the autopilot's walk to each)
+    n24_run(['team-darkproto-card', 'team-darkproto'], '--scene emu --seed 3 --run-depth 3 --net-biome x5 --guardian 59 --dev god,quiet,hp=600',
+            'wait 1400; shot; wait 1400; shot', N22_AUTO),
+    n24_run(['team-meddy-map', 'team-meddy'], '--scene emu --seed 3 --run-depth 3 --net-biome x0 --guardian 64 --dev god,quiet',
+            'wait 1000; shot; wait 1800; shot', N22_AUTO),
+    # (their Souls: ProtoSoul held (souls=0x40) and a folder of Sword, UNITE under OK and its picture, MegaMan
+    # united, his charged WideSword; MeddySoul (0x800) by Recov10, united, and her two capsules on the second
+    # Custom screen, the cursor on the first)
+    n24_run(['soul-proto-unite', 'soul-proto', 'soul-proto-slash'], N24_FIRST + ',souls=0x40,folder=71',
+            N24_LAYER + 'foes 01@63; ' + N24_UNITE + 'shot; press A; wait 60; press START; wait 10; press A; wait 260; shot; wait 20; '
+            'hold B 100; wait 16; shot'),
+    n24_run(['soul-meddy', 'soul-meddy-capsules'], N24_FIRST + ',souls=0x800,folder=154',
+            N24_LAYER + 'foes 205@52; ' + N24_UNITE + 'press A; wait 60; press START; wait 10; press A; wait 220; shot; wait 40; '
+            'hold B 90; wait 520; press L; wait 150; ' + 'press RIGHT; wait 8; ' * 3 + 'press DOWN; wait 20; shot'),
+    n24_run(['team-board-protoman', 'team-board-command', 'team-board-battle'], '--scene emu --seed 5 --run-depth 5 --dev dark,souls=64,god',
+            N24_BOARD),
+    # (Falzar's five Crosses held by their flags, 0xE7-0xEB: CROSSSELECT's list of them, the cursor on TenguCross;
+    # MegaMan in it, his charged shot)
+    n24_run(['falzar-crossselect', 'falzar-tengucross'], N24_SECOND + ',god,hp=400',
+            N24_LAYER + 'flags 231 235 1; wait 4; foes 01@52/01@63; wait 300; press UP; wait 40; press DOWN; wait 20; press DOWN; wait 20; '
+            'shot; press A; wait 60; press START; wait 10; press A; wait 260; hold B 80; wait 20; shot'),
+    # (Forms from the PET's menu: HeatCross brought and six more held by their flags, CROSSSELECT's five and two
+    # spares; ElecCross taken up, the cursor among the spares; swapped. Its Souls' page with every Soul of BN5's held)
+    n24_run(['forms-screen', 'forms-taken', 'forms-swap'], N24_FORMS,
+            N24_LAYER + 'flags 227 232 1; wait 4; ' + N24_TO_FORMS + 'press DOWN; wait 30; shot; wait 20; press A; wait 30; shot; wait 20; '
+            'press A; wait 30; shot; wait 20'),
+    n24_run(['forms-souls'], N24_FORMS + ',souls=0xFFF', N24_LAYER + 'flags 227 232 1; wait 4; ' + N24_TO_FORMS + 'press R; wait 40; shot; wait 20'),
+    # (the PET's menu over a layer's field; SELECT pressed once and MegaMan walked under the map)
+    n24_run(['pet-menu-columns'], N24_SECOND, N24_LAYER + 'press START; wait 60; shot; wait 20'),
+    n24_run(['map-stays-open'], N24_SECOND, N24_LAYER + 'press SELECT; wait 60; hold RIGHT 40; wait 4; shot; wait 20'),
+    # (fast forward's mark while it runs; a dropped link's card over a battle and the band as it is back, drawn by
+    # the dev step, docs/devtools/net-square.md: the Square's words, no NetBattle under them)
+    n24_run(['fast-forward-mark'], N24_SECOND + ',god', N24_LAYER + 'hold FAST+UP+RIGHT 40; shot; hold FAST+UP+RIGHT 30'),
+    n24_run(['link-dropped', 'link-back'], N24_SECOND + ',god',
+            N24_LAYER + 'foes 01@52/01@63; wait 300; press START; wait 10; press A; wait 240; reconnect 12; wait 60; shot; wait 200; '
+            'reconnect back; wait 20; shot'),
+    # (a party's field as seat 1 sees it, the dev's stood-in party of three against layer 3's guardian: each
+    # partner's HP under his mark)
+    n24_run(['party-partner-hp'], '--scene emu --seed 3 --run-depth 3 --dev quiet,partycore=3,partybot=1,partyview=1,partyhp=60',
+            'wait 1950; shot', N22_AUTO),
+    # (Lan's HP after act 3 of seed 7, a request done (job=3) or a Bring request with two Wood chips in the Pack
+    # (job=4, pack=38): the courier's pay in the asker's name, and BN6's Chip Trader screen over the two)
+    n24_run(['courier-pays', 'courier-pays-zenny'], '--scene home --seed 7 --run-depth 10 --dev job=3,jobstate=2',
+            N24_COURIER + 'press A; wait 40; ' * 3 + 'shot; ' + 'press A; wait 40; ' * 2 + 'shot'),
+    n24_run(['bring-choice-asked', 'bring-choice'], '--scene home --seed 7 --run-depth 10 --dev job=4,jobstate=2,pack=38',
+            N24_COURIER + 'press A; wait 40; ' * 4 + 'shot; press A; wait 40; shot'),
+    # (fixed: GolmHit1 on a Surrounded field, MegaMan turned left with L, the fist on the foe ahead of him (#838);
+    # a liberation's battle standing still under TIME UP! and LIBERATE FAILED! (#794); CosmoMn SP's card in Folder
+    # Edit, 80 (#835); ColonlDS's row in the Pack (#732); HubBatc's card, BN6's blank (#731))
+    n24_run(['golmhit-turned-left', 'golmhit-turned'], N24_FIRST,
+            N24_LAYER + 'chip 120 I 29; foes 06@12/06@22/06@52/06@62/sides@33/mm@32; wait 300; press A; wait 10; press START; wait 10; '
+            'press A; wait 260; status paralysis 900; wait 30; hold L 4; wait 30; shot; press A; wait 20; shot'),
+    n24_run(['liberation-time-up', 'liberation-time-up-failed'], '--scene emu --seed 5 --run-depth 5 --dev dark,god', N24_TIME_UP),
+    n24_run(['card-cosmoman-sp'], '--scene town --seed 2', N24_ROOM + 'press START; wait 40; chip 516 C 1; ' + N24_FOLDER_EDIT + 'shot'),
+    n24_run(['pack-colonlds'], '--scene town --seed 2',
+            N24_ROOM + 'press START; wait 40; chip 492 C 1; ' + N24_FOLDER_EDIT + 'press RIGHT; wait 40; press DOWN; wait 30; shot'),
+    # (seed 14's fourth layer, its vault open (library=1) and a Pack to trade from: three chips into the Chip Trader,
+    # BN6's save after the trade, and "Try again?" with no reward pick over it (#734))
+    n24_run(['trader-after-trade'], '--scene emu --seed 14 --run-depth 4 --dev quiet,library=1,pack=120',
+            'wait 151; mash A 300; wait 20; mash A 60; wait 30; mash A 60; wait 30; by trader; wait 10; ' + 'press A; wait 30; ' * 6
+            + 'press A; wait 40; ' * 4 + 'press A; wait 130; press A; wait 60; shot'),
+    n24_run(['card-hubbatc'], '--scene town --seed 2', N24_ROOM + 'press START; wait 40; chip 309 J 1; ' + N24_FOLDER_EDIT + 'shot'),
+]
+SCREENSHOTS += N24B_SHOTS
+N24B = {entry[0]: entry for entry in N24B_SHOTS}   # (tools/before_after.py's 0.24.0 scenes run these by the last release too)
+# (BN5's Navis, Souls, board and chips: the whole ROM folder)
+WHOLE_ROMS_A += ('team-darkproto-card', 'team-meddy-map', 'soul-proto-unite', 'soul-meddy', 'team-board-protoman', 'forms-souls',
+                 'liberation-time-up', 'card-cosmoman-sp', 'pack-colonlds')
+# (the shared dive's pictures, docs/screenshots/dive-*.png and docs/clips/dive-crew.gif, are no entries here: two or
+# three games on a local server at the clock's pace, tests/scenarios/online_week.py's and online_crew_view.py's
+# courses played by tools/scenarios_online.py's cast (alpha, beta and gamma from Lan's HP, seed 120's Square, the
+# full NetPass), a picture taken at the moment wanted, as tools/online_pictures.py's dive takes are; a retake
+# draws another net)
+# (the map opened by a press, MegaMan walked under it, the next press closing it; the courier's pay, his boxes paged)
+N24_MAP_CLIP = n24_script(N24_LAYER + 'wait 20; press SELECT; wait 50; hold RIGHT 40; hold UP+RIGHT 40; hold LEFT 40; wait 20; press SELECT; wait 40')[0]
+N24_PAY_CLIP = n24_script(N24_COURIER + 'press A; wait 40; ' * 5 + 'press A; wait 60')[0]
+CLIPS += [
+    ('map-stays-open', N24_SECOND.split(), {}, N24_MAP_CLIP, 620, 890),
+    ('courier-pays', '--scene home --seed 7 --run-depth 10 --dev job=3,jobstate=2'.split(), {}, N24_PAY_CLIP, 1264, 1650),
+]
+README_GIFS.update({'map-stays-open': (None, 15), 'courier-pays': (None, 15)})
 
 
 def clips(only=None):
