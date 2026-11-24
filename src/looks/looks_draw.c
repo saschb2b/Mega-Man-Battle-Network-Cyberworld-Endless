@@ -40,8 +40,9 @@
 #define PILL_EDGE rgba(181, 255, 189, 255)
 #define INFO_Y (TOP + MID_H + 3)
 #define INFO_H (H - 3 - INFO_Y)
-#define POP_X (LIST_X + 4)  /* ChipFolder's SELECT pop-up, under the looks' row, inside the list */
-#define POP_W 78
+#define POP_X (LIST_X + 1)  /* ChipFolder's SELECT pop-up, under the looks' row, inside the list */
+#define POP_W (LIST_W - 2)
+#define POP_IN 11           /* its rows' words from its field's left, the arrow before them */
 #define POP_ROW 13
 
 /* a GBA colour (R in the low bits) as the canvas's */
@@ -203,8 +204,8 @@ static void popup(int x, int y, const LooksView *v) {
 		SDL_Rect at = looks_popup_rect(r);
 		if (r < LOOKS_POPUP_ROWS - 1) looks_copy_row(row, sizeof row, (v->slot + 1 + r) % LOOK_SLOTS);
 		else snprintf(row, sizeof row, "%s", looks_word(LW_ALL_PLAIN));
-		look_text(x + at.x + ROW_IN, y + at.y, row, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
-		if (r == v->popup) look_cursor(x + at.x + 2, y + at.y + 2);
+		look_text(x + at.x + POP_IN, y + at.y, row, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+		if (r == v->popup) look_cursor(x + at.x + 1, y + at.y + 2);
 	}
 }
 
