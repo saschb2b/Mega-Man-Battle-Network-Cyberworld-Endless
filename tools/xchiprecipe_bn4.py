@@ -71,6 +71,7 @@ ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x
                   0x15: 0xDB,   # (NumSoul's charged shot)
                   0x19: 0xDC,   # (FireSoul's charged shot)
                   0x14: 0xDD,   # (MetlSoul's charged shot)
+                  0x28: 0xDE,   # (WoodSoul's charged shot)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -101,6 +102,11 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
 # A call of a unit's code aimed by hand, at a stub of the chips' (XC_STUBS, src/emu/xchips_code.h): BN4's routine has no twin
 # and the unit needs none of what it gives
 UNIT_AIMS = {
+    'WoodSoul': {0x08043014: ('XC_STUBS', "a count over nine of the NaviStats' fields (by 0x0800D772), each against a list of "
+                                          "its own (0x08043070, 0x0804304C), for the tornado's hits: the state's path of "
+                                          "subfamily 2 alone (0x080ECFC8), Static's (BN4's chip 27), which no row of the "
+                                          "registry plays; WoodSoul's power attack sets subfamily 0 and Tornado (chip 8) is "
+                                          "BN6's own by name, so the call is the stub that returns 0")},
     'MetlSoul': {0x0800D772: ('XC4_BUSTER_DAMAGE', "his plain shot's damage (power attack 0x0B: r0 his side, r1 5, then +1): BN4's "
                                                     "NaviStats +5 its buster's attack less one, as its own plain shot reads it "
                                                     "(0x0800CC34); BN6 keeps the buster's attack otherwise (NaviStats +1 and a table, "
@@ -134,7 +140,7 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
 SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),), 0x3E: ((0x0A, 'SrchSoul'),),
                0x15: ((0x11, 'NumSoul'),), 0x19: ((0x0C, 'FireSoul'),),
-               0x14: ((0x13, 'MetlSoul'),)}
+               0x14: ((0x13, 'MetlSoul'),), 0x28: ((0x57, 'WoodSoul'),)}
 # ... and a Soul's taking of the form that spawns an object of its own (BN4_FORM_ENTERS by its form), copied with the unit of
 # its charged shot's family, which the Souls' engine runs as he enters the proxy form (src/emu/soullife.c, xchips_bn4_moved_at).
 # By BN4's family: (the form, its Soul)
@@ -377,6 +383,7 @@ UNITS = (
     ('attack', 0x15, 'NumSoul'),
     ('attack', 0x19, 'FireSoul'),
     ('attack', 0x14, 'MetlSoul'),
+    ('attack', 0x28, 'WoodSoul'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -420,7 +427,8 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300,
                0xA7: 0x301,                 # (GutsSoul's rapid buster's shots)
-               0xAC: 0x302}                 # (NumSoul's charged shot's object)
+               0xAC: 0x302,                 # (NumSoul's charged shot's object)
+               0x126: 0x303}                # (WoodSoul's charged shot's tornado)
 # (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
 # A call several of BN4's sounds reach, each by a branch that makes r0 one (T.back_value follows one path): read by hand,
 # each sound copied at its number plus the call's add, which its shim adds to r0 (XvSoundCall.add), SOUND_SLOTS holding
