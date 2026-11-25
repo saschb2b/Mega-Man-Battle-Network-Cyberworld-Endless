@@ -1,6 +1,7 @@
 /* BN4 Red Sun's Souls in BN6's engine (soulbn4.h). */
 #include "soulbn4.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "bn4.h"
@@ -28,8 +29,8 @@ enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
 /* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8, FireSoul 5, MetlSoul 9,
- * WoodSoul 12, WindSoul 3) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3 };
+ * WoodSoul 12, WindSoul 3, ProtSoul 7) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3, 7 };
 #define FORM_GUTS 2
 #define FORM_NUM 8
 #define FORM_AQUA 11
@@ -37,6 +38,7 @@ static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3 };
 #define FORM_METL 9
 #define FORM_WOOD 12
 #define FORM_WIND 3
+#define FORM_PROT 7
 #define OP_MOVS_R1 0x2100u   /* movs r1,#imm8 */
 #define OP_MOVS_R0 0x2000u   /* movs r0,#imm8 */
 #define OP_MOVS_R4 0x2400u   /* movs r4,#imm8 */
@@ -98,6 +100,27 @@ static bool metl_rule(int *kind1, int *kind2) {
 	return true;
 }
 
+/* ProtSoul's rules in BN4's code: the test's kind (BN4_PROT_TEST_KIND, a chip not left alone) and the bonus's the same kind;
+ * false where the code is not that */
+static bool prot_rule(int *kind) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (!b4) return false;
+	uint16_t f = get16(b4 + (BN4_PROT_TEST_FORM - BUS)), k = get16(b4 + (BN4_PROT_TEST_KIND - BUS));
+	uint16_t bf = get16(b4 + (BN4_PROT_BONUS_FORM - BUS)), bk = get16(b4 + (BN4_PROT_BONUS_KIND - BUS));
+	if (f != (OP_CMP_R0 | FORM_PROT) || (k & 0xFF00u) != OP_CMP_R4 || bf != (OP_CMP_R2 | FORM_PROT) || bk != (OP_CMP_R1_B | (k & 0xFF)))
+		return false;
+	*kind = k & 0xFF;
+	return true;
+}
+
+/* the kind a Soul charges chips of that are not left alone, AquaSoul's and ProtSoul's, by his form's rule; -1 none */
+static int alone_kind(int form) {
+	int kind;
+	if (form == FORM_AQUA && aqua_rule(&kind)) return kind;
+	if (form == FORM_PROT && prot_rule(&kind)) return kind;
+	return -1;
+}
+
 bool soulbn4_charges(int k, int chip) {
 	int kind, kind2;
 	if (k >= 0 && k < SOULS_BN4 && forms[k] == FORM_FIRE && fire_rule(&kind)) return chip > 0 && soulkinds_bn4_of(chip) == kind;
@@ -106,7 +129,7 @@ bool soulbn4_charges(int k, int chip) {
 		int kd = soulkinds_bn4_of(chip);
 		return chip > 0 && !(flags & BN6_CHIP_LEFT_ALONE) && (flags & BN6_CHIP_SHOWS_POWER) && (kd == kind || kd == kind2);
 	}
-	if (k < 0 || k >= SOULS_BN4 || forms[k] != FORM_AQUA || !aqua_rule(&kind)) return false;
+	if (k < 0 || k >= SOULS_BN4 || (kind = alone_kind(forms[k])) < 0) return false;
 	uint32_t rec = chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE;
 	return chip > 0 && !(hook_read8(rec + BN6_CHIP_EFFECT_FLAGS) & BN6_CHIP_LEFT_ALONE) && soulkinds_bn4_of(chip) == kind;
 }
@@ -132,8 +155,9 @@ unsigned soulbn4_chip_bonus(int k, int chip) {
 
 unsigned soulbn4_charge_bonus(int k) {
 	int kind, kind2;
-	/* (BN4_CHIP_CHARGE_BONUS by form: AquaSoul's Aqua, MetlSoul's two kinds; the chips he charges are those alone) */
-	return k >= 0 && k < SOULS_BN4 && ((forms[k] == FORM_AQUA && aqua_rule(&kind)) || (forms[k] == FORM_METL && metl_rule(&kind, &kind2))) ?
+	/* (BN4_CHIP_CHARGE_BONUS by form: AquaSoul's Aqua, ProtSoul's Sword, MetlSoul's two kinds; the chips he charges are those
+	 * alone) */
+	return k >= 0 && k < SOULS_BN4 && (alone_kind(forms[k]) >= 0 || (forms[k] == FORM_METL && metl_rule(&kind, &kind2))) ?
 		BN4_CHARGED_DOUBLE : 0;
 }
 
@@ -191,6 +215,17 @@ bool soulbn4_read(int k, SoulBn4 *out) {
 	out->element = b4[BN4_FORM_ELEMENTS - BUS + (uint32_t)form];
 	out->power = row[ROW4_CHARGED];
 	out->routine = power_routine(b4, out->power);
+	if (k == 9) printf("xchips DBG prot: chip %#x plain %#x routine %#x\n", out->chip, (unsigned)plain, (unsigned)out->routine);
+	/* (his B and left's, where his taking of the form sets it: ProtSoul's shield) */
+	out->left = NONE;
+	if (form == FORM_PROT && get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * (uint32_t)form) == (BN4_PROT_ENTER | 1) &&
+		(get16(b4 + (BN4_PROT_LEFT - BUS)) & 0xFF00u) == OP_MOVS_R1) {
+		out->left = b4[BN4_PROT_LEFT - BUS];
+		out->left_routine = out->left < BN4_POWER_ATTACK_COUNT ? power_routine(b4, out->left) : 0;
+		if (k == 9) printf("xchips DBG prot: left %#x routine %#x\n", out->left, (unsigned)out->left_routine);
+		if (!out->left_routine) return false;
+		memcpy(out->left_charge, b4 + (BN4_CHARGE_TIMES - BUS) + CHARGE_ROW * (uint32_t)out->left, CHARGE_ROW);
+	}
 	memcpy(out->charge, b4 + (BN4_CHARGE_TIMES - BUS) + CHARGE_ROW * (uint32_t)out->power, CHARGE_ROW);
 	return out->routine != 0;
 }

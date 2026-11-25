@@ -1445,7 +1445,11 @@ format, its game 4: the trace's header names it):
   games (BN4's fourth-kind 0x05, BN6's 0x08), and an object's sprite state
   counts as its slot's last occupant's from its spawn on, a record of many
   frames (a unison's) holding an earlier occupant's set-up at the same
-  address.
+  address. MegaMan's B and left's window and lock are laid where BN6
+  keeps them (BN4's AI +0x16 at BN6's +0x13, its +0x1A at +0x15; the bytes
+  they displace at BN6's +0x16 and +0x1A, the spare's order kept), and his
+  AI words at +0x08 and +0x10 are read as numbers, never as the pointers a
+  count in their top byte can look like.
 - **The control** (`"kind": "control"`): `bn4_mettaur_control` fights
   BN4's Mettaur at (5,2) against MegaMan at (2,2) with 200 HP, 35 buster
   shots and five steps by the timer, twice, each run in a process of its

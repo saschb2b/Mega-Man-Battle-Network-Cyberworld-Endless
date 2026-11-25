@@ -1,0 +1,11 @@
+{
+ "name": "MegaMan's attack's Sword bit, BN6's",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offset": "0xA2",
+ "bit": "0x80",
+ "direction": "BN6 has, BN4 not",
+ "why": "As the Wind bit (above): BN6 keeps an attack's second element as a bit of its variables' +2, 0x80 a Sword chip's by its record's +6 (the table at 0x080129E4), ORed in by its chip route (0x080129A6) and chip use (0x080126F6); BN4 none. ProtSoul's WideSwrd, BN6's own by name, used charged: bn4_soul_prot_chip at t64"
+}

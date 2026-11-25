@@ -15,8 +15,9 @@
 #include <stdint.h>
 
 #define SOUL_BN4_FIRST 13   /* BN6's Soul number (BN6_SOUL_ID, the element's +BN6_ELEMENT_SOUL, a used bit) of BN4's first moved */
-#define SOULS_BN4      9    /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul (BN4's 4),
-                             * NumSoul (BN4's 8), FireSoul (BN4's 5), MetlSoul (BN4's 9), WoodSoul (BN4's 12), WindSoul (BN4's 3) */
+#define SOULS_BN4      10   /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul (BN4's 4),
+                             * NumSoul (BN4's 8), FireSoul (BN4's 5), MetlSoul (BN4's 9), WoodSoul (BN4's 12), WindSoul (BN4's 3),
+                             * ProtSoul (BN4's 7) */
 #define SOULS_HELD_BN4 6    /* the bit of the first in the Souls held (soulunite_held), past BN5's six */
 
 /* A BN4 Soul's rows as BN6's engine takes them, read from BN4's ROM */
@@ -33,6 +34,10 @@ typedef struct {
 	uint8_t plain;     /* his plain shot's power attack, BN4's id (BN4_FORM_LOADOUTS +1), 0 BN4's own for every form: MetlSoul's 0x0B */
 	uint32_t plain_routine;   /* ... its routine moved with his unit (tools/xchiprecipe_bn4.py SOUL_PLAINS), 0 none */
 	uint8_t plain_charge[10]; /* ... its charge times */
+	uint8_t left;      /* his B and left's power attack, BN4's id, which his taking of the form sets (BN4's AI data +0, BN6's
+	                    * BN6_AI_POWER_C: ProtSoul's shield 0x6A), NONE none */
+	uint32_t left_routine;    /* ... its routine moved with a unit (SOUL_POWERS), 0 none */
+	uint8_t left_charge[10];  /* ... its charge times */
 } SoulBn4;
 
 /* BN6's k-th BN4 Soul (0 to SOULS_BN4 - 1) read: false where BN4's ROM is

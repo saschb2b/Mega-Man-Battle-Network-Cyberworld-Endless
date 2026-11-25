@@ -61,7 +61,8 @@ COUNT_CHIP4 = 0xF5                        # (... its A counter, BN4's +0x30, u16
 TIME_CHIP4 = 0xFC                         # (BN4's chip charge's time, its cache +0x34 at BN6_AI_SPARE_LAST)
 BUTTON_A, BUTTON_B = 1, 2
 LEVEL_CHIP4, LEVEL4 = 0x0A, 0x0B          # (BN4's levels)
-KEPT_CHIP4, KEPT4 = 0x14, 0x15            # (... kept as B is let go, 0x0800BE48-0x0800BE4E)
+KEPT_CHIP4, KEPT4 = 0x14, 0x1A            # (... kept as B is let go, 0x0800BE48-0x0800BE4E; the second laid at BN6's +0x1A, where BN4
+                                          # keeps its B and left's lock, src/dev/xdiff_bn4_trace.c KEPT_LEVEL_AT)
 TIME4 = 0xFE                              # (BN4's charged shot's charge time, its cache +0x36 at BN6_AI_SPARE_LAST + 2)
 COUNT6, LEVEL6, BUTTON6, REQUEST6 = 0x1B, 0x1D, 0x1E, 0x46
 LEVEL_AS6 = {0: 0, 1: 1, 3: 2}
@@ -165,7 +166,8 @@ def chip_power(rom4, form):
 
 def power_map(rom4):
     """BN4's power attack -> BN6's for the moved Souls: each one's charged shot (BN4_FORM_LOADOUTS' +3 by its form, 0x080184F0)
-    at bn6_power's number, its chip charge (+2) at chip_power's, and a plain shot of its own (+1: MetlSoul's) at its own"""
+    at bn6_power's number, its chip charge (+2) at chip_power's, and a plain shot of its own (+1: MetlSoul's) or his B and
+    left's (ProtSoul's shield) at its own"""
     if not rom4:
         return {}
     out = {rom4[0x184F0 + 4 * f + 3]: bn6_power(f) for f in bn4_forms().values()}
@@ -176,6 +178,13 @@ def power_map(rom4):
     for k, f in enumerate(bn4_forms().values()):
         if rom4[0x184F0 + 4 * f + 1]:
             out[rom4[0x184F0 + 4 * f + 1]] = more + 2 * k + 1
+        # (... or his B and left's, which his taking of the form sets (BN4_FORM_ENTERS, 0x0800E0A0: ldr r0,[r5,#0x58]; movs
+        # r1,#power; strb r1,[r0,#0], ProtSoul's shield), the same place where he has no plain shot of his own)
+        enter = int.from_bytes(rom4[0xE0A0 + 4 * f:0xE0A4 + 4 * f], 'little') & ~1
+        at = enter - 0x08000000
+        h = [int.from_bytes(rom4[at + 2 * i:at + 2 * i + 2], 'little') for i in range(3)] if 0 <= at < len(rom4) - 6 else []
+        if not rom4[0x184F0 + 4 * f + 1] and h and h[0] == 0x6DA8 and h[1] & 0xFF00 == 0x2100 and h[2] == 0x7001:
+            out[h[1] & 0xFF] = more + 2 * k + 1
     return out
 
 

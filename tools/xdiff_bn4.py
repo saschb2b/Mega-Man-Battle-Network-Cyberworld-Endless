@@ -981,12 +981,18 @@ def blinked_roles(trace):
         fr['blinked'] = frozenset(by_addr[e.object].role for e in fr['events'] if e.kind == BLINK and e.object in by_addr)
 
 
-def cells(fa, fb, part, ba, bb, start=0):
+AI_NUMBER_WORDS = (0x08, 0x10)   # (MegaMan's AI data's words of numbers whose top byte is a count that can look like a pointer's
+                                 # region: +0x08 his B and left's power attack (BN6_AI_POWER_C) beside BN4's charge's level (1-3,
+                                 # its leftover at +0x0B); +0x10 beside his B-and-direction window (1-8, BN6_AI_LEFT_WINDOW, +0x13))
+
+
+def cells(fa, fb, part, ba, bb, start=0, numbers=()):
     """the places two parts' bytes differ, a word that is a pointer in either by what it names (Frame.ptr: an object by
-    its role and part, a panel; a pointer into a ROM as it is, BN4's ROM's data not yet read as BN6's)"""
+    its role and part, a panel; a pointer into a ROM as it is, BN4's ROM's data not yet read as BN6's); the words at
+    `numbers` read as bytes alone, never as the pointer a count in their top byte can look like"""
     out, k = [], start
     while k < max(len(ba), len(bb)):
-        if k % 4 == 0 and k + 4 <= min(len(ba), len(bb)):
+        if k % 4 == 0 and k + 4 <= min(len(ba), len(bb)) and k not in numbers:
             wa, wb = u32(ba, k), u32(bb, k)
             if is_ptr(wa) or is_ptr(wb):
                 sprites = getattr(fa.canon, 'sprites', ())   # (a moved family's sprite by its offset in it: bn4_sprites)
@@ -1519,11 +1525,12 @@ def frame_diffs(fa, fb, fbt=None):
         aa = megaman_chip_as_bn6(oa.ai, fa.canon) if fb.game == 6 and isinstance(role, tuple) and role[:2] == ('T1', MEGAMAN_ID) else oa.ai
         if aa is not oa.ai:   # (his misc state's phase while a unit's wrapper waits)
             aa = megaman_wait_as_bn6(aa, oa.rec)
+        him = isinstance(role, tuple) and role[:2] == ('T1', MEGAMAN_ID)
         for part, xa, xb in (('ai', aa, ob.ai), ('coll', ca, ob.coll)):
             if (xa is None) != (xb is None):
                 found.append((part, 0, xa is not None, xb is not None))
             elif xa is not None:
-                found += cells(fa, fb, part, xa, xb)
+                found += cells(fa, fb, part, xa, xb, numbers=AI_NUMBER_WORDS if him and part == 'ai' else ())
         out += [Diff(t, role, part, off, a, b) for part, off, a, b in found]
     if fa.fr['rng'] != fb.fr['rng'] and not replayed_world(fa, fb):
         out.append(Diff(t, 'battle', 'rng', 0, fa.fr['rng'], fb.fr['rng']))

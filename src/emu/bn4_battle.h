@@ -251,4 +251,12 @@
 #define BN4_FACE_DIGITS   0x0870BEE0u /* ... the count's digits, 0x80 bytes each by 5 - the count (six: 5 to 0), */
 #define BN4_FACE_PALS     0x0870C1E0u /* ... and the faces' palettes, 0x20 bytes each by the face: eleven (faces 0-10) */
 
+#define BN4_AI_LEFT_WINDOW 0x16       /* u8 the frames left to press a direction after B for his B and left's power attack (AI data
+                                       * +0: 8 as B is pressed, one less a frame, 0 once taken; 0x0800BEA0-0x0800BECA), BN6's +0x13 */
+#define BN4_AI_LEFT_WINDOW_SWAP 0x13  /* ... and BN4's byte at BN6's window's place, which the differential lays where BN4's window stood
+                                       * (BN6's +0x16, BN6_AI_VERSION: MegaMan's 0), its other leftovers' order kept */
+#define BN4_AI_LEFT_HOLD  0x1A        /* u8 his B and left's lock: while it stands no window opens (0x0800BE9C), its power attack setting
+                                       * its frames (ProtSoul's shield 0x28 at 0x0800D3DC), one less a frame; BN6's +0x15 */
+#define BN4_AI_KEPT_LEVEL 0x15        /* u8 his charge's level kept as B is let go (0x0800BE94), which the differential lays at BN6's +0x1A,
+                                       * BN6 keeping its B and left's lock at its +0x15 */
 #endif

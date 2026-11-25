@@ -41,4 +41,10 @@
 #define BN6_CHIP_ROUTE    0x080129A6u /* r0 a chip, r7 MegaMan's attack's variables: BN4_CHIP_ROUTE's twin, from BN6's record (its
                                        * +2 with the element's bit of 0x080129E4's table by the record's +6), its family returned */
 
+#define BN6_ATTACK_END        0x08011714u /* an attack's end (BN4's 0x0800C9FC its twin): its variables' +0x1C, the kind its state was set
+                                             with (0x08011680-0x08011694 by r2), 2 setting his AI data's +0x19 and 3 (a B and left's)
+                                             his BN6_AI_LEFT_HOLD from the variables' +5, */
+#define BN6_ATTACK_END_LEFT   0x0801173Cu /* ... its strb r0,[r1,#0x15]: BN4's end sets no lock, its power attack having set it as it began */
+#define BN6_ATTACK_END_LEFT_PAST 0x0801173Eu /* ... and past it */
+
 #endif

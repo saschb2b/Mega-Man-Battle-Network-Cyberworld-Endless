@@ -72,6 +72,7 @@ ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x
                   0x19: 0xDC,   # (FireSoul's charged shot)
                   0x14: 0xDD,   # (MetlSoul's charged shot)
                   0x28: 0xDE,   # (WoodSoul's charged shot)
+                  0x25: 0xDF,   # (ProtSoul's shield, his B and left)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -140,7 +141,7 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
 SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),), 0x3E: ((0x0A, 'SrchSoul'),),
                0x15: ((0x11, 'NumSoul'),), 0x19: ((0x0C, 'FireSoul'),),
-               0x14: ((0x13, 'MetlSoul'),), 0x28: ((0x57, 'WoodSoul'),)}
+               0x14: ((0x13, 'MetlSoul'),), 0x28: ((0x57, 'WoodSoul'),), 0x25: ((0x6A, 'ProtSoul'),)}
 # ... and a Soul's taking of the form that spawns an object of its own (BN4_FORM_ENTERS by its form), copied with the unit of
 # its charged shot's family, which the Souls' engine runs as he enters the proxy form (src/emu/soullife.c, xchips_bn4_moved_at).
 # By BN4's family: (the form, its Soul)
@@ -384,6 +385,7 @@ UNITS = (
     ('attack', 0x19, 'FireSoul'),
     ('attack', 0x14, 'MetlSoul'),
     ('attack', 0x28, 'WoodSoul'),
+    ('attack', 0x25, 'ProtSoul'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -428,7 +430,9 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x91: 0x300,
                0xA7: 0x301,                 # (GutsSoul's rapid buster's shots)
                0xAC: 0x302,                 # (NumSoul's charged shot's object)
-               0x126: 0x303}                # (WoodSoul's charged shot's tornado)
+               0x126: 0x303,                # (WoodSoul's charged shot's tornado)
+               0xC1: 0x304,                 # (ProtSoul's shield, the third kind's 0x2B's init)
+               0x8B: 0x305}                 # (the Guard state's shockwave's, its chips' path alone)
 # (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
 # A call several of BN4's sounds reach, each by a branch that makes r0 one (T.back_value follows one path): read by hand,
 # each sound copied at its number plus the call's add, which its shim adds to r0 (XvSoundCall.add), SOUND_SLOTS holding
@@ -457,6 +461,16 @@ FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
 # holds one of BN4's numbers BN6 numbers otherwise, bytes: a row's offset -> {BN4's value: BN6's}, each set in the copy
 # (table_bytes; bytes_why says what the values are and where each pair was read)
 TABLES = {
+    0x080CD2A8: dict(size=15 * 9 + 1, entry=9, kinds=(), sprite=(5, 6), list=None, loads={0x080CD36C},
+                     why="the third kind's 0x00's kinds (9 bytes each: its collision's three arguments, its +0x17, +0x11, its "
+                         "sprite's list's offset and number, 0xFF none), read by its init (0x080CD354, by +4); the Guard state "
+                         "spawns kind 6 alone (0x080ECDA6: movs r4,#6, its subfamily 4, ProtSoul's shield), whose row has no "
+                         "sprite (+5 0xFF)"),
+    0x080CFB8C: dict(size=9 * 4, entry=4, kinds=(), sprite=(None, 0), list=4, loads={0x080CFBFE},
+                     why="the shockwave's kinds (the third kind's 0x16: 4 bytes each, its sprite's number in list 4, its "
+                         "animation's, its speed), read by its init (0x080CFBF2, by +4); the Guard chips' path alone spawns it "
+                         "(0x080ECD9C, its subfamilies 0-2 by 0x080ECE10), which no row of the registry plays (BN4's Guard1-3 "
+                         "are the run's by name, BN5's moved): ProtSoul's subfamily 4 never"),
     0x08018B48: dict(size=20 * 0x16, entry=0x16, kinds=(), sprite=(None, 0), list=3, loads=set(),
                      why="the Navi chips' SP and DS powers (BN4_DS_POWERS: 20 rows of 11 u16s, a Navi's row, RollSP/DS to VideMnSP/DS, numbers alone), "
                          "the SP's column by his time, the DS's by the Holes"),
@@ -570,6 +584,10 @@ ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
 # BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
 IMMS = {
+    0x0800D3DC: dict(form='THUMB_STRB', rd=0, rn=6, was=0x1A, now=0x15,
+                     why="ProtSoul's shield (power attack 0x6A): his B and left's lock, 0x28 frames, at his AI data's +0x1A in BN4 "
+                         "(BN4_AI_LEFT_HOLD: its window waits while it stands, 0x0800BE9C) and +0x15 in BN6 (BN6_AI_LEFT_HOLD, "
+                         "0x08013136; counted down at 0x080107E8)"),
     0x0800CDEC: dict(form='THUMB_ADDS', rd=0, rn=0, was=1, now=0,
                      why="MetlSoul's plain shot: its damage's +1, which BN6's buster damage holds already (UNIT_AIMS' XC4_BUSTER_DAMAGE)"),
     0x0800CE04: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x08, now=0x11,

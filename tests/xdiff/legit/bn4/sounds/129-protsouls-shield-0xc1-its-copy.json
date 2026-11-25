@@ -1,0 +1,10 @@
+{
+ "bn4": "0xC1",
+ "bn6": "0x304",
+ "clock": "state",
+ "souls": [
+  "7"
+ ],
+ "what": "ProtSoul's shield 0xC1, its copy",
+ "why": "Played by the shield (the third kind's 0x2B, the Guard state's, ProtSoul's B and left) as it is set up (BN4: movs r0,#0xc1 at 0x080D227A, its bl at 0x080D227E; BN6: the copy's bl aimed at a shim of the unit's home that makes r0 0x304, XvSoundCall): the same sound, BN4's song copied into slot 0x304 by ProtSoul's unit (src/audio/xsong.c XSOUNDS). bn4_soul_prot_shield at t34"
+}
