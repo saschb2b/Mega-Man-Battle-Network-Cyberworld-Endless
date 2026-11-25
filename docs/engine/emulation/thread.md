@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The core on its own thread"
 description: "The GBA core on its own thread on the New 3DS (`emu_threaded`, `CYBERWORLD_EMU_THREAD=1`): `emu_frame` starts a frame and returns, every other access waits for it, and mGBA's threaded video draws alongside."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-25T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-25T23:30:00Z }
 ---
 
 # The core on its own thread

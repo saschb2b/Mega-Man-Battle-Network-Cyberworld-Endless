@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-25T23:30:00Z
-* **Update**: game/pet-menu.md (BN6's own picture of the menu kept once it stands still, the game's frames run without it on the core's own thread; what stands still that moved, and the New 3DS's numbers on the net against the town), engine/emulation/thread.md (the way tried for the menu that was kept in another form).
