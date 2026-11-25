@@ -546,6 +546,7 @@
 0800E728 routines_tables
 0800E730 virus_families_moved
 0800E894 other_statuses_timers_cleared
+0800E8D2 junksoul_charged_shot
 0800E8E2 bn5_chips_code
 0800E908 bn5_chips_code.blindness_counted_down_2
 0800E994 BN6_DIRECTION
@@ -1536,6 +1537,7 @@
 080E19CA bn6_battle_bits_0x10_set
 080E1A90 column_areagrab_takes_action_8
 080E1C00 BN6_SPAWN_SPARK
+080E1CC4 sound_0x88
 080E1CCA owner_place
 080E1D2A bn5_chips_code.status_mark_spawned_2
 080E21E4 BN6_GLOW_SHOW

@@ -158,6 +158,7 @@
 0800ADA8 bn4_arrow_lag_panel_tested_by
 0800AECA BN4_CONFUSE_STEP
 0800AED2 confusion_countdown_end
+0800AF04 junksoul_charged_shot.spawned
 0800AF90 BN4_DIRECTION
 0800AFB0 BN4_DIRECTION_TO
 0800B036 BN4_ID_RAISE
@@ -218,6 +219,7 @@
 0800CC2E metlsoul_chip_charge
 0800CCD0 firesoul_flame_for.bn4
 0800CDE2 navistats_5_by
+0800CE4C bn4_power_attack_0x61
 0800D204 chip_0x35
 0800D298 BN4_POWER_THUN
 0800D3C0 power_0x6a
@@ -244,6 +246,10 @@
 0800E106 windsoul_shots_pass.1_bl_0x080e68f8
 0800E12C bn4_form_enters_7
 0800E12E protsoul_chip_charge.0x6a
+0800E146 bn4_form_enters_10
+0800E15C bl_0x080cd81e
+0800E168 spawn_word_by_his_side_from
+0800E170 r7_word
 0800E174 bn4_bn4_form_enters_12
 0800E208 windsoul_shots_pass.pass
 0800E22E windsoul_shots_pass.0xa
@@ -650,6 +656,7 @@
 080E18EE BN4_SPAWN_EFFECT
 080E22FC gutsman_attack_against
 080E230A sprite_number
+080E2354 sound_0xae_every_60_frames
 080E23C0 gutsman_attack_against_2
 080E2934 BN4_DEBRIS_INIT
 080E29F8 BN4_SPAWN_DEBRIS
