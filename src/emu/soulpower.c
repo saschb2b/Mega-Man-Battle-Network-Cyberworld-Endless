@@ -220,6 +220,15 @@ static void team_chaos(void) {
 	if (team_chaos_on) emu_write(SOULS_TEAM_CHAOS, out, sizeof out);
 }
 
+/* the charge times BN4's Souls give grown entry i: id5 -1 a Soul's charged shot's, -3 his chip charge's on BN4's own power
+ * attacks (BN4_MORE_AT on, BN4_MORE_EACH a Soul); NULL where none (a gap's, -2) */
+static const uint8_t *bn4_charge_of(int i, int id5) {
+	bool own = id5 == -3;
+	int k = own ? (i - BN4_MORE_AT) / BN4_MORE_EACH : i - nmoved - (int)sizeof empty_powers - nchaos;
+	if ((id5 != -1 && !own) || (own && i < BN4_MORE_AT) || k < 0 || k >= nbn4) return NULL;
+	return own ? bn4s[k].chip_charge : bn4s[k].charge;
+}
+
 /* the grown power attacks' and charge times' entries past BN6's own, n in all; false where one has no routine */
 static bool grown(int n, uint8_t powers[4 * 0x100], uint8_t charges[BN6_CHARGE_ROW * 0x100]) {
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
@@ -231,10 +240,9 @@ static bool grown(int n, uint8_t powers[4 * 0x100], uint8_t charges[BN6_CHARGE_R
 		if (!routine) return false;
 		put32(powers + 4 * (BN6_POWER_ATTACK_COUNT + i), routine);
 		uint8_t *row = charges + BN6_CHARGE_ROW * (BN6_POWER_ATTACK_COUNT + i);
-		int more = (i - BN4_MORE_AT) / BN4_MORE_EACH;   /* (BN4's own: its Soul's k) */
-		if (id5 == -2 || ((id5 == -3 || id5 == -4) && (i < BN4_MORE_AT || more >= nbn4))) memset(row, 0, BN6_CHARGE_ROW);
-		else if (id5 == -3) memcpy(row, bn4s[more].chip_charge, BN6_CHARGE_ROW);
-		else if (id5 < 0) memcpy(row, bn4s[i - nmoved - (int)sizeof empty_powers - nchaos].charge, BN6_CHARGE_ROW);
+		const uint8_t *from4 = id5 < 0 ? bn4_charge_of(i, id5) : NULL;
+		if (from4) memcpy(row, from4, BN6_CHARGE_ROW);
+		else if (id5 < 0) memset(row, 0, BN6_CHARGE_ROW);
 		else memcpy(row, b5 + (BN5_CHARGE_TIMES - BUS) + BN6_CHARGE_ROW * (uint32_t)id5, BN6_CHARGE_ROW);
 		for (int k = 0; (breaks & SOULPOWER_BREAK_CHARGE) && k < BN6_CHARGE_ROW / 2; ++k) put16(row + 2 * k, get16(row + 2 * k) + 10);
 	}
