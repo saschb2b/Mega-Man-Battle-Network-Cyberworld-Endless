@@ -637,6 +637,13 @@ int xchips_bn4_effect(int from) {
 	return -1;
 }
 
+int xchips_bn4_sound(int song) {
+	for (int i = 0; installed4 && i < xchips_bn4_count; ++i)
+		for (int s = 0; s < xchips_bn4[i].nsongs; ++s)
+			if (xchips_bn4[i].songs[s].song == song) return xchips_bn4[i].songs[s].slot;
+	return -1;
+}
+
 bool xchips_bn4_code_install(void) {
 	if (installed4) return true;
 	installed4 = units4_install(false);

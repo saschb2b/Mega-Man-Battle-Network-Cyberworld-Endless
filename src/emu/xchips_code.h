@@ -83,5 +83,7 @@ bool xchips_bn4_moved(int id);
 uint32_t xchips_bn4_moved_at(uint32_t bn4);
 /* ... and the effect of BN6's its units draw BN4's effect `from` as (moved with them: Repair's 7), -1 where none does */
 int xchips_bn4_effect(int from);
+/* ... and the song slot its units copied BN4's sound `song` into (Repair's 0x9A at 0x39), -1 where none does */
+int xchips_bn4_sound(int song);
 
 #endif
