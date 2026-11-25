@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-25
+* **Update**: engine/emulation/thread.md (The video thread stays on the main core: the second core tried and measured on a New 3DS, the GBA's frame 10.9 to 18.5 ms and 47 frames shown, taken out; the start menu's account, and two other ways tried for it).
 * **Update**: multirom/bn4-souls.md (RollSoul in BN6's engine: his arrow, its lag's step out through BN6's own step, his heal after a chip), rom/souls.md (RollSoul's row), code/emu.md (soulroll.c), engine/emulation/memory.md (FREE_BN4_CHIP_STUBS grown for the step's stubs), engine/emulation/free-space.md (its region's line).
 * **Update**: game/pet-menu.md (what the menu's picture cost on a New 3DS, 11 ms of drawing a frame, and the copies taken out: the band's rows, the pieces' part of the core's frame, one copy of the field).
 * **Update**: engine/emulation/thread.md (Nothing asked each frame reads a file: the Net Square's 20 ms a frame on a New 3DS were netpass.ini and the pending trade's file read every frame, kept in memory now; the frame log's parts for the Square).
