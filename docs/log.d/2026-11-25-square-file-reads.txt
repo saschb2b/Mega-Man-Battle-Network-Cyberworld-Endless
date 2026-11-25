@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-25T19:20:00Z
-* **Update**: engine/emulation/thread.md (Nothing asked each frame reads a file: the Net Square's 20 ms a frame on a New 3DS were netpass.ini and the pending trade's file read every frame, kept in memory now; the frame log's parts for the Square).
