@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-25T14:01:17Z
-* **Update**: multirom/bn4-souls.md (RollSoul in BN6's engine: his arrow, its lag's step out through BN6's own step, his heal after a chip), rom/souls.md (RollSoul's row), code/emu.md (soulroll.c), engine/emulation/memory.md (FREE_BN4_CHIP_STUBS grown for the step's stubs), engine/emulation/free-space.md (its region's line).

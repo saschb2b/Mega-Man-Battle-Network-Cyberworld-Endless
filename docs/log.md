@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-25
+* **Update**: multirom/bn4-souls.md (RollSoul in BN6's engine: his arrow, its lag's step out through BN6's own step, his heal after a chip), rom/souls.md (RollSoul's row), code/emu.md (soulroll.c), engine/emulation/memory.md (FREE_BN4_CHIP_STUBS grown for the step's stubs), engine/emulation/free-space.md (its region's line).
 * **Update**: game/pet-menu.md (what the menu's picture cost on a New 3DS, 11 ms of drawing a frame, and the copies taken out: the band's rows, the pieces' part of the core's frame, one copy of the field).
 * **Update**: engine/emulation/thread.md (Nothing asked each frame reads a file: the Net Square's 20 ms a frame on a New 3DS were netpass.ini and the pending trade's file read every frame, kept in memory now; the frame log's parts for the Square).
 * **Update**: engine/emulation/3ds-memory.md (the 3DS reads both extra ROMs: the limit's reason gone since 14 November, modelled again with both at 71.9 MB under the 86 MB rule, the rule now holding the `all` case, a third ROM stopped at build time until modelled), online/netpass.md (no system of this build is one of one extra ROM; the rule kept for 0.24.0's 3DS games and `--dev xroms=1`), online/weekly-net.md (a 3DS that reads both dives), game/progression/encounter-groups.md, game/battle-lab.md, multirom/how-it-is-built.md, multirom/bn4.md, code/platforms.md, devtools/net-square.md, devtools/dev-menu.md (the same, where each named the limit), GUIDE.md (a New 3DS reads both, its pass everyone's).

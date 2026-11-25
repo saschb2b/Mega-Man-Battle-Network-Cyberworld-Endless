@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Free space: zones, headroom and placing a region"
 description: "The free space's one plan (`src/emu/free_space.plan`): its zones by kind and their headroom, `tools/free_space.py`'s header, tables and report, how a new region is placed, how an overrun is told, and the move that sized the layers' regions by their largest and freed `code-low`."
 tags: [engine, emulation, free-space]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T22:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T14:01:17Z }
 sources:
   - id: plan
     resource: "src/emu/free_space.plan"
