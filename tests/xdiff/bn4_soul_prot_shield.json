@@ -1,0 +1,222 @@
+{
+ "about": "BN4's ProtSoul (Blue Moon's Soul 7, form 7: kind Sword; his charged shot power attack 0x3E, WideSwrd by BN4's chip route, 60 frames; his chip charge a Sword chip not left alone held 30 frames, doubled; his taking of the form sets his B and left to power attack 0x6A, his shield, BN4's Guard state's subfamily 4, BN4_PROT_ENTER) in BN4 Red Sun's own battle against BN6's with ProtSoul moved (docs/multirom/bn4-souls.md): BN6's Soul 22 over the proxy form, his WideSwrd BN4's power attack copied onto BN6's own WideSwrd through BN6's chip route (soulroute.c), his chip charge BN5's empty power of 30 frames, his shield the Guard state moved at BN6's grown 0xDF (tools/xchiprecipe_bn4.py) on his B and left. Red Sun refuses Blue Moon's Souls: the harness gives him a Red Sun Soul's flag. Two WideSwrd L (BN4's 49, BN6's own 72, kind Sword): the first Custom screen picks both, moves to UNITE and takes one and the Soul. B and left pressed at fight frame 30 raise his shield (BN6_AI_POWER_C: the loadout's B and left, the Guard state moved), its object the third kind's 0x2B and its kind 6 the third kind's 0x00 beside him, held to its end. The MettaurEX (250 HP) at (4,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "against": "bn6",
+ "subject": "megaman",
+ "foes": "06@42",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 160,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "safe": true,
+ "souls4": "40",
+ "souls6": "8000",
+ "folder4": [
+  "1631",
+  "1631"
+ ],
+ "deck4": [
+  "1631",
+  "1631"
+ ],
+ "folder6": [
+  "048:0B",
+  "048:0B"
+ ],
+ "deck6": [
+  "048:0B",
+  "048:0B"
+ ],
+ "chips": [
+  "031:048"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B+LEFT",
+   2
+  ]
+ ]
+}

@@ -50,4 +50,8 @@
 #define BN6_AI_HP_BUG         0x09        /* u8 the HP bug's frames counted (0x08010230: HP above 1, its period by NaviStats +0x18, one HP lost
                                            * through 0x0800E2D8 at the period, then 0) */
 
+#define BN6_AI_LEFT_WINDOW    0x13        /* u8 the frames left to press a direction after B for his B and left's power attack
+                                             (BN6_AI_POWER_C: 8 as B is pressed, one less a frame; 0x08013140-0x08013174), BN4's +0x16 */
+#define BN6_AI_LEFT_HOLD      0x15        /* u8 his B and left's lock: while it stands no window opens (0x08013136), one less a frame
+                                             (0x080107E8); BN4's +0x1A */
 #endif

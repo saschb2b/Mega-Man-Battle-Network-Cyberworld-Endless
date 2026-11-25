@@ -1,0 +1,16 @@
+[
+ {
+  "name": "ProtSoul's charge 10 frames longer",
+  "spec": "bn4_soul_prot",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 70 frames for his charged shot where BN4_CHARGE_TIMES' row of 0x3E holds 60: B held 62 frames fires his plain buster, not WideSwrd"
+ },
+ {
+  "name": "ProtSoul's charged shot another chip",
+  "spec": "bn4_soul_prot",
+  "poke": [
+   "08AFAD42:2049"
+  ],
+  "what": "his charged shot's copy (SOULS4_ROUTES' third, src/emu/soulroute.c) with its movs r0,#0x48 (WideSwrd, BN6's) made #0x49: the attack's chip another"
+ }
+]

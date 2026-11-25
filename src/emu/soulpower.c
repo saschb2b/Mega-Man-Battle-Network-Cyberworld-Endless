@@ -141,9 +141,9 @@ static uint32_t routine_of(int i, int *id5) {
 	if (i >= BN4_MORE_AT && i < BN4_MORE_END) {
 		/* (BN4's own: an empty one where its Soul's chip charge takes one, its charge times BN4's; his plain shot's copy) */
 		int k = (i - BN4_MORE_AT) / BN4_MORE_EACH, role = (i - BN4_MORE_AT) % BN4_MORE_EACH;
-		if (role == MORE_OTHER && k < nbn4 && bn4s[k].plain_routine) {
+		if (role == MORE_OTHER && k < nbn4 && (bn4s[k].plain_routine || bn4s[k].left_routine)) {
 			*id5 = -4;
-			return bn4s[k].plain_routine | 1;
+			return (bn4s[k].plain_routine ? bn4s[k].plain_routine : bn4s[k].left_routine) | 1;
 		}
 		*id5 = role == MORE_CHIP && k < nbn4 && bn4_chip_own(&bn4s[k]) ? -3 : -2;
 		return BN6_POWER_EMPTY | 1;
@@ -230,7 +230,7 @@ static const uint8_t *bn4_charge_of(int i, int id5) {
 	bool own = id5 == -3 || id5 == -4;
 	int k = own ? (i - BN4_MORE_AT) / BN4_MORE_EACH : i - nmoved - (int)sizeof empty_powers - nchaos;
 	if ((id5 != -1 && !own) || (own && i < BN4_MORE_AT) || k < 0 || k >= nbn4) return NULL;
-	return id5 == -1 ? bn4s[k].charge : id5 == -3 ? bn4s[k].chip_charge : bn4s[k].plain_charge;
+	return id5 == -1 ? bn4s[k].charge : id5 == -3 ? bn4s[k].chip_charge : bn4s[k].plain_routine ? bn4s[k].plain_charge : bn4s[k].left_charge;
 }
 
 /* the grown power attacks' and charge times' entries past BN6's own, n in all; false where one has no routine */
@@ -300,7 +300,11 @@ static bool rows_make(uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)])
 	for (int k = 0; k < nbn4; ++k) {
 		uint8_t *r6 = rows + BN6_FORM_LOADOUT_SIZE * (SOULS + k);
 		r6[ROW_A] = (uint8_t)bn4_chip_power(k);
-		r6[ROW_6] = bn4s[k].plain_routine ? (uint8_t)(SOUL_POWER_FIRST + BN4_MORE_AT + BN4_MORE_EACH * k + MORE_OTHER) : 0;
+		/* (his own other power, on BN4's own power attacks: his plain shot's, MetlSoul's, or his B and left's, ProtSoul's
+		 * shield; a Soul has one of them at most) */
+		uint8_t other = (uint8_t)(SOUL_POWER_FIRST + BN4_MORE_AT + BN4_MORE_EACH * k + MORE_OTHER);
+		r6[ROW_6] = bn4s[k].plain_routine ? other : 0;
+		if (bn4s[k].left_routine && !bn4s[k].plain_routine) r6[ROW_LEFT] = other;
 		r6[ROW_B] = (uint8_t)(BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos + k);
 	}
 	return true;

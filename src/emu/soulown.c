@@ -9,6 +9,7 @@
 #include "soulcolonel.h"
 #include "soulcompanion.h"
 #include "soulguard.h"
+#include "soullock.h"
 #include "soulwind.h"
 #include "soullava.h"
 #include "soullook.h"
@@ -24,7 +25,7 @@ bool soulown_install(int soulbreak) {
 		soulchaos_install(SOULBREAK_POWER(soulbreak)) && soulpower_install(SOULBREAK_POWER(soulbreak)) &&
 		soulpassive_install(SOULBREAK_PASSIVE(soulbreak)) && soulchips_install(SOULBREAK_CHIPS(soulbreak)) &&
 		soulcharged_install() && soullava_install() && soulguard_install(SOULBREAK_PASSIVE(soulbreak)) &&
-		soulwind_install(SOULBREAK_PASSIVE(soulbreak)) &&
+		soulwind_install(SOULBREAK_PASSIVE(soulbreak)) && soullock_install() &&
 		soulcolonel_install(SOULBREAK_PASSIVE(soulbreak)) && soulmood_install(SOULBREAK_MOOD(soulbreak)) &&
 		soulrapid_install(SOULBREAK_BN4(soulbreak)) && soulshuffle_install(SOULBREAK_POWER(soulbreak)) &&
 		soulcapsule_install(0);

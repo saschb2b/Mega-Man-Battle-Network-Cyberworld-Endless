@@ -1,0 +1,18 @@
+[
+ {
+  "name": "ProtSoul's shield one stronger",
+  "spec": "bn4_soul_prot_shield",
+  "poke": [
+   "0800D3D2:2033"
+  ],
+  "what": "his shield's power attack's copy (0x6A, SOUL_POWERS) with its movs r0,#0x32 (the attack's power, its +8) made #0x33"
+ },
+ {
+  "name": "ProtSoul's lock a frame shorter",
+  "spec": "bn4_soul_prot_shield",
+  "poke": [
+   "0800D3DA:2027"
+  ],
+  "what": "his shield's power attack's copy with its movs r0,#0x28 (his B and left's lock, BN6_AI_LEFT_HOLD by IMMS) made #0x27"
+ }
+]

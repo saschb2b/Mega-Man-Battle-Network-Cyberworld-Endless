@@ -113,4 +113,13 @@
                                        * word at 0x0800DB14), 1 set where NaviStats +0x28 is 1, his AI +0x5C's wind ended (BN4_WIND_END)
                                        * and the word cleared (0x0800D8F6-0x0800D902): WindSoul's taken away as he leaves */
 
+#define BN4_PROT_TEST_FORM 0x0800BC88u /* BN4_CHIP_CHARGE_TEST's cmp r0,#7: ProtSoul's form, */
+#define BN4_PROT_TEST_KIND 0x0800BC8Cu /* ... cmp r4,#6: a Sword chip (BN4_CHIP_KIND), not left alone (its flags' bit 0, 0x0800BC90) */
+#define BN4_PROT_BONUS_FORM 0x0800C4A8u /* BN4_CHIP_CHARGE_BONUS's cmp r2,#7, */
+#define BN4_PROT_BONUS_KIND 0x0800C4AEu /* ... cmp r1,#6: a Sword chip charged doubled (BN4_CHARGED_DOUBLE) */
+#define BN4_PROT_ENTER    0x0800E12Cu /* ProtSoul's (form 7's): ldr r0,[r5,#0x58]; movs r1,#0x6a; strb r1,[r0,#0]: his AI data's +0,
+                                       * BN6's BN6_AI_POWER_C, his B and left's power attack, */
+#define BN4_PROT_LEFT     0x0800E12Eu /* ... the movs r1,#0x6a: his shield (0x0800D3C0: family 0x25, BN4's Guard state's subfamily 4,
+                                       * power 50, the hit word 0x114) */
+
 #endif

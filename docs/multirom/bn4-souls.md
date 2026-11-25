@@ -521,6 +521,29 @@ BN4 not), WindRack's id by the spec's `chips`, the wind's word at AI
 BN6's of that frame, and BN4's charge glow kept out of the natives' ranks
 as BN6's was ([the differential](../devtools/differential.md)).
 
+## ProtSoul in BN6's engine
+
+ProtSoul (Blue Moon's Soul 7, form 7, kind Sword) is BN6's Soul 22 (k 9,
+held bit 15). What it took:
+
+| Part | ProtSoul's |
+| --- | --- |
+| His charged shot | power attack 0x3E, WideSwrd by BN4's chip route, the same shape as WindSoul's shots: BN6's own WideSwrd through `soulroute.c` |
+| His chip charge | a Sword chip not left alone held 30 frames (`BN4_PROT_TEST_FORM`, BN5's empty power of those times), doubled (`BN4_PROT_BONUS_FORM`), AquaSoul's shape (`soulbn4.c`'s `alone_kind`) |
+| His shield | his taking of the form sets his B and left to power attack 0x6A (`BN4_PROT_ENTER`, `BN4_PROT_LEFT`), BN4's Guard state's subfamily 4, moved as an attack unit at BN6's grown 0xDF (its shield the third kind's 0x2B, sound 0xC1 at slot 0x304; its third kind's 0x00 of kind 6, its kinds' table copied with it; the Guard chips' shockwave with it, which his subfamily never spawns). It is the Soul's other power on BN4's own power attacks, his loadout's B and left (`SoulBn4`'s `left`). Its power sets his B and left's lock, 0x28 frames: BN4 keeps it at AI +0x1A (`BN4_AI_LEFT_HOLD`), BN6 at +0x15 (`BN6_AI_LEFT_HOLD`, the store aimed there by `IMMS`). BN4's lock runs on past the attack, where BN6's attack's end sets it anew (`BN6_ATTACK_END_LEFT`); `soullock.c` passes over that store for a BN4 Soul |
+| His look | BN4's other seven places of form 7 pick ProtoMan's arm (0xD) for its sword states' look; a chip both games name plays as BN6's, BN6's swords their own code, so they stand as BN4's alone (a look's hook, no differential's, if wanted) |
+
+The proof is three specs, each with its control: `bn4_soul_prot`,
+WideSwrd charged (B held 62 frames), held through t96, the frame its
+variables are set; `bn4_soul_prot_chip`, the WideSwrd left used charged and
+doubled, held through t64; `bn4_soul_prot_shield`, his shield on B and left
+and its lock run out, 160 frames. Six mutations: the charge longer, the
+charged shot another chip, the chip charge left out, the charged chip not
+doubled, the shield one stronger, its lock a frame shorter. The B and
+left's window (BN4's AI +0x16, BN6's +0x13) and lock are paired in the
+trace, and the comparator reads MegaMan's AI words that hold such counts as
+numbers ([the differential](../devtools/differential.md)).
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first

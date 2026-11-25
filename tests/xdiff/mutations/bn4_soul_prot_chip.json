@@ -1,0 +1,14 @@
+[
+ {
+  "name": "ProtSoul's chip charge left out",
+  "spec": "bn4_soul_prot_chip",
+  "soulbreak": 65536,
+  "what": "the chips' break that leaves a BN4 Soul's chip charge out (src/emu/soulchips.c): A held 32 frames uses WideSwrd uncharged"
+ },
+ {
+  "name": "ProtSoul's charged chip not doubled",
+  "spec": "bn4_soul_prot_chip",
+  "soulbreak": 131072,
+  "what": "the chips' break that leaves BN4's charge bonus out (src/emu/soulchips.c): WideSwrd charged strikes 80 where BN4's doubles it"
+ }
+]
