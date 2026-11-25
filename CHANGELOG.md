@@ -3,7 +3,7 @@
 Come and talk: runs, folders, NetBattles, help and ideas on the game's
 Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
 
-## Unreleased
+## 0.24.1 (2026-11-25)
 
 - **Fixed: the New 3DS and the PS Vita ran slower since 0.24.0.** The new
   PET menu's picture asked the game where it stood on every frame drawn,
