@@ -154,6 +154,8 @@
 #define SOULS4_ROUTE_SIZE  0x20u
 #define SOULS4_WIND        (FREE_BN4_SOUL_LOOK + 0x19E00u)  /* ... WindSoul's wind spawned at his frame's end (soulwind.c), to: */
 #define SOULS4_WIND_END    (FREE_BN4_SOUL_LOOK + 0x19E40u)
-#define SOULS4_END         SOULS4_WIND_END
+#define SOULS4_HEAL        (FREE_BN4_SOUL_LOOK + 0x19E40u)  /* ... RollSoul's heal's look and sound after a chip of his (soulroll.c), to: */
+#define SOULS4_HEAL_END    (FREE_BN4_SOUL_LOOK + 0x19E80u)
+#define SOULS4_END         SOULS4_HEAL_END
 
 #endif

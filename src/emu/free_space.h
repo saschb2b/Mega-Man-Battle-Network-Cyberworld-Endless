@@ -144,9 +144,9 @@
 #define FREE_CHIP_ART_END    (EMU_FREE + 0x700000u)
 #define FREE_SOULS_ART       (EMU_FREE + 0x700000u)  /* the Souls' art past their room: BN5's effects BN6 redrew, copied (soulcode.c, soulcolonel.c) */
 #define FREE_SOULS_ART_END   (EMU_FREE + 0x710000u)
-#define FREE_BN4_CHIP_STUBS  (EMU_FREE + 0x710000u)  /* BN4's chips' own routines BN6 has no twin of: a side's first actor (BugCurse's target) (xchips_code.c) */
-#define FREE_BN4_CHIP_STUBS_END (EMU_FREE + 0x710040u)
-#define FREE_TAIL            (EMU_FREE + 0x710040u)  /* free to FREE_LATE_CODE (free) */
+#define FREE_BN4_CHIP_STUBS  (EMU_FREE + 0x710000u)  /* BN4's chips' own routines BN6 has no twin of: a side's first actor (BugCurse's target), RollSoul's step out of his shot's lag (xchips_code.c) */
+#define FREE_BN4_CHIP_STUBS_END (EMU_FREE + 0x7100A0u)
+#define FREE_TAIL            (EMU_FREE + 0x7100A0u)  /* free to FREE_LATE_CODE (free) */
 #define FREE_LATE_CODE       (EMU_FREE + 0x711000u)  /* the late families' code, block by block, past the families' own room (xvirus.c) */
 #define FREE_LATE_CODE_END   (EMU_FREE + 0x720000u)
 #define FREE_BN4_NAVIS       (EMU_FREE + 0x720000u)  /* BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes (xnavi_bn4.c) */
@@ -281,8 +281,8 @@
 	X("FREE_TEAM_SOULS", (EMU_FREE + 0x640000u), (EMU_FREE + 0x6A0000u), "", "code") \
 	X("FREE_CHIP_ART", (EMU_FREE + 0x6A0000u), (EMU_FREE + 0x700000u), "", "code") \
 	X("FREE_SOULS_ART", (EMU_FREE + 0x700000u), (EMU_FREE + 0x710000u), "", "code") \
-	X("FREE_BN4_CHIP_STUBS", (EMU_FREE + 0x710000u), (EMU_FREE + 0x710040u), "", "code") \
-	X("FREE_TAIL", (EMU_FREE + 0x710040u), (EMU_FREE + 0x711000u), "", "code") \
+	X("FREE_BN4_CHIP_STUBS", (EMU_FREE + 0x710000u), (EMU_FREE + 0x7100A0u), "", "code") \
+	X("FREE_TAIL", (EMU_FREE + 0x7100A0u), (EMU_FREE + 0x711000u), "", "code") \
 	X("FREE_LATE_CODE", (EMU_FREE + 0x711000u), (EMU_FREE + 0x720000u), "", "code") \
 	X("FREE_BN4_NAVIS", (EMU_FREE + 0x720000u), (EMU_FREE + 0x730000u), "", "code") \
 	X("FREE_BN4_NAVI_CODE", (EMU_FREE + 0x730000u), (EMU_FREE + 0x750000u), "", "code") \

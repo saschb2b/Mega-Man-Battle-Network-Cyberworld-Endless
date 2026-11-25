@@ -3907,6 +3907,109 @@ static const XcSong protsoul_songs[] = { { 0x8B, 0x305 }, { 0xC1, 0x304 } };
 	.types = protsoul_types, .ntypes = (int)(sizeof protsoul_types / sizeof *protsoul_types), \
 	.sound_calls = protsoul_sound_calls, .nsound_calls = (int)(sizeof protsoul_sound_calls / sizeof *protsoul_sound_calls), \
 	.sprites = protsoul_sprites, .nsprites = (int)(sizeof protsoul_sprites / sizeof *protsoul_sprites) }
+/* ---- RollSoul: BN4's attack 0x1b (080EC575) as BN6's 0xe0; its chips  ---- */
+/* MegaMan's state 0x1b (080EC574-080EC642), the family of its chips' records: moved */
+/* RollSoul's power attack 0x22 (0800CF20), which returns the family: copied with it */
+/* its table 080CE5B0's kind 0: sprite 3:0x10 in BN4, 0x88 in BN6 (copied) */
+/* its effect 0x56: BN6's 0xbe, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0x132 (080EC5E2): BN4's song copied into the grown song table's slot 0x208, on BN4's player 27 */
+
+static const XvBlock rollsoul_blocks[] = {
+	{ 0x080EC574, 0x080EC642, XC4_CODE + 0x84D0, 0x9801B3E1u },
+	{ 0x080CE6E0, 0x080CE840, XC4_CODE + 0x85A0, 0x5AA41525u },
+	{ 0x080CE5B0, 0x080CE6E0, XC4_CODE + 0x8700, 0x69329294u },
+	{ 0x0800AD2A, 0x0800B12C, XC4_CODE + 0x8832, 0x793106FEu },
+	{ 0x0800CF20, 0x0800CF42, XC4_CODE + 0x8C40, 0x98F648D7u },
+};
+static const XvData rollsoul_data[] = {
+	{ 0x080EC586, 0x080EC588, XV_RAW },
+	{ 0x080EC588, 0x080EC58C, XV_POOL },
+	{ 0x080EC58C, 0x080EC594, XV_TABLE },
+	{ 0x080CE6F2, 0x080CE6F4, XV_RAW },
+	{ 0x080CE6F4, 0x080CE6F8, XV_POOL },
+	{ 0x080CE6F8, 0x080CE704, XV_TABLE },
+	{ 0x080CE828, 0x080CE83C, XV_RAW },
+	{ 0x080CE83C, 0x080CE840, XV_POOL },
+	{ 0x080CE5B0, 0x080CE6E0, XV_RAW },
+	{ 0x0800AD54, 0x0800B128, XV_ZERO },
+	{ 0x0800B128, 0x0800B12C, XV_POOL },
+};
+static const XvPair rollsoul_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN4_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x08009EE4, 0x0800CCBE },   /* project:thunder, DIFF (audited) */
+	{ 0x0800AB3E, 0x0800E276 },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800AE10, 0x0800E6E8 },   /* project:families-2, SAME */
+	{ 0x0800B4B0, XC4_STEP_OUT },   /* the step his pad asks, where he can stand (BN4_STEP_ASK_PANEL, its panel in r0, r1): BN6's ask and test (BN6_STEP_ASK, BN6_STEP_ASK_PANEL), the step in r0 for XC4_STEP_START */
+	{ 0x0800B6DC, BN6_SHOT_LAG },   /* the lag's frames by the free panels before him (BN4_SHOT_LAG, r2 0): BN6's twin by body, its table's row 0 BN4's bytes (BN4_SHOT_LAGS, BN6_SHOT_LAGS) */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C208, XC_STUBS },   /* the step's style (BN4_STEP_ASK_STYLE, into r2 for the step's start): BN6 reads its own after the attack's end as BN4 does, in XC4_STEP_START, so the call is the stub that returns 0 */
+	{ 0x0800C9BA, XC4_STEP_START },   /* the step begun (BN4_STEP_ASK_START, r0, r1 its panel, r2 its style): BN6's, by the step XC4_STEP_OUT left in r0, its style and kind BN6's */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F74, 0x0801A140 },   /* project:thunder, LAYOUT */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F96, 0x0801A166 },   /* project:research, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair rollsoul_words[] = {
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvImm rollsoul_imms[] = {
+	{ 0x0800AD40, THUMB_LDRB, 1, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x0800AD42, THUMB_CMP, 1, 0, 0xA, 0xFF },   /* BN4's panel type 0xa, none in BN6: compared with no type of BN6's */
+	{ 0x0800CF3E, THUMB_MOVS, 0, 0, 0x1B, 0xE0 },   /* RollSoul's power attack 0x22: the family it returns, BN4's 0x1b, BN6's grown 0xe0 */
+	{ 0x080CE74A, THUMB_STRB, 0, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080CE79A, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080CE7D6, THUMB_MOVS, 4, 0, 0x56, 0xBE },   /* its effect: 0x56 in BN4, 0xbe in BN6 (moved) */
+	{ 0x080EC578, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+};
+static const XvType rollsoul_types[] = {
+	{ 3, 0x0B, XV_TYPE_MOVED4, 0x0B },   /* BN4's third-kind 0xb, moved, the chips' page */
+};
+static const XvSprite rollsoul_sprites[] = {
+	{ 3, 0x10, 3, 0x88, XC4_ROOM_ROW(54), 0x200 },   /* BN4's 3:0x10, the room's row 54 */
+	{ 4, 0x15, 4, 0x92, XC4_ROOM_ROW(55), 0x800 },   /* BN4's 4:0x15, the room's row 55 */
+};
+static const XvId rollsoul_effects[] = { { 0x56, 0xBE } };
+static const XvByte rollsoul_bytes[] = {
+	{ 0x080CE5B6, 0x10, 0x88 },   /* its table's kind 0: list 3 0x10 in BN4, 0x88 in BN6 (copied) */
+};
+static const XvSoundCall rollsoul_sound_calls[] = {
+	{ 0x080EC5E2, 0x208 },   /* its sound 0x132: BN4's song at the grown table's slot 0x208 */
+};
+static const XcSong rollsoul_songs[] = { { 0x132, 0x208 } };
+
+#define ROLLSOUL_CODE { .name = "RollSoul (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0xAC00), \
+	.blocks = rollsoul_blocks, .nblocks = (int)(sizeof rollsoul_blocks / sizeof *rollsoul_blocks), \
+	.data = rollsoul_data, .ndata = (int)(sizeof rollsoul_data / sizeof *rollsoul_data), \
+	.calls = rollsoul_calls, .ncalls = (int)(sizeof rollsoul_calls / sizeof *rollsoul_calls), \
+	.words = rollsoul_words, .nwords = (int)(sizeof rollsoul_words / sizeof *rollsoul_words), \
+	.imms = rollsoul_imms, .nimms = (int)(sizeof rollsoul_imms / sizeof *rollsoul_imms), \
+	.types = rollsoul_types, .ntypes = (int)(sizeof rollsoul_types / sizeof *rollsoul_types), \
+	.sound_calls = rollsoul_sound_calls, .nsound_calls = (int)(sizeof rollsoul_sound_calls / sizeof *rollsoul_sound_calls), \
+	.sprites = rollsoul_sprites, .nsprites = (int)(sizeof rollsoul_sprites / sizeof *rollsoul_sprites), \
+	.effects = rollsoul_effects, .neffects = (int)(sizeof rollsoul_effects / sizeof *rollsoul_effects), \
+	.bytes = rollsoul_bytes, .nbytes = (int)(sizeof rollsoul_bytes / sizeof *rollsoul_bytes) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -3951,6 +4054,7 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_ATTACK, 0x14, 0xDD, 0x080EC0A5, XC4_HOMES + 0xA000, METLSOUL_CODE, metlsoul_songs, (int)(sizeof metlsoul_songs / sizeof *metlsoul_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x28, 0xDE, 0x080ECF45, XC4_HOMES + 0xA400, WOODSOUL_CODE, woodsoul_songs, (int)(sizeof woodsoul_songs / sizeof *woodsoul_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x25, 0xDF, 0x080ECCF3, XC4_HOMES + 0xA800, PROTSOUL_CODE, protsoul_songs, (int)(sizeof protsoul_songs / sizeof *protsoul_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x1B, 0xE0, 0x080EC575, XC4_HOMES + 0xAC00, ROLLSOUL_CODE, rollsoul_songs, (int)(sizeof rollsoul_songs / sizeof *rollsoul_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
 

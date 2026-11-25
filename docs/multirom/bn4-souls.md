@@ -544,6 +544,29 @@ left's window (BN4's AI +0x16, BN6's +0x13) and lock are paired in the
 trace, and the comparator reads MegaMan's AI words that hold such counts as
 numbers ([the differential](../devtools/differential.md)).
 
+## RollSoul in BN6's engine
+
+RollSoul (Red Sun's Soul 1, form 1, kind Recovery) is BN6's Soul 23 (k 10,
+held bit 16). What it took:
+
+| Part | RollSoul's |
+| --- | --- |
+| His charged shot | power attack 0x22 into family 0x1B, the arrow (MegaMan's state 0x1B, its object the third kind's 0x0B, its kinds' table at `0x080CE5B0` copied with it, its sprite 3:0x10 BN6's 0x88; its effect 0x56 BN6's 0xBE; its sound 0x132 RollAro's copy at slot 0x208), moved as an attack unit at BN6's grown 0xE0 |
+| Its lag | the arrow's lag (state 0x1B's 4) counts its frames by the free panels before him (`BN4_SHOT_LAG`, BN6's twin `BN6_SHOT_LAG` by body, their tables' row 0 the same bytes) and ends early in a step his pad asks. BN4 lays the step out by its panel (`BN4_STEP_ASK_PANEL`, `BN4_STEP_ASK_START`), BN6 by its direction (`BN6_STEP_ASK`, `BN6_STEP_ASK_PANEL`, `BN6_STEP_ASK_START`), so two stubs of the chips' own (`XC4_STEP_OUT`, `XC4_STEP_START` in `FREE_BN4_CHIP_STUBS`) make BN6's step in BN4's order, the attack's end between; the step is BN6's own from there, as every step of his is |
+| His heal | after a chip of another kind than Recovery, his max HP's tenth healed, the heal's effect at him (BN4's 7, Repair's moved, BN6's 0xCE) and its sound (BN4's 0x9A at slot 0x39): BN4's chip use at `0x080EED04` (`BN4_ROLL_HEAL_FORM` and the rule's four numbers, read from BN4's code by `soulbn4_heal`), a hook at the same place of BN6's (`BN6_CHIP_USE_HEAL`) and a stub in the Souls' room for the effect and the sound (`SOULS4_HEAL`, `soulroll.c`) |
+
+His B and left is MegaMan's own shield, power attack 0x26 in BN4 (his
+form sets none: `BN4_FORM_ENTERS`' 1 is a `mov pc,lr`), BN6's own in BN6.
+The proof is three specs, each with its control: `bn4_soul_roll`, the
+arrow (B held 62 frames) and its lag run out, 180 frames; `bn4_soul_roll_step`,
+UP in the lag, the step asked on the same frame in both, held at t110,
+where the step's own count begins (BN4's style 10 frames, BN6's 4: his walk
+BN6's own); `bn4_soul_roll_heal`, AirHoc1 used (a moved chip, BN4's code in
+both), the heal at full HP, its effect and sound. Five mutations: the
+charge longer, the arrow one stronger, the step left out, the heal left
+out, the heal's effect another. The comparator reads the step's state and
+variables as each engine's own (souls.json's `step`).
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first

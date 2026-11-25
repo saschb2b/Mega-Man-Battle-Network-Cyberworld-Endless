@@ -1,0 +1,16 @@
+[
+ {
+  "name": "RollSoul's charge 10 frames longer",
+  "spec": "bn4_soul_roll",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 70 frames for his charged shot where BN4_CHARGE_TIMES' row of 0x22 holds 60: B held 62 frames fires his plain buster, not the arrow"
+ },
+ {
+  "name": "RollSoul's arrow one stronger",
+  "spec": "bn4_soul_roll",
+  "poke": [
+   "0800CF22:201F"
+  ],
+  "what": "his power attack 0x22's copy (copied with family 0x1B's unit) with its movs r0,#0x1e, the arrow's damage at the variables' +8, made #0x1f: the MettaurEX keeps one HP less"
+ }
+]

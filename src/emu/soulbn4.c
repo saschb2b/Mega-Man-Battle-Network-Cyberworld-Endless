@@ -1,7 +1,6 @@
 /* BN4 Red Sun's Souls in BN6's engine (soulbn4.h). */
 #include "soulbn4.h"
 
-#include <stdio.h>
 #include <string.h>
 
 #include "bn4.h"
@@ -29,8 +28,8 @@ enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
 /* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8, FireSoul 5, MetlSoul 9,
- * WoodSoul 12, WindSoul 3, ProtSoul 7) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3, 7 };
+ * WoodSoul 12, WindSoul 3, ProtSoul 7, RollSoul 1) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3, 7, 1 };
 #define FORM_GUTS 2
 #define FORM_NUM 8
 #define FORM_AQUA 11
@@ -215,14 +214,12 @@ bool soulbn4_read(int k, SoulBn4 *out) {
 	out->element = b4[BN4_FORM_ELEMENTS - BUS + (uint32_t)form];
 	out->power = row[ROW4_CHARGED];
 	out->routine = power_routine(b4, out->power);
-	if (k == 9) printf("xchips DBG prot: chip %#x plain %#x routine %#x\n", out->chip, (unsigned)plain, (unsigned)out->routine);
 	/* (his B and left's, where his taking of the form sets it: ProtSoul's shield) */
 	out->left = NONE;
 	if (form == FORM_PROT && get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * (uint32_t)form) == (BN4_PROT_ENTER | 1) &&
 		(get16(b4 + (BN4_PROT_LEFT - BUS)) & 0xFF00u) == OP_MOVS_R1) {
 		out->left = b4[BN4_PROT_LEFT - BUS];
 		out->left_routine = out->left < BN4_POWER_ATTACK_COUNT ? power_routine(b4, out->left) : 0;
-		if (k == 9) printf("xchips DBG prot: left %#x routine %#x\n", out->left, (unsigned)out->left_routine);
 		if (!out->left_routine) return false;
 		memcpy(out->left_charge, b4 + (BN4_CHARGE_TIMES - BUS) + CHARGE_ROW * (uint32_t)out->left, CHARGE_ROW);
 	}
@@ -361,4 +358,20 @@ bool soulbn4_guarded(int k) {
 		return false;
 	uint16_t f = get16(b4 + (BN4_STATUS_GUARD_FORM - BUS));
 	return (f & 0xFF00u) == OP_CMP_R0 && (f & 0xFF) == forms[k];
+}
+
+bool soulbn4_heal(int k, SoulBn4Heal *out) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (!b4 || k < 0 || k >= SOULS_BN4) return false;
+	uint16_t f = get16(b4 + (BN4_ROLL_HEAL_FORM - BUS)), kind = get16(b4 + (BN4_ROLL_HEAL_KIND - BUS));
+	uint16_t share = get16(b4 + (BN4_ROLL_HEAL_SHARE - BUS)), effect = get16(b4 + (BN4_ROLL_HEAL_EFFECT - BUS));
+	uint16_t sound = get16(b4 + (BN4_ROLL_HEAL_SOUND - BUS));
+	if (f != (OP_CMP_R0 | forms[k]) || (kind & 0xFF00u) != OP_CMP_R0 || (share & 0xFF00u) != OP_MOVS_R1 || !(share & 0xFFu) ||
+		(effect & 0xFF00u) != OP_MOVS_R4 || (sound & 0xFF00u) != OP_MOVS_R0)
+		return false;
+	out->kind = (uint8_t)kind;
+	out->share = (uint8_t)share;
+	out->effect = (uint8_t)effect;
+	out->sound = (uint8_t)sound;
+	return true;
 }

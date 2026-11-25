@@ -131,5 +131,13 @@
   "evidence": [
    "bn4_soul_wind at t2: MegaMan's AI +0x5C the wind (the fourth kind's 0x41) in BN4, 0 in BN6"
   ]
+ },
+ {
+  "key": "step",
+  "name": "his step out of an attack's lag, each engine's own state",
+  "why": "RollSoul's charged shot's lag (MegaMan's state 0x1B's 4, BN4 0x080EC5F6) ends early in a step his pad asks, BN4's laid out by its panel (BN4_STEP_ASK_PANEL; BN4_STEP_ASK_START: his attack's variables' +0x16 and +0x17 the panel, +0x18 its kind by NaviStats +0x23 and +0x25, 0xA, then his state 7) and BN6's by its direction (XC4_STEP_OUT, XC4_STEP_START: BN6_STEP_ASK_START sets +0xC the step, +0x18 its kind by NaviStats +0x29, 4, +3 a second kind, +0x2C cleared, then his state 0x10): the one step, each engine's own state and numbers, the step asked on the same frame; his panel, place and animation compared through it, to its walk proper, each engine's own (bn4_soul_roll_step's verdict)",
+  "evidence": [
+   "bn4_soul_roll_step at t102: MegaMan's CurAction 9 in BN4, 0x10 in BN6; his attack's +0xC 0 and 1, +0x18 0xA and 4"
+  ]
  }
 ]
