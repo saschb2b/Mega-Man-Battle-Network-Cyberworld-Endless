@@ -59,10 +59,11 @@ From there BN4's life of a Soul is BN5's in other places:
   MegaMan plain again the turn after.
 - A charged shot is a power attack by the loadout's id (`0x0800CA7C`). It
   sets the attack's variables and returns an attack family, by CurAction
-  itself into `0x080EAEFC`, MegaMan's state table, which the Soul Navis' attacks share ([BN4's Navis in BN6's engine](bn4-navis.md); BN6's table starts at 0x10). Three of them use
+  itself into `0x080EAEFC`, MegaMan's state table, which the Soul Navis' attacks share ([BN4's Navis in BN6's engine](bn4-navis.md); BN6's table starts at 0x10). Four of them use
   one of BN4's chips through `0x0800D406`: WindSoul's AirShot and WindRack,
-  ProtSoul's WideSwrd. JunkSoul uses a chip from the battle. BN6 has
-  AirShot, WindRack and WideSwrd by name.
+  ProtSoul's WideSwrd, and JunkSoul's Poltrgst (BN4's 381, named past 0xFF:
+  `movs r0,#0x7e; adds r0,#0xff`). BN6 has AirShot, WindRack and WideSwrd
+  by name, and the run has Poltrgst (BN5's, moved).
 
 All twelve were seen in romlab. Each Soul was given Wind's kind and flag in
 the ROM's two tables. Each one united after AirShot, played its unison,
@@ -93,7 +94,7 @@ BN6 would need.
 | ProtSoul | Blue Moon | Sword | WideSwrd (60) | chip charge (30); the sword families otherwise | 22, 1,060 B | 11 SAME, 3 LAYOUT, 4 audited, 2 open | 8 |
 | NumSoul | Blue Moon | Plus | family 0x15 (120) | +10 to attack chips of no kind (BN5's NumberSoul's rule); an object beside him | 14, 478 B | 6 SAME, 2 LAYOUT, 1 audited | 0 |
 | MetlSoul | Blue Moon | Break | family 0x14 (80) | a plain shot of its own (family 0x08); chip charge (70) | 43, 1,806 B | 13 SAME, 5 LAYOUT, 4 audited, 1 open | 0 |
-| JunkSoul | Blue Moon | Obstacle | a chip used this battle (80) | an object of its own as he unites | 3, 96 B | 2 SAME | 0 |
+| JunkSoul | Blue Moon | Obstacle | Poltrgst (80) | a collision region at his panel as he unites | 3, 96 B | 2 SAME | 0 |
 | AquaSoul | Blue Moon | Aqua | family 0x1E (30) | element Aqua; chip charge (20) | 14, 452 B | 5 SAME, 2 LAYOUT, 1 audited | 0 |
 | WoodSoul | Blue Moon | Wood | family 0x28 (100) | element Wood; grass, two places | 23, 948 B | 5 SAME, 2 LAYOUT, 1 audited | 2 |
 
@@ -101,9 +102,8 @@ The numbers say less than they seem in two places. The objects a Soul
 spawns (WindSoul's wind, FireSoul's and NumSoul's companions, SrchSoul's
 and JunkSoul's objects) are counted by their spawners only. Their types'
 code is the other BN4 tracks' to move, once, as BN5's objects were. And
-JunkSoul is small only because its shot is any chip the battle used: it
-needs every chip it can name moved first, and a record of the chips used,
-which BN6 does not keep.
+JunkSoul is small because its shot is a chip by name, Poltrgst, which the
+run has as BN5's moved chip.
 
 The two open DIFF pairs are `0x080CD7E2` against BN6's `0x080C6BDA`, where
 an object's element sits at +0x17 in BN4 and +0xE in BN6 (the rewrite
@@ -219,8 +219,8 @@ in the engine, and the mechanisms it needs that the run does not have yet:
 10. **MetlSoul**: 43 routines, the most code, and a plain shot of its own.
 11. **ProtSoul**: eight engine places in the sword families, and two open
     pairs.
-12. **JunkSoul**: any chip of the battle, after the chips' track and a
-    record of chips used.
+12. **JunkSoul**: three routines; his shot Poltrgst by name through the chip
+    route, his taking of the form a collision region.
 
 The recommendation is to move ThunSoul first, as BN5's KnightSoul was: the
 proof of the whole path (the generator's BN4 roots, a BN4 Soul number in

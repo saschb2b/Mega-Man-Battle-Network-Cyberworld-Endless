@@ -28,8 +28,8 @@ enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
 /* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8, FireSoul 5, MetlSoul 9,
- * WoodSoul 12, WindSoul 3, ProtSoul 7, RollSoul 1) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3, 7, 1 };
+ * WoodSoul 12, WindSoul 3, ProtSoul 7, RollSoul 1, JunkSoul 10) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3, 7, 1, 10 };
 #define FORM_GUTS 2
 #define FORM_NUM 8
 #define FORM_AQUA 11

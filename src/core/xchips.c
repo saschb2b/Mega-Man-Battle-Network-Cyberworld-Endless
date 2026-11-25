@@ -176,6 +176,7 @@ uint16_t xchips_reward_bn6(uint16_t v) {
 
 #define BUS 0x08000000u
 static uint16_t from_bn4[BN4_CHIP_COUNT];
+static uint16_t named_bn4[BN4_CHIP_COUNT];   /* (... and each one's by its name alone, whatever its class: xchips_bn4_named) */
 static bool bn4_paired;
 
 int xchips_v1_of(const uint8_t *version, const uint16_t *navi, const uint8_t *cls, int n, int x) {
@@ -253,6 +254,8 @@ static void pair_bn4(void) {
 	xchips_pair((const char (*)[XCHIP_NAME])names6, XCHIPS_BN6, (const char (*)[XCHIP_NAME])names4, BN4_CHIP_COUNT, to_bn4, from_bn4);
 	/* (one chip under two spellings, xreg4_alias: BN6's) */
 	for (int k = 0; k < xreg4_alias_count; ++k) from_bn4[xreg4_alias[k][0]] = xreg4_alias[k][1];
+	/* (each one's run id by its name alone first, whatever its class: xchips_bn4_named) */
+	for (int x = 1; x < BN4_CHIP_COUNT; ++x) named_bn4[x] = from_bn4[x] ? from_bn4[x] : (uint16_t)registry_named(names4[x]);
 	for (int x = 1; x < BN4_CHIP_COUNT; ++x)
 		if (cls[x] > XCHIPS_GIGA) from_bn4[x] = 0;
 		else if (!from_bn4[x]) from_bn4[x] = (uint16_t)registry_named(names4[x]);
@@ -270,6 +273,11 @@ static void pair_bn4(void) {
 int xchips_bn4_paid(int x) {
 	pair_bn4();
 	return bn4_paired && x > 0 && x < BN4_CHIP_COUNT ? from_bn4[x] : 0;
+}
+
+int xchips_bn4_named(int x) {
+	pair_bn4();
+	return bn4_paired && x > 0 && x < BN4_CHIP_COUNT ? named_bn4[x] : 0;
 }
 
 uint16_t xchips_reward_bn4(uint16_t v) {

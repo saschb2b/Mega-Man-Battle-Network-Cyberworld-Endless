@@ -1,7 +1,7 @@
 /* BN4's Souls' shots that are a chip, in BN6's engine (docs/multirom/bn4-souls.md,
  * WindSoul in BN6's engine): a power attack of BN4's that sets up a chip of
  * BN4's through its chip route (BN4_CHIP_ROUTE: WindSoul's AirShot and
- * WindRack, ProtSoul's WideSwrd) runs as the same routine on BN6's chip of
+ * WindRack, ProtSoul's WideSwrd, JunkSoul's Poltrgst) runs as the same routine on BN6's chip of
  * its name through BN6's twin (BN6_CHIP_ROUTE), the stores after it BN4's. */
 #ifndef CW_SOULROUTE_H
 #define CW_SOULROUTE_H

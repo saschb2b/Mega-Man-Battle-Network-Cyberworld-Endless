@@ -65,7 +65,7 @@ STATES4, NSTATES4 = 0x080EAEFC, 116   # BN4_PLAYER_STATES, BN4_PLAYER_STATE_COUN
 ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 # BN4's family -> its number, fixed for good as a unit is written (a saved state's CurAction names it), in the units' order
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
-                  0x12: 0xD8,   # (BN4's Souls' own families from 0xD8, docs/project/claims/bn4-souls.json)
+                  0x12: 0xD8,   # (BN4's Souls' own families from 0xD8, 0xD8-0xE3 theirs, as their claim held them)
                   0x10: 0xD9,   # (GutsSoul's rapid buster, his state 0x10: no chip's, asked by B pressed six times, soulrapid.c)
                   0x3E: 0xDA,   # (SrchSoul's charged shot)
                   0x15: 0xDB,   # (NumSoul's charged shot)
@@ -159,7 +159,10 @@ SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: (
 # its charged shot's family, which the Souls' engine runs as he enters the proxy form (src/emu/soullife.c, xchips_bn4_moved_at).
 # By BN4's family: (the form, its Soul)
 ENTERS4 = 0x0800E0A0   # BN4_FORM_ENTERS
-SOUL_ENTERS = {0x3E: ((4, 'SrchSoul'),), 0x19: ((5, 'FireSoul'),)}
+SOUL_ENTERS = {0x3E: ((4, 'SrchSoul'),), 0x19: ((5, 'FireSoul'),),
+               # (JunkSoul's charged shot is the run's Poltrgst by name through BN6's chip route, no unit of his (src/emu/soulroute.c):
+               # his taking of the form, a collision region at his panel, rides with ProtSoul's, the Blue Moon Soul's unit beside it)
+               0x25: ((10, 'JunkSoul'),)}
 # ... and a Soul's own attack for a chip he charged (BN4's chip use runs it where the chip's charged and his the form:
 # FireSoul's 0x0800D638 at 0x0800B78A), the variables at his AI +0x70 set and its family returned as a power attack's, copied
 # with the unit of that family (its return given the unit's number, its +0x70 BN6's +0xA0: IMMS), which the Souls' engine runs
@@ -169,8 +172,8 @@ SOUL_CHARGED = {0x19: ((0x0800D638, 'FireSoul'),)}
 # the unit of his charged shot's family, its family BN6's buster's (IMMS). By BN4's family: (its power attack, its Soul)
 SOUL_PLAINS = {0x14: ((0x0B, 'MetlSoul'),)}
 BUSTER4, BUSTER6 = 0x08, 0x11   # (BN4's buster's family, BN6's: the differential's PLAYER_FAMILY)
-# The fourth kind's types a Soul's object is moved as, at fixed dispatch numbers of the Souls' own (docs/project/claims/
-# bn4-souls.json, past bn4-air-units' 0xA0-0xA3), not the units' count: BN4's type -> its number
+# The fourth kind's types a Soul's object is moved as, at fixed dispatch numbers of the Souls' own (0xA4-0xA7 and 0xB6-0xBF,
+# as their claim held them, past bn4-air-units' 0xA0-0xA3), not the units' count: BN4's type -> its number
 TYPES4_SOULS = {0x44: 0xA4,   # (SrchSoul's, spawned as he unites, 0x080E6E4C)
                 0x12: 0xA5}   # (FireSoul's field of grass, spawned as he unites, 0x080E3604: r4 its type, mode and frames)
 # BN4's computed powers (a chip's power of 1000 and up: the routine by power - 1000 in BN4_CHIP_POWERS, bn4.h) moved into
@@ -791,6 +794,11 @@ UNIT_COPIED = {
 # The data a routine a unit copies reads from the bytes after its code, copied with it as raw bytes (bn4_twins.COPIED_DATA's
 # way, for the unit alone; else zeroed as a copied routine's neighbours): the unit's name -> the routine -> (lo, hi, why)
 UNIT_COPIED_DATA = {
+    'ProtSoul': {
+        0x0800E146: (0x0800E168, 0x0800E170, "JunkSoul's region's spawn words by his side (BN4_JUNK_ENTER: 0x1705FF85, 0x1705FF84), "
+                                             "read by his side's index from the pool's word; numbers alone, the same layout as "
+                                             "BN6's spawner reads (0x080C6C16, its byte +1 0xFF)"),
+    },
     'SrchSoul': {
         0x0800FB3C: (0x0800FC38, 0x0800FC48, "the panels' flags of a foe by his side, two words a side (0x200000 and 0x400000 "
                                              "first), numbers alone: the same bits in BN6's panels (BN6's table of them at "

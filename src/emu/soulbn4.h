@@ -15,9 +15,9 @@
 #include <stdint.h>
 
 #define SOUL_BN4_FIRST 13   /* BN6's Soul number (BN6_SOUL_ID, the element's +BN6_ELEMENT_SOUL, a used bit) of BN4's first moved */
-#define SOULS_BN4      11   /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul (BN4's 4),
-                             * NumSoul (BN4's 8), FireSoul (BN4's 5), MetlSoul (BN4's 9), WoodSoul (BN4's 12), WindSoul (BN4's 3),
-                             * ProtSoul (BN4's 7), RollSoul (BN4's 1) */
+#define SOULS_BN4      12   /* BN4's Souls moved, all twelve: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul
+                             * (BN4's 4), NumSoul (BN4's 8), FireSoul (BN4's 5), MetlSoul (BN4's 9), WoodSoul (BN4's 12), WindSoul
+                             * (BN4's 3), ProtSoul (BN4's 7), RollSoul (BN4's 1), JunkSoul (BN4's 10) */
 #define SOULS_HELD_BN4 6    /* the bit of the first in the Souls held (soulunite_held), past BN5's six */
 
 /* A BN4 Soul's rows as BN6's engine takes them, read from BN4's ROM */

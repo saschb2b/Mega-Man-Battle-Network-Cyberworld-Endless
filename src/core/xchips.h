@@ -61,6 +61,10 @@ bool xchips_kept_out(int id);
  * (xchips_v1_of, xchips_sp_named); a pseudo-chip or Program Advance none.
  * Read once both ROMs are (0 without BN4's). */
 int xchips_bn4_paid(int x);
+/* ... and BN4's chip `x`'s run id by its name alone, whatever its class:
+ * a chip no folder holds that a Soul's shot names (JunkSoul's Poltrgst,
+ * BN4's 381, a secret one), the run's of that name; 0 none */
+int xchips_bn4_named(int x);
 
 /* A Navi chip's version, its record's first parameter in BN4 and BN5 alike
  * (BN6 numbers its own otherwise: its SP is named with the mark) */
