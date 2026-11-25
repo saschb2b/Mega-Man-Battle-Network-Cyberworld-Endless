@@ -41,7 +41,7 @@ void frame_log_depth(uint64_t ticks, int scale) {
 }
 
 /* (the parts named, their time summed over the second) */
-#define PARTS_MOST 32
+#define PARTS_MOST 64
 static struct { const char *name; uint64_t ticks; } parts[PARTS_MOST];
 static int nparts;
 
