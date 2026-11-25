@@ -422,15 +422,8 @@ static void hold_step(Side *g, const Spec *s) {
 	if (s->hide && g->seeded && !g->hidden && v->coll_flash) foes_mark(v, v->coll_flash, s->hide, v->coll_flags, BN5_OBJ_FLASHING), g->hidden = true;
 }
 
-/* (panels=) a BN4 spec's panels' types written in each game before its first fight frame, or at the fight frame each names by
- * the fight's timer as the keys are (xdiff_bn4.c's xd4_panels_put, which puts those due) */
-static void panels_step(Side *g, const Spec *s, uint32_t t) {
-	for (int i = 0; i < s->npanels; ++i)
-		if (!(g->paneled >> i & 1) && (!s->panels[i].at || t >= (uint32_t)g->behind + s->panels[i].at)) {
-			xd4_panels_put(s, g->v.game, i);
-			g->paneled |= 1u << i;
-		}
-}
+/* (panels=) a BN4 spec's panels' types written in each game as they fall due (xdiff_bn4.c's xd4_panels_due) */
+static void panels_step(Side *g, const Spec *s, uint32_t t) { g->paneled = xd4_panels_due(s, g->v.game, t, (uint32_t)g->behind, g->paneled); }
 
 /* (safe=1) MegaMan's collision data invulnerable, before each frame of the battle */
 static void keep_safe(const View *v) {

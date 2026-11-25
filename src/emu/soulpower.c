@@ -231,8 +231,9 @@ static bool grown(int n, uint8_t powers[4 * 0x100], uint8_t charges[BN6_CHARGE_R
 		if (!routine) return false;
 		put32(powers + 4 * (BN6_POWER_ATTACK_COUNT + i), routine);
 		uint8_t *row = charges + BN6_CHARGE_ROW * (BN6_POWER_ATTACK_COUNT + i);
-		if (id5 == -2) memset(row, 0, BN6_CHARGE_ROW);
-		else if (id5 == -3) memcpy(row, bn4s[(i - BN4_MORE_AT) / BN4_MORE_EACH].chip_charge, BN6_CHARGE_ROW);
+		int more = (i - BN4_MORE_AT) / BN4_MORE_EACH;   /* (BN4's own: its Soul's k) */
+		if (id5 == -2 || ((id5 == -3 || id5 == -4) && (i < BN4_MORE_AT || more >= nbn4))) memset(row, 0, BN6_CHARGE_ROW);
+		else if (id5 == -3) memcpy(row, bn4s[more].chip_charge, BN6_CHARGE_ROW);
 		else if (id5 < 0) memcpy(row, bn4s[i - nmoved - (int)sizeof empty_powers - nchaos].charge, BN6_CHARGE_ROW);
 		else memcpy(row, b5 + (BN5_CHARGE_TIMES - BUS) + BN6_CHARGE_ROW * (uint32_t)id5, BN6_CHARGE_ROW);
 		for (int k = 0; (breaks & SOULPOWER_BREAK_CHARGE) && k < BN6_CHARGE_ROW / 2; ++k) put16(row + 2 * k, get16(row + 2 * k) + 10);

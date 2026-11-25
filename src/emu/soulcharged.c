@@ -54,7 +54,7 @@ bool soulcharged_install(void) {
 	uint8_t out[SOULS_BN4_CHARGED_END - SOULS_BN4_CHARGED] = { 0 };
 	for (size_t i = 0; i < sizeof code / sizeof *code; ++i) put16(out + 2 * i, code[i]);
 	put32(out + STUB_LITS, BN6_ATTACK_FAMILY_SET | 1);
-	put32(out + STUB_LITS + 4, (BN6_CHARGED_CHIP_SET + 4) | 1);
+	put32(out + STUB_LITS + 4, BN6_CHARGED_CHIP_SET_DONE | 1);
 	if (!thumb_bl_write(out, STUB_BL1, SOULS_BN4_CHARGED, SOULS_BN4_CHARGED + STUB_BX) ||
 		!thumb_bl_write(out, STUB_BL2, SOULS_BN4_CHARGED, SOULS_BN4_CHARGED + STUB_BX))
 		return false;

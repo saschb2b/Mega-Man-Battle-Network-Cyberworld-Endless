@@ -325,6 +325,7 @@
 #define BN6_CHARGED_RELEASE   0x0800FBA4u /* cmp r1,#0xd in the release of a charged A (0x0800FB74 on): r1 the A power attack (AI data +5), */
 #define BN6_CHARGED_CHIP_SET  0x0800FBF2u /* ... its bl to the family's set (0x08011688, r0 the family 0x080127C0 returned), r7 the attack's variables */
 #define BN6_OBJECT_HEAL       0x0800E2ECu /* r0 HP, r5 an object: its HP (+0x24) that much more, held to its max (+0x26); BN4's 0x0800ABBA the same */
+#define BN6_CHARGED_CHIP_SET_DONE 0x0800FBF6u /* ... past it: ldrb r0,[r7,#0x1b] */
 #define BN6_ATTACK_FAMILY_SET 0x08011688u /* r0 an attack family: MegaMan's attack set to it (his CurAction) */
 #define BN6_CHARGED_CHIP_USE  0x0800FBECu /* ... the ids that use the chip charged (0x0D, 0x1F, 0x20, 0x29, 0x2D, 5) going on here (movs r0,#1, the chip's use); the rest run the power attack */
 #define BN6_CHARGE_BONUS      0x08012C7Cu /* a charged chip's bonus by the form (r0 whether charged): ElecCross's 0x4000, SlashCross's 40, else 0 */
