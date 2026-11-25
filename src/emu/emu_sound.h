@@ -24,9 +24,4 @@ void emu_sound_mix(int16_t *frames, int n);
  * target (audio_pace.h) */
 double emu_sound_settle(void);
 
-/* For the frame log, since the last call: the device's reads the ring could
- * not fill (each padded with silence, a crack heard), the frames of silence,
- * and the least the ring held as a read began (-1: none read) */
-void emu_sound_dry(int *reads, int *silence, int *least);
-
 #endif

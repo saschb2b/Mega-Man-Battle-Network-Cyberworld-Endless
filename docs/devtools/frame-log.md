@@ -63,8 +63,7 @@ which waits for no refresh, showed 60 to 61 with gaps to 22 ms.
 So the 3DS keeps its lines in memory (`say`, `src/core/frame_log.c`; 128
 KB, two minutes of lines) and writes them where the loop is held anyway:
 after a second with a frame of 100 ms or more in it (a layer made, a
-start), as the room fills, and as the game ends (`frame_log_flush`, from
-`platform_shutdown`). A game that stops without ending loses the lines
+start), as the room fills, and as the game ends (at exit). A game that stops without ending loses the lines
 kept; the other lines of `log.txt` are written as they are printed, as
 before, each one a stall of that size where it falls (a song's start, a
 layer made). Elsewhere a frame line is printed as it is said, for the

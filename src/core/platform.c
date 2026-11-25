@@ -614,7 +614,6 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 }
 
 void platform_shutdown(void) {
-	frame_log_flush();   /* (the 3DS's lines kept in memory, frame_log.c) */
 	/* (the saves as the game ends them, written and then copied before it
 	 * goes: save_queue.h, mirror.h; a statistics' request under way given
 	 * up) */
