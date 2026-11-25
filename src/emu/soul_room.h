@@ -148,6 +148,12 @@
 #define SOULS4_COMPANION_MASKS (FREE_BN4_SOUL_LOOK + 0x19C00u) /* ... their companion overlay's masks, a byte an animation, written once
                                                                  (soulcompanion.c), to: */
 #define SOULS4_COMPANION_MASKS_END (FREE_BN4_SOUL_LOOK + 0x19D00u)
-#define SOULS4_END         SOULS4_COMPANION_MASKS_END
+#define SOULS4_ROUTES      (FREE_BN4_SOUL_LOOK + 0x19D00u)  /* ... their shots that are a chip of BN4's as BN6's chip of its name
+                                                             * (soulroute.c), SOULS4_ROUTE_SIZE each, written once, to: */
+#define SOULS4_ROUTES_END  (FREE_BN4_SOUL_LOOK + 0x19E00u)
+#define SOULS4_ROUTE_SIZE  0x20u
+#define SOULS4_WIND        (FREE_BN4_SOUL_LOOK + 0x19E00u)  /* ... WindSoul's wind spawned at his frame's end (soulwind.c), to: */
+#define SOULS4_WIND_END    (FREE_BN4_SOUL_LOOK + 0x19E40u)
+#define SOULS4_END         SOULS4_WIND_END
 
 #endif

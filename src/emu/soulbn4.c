@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "bn4.h"
+#include "bn4_navis.h"
 #include "bn4_souls.h"
 #include "bn6.h"
 #include "bn6_chips.h"
@@ -14,6 +15,7 @@
 #include "rom.h"
 #include "soulkinds.h"
 #include "soulpassive.h"
+#include "soulroute.h"
 #include "thumb_reloc.h"
 #include "xchips_code.h"
 
@@ -26,15 +28,18 @@ enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
 /* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8, FireSoul 5, MetlSoul 9,
- * WoodSoul 12) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12 };
+ * WoodSoul 12, WindSoul 3) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3 };
 #define FORM_GUTS 2
 #define FORM_NUM 8
 #define FORM_AQUA 11
 #define FORM_FIRE 5
 #define FORM_METL 9
 #define FORM_WOOD 12
+#define FORM_WIND 3
 #define OP_MOVS_R1 0x2100u   /* movs r1,#imm8 */
+#define OP_MOVS_R0 0x2000u   /* movs r0,#imm8 */
+#define OP_MOVS_R4 0x2400u   /* movs r4,#imm8 */
 #define OP_BEQ_NEXT 0xD001u  /* beq past the next bl */
 #define OP_CMP_R1_B 0x2900u   /* cmp r1,#imm8 (the bonus's kinds) */
 #define OP_BL_HI 0xF000u      /* a bl's first half */
@@ -154,6 +159,12 @@ int soulbn4_k(int soul) { return soul >= SOUL_BN4_FIRST && soul < SOUL_BN4_FIRST
 /* a power attack's routine one of BN4's empty ones (its charge times alone serve) */
 static bool empty4(uint32_t routine) { return routine == (BN4_POWER_EMPTY | 1) || routine == (BN4_POWER_EMPTY2 | 1); }
 
+/* BN4's power attack `power` as BN6 runs it: its code moved with a unit, else its copy as a chip's shot (soulroute.c); 0 none */
+static uint32_t power_routine(const uint8_t *b4, int power) {
+	uint32_t moved = xchips_bn4_moved_at(get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * (uint32_t)power));
+	return moved ? moved : soulroute_at(power);
+}
+
 bool soulbn4_read(int k, SoulBn4 *out) {
 	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
 	memset(out, 0, sizeof *out);
@@ -165,9 +176,8 @@ bool soulbn4_read(int k, SoulBn4 *out) {
 	/* (a chip charge only where its power attack is one of BN4's empty routines, its charge times serving alone: AquaSoul's,
 	 * FireSoul's) */
 	bool chip = row[ROW4_CHIP] != NONE;
-	/* (a plain shot of his own where its code is moved with his unit: MetlSoul's) */
-	uint32_t plain = row[ROW4_PLAIN] != POWER_PLAIN4 && row[ROW4_PLAIN] < BN4_POWER_ATTACK_COUNT ?
-		xchips_bn4_moved_at(get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * row[ROW4_PLAIN])) : 0;
+	/* (a plain shot of his own where its code is moved with his unit, MetlSoul's, or is a chip's shot, WindSoul's AirShot) */
+	uint32_t plain = row[ROW4_PLAIN] != POWER_PLAIN4 && row[ROW4_PLAIN] < BN4_POWER_ATTACK_COUNT ? power_routine(b4, row[ROW4_PLAIN]) : 0;
 	if (form < 1 || form >= FORMS || row[ROW4_0] != NONE || (row[ROW4_PLAIN] != POWER_PLAIN4 && !plain) || row[ROW4_CHARGED] >= BN4_POWER_ATTACK_COUNT ||
 		(chip && (row[ROW4_CHIP] >= BN4_POWER_ATTACK_COUNT || !empty4(get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * row[ROW4_CHIP])))))
 		return false;
@@ -180,16 +190,17 @@ bool soulbn4_read(int k, SoulBn4 *out) {
 	out->kind = b4[BN4_SOUL_KINDS - BUS + (uint32_t)(form - 1)];
 	out->element = b4[BN4_FORM_ELEMENTS - BUS + (uint32_t)form];
 	out->power = row[ROW4_CHARGED];
-	out->routine = xchips_bn4_moved_at(get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * out->power));
+	out->routine = power_routine(b4, out->power);
 	memcpy(out->charge, b4 + (BN4_CHARGE_TIMES - BUS) + CHARGE_ROW * (uint32_t)out->power, CHARGE_ROW);
 	return out->routine != 0;
 }
 
 /* The Souls whose taking of the form passes over the hand (BN4_FORM_ENTERS), each its routine's places: GutsSoul's +30 to chips
- * of no kind or panel-cracking, NumSoul's +10 to those of no kind (one kind: kind2 0) */
+ * of no kind or panel-cracking, NumSoul's +10 to those of no kind, WindSoul's +10 to Wind chips (one kind: kind2 0) */
 static const struct { uint8_t form; uint32_t enter, kind, kind2, add; } passes[] = {
 	{ FORM_GUTS, BN4_GUTS_ENTER, BN4_GUTS_PASS_KIND, BN4_GUTS_PASS_KIND2, BN4_GUTS_PASS_ADD },
 	{ FORM_NUM, BN4_NUM_ENTER, BN4_NUM_PASS_KIND, 0, BN4_NUM_PASS_ADD },
+	{ FORM_WIND, BN4_WIND_ENTER, BN4_WIND_PASS_KIND, 0, BN4_WIND_PASS_ADD },
 };
 
 /* form's pass's numbers read from BN4's code: its kinds (kind2 -1 none) and its add; false where it has none, or the code is not
@@ -276,6 +287,34 @@ void soulbn4_enter(uint32_t obj, int k) {
 		if ((kind == kind1 || kind == kind2) && shows_power(chip))
 			hook_write16(hand + BN6_HAND_BONUS + 2 * i, (uint16_t)(hook_read16(hand + BN6_HAND_BONUS + 2 * i) + add));
 	}
+}
+
+uint32_t soulbn4_wind(int k) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	uint32_t to;
+	if (!b4 || k < 0 || k >= SOULS_BN4 || forms[k] != FORM_WIND ||
+		get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * (uint32_t)forms[k]) != (BN4_WIND_ENTER | 1) ||
+		!thumb_bl_read(b4 + (BN4_WIND_SPAWN_CALL - BUS), 0, BN4_WIND_SPAWN_CALL, &to) || to != BN4_WIND_SPAWN)
+		return 0;
+	uint16_t f = get16(b4 + (BN4_WIND_FLAGS - BUS));
+	return (f & 0xFF00u) == OP_MOVS_R0 ? (f & 0xFFu) : 0;
+}
+
+bool soulbn4_wind_coll(SoulBn4CollSet *out) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (!b4) return false;
+	uint16_t a = get16(b4 + (BN4_WIND_COLL - BUS)), b = get16(b4 + (BN4_WIND_COLL + 2 - BUS)), c = get16(b4 + (BN4_WIND_COLL + 4 - BUS));
+	if ((a & 0xFF00u) != OP_MOVS_R1 || (b & 0xFF00u) != 0x2200u || (c & 0xFF00u) != 0x2300u) return false;
+	out->region = a & 0xFF;
+	out->region2 = b & 0xFF;
+	out->arg = c & 0xFF;
+	return true;
+}
+
+int soulbn4_wind_level(void) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	uint16_t m = b4 ? get16(b4 + (BN4_WIND_LEVEL - BUS)) : 0;
+	return (m & 0xFF00u) == OP_MOVS_R4 ? (m & 0xFF) : -1;
 }
 
 bool soulbn4_guarded(int k) {

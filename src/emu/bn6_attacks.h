@@ -38,4 +38,7 @@
 #define BN6_CHARGE_TIMES_REF    0x08012FC4u   /* the one word naming it (0x08012FA6) */
 #define BN6_CHARGE_ROW          10            /* bytes a power attack's */
 
+#define BN6_CHIP_ROUTE    0x080129A6u /* r0 a chip, r7 MegaMan's attack's variables: BN4_CHIP_ROUTE's twin, from BN6's record (its
+                                       * +2 with the element's bit of 0x080129E4's table by the record's +6), its family returned */
+
 #endif

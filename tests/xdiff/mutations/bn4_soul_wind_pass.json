@@ -1,0 +1,8 @@
+[
+ {
+  "name": "WindSoul's pass left out",
+  "spec": "bn4_soul_wind_pass",
+  "soulbreak": 512,
+  "what": "the passives' break SOULPASSIVE_BREAK_PLUS leaves his entering's pass out (src/emu/soulbn4.c soulbn4_enter): AirShot strikes 20 where BN4's is 30"
+ }
+]

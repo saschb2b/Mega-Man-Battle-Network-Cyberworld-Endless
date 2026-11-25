@@ -1,0 +1,14 @@
+{
+ "name": "WindSoul's wind's spawn's r3, each game's leftover",
+ "spawn_leftover": {
+  "kind": "T4",
+  "type": "0x41",
+  "word": "0x3C",
+  "bn4": [
+   "rom",
+   134293088
+  ],
+  "bn6": "0x080E666D"
+ },
+ "why": "The fourth kind's spawn keeps the caller's r1 to r3 at the object's +0x34 to +0x3C (WindMan's wind's spawn's r3, above). WindSoul's taking of the form (BN4_WIND_ENTER) calls BN4_WIND_SPAWN with r3 what its collision's set-up before it left (0x08012ED0's last literal, 0x08012660); BN6's stub calls BN6_WIND_SPAWN through a bx r3 whose r3 is the routine's address with its Thumb bit (src/emu/soulwind.c, 0x080E666D). No code of the wind reads its +0x3C (its routines 0x080E6584-0x080E6780). bn4_soul_wind at t2"
+}

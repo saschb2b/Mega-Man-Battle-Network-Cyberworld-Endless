@@ -149,6 +149,10 @@
                                             * hit gave him on him: passed over where NaviStats +0x29 or his form (+0x2C) is 7, his
                                             * form 0x13, or NaviStats +0x52 set (0x0801ACC6-0x0801ACE6), */
 #define BN6_PLAYER_STATUS_PAST 0x0801ACECu /* ... and where those go, past it */
+#define BN6_COLL_SET_UP       0x0801A082u /* r1, r2 its regions, r3 its +0xE, r5 the object: its collision data's hit masks set from them
+                                           * (+0x30, +0x34 by 0x0801A0BA), +0x2E its +0x2C: BN4's 0x08012ED0 (its +0xC, +0x58, +0x5C) */
+#define BN6_PLAYER_LAST_CALL  0x0801AD0Cu /* the player's frame's last call, bl BN6_PLAYER_LAST, before its pop (BN6_PLAYER_FRAME_END), */
+#define BN6_PLAYER_LAST       0x0800EB9Eu
 #define BN6_COLL_PUSH         0x12        /* u16 a hit's, given the struck's +0xA4 where its low byte is not 0 (0x081D78BA; BN4's +0x74) */
 #define BN6_COLL_PUSH_TAKEN   0xA4        /* u16 the struck's (0x081D78C6; BN4's +0x48) */
 #define BN6_COLL_MET          0x68        /* u32 the index bits of those it met (0x081D7B1E-0x081D7B30; BN4's +0x4C) */

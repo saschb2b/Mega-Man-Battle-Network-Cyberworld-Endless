@@ -1438,7 +1438,14 @@ format, its game 4: the trace's header names it):
   why), applied only where BN4's trace holds nothing there and the other
   is BN6's: a virus's AI data and its pointer, the AI index, the freeze's
   and the bubble's timers, and the doublings BN6's hit pass counts for the
-  struck (+0x74, +0x75), which BN4's applies to the damage at once.
+  struck (+0x74, +0x75), which BN4's applies to the damage at once. A
+  spec's `chips` (`"BN4:BN6"`, hex ids) pairs the chips a Soul shoots by
+  name, no folder's, as the folders' pairs are (WindSoul's WindRack). The
+  natives' renderer ranks leave out MegaMan's buster's charge glow in both
+  games (BN4's fourth-kind 0x05, BN6's 0x08), and an object's sprite state
+  counts as its slot's last occupant's from its spawn on, a record of many
+  frames (a unison's) holding an earlier occupant's set-up at the same
+  address.
 - **The control** (`"kind": "control"`): `bn4_mettaur_control` fights
   BN4's Mettaur at (5,2) against MegaMan at (2,2) with 200 HP, 35 buster
   shots and five steps by the timer, twice, each run in a process of its

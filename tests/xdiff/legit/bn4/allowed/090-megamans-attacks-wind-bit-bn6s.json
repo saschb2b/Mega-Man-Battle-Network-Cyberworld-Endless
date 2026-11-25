@@ -1,0 +1,11 @@
+{
+ "name": "MegaMan's attack's Wind bit, BN6's",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offset": "0xA2",
+ "bit": "0x20",
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6 keeps an attack's second element as a bit of its variables' +2 (0x10 Cursor, 0x20 Wind, 0x40 Break, 0x80 Sword by its record's +6, the table at 0x080129E4), ORed in as a chip sets the attack up (its chip route 0x080129A6 at 0x080129C8-0x080129D2; the chip use's 0x080126F6 at 0x0801271E-0x08012728); BN4 sets +2 from the record's +4 alone (BN4_CHIP_ROUTE 0x0800D428, its chip use the same), its kinds kept in its records' +7 apart. So a Wind chip's attack, AirShot's or WindRack's, BN6's own by name, has 0x20 there in BN6 and not in BN4, WindSoul's two shots too (soulroute.c copies BN4's power attacks onto BN6's route). bn4_soul_wind_shots at t32 (AirShot used)"
+}
