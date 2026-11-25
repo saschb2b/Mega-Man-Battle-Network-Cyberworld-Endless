@@ -72,6 +72,7 @@ ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x
                   0x19: 0xDC,   # (FireSoul's charged shot)
                   0x14: 0xDD,   # (MetlSoul's charged shot)
                   0x28: 0xDE,   # (WoodSoul's charged shot)
+                  0x25: 0xDF,   # (ProtSoul's shield, his B and left)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -140,7 +141,7 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
 SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),), 0x3E: ((0x0A, 'SrchSoul'),),
                0x15: ((0x11, 'NumSoul'),), 0x19: ((0x0C, 'FireSoul'),),
-               0x14: ((0x13, 'MetlSoul'),), 0x28: ((0x57, 'WoodSoul'),)}
+               0x14: ((0x13, 'MetlSoul'),), 0x28: ((0x57, 'WoodSoul'),), 0x25: ((0x6A, 'ProtSoul'),)}
 # ... and a Soul's taking of the form that spawns an object of its own (BN4_FORM_ENTERS by its form), copied with the unit of
 # its charged shot's family, which the Souls' engine runs as he enters the proxy form (src/emu/soullife.c, xchips_bn4_moved_at).
 # By BN4's family: (the form, its Soul)
@@ -384,6 +385,7 @@ UNITS = (
     ('attack', 0x19, 'FireSoul'),
     ('attack', 0x14, 'MetlSoul'),
     ('attack', 0x28, 'WoodSoul'),
+    ('attack', 0x25, 'ProtSoul'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
