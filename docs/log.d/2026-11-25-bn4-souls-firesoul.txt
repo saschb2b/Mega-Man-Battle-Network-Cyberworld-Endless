@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-25T01:30:00Z
+* **Update**: multirom/bn4-souls.md (FireSoul in BN6's engine: his flame, his chip charge on BN4's own power attacks, his flame for a chip charged, his grass, his companion and his lava), rom/souls.md (FireSoul's flame for a chip charged and his chip charge's row, FireSoul on lava's row), code/emu.md (soulcharged.c, soullava.c), devtools/differential.md (FireSoul's grass in the Soul object's rule, BN4's lava and its count), project/claims/bn4-souls.json (the Souls' Thumb's stubs).

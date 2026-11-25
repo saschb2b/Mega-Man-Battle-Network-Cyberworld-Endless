@@ -16,6 +16,7 @@
 #include "rom.h"
 #include "soul_room.h"
 #include "soulbn4.h"
+#include "thumb_reloc.h"
 #include "xnavi_room.h"
 #include "xvirus_tx.h"
 
@@ -25,6 +26,34 @@
 #define OP_STR_R0_R7_48 0x64B8u   /* str r0,[r7,#0x48]: BN4_SOUL_COMPANION's keeping at his AI +0x48 */
 
 static bool done;
+static int both_k = -1;   /* the BN4 Soul whose stub SOULS_BN4_BOTH is, -1 none */
+
+/* The stub of BN4's k-th Soul, who has both (as BN4_FORM_STATE runs the form's routine, BN4_SOUL_COMPANION spawns at the unison):
+ * the overlay of BN4's Souls' kind through BN6's own spawn (BN6_FORM_OVERLAY_SPAWN), then his taking of the form's copy; r5 him,
+ * entered from the proxy form's overlay routine's call */
+static bool both_write(int k, uint32_t enter) {
+	static const uint16_t code[] = {
+		0xB500,                       /* 00 push {lr} */
+		0x2000 | SOUL_OVERLAY_BN4,    /* 02 movs r0,#kind */
+		0x2200,                       /* 04 movs r2,#0 */
+		0x4B03,                       /* 06 ldr r3,[pc,#0xC]: BN6's overlay spawn */
+		0, 0,                         /* 08 bl the bx r3 */
+		0x4B02,                       /* 0C ldr r3,[pc,#8]: his taking of the form's copy */
+		0, 0,                         /* 0E bl the bx r3 */
+		0xBD00,                       /* 12 pop {pc} */
+	};
+	uint8_t out[SOULS_BN4_BOTH_END - SOULS_BN4_BOTH] = { 0 };
+	for (size_t i = 0; i < sizeof code / sizeof *code; ++i) put16(out + 2 * i, code[i]);
+	put32(out + 0x14, BN6_FORM_OVERLAY_SPAWN | 1);
+	put32(out + 0x18, enter);
+	put16(out + 0x1C, 0x4718);   /* bx r3 */
+	put16(out + 0x1E, 0x46C0);   /* nop */
+	if (!thumb_bl_write(out, 0x08, SOULS_BN4_BOTH, SOULS_BN4_BOTH + 0x1C) || !thumb_bl_write(out, 0x0E, SOULS_BN4_BOTH, SOULS_BN4_BOTH + 0x1C))
+		return false;
+	emu_write(SOULS_BN4_BOTH, out, sizeof out);
+	both_k = k;
+	return true;
+}
 
 static uint16_t word_of(int k) {
 	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
@@ -66,6 +95,11 @@ bool soulcompanion_install(void) {
 	}
 	claims_begin("BN4's Souls' companions (soulcompanion.c)");
 	xv_commit();
+	/* (one Soul with both, FireSoul: the stub is his) */
+	for (int k = 0; k < SOULS_BN4; ++k) {
+		uint32_t enter = soulbn4_enter_copy(k);
+		if (word_of(k) && enter && (both_k >= 0 || !both_write(k, enter))) fprintf(stderr, "soulcompanion: BN4's Soul %d's companion and object: no room for both\n", soulbn4_form(k));
+	}
 	claims_end();
 	xv_tx_end();
 	done = true;
@@ -82,5 +116,7 @@ uint32_t soulcompanion_owner(uint32_t obj) {
 	return hook_read8(obj + BN6_T1_TYPE) == BN6_OVERLAY_TYPE && hook_read8(obj + BN6_T1_PARAM) == SOUL_OVERLAY_BN4 ?
 		hook_read32(obj + BN6_T1_PARENT) : obj;
 }
+
+uint32_t soulcompanion_both(int k) { return done && k >= 0 && k == both_k ? SOULS_BN4_BOTH : 0; }
 
 uint32_t soulcompanion_leave(int k) { return done && word_of(k) ? BN6_FORM_OVERLAY_TAKE : 0; }

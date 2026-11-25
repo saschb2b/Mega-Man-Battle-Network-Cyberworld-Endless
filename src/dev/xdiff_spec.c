@@ -198,19 +198,28 @@ static int skips_parse(Spec *s, const char *name, const char *v) {
 	return s->nskips > 0;
 }
 
-/* panels=CR:T[,CR:T...]: each panel (column C, row R, a hex digit each, the field's 1-6 and 1-3) given type T (hex) as the fight
- * begins */
+/* panels=CR:T[/T6][@N][,CR:T...]: each panel (column C, row R, a hex digit each, the field's 1-6 and 1-3) given type T (hex) as
+ * the fight begins, or at fight frame N (decimal) by the fight's timer, in BN6's battle type T6 where it is given (BN4's lava 8,
+ * BN6's 0xD) */
 static bool panels_parse(Spec *s, const char *v) {
 	for (const char *p = v; *p; ) {
 		unsigned cr, t;
 		int n = 0;
 		if (s->npanels >= MAX_PANELS || sscanf(p, "%2x:%x%n", &cr, &t, &n) != 2 || !n) return false;
 		unsigned col = cr >> 4, row = cr & 0xF;
-		if (col < 1 || col > 6 || row < 1 || row > 3 || !t || t > 0xF) return false;
+		unsigned t6 = t;
+		p += n;
+		if (*p == '/' && (sscanf(p + 1, "%x%n", &t6, &n) != 1 || !n)) return false;
+		if (*p == '/') p += 1 + n;
+		unsigned at = 0;
+		if (*p == '@' && (sscanf(p + 1, "%u%n", &at, &n) != 1 || !n || at > 0xFFFF)) return false;
+		if (*p == '@') p += 1 + n;
+		s->panels[s->npanels].at = (uint16_t)at;
+		if (col < 1 || col > 6 || row < 1 || row > 3 || !t || t > 0x1F || !t6 || t6 > 0x1F) return false;
 		s->panels[s->npanels].col = (uint8_t)col;
 		s->panels[s->npanels].row = (uint8_t)row;
+		s->panels[s->npanels].type6 = (uint8_t)t6;
 		s->panels[s->npanels++].type = (uint8_t)t;
-		p += n;
 		if (*p == ',') ++p;
 		else if (*p) return false;
 	}

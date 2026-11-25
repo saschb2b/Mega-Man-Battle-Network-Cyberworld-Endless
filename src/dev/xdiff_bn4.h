@@ -53,8 +53,10 @@ void xd4_state_take(const Spec *s, int game, int screen, int custom);
  * takes a form) */
 void xd4_souls_put(const Spec *s);
 /* (panels=) a BN4 spec's panels given their types in the battle of `game` (4 BN4's, its type at a panel's +0, BN4_PANEL_TYPE; 6
- * BN6's, at +2, BN6_PANEL_TYPE) before its first fight frame: each game makes a panel's flags from its type every frame */
-void xd4_panels_put(const Spec *s, int game);
+ * BN6's, at +2, BN6_PANEL_TYPE, its type6) as each falls due at fight timer `t` (before the first fight frame, or its frame
+ * past `behind` as the keys are), those of `put` (bit i its panel i) done already; each game makes a panel's flags from its
+ * type every frame. The panels put now and before */
+unsigned xd4_panels_due(const Spec *s, int game, uint32_t t, uint32_t behind, unsigned put);
 /* ... and BN4's MegaMan's form (its battle NaviStats' BN4_NAVI_FORM) said as it changes, once a frame where souls4 gave a Soul:
  * a Soul's unison and its turns' end, as the trace's numbers have them */
 void xd4_form_watch(void);

@@ -1,0 +1,10 @@
+{
+ "bn4": "0xA8",
+ "bn6": "0x285",
+ "clock": "state",
+ "souls": [
+  "5"
+ ],
+ "what": "FireSoul's flame 0xA8, its copy",
+ "why": "Played by MegaMan's state 0x19 as FireSoul's flame goes out, his charged shot's and the charged Fire chip's (BN4: its bl to PlaySoundEffect at 0x080EC4E2; BN6: the state's copy, FireSoul's unit's at BN6's grown 0xDC, its bl aimed at a shim of the unit's home that makes r0 0x285, XvSoundCall), a state's clock, his: the same sound, BN4's song copied into slot 0x285 by the Elem chips' unit first (src/audio/xsong.c XSOUNDS), as their shot's (110). bn4_soul_fire at t76"
+}

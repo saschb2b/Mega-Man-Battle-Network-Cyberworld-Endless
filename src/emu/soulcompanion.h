@@ -30,6 +30,10 @@ bool soulcompanion_enter(int k, uint32_t *word);
  * hook): its parent where it is BN6's companion overlay of BN4's Souls'
  * kind, else `obj` itself */
 uint32_t soulcompanion_owner(uint32_t obj);
+/* ... where he has both a companion and a taking of the form of his own that
+ * is moved (soulbn4_enter_copy: FireSoul's field of grass), the stub that
+ * spawns the one, then runs the other (SOULS_BN4_BOTH); 0 else */
+uint32_t soulcompanion_both(int k);
 /* ... and its leave: BN6's own removal of the overlay, 0 where he has none */
 uint32_t soulcompanion_leave(int k);
 

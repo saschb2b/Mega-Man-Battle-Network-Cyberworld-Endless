@@ -414,8 +414,34 @@ Atk+10) on the first Custom screen, B held 122 frames for his die, A at 220
 for MokoRus1 with his pass's 10. Its three mutations: the charge 10 frames
 longer, the pass left out, the companion's masks a step behind him. FireSoul
 shares the companion (list 4's 0, 9,288 bytes, which fits after FireMan's
-picture) but has an object of his own as he enters too, which `soullife.c`
-does not yet run beside it.
+picture) beside an object of his own as he enters (FireSoul in BN6's engine,
+below).
+
+## FireSoul in BN6's engine
+
+FireSoul (Red Sun's Soul 5, form 5, kind Fire, element Fire) is BN6's Soul
+18 (k 5, held bit 11), the first BN4 Soul with an attack of his own for a
+chip he charged and the first with both a companion and an object as he
+enters. What it took:
+
+| Part | FireSoul's |
+| --- | --- |
+| His charged shot | power attack 0x0C into family 0x19, an attack unit at BN6's grown 0xDC: a flame of 50 two panels ahead, Fire. Its flame is the third kind's 0x09, which Elem's unit moved first, so his unit copies its spawner alone (`SHARED3`) and that spawner's palette store at `0x080CE4BC` is named in `IMMS`. Its sound 0xA8 is Elem's copy at slot 0x285 |
+| His chip charge | power 0x66, BN4's second empty routine (`BN4_POWER_EMPTY2`, `0x0800CCD0`): a Fire chip held 50 frames (`BN4_FIRE_TEST_FORM`, no flag tested). BN5 has no empty power of those times, so BN4's Souls have power attacks of their own past Team ProtoMan's (`SOUL_POWER_BN4_MORE`, 0xE0 on, two by k, `soulpower.c`), which BN6 uses the chip charged by as it does BN5's empty ones |
+| His flame for a chip charged | BN4's chip use runs `BN4_FIRE_CHARGED` (`0x0800D638`) in place of the chip's setup where the chip is charged and his the form (`0x0800B776`, `0x0800B78A`): family 0x19 at 150, Fire, the chip's id 0. The generator copies it with his unit (`SOUL_CHARGED`, its `+0x70` BN6's `+0xA0` and its family his number), and `soulcharged.c` runs the copy after BN6's setup of the chip charged and sets the family it returns (`BN6_CHARGED_CHIP_SET`) |
+| His grass | his taking of the form (`0x0800E11C`) spawns the fourth kind's 0x12, a setter of panels (r4: type 6, mode 3, 10 frames), which blinks and then sets the middle row and (2,1), (2,3), (5,1), (5,3) to grass, BN6's number too. The generator moves it at the claim's dispatch 0xA5 with his entering (`SOUL_ENTERS`, `TYPES4_SOULS`). BN4's runs inside the unison, BN6's as he enters the proxy form, so the comparator's `soul object` reads BN6's blinks and its panels still plain in the fight's first frames as the same state, and a panel's blink each game keeps |
+| His companion | list 4's 0 (9,288 bytes), after FireMan's picture in the shared room, as NumSoul's. He has an object as he enters too: `soulcompanion.c` writes a stub that spawns the one and runs the other (`SOULS_BN4_BOTH`) |
+| His lava | where BN4's lava (type 8) hurts an actor or spares a Fire one, it heals FireSoul 50, adds as much to his collision data's Fire tally, turns plain and shows effect 7 and sound 0x9A (`BN4_LAVA_STEP`'s form 5, `BN4_LAVA_FIRE_HEAL`). BN6's engine's lava is BN5's (`XPANEL_LAVA`, `xpanels.c`), which spares a Fire actor: `soullava.c` gives FireSoul BN4's step through `xpanels_lava_own`, a Thumb of BN6's twins (`BN6_OBJECT_HEAL`, `BN6_SET_PANEL_TYPE`, effect 7 as Repair's unit moved it, 0xCE, and sound 0x9A as Walla's family copied it, 0x39) |
+
+The proof is `bn4_soul_fire` (with its control): united by two HeatShot, B
+held 42 frames for his flame of 50, A held 52 for the HeatShot turned into
+his flame of 150, against a MettaurEX (250 HP) off his grass, which keeps
+50 in both. Its five mutations: the charges 10 frames longer, his element
+none, the flame for a chip another power, plain panels for grass, the
+companion a step behind. His lava is `bn4_soul_fire_lava`: lava given under
+him at fight frame 30 (BN4's type 8, BN6's 0xD), healed and cooled in both,
+BN4's sound 0x9A and its copy at the same frame; its three mutations another
+effect, no sound, and the Thumb ended at once.
 
 ## Two Souls of one kind
 

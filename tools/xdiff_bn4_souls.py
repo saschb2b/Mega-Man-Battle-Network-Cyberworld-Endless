@@ -67,7 +67,10 @@ WINDOW6, PRESSES6 = 0x19, 0x18            # (... BN6's in his side's Souls block
 REQUESTS, RAPID4, CHARGED6, RAPID_AT = 0x44, 0x20, 0x02, 6   # (... at six asked: BN4's request 0x20, BN6's its charged B's 2)
 CHAOS6_NONE = 0xFF                        # (BN6's +0x11, its chip's chaos power, 0xFF none: BN6_AI_POWER_CHIP's note)
 GLOW4, GLOW6, GLOW_SLOT = ('T4', 0x05), ('T4', 0x08), 0x58
-SOUL_OBJECTS4 = (('T4', 0x44),)
+SOUL_OBJECTS4 = (('T4', 0x44), ('T4', 0x12))   # (SrchSoul's scan, FireSoul's field of grass)
+BLINK_TYPE, BLINK_SIDE, BLINKING = 0x08, 0x09, 0x0D   # (a panel's: BN6_PANEL_BLINK_TYPE, _SIDE, BN6_PANEL_BLINKING)
+SETTER_TYPE = 0x04                        # (FireSoul's object's +4: the type it sets, BN4's 0x080E3436)
+PANEL_TYPE, PANEL_TYPE_COPY, PANEL_FLAGS, PLAIN = 0x02, 0x06, 0x14, 2   # (BN6_PANEL_TYPE, its copy, the flags word; plain)
 # A Soul's companion (NumSoul's, FireSoul's: BN4_SOUL_COMPANION's first-kind 0x57) as BN6's companion overlay, its type 0x56 of
 # the kind SOUL_OVERLAY_BN4 (src/emu/soulcompanion.c), told as one by tools/xdiff_bn4.py's t1_moved
 COMPANION = ('T1', T1_MOVED | 0x57)
@@ -137,7 +140,8 @@ def bn6_power(form):
 def chip_power(rom4, form):
     """BN6's number of the chip charge of BN4's Soul of `form`, as src/emu/soulpower.c's bn4_chip_power gives it: BN5's empty
     power (soulpower.c's empty_powers, after Team Colonel's moved ones) whose charge times (BN5_CHARGE_TIMES, 0x0801CA68, ten
-    bytes an id) are those of its own (BN4_FORM_LOADOUTS' +2, BN4_CHARGE_TIMES 0x080180B8); None where it has none"""
+    bytes an id) are those of its own (BN4_FORM_LOADOUTS' +2, BN4_CHARGE_TIMES 0x080180B8), else BN4's own at the k-th's place
+    past Team ProtoMan's (soul_room.h SOUL_POWER_BN4_MORE, two by k: FireSoul's); None where it has none"""
     chip = rom4[0x184F0 + 4 * form + 2]
     if chip == 0xFF:
         return None
@@ -150,7 +154,10 @@ def chip_power(rom4, form):
     for i, p in enumerate(empty):
         if rom5[0x1CA68 + 10 * p:0x1CA68 + 10 * p + 10] == row4:
             return count + colonel_powers() + i
-    return None
+    room = open(os.path.join(ROOT, 'src', 'emu', 'soul_room.h')).read()
+    more = int(re.search(r'#define SOUL_POWER_BN4_MORE\s+(0x[0-9A-Fa-f]+)', room).group(1), 16)
+    k = {f: n for n, f in enumerate(bn4_forms().values())}.get(form)
+    return None if k is None else more + 2 * k
 
 
 def power_map(rom4):
@@ -174,6 +181,7 @@ class Souls4:
     def __init__(self, ta, tb, rom4, lag):
         self.names, self.forms, self.powers, self.frames = rules(), bn4_forms(), power_map(rom4), form_frames(rom4)
         self.rom4, self.trace_b = rom4, tb
+        self.blinked = None         # (the panel type BN6's Soul object blinked the panels as, once seen: FireSoul's grass)
         self.companion_first = {}   # (the companion's animation, its sprite's and its +0x11, at its first difference read)
         self.a, self.b, self.lag = {f['t']: f for f in ta['frames']}, {f['t']: f for f in tb['frames']}, lag
         self.unison_last = None   # (BN4's last frame of its unison)
@@ -259,8 +267,35 @@ class Souls4:
         alone in play in the fight's first frames, BN4's gone before them"""
         mine = lambda x: isinstance(x, tuple) and tuple(x[:2]) in SOUL_OBJECTS4
         objs = lambda fr: [o for o in fr['objs'] if mine(o.role)]
+        for o in objs(fb.fr):
+            self.blinked = o.o8(SETTER_TYPE)
+        # (a panel's blink, kept: BN6's of the object's that blinked it in the fight, its type and side (BN6_PANEL_BLINK_SET's
+        # stores, kept after), BN4's cleared as its fight began, its blinks before it)
+        raw = lambda v: v[1] if isinstance(v, tuple) and len(v) == 2 and v[0] == 'raw' and isinstance(v[1], int) else None
+        if isinstance(d.role, str) and d.role.startswith('panel ') and d.part == 'panel' and d.off == BLINK_TYPE and \
+                raw(d.a) is not None and raw(d.b) is not None and self.blinked is not None:
+            # (the word read whole: its type and side bytes so, the rest alike)
+            a, b = raw(d.a), raw(d.b)
+            # (either game's kept where the other's has none: the setter's loop runs to column 0, which BN6's twin of the blink,
+            # 0x0800CC52, leaves alone)
+            kept, none = (b, a) if a & 0xFFFF == 0 else (a, b)
+            return a & ~0xFFFF == b & ~0xFFFF and none & 0xFFFF == 0 and kept & 0xFF == self.blinked and (kept >> 8 & 0xFF) in (0, 1)
+        if isinstance(d.role, str) and d.role.startswith('panel ') and d.part == 'panel' and d.a == 0 and self.blinked is not None:
+            if d.off == BLINK_TYPE:
+                return d.b == self.blinked
+            if d.off == BLINK_SIDE:
+                return d.b in (0, 1)
+            if d.off == BLINKING:
+                return d.b == 1 and bool(objs(fb.fr))
         if objs(fa.fr) or not objs(fb.fr):
             return False
+        # (a panel it sets, BN4's set before the fight, BN6's as it ends: BN4's of its type, BN6's plain still, the type's own flags)
+        if isinstance(d.role, str) and d.role.startswith('panel ') and d.part == 'panel' and self.blinked is not None:
+            x, y = (int(v) for v in d.role.split(' ')[1].split(','))
+            pa, pb = fa.fr['panels'][y * 8 + x], fb.fr['panels'][y * 8 + x]
+            if len(pa) <= PANEL_FLAGS + 4 or len(pb) <= PANEL_FLAGS + 4 or (pa[PANEL_TYPE], pb[PANEL_TYPE]) != (self.blinked, PLAIN):
+                return False
+            return d.off in (PANEL_TYPE, PANEL_TYPE_COPY) or PANEL_FLAGS <= d.off < PANEL_FLAGS + 4 or d.off in (BLINK_TYPE, BLINK_SIDE)
         if d.part == 'in play':
             return mine(d.role) and d.a is False and d.b is True
         if d.part == 'run order' and isinstance(d.a, list) and isinstance(d.b, list):

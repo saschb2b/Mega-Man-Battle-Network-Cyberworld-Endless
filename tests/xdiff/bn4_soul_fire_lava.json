@@ -1,0 +1,216 @@
+{
+ "about": "BN4's FireSoul on lava (BN4_LAVA_STEP's form 5, BN4_LAVA_FIRE_HEAL: 50 healed, as much to his collision data's Fire tally, the panel plain, effect 7 at his place and sound 0x9A) in BN4 Red Sun's own battle against BN6's (docs/multirom/bn4-souls.md, FireSoul in BN6's engine): BN6's lava is BN5's (XPANEL_LAVA 0xD, src/emu/xpanels.c), which FireSoul takes BN4's way (soullava.c). Lava at (3,1) at fight frame 30, BN4's type 8 and BN6's 0xD; united by two HeatShot as bn4_soul_fire on the first Custom screen, so FireSoul stands where it comes (MegaMan at (3,1), the lava under him). A MettaurEX at (4,1); MegaMan with 2000 HP, his max, so the heal is held to it; kept from harm.",
+ "game": "bn4",
+ "against": "bn6",
+ "subject": "megaman",
+ "foes": "06@41",
+ "mm": "31",
+ "hp": 2000,
+ "frames": 200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "safe": true,
+ "souls4": "10",
+ "souls6": "800",
+ "folder4": [
+  "0213",
+  "0213"
+ ],
+ "deck4": [
+  "0213",
+  "0213"
+ ],
+ "folder6": [
+  "24C:01",
+  "24C:01"
+ ],
+ "deck6": [
+  "24C:01",
+  "24C:01"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [],
+ "panels": [
+  "31:8/D@30"
+ ]
+}

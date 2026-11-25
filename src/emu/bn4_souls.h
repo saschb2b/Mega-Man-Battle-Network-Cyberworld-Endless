@@ -32,9 +32,21 @@
 /* A Soul's chip charge (AquaSoul's, form 11; ProtSoul's, MetlSoul's and FireSoul's by the same code): */
 #define BN4_POWER_EMPTY   0x0800CC2Cu /* mov pc,lr: the chip charge's power attack of forms 7, 9 and 11 (BN4_FORM_LOADOUTS +2), its charge
                                        * times (BN4_CHARGE_TIMES' row) the chip charge's alone */
+#define BN4_LAVA_STEP     0x08013128u /* an actor on a panel of type 8 (lava; BN6's engine's XPANEL_LAVA, BN5's): */
+#define BN4_LAVA_FIRE_FORM 0x08013142u /* ... cmp r0,#5: FireSoul's form (NaviStats +0x24), on to 0x080131B8, */
+#define BN4_LAVA_FIRE_HEAL 0x080131B8u /* ... movs r0,#0x32: 50 healed (0x0800ABBA, BN6's 0x0800E2EC), the same added to his collision data's
+                                        * Fire tally (+0x3E, BN6's BN6_COLL_FIRE_DAMAGE), the panel set plain (BN4_SET_PANEL_TYPE),
+                                        * effect 7 at his place (movs r4,#7 at 0x080131D6) and sound 0x9A (0x080131DC) */
+#define BN4_POWER_EMPTY2  0x0800CCD0u /* mov pc,lr: another, FireSoul's chip charge's (form 5's +2, power 0x66: 50 frames) */
 #define BN4_CHIP_CHARGE_TEST 0x0800BC78u /* r0 the chip: 1 where his form charges it with A (r4 its kind, +7; r7 its flags, +9) */
 #define BN4_AQUA_TEST_FORM 0x0800BCBAu  /* ... cmp r0,#0xb: AquaSoul's form, then not left alone (+9 bit 0), */
 #define BN4_AQUA_TEST_KIND 0x0800BCC4u  /* ... cmp r4,#1: of the kind Aqua */
+#define BN4_FIRE_TEST_FORM 0x0800BCB0u  /* ... cmp r0,#5: FireSoul's form, no flag tested, */
+#define BN4_FIRE_TEST_KIND 0x0800BCB4u  /* ... cmp r4,#0: of the kind Fire */
+#define BN4_CHARGED_FORM  0x0800B776u   /* the chip use's (0x0800B6F8 on: r4 its flags, 8 a chip charged): cmp r0,#5, FireSoul's form, */
+#define BN4_FIRE_CHARGED_CALL 0x0800B78Au /* ... where its bl to BN4_FIRE_CHARGED stands in for the chip's setup (0x0800D4B4) */
+#define BN4_FIRE_CHARGED  0x0800D638u   /* FireSoul's attack for a chip he charged: family 0x19 (his flame) of 150, Fire, its hit word
+                                         * 0x1E05, the chip's id 0 (tools/xchiprecipe_bn4.py SOUL_CHARGED) */
 #define BN4_CHIP_CHARGE_BONUS 0x0800C47Au /* r0 the chip, r1 his form: 0x8000 to a charged chip's power (its damage doubled; BN6's twin
                                            * 0x08012C7C, BN6_CHARGE_BONUS), then sound 0x1BB (0x0800D536-0x0800D53C) */
 #define BN4_AQUA_BONUS_FORM 0x0800C49Au /* ... cmp r2,#0xb: AquaSoul's, */

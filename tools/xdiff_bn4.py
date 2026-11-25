@@ -753,7 +753,11 @@ BN4_TIMERS_IDLE, BN6_TIMERS_IDLE = (0x3C0, 0x80BE), (0, 0x708)
 # holds BN6's numbers for them (tools/xchiprecipe_bn4.py TABLES' bytes). And BN4's set type's timer: BN4_SET_PANEL_TYPE gives
 # +0x12 0xBE, which BN4's panel step (BN4_PANEL_STEP) counts on a holding panel (0xA) alone, as it counts 0x80BE nowhere: on
 # any other type both are BN4's idle, BN6's 0x708 (BN6_PANEL_TIMER, written every frame on most types)
-PANEL_TYPES4 = {9: 5, 0xB: 16}
+PANEL_TYPES4 = {9: 5, 0xB: 16, 8: 0xD}
+# ... and BN4's lava, 8 (0x11010's word, BN5's lava's), the engine's XPANEL_LAVA 0xD (BN5's lava as src/emu/xpanels.c runs it):
+# BN4 counts its 960 frames at its +0xE (the trace's +0x10, BN4_PANEL_STEP), BN6's engine at +0x12 (BN6_PANEL_TIMER, xpanels.c
+# MADE_FRAMES), its +0x10 0
+BN4_PANEL_LAVA, LAVA_FRAMES = 8, 960
 PANEL_FLAGS, PANEL_BLINK_TYPE, BN4_PANEL_HOLDING, BN4_SET_TIMER = 0x14, 0x08, 0x0A, 0xBE
 
 
@@ -785,6 +789,10 @@ def panel_as_bn6(i, p, tabs, panels, start=None):
             out[PANEL_FLAGS] = out[PANEL_FLAGS] & 0xF0 | PANEL_TYPES4[t]
     out[PANEL_BLINK_TYPE] = PANEL_TYPES4.get(out[PANEL_BLINK_TYPE], out[PANEL_BLINK_TYPE])
     timers = u16(out, PANEL_SIDE_TIMER), u16(out, PANEL_TIMER)
+    if t == BN4_PANEL_LAVA and timers[1] == BN4_TIMERS_IDLE[1]:
+        out[PANEL_SIDE_TIMER:PANEL_SIDE_TIMER + 2] = (0).to_bytes(2, 'little')
+        out[PANEL_TIMER:PANEL_TIMER + 2] = timers[0].to_bytes(2, 'little')
+        return out
     if timers == (BN4_TIMERS_IDLE[0], BN4_SET_TIMER) and t != BN4_PANEL_HOLDING:
         timers = BN4_TIMERS_IDLE
     if timers == BN4_TIMERS_IDLE:
@@ -1146,6 +1154,25 @@ def family_sounds(fa, fb, sd):
 
 
 SPRITE_COUNT = 0x91   # (a first-kind object's sprite +1: the frames its animation's count runs, legit.json's bn4 clocks)
+
+
+LAVA_COUNT = "the lava's count, by the fight's frames"
+
+
+def lava_count(d, fa, fbt):
+    """legit.json's bn4 clocks, the lava's count: a lava panel's 960 frames (BN4's type 8, counted at its +0xE by its panel step
+    BN4_PANEL_STEP; BN6's engine's XPANEL_LAVA, BN5's, at +0x12 by its own, src/emu/xpanels.c), which each panel step counts as
+    the main loop runs it, not a state: compared at the same fight frame (panel_as_bn6 lays BN4's at BN6's place). True where
+    BN6's of BN4's t holds the same; at the frame a spec's panel is given lava (xdiff.c panels_step, BN4's after its panel step
+    had run that frame), BN4's its 960 not yet counted, BN6's one counted"""
+    if not (fbt and isinstance(d.role, str) and d.role.startswith('panel ') and d.part == 'panel' and PANEL_TIMER <= d.off < PANEL_TIMER + 2):
+        return False
+    x, y = (int(v) for v in d.role.split(' ')[1].split(','))
+    pa, pb = fa.fr['panels'][y * 8 + x], fbt.fr['panels'][y * 8 + x]
+    if pa[PANEL_TYPE] != BN4_PANEL_LAVA or pb[PANEL_TYPE] != PANEL_TYPES4[BN4_PANEL_LAVA]:
+        return False
+    a, b = u16(pa, PANEL_SIDE_TIMER), u16(pb, PANEL_TIMER)   # (BN4's frame as traced: its count at the trace's +0x10)
+    return a == b or (a == LAVA_FRAMES and b == LAVA_FRAMES - 1)
 
 
 def opening_count(d, fa, fbt):
@@ -2009,6 +2036,7 @@ def compare(spec, ta, tb, canon, show=6):
         ft = Frame(tb, frt, canon) if frt and lag else None
         for d in world:   # (legit.json's bn4 clocks: what the fight's frames count, at the same fight frame)
             d.mask = ("the opening's animation count, by the fight's frames" if opening_count(d, fa, ft) else
+                      LAVA_COUNT if lava_count(d, fa, ft) else
                       "the hit's spark, each engine's own" if spark_own(d) else
                       "Full Synchro's aura, each engine's own" if synchro_aura(d, fa, fb) else
                       "the paralysis's flash, its gate a state's and its phase the timer's" if paralysis_flash(d, fa, fb) else

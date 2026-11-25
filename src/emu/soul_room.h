@@ -36,6 +36,12 @@
 #define SOUL_COLONEL_STRIKE (SOULS_THUMB + 0x100u)    /* ... BN5's obstacle states' block (0x08018002-0x0801802E) where BN6's lack it, */
 #define SOUL_COLONEL_UNDO  (SOULS_THUMB + 0x180u)     /* ... and B giving the button's chip back (BN5's 0x08024CEA-0x08024D28), */
 #define SOULS_COLONEL_END  (SOULS_THUMB + 0x1C0u)
+#define SOULS_BN4_CHARGED  (SOULS_THUMB + 0x1C0u)    /* ... a BN4 Soul's attack for a chip he charged run in place of the chip's setup (soulchips.c), */
+#define SOULS_BN4_CHARGED_END (SOULS_THUMB + 0x1E0u)
+#define SOULS_BN4_BOTH     (SOULS_THUMB + 0x1E0u)    /* ... a BN4 Soul's companion spawned, then his taking of the form's copy (soulcompanion.c), */
+#define SOULS_BN4_BOTH_END (SOULS_THUMB + 0x200u)
+#define SOULS_BN4_LAVA     (SOULS_THUMB + 0x200u)    /* ... FireSoul on lava, healed and the panel cooled (soullava.c), */
+#define SOULS_BN4_LAVA_END (SOULS_THUMB + 0x260u)
 #define SOULS_THUMB_END    (FREE_SOULS + 0x001C80u)   /* ... to */
 #define SOULS_ARM_OF       (FREE_SOULS + 0x001C80u)   /* list 0's arm row by sprite number grown: BN6's bytes, then the Souls', to: */
 #define SOULS_ARM_OF_END   (FREE_SOULS + 0x001D80u)
@@ -79,6 +85,9 @@
 #define SOUL_POWER_FIRST   0x94          /* BN6's power attack id of the first Soul's (BN6's own 148 to 0x93) */
 #define SOUL_POWER_TEAM    0xB1          /* ... of Team ProtoMan's first (soulpower.c): past Team Colonel's 17 (moved 8, empty 3, chaos 6) and
                                             room for BN4's twelve, so that neither moves the other's: their empty ones, chaos ones, then moved */
+#define SOUL_POWER_BN4_MORE 0xE0        /* ... of BN4's Souls' own past their charged shots, two by k (a chip charge BN5 has no empty
+                                            power of its times or that runs an attack of his, then a plain shot or a B-left), to 0xF8,
+                                            past Team ProtoMan's (soulpower.c) */
 #define SOUL_FACE_FIRST    0x17          /* BN6's emotion window face of the first Soul's, past BN6's 23 (0x0801CD08) */
 #define SOUL_FACE_BN4      0x1D          /* ... of BN4's united Soul's, past BN5's six (SOULS_FACES and SOULS_FACE_PALS hold 32; Team ProtoMan's
                                             Souls show MegaMan's own, BN6's 0: Team Colonel's ROM holds no face of theirs, soullook.c) */

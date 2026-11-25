@@ -15,8 +15,8 @@
 #include <stdint.h>
 
 #define SOUL_BN4_FIRST 13   /* BN6's Soul number (BN6_SOUL_ID, the element's +BN6_ELEMENT_SOUL, a used bit) of BN4's first moved */
-#define SOULS_BN4      5    /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul (BN4's 4),
-                             * NumSoul (BN4's 8) */
+#define SOULS_BN4      6    /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul (BN4's 4),
+                             * NumSoul (BN4's 8), FireSoul (BN4's 5) */
 #define SOULS_HELD_BN4 6    /* the bit of the first in the Souls held (soulunite_held), past BN5's six */
 
 /* A BN4 Soul's rows as BN6's engine takes them, read from BN4's ROM */
@@ -27,7 +27,8 @@ typedef struct {
 	uint8_t power;     /* its charged shot's power attack, BN4's id (BN4_FORM_LOADOUTS +3) */
 	uint32_t routine;  /* ... its routine moved with its family's unit (xchips_bn4_moved_at), 0 none */
 	uint8_t charge[10];/* ... its charge times by his Charge (BN4_CHARGE_TIMES, BN6_CHARGE_ROW's shape) */
-	uint8_t chip;      /* his chip charge's power attack, BN4's id (BN4_FORM_LOADOUTS +2: BN4's empty routine, BN4_POWER_EMPTY), NONE none */
+	uint8_t chip;      /* his chip charge's power attack, BN4's id (BN4_FORM_LOADOUTS +2: BN4's empty routines, BN4_POWER_EMPTY and
+	                    * BN4_POWER_EMPTY2), NONE none */
 	uint8_t chip_charge[10];  /* ... its charge times by his Charge, the A button's hold before a chip is used charged */
 } SoulBn4;
 
@@ -53,6 +54,9 @@ uint32_t soulbn4_enter_copy(int k);
  * kind by BN4's numbering, soulkinds_bn4_of, and its flags): AquaSoul an Aqua chip not left alone; false for a Soul with no
  * chip charge */
 bool soulbn4_charges(int k, int chip);
+/* (after xchips_bn4_code_install) BN4's k-th Soul's own attack for a chip he charged, which BN4's chip use runs in place of the
+ * chip's (FireSoul's flame, BN4_FIRE_CHARGED, at BN4_FIRE_CHARGED_CALL), its copy's address with its Thumb bit, 0 none */
+uint32_t soulbn4_charged_copy(int k);
 /* ... and what BN4 adds to the power of a chip it charged (BN4_CHIP_CHARGE_BONUS): BN4_CHARGED_DOUBLE, its damage doubled */
 unsigned soulbn4_charge_bonus(int k);
 /* ... and what it adds to an uncharged chip's (BN4_CHIP_BONUS): ThunSoul's BN4_PARALYSING to an Elec chip whose power shows, 0 else */
