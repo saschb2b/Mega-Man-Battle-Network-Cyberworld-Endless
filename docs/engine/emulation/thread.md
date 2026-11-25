@@ -139,3 +139,6 @@ Also tried for the menu and not kept:
   the menu takes input**: every frame that does draw still runs past a
   refresh, so the menu shows N of N + 1 frames (53 a second at one
   refresh in eight) and the band's field steps at the refresh's rate.
+  Kept in another form: no refresh at all once the menu stands still
+  ([The PET's start menu](../../game/pet-menu.md), Under it, BN6), the
+  band's field standing as the field under the menu does.

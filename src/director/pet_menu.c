@@ -159,5 +159,7 @@ uint32_t pet_menu_keys(uint32_t keys) {
 
 void pet_menu_describe(FILE *f) {
 	static const char *const names[PM_ENTRIES + 1] = { "ChipFolder", "SubChip", "Library", "MegaMan", "Forms", "Colours", "E-Mail", "KeyItem", "Options", "Save", "EXIT" };
-	if (pet_menu_up()) fprintf(f, "petmenu at %s\npetfield %s\n", names[cur], pet_menu_field_kept() ? "kept" : "none");
+	/* (petpicture: BN6's own picture of the menu, drawn each frame or the last one kept, pet_menu_unshown) */
+	if (pet_menu_up()) fprintf(f, "petmenu at %s\npetfield %s\npetpicture %s\n", names[cur], pet_menu_field_kept() ? "kept" : "none",
+		emu_threaded() && pet_menu_unshown() ? "kept" : "live");
 }

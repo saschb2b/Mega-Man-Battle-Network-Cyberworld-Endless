@@ -317,7 +317,9 @@ static void update(void) {
 		fast_step(dev_fast);
 		for (int i = 0; frame_goes_on(i, speed); ++i) {
 			if (started) TIMED("director", after_frame());
-			emu_frame_as(cinema_keys(frame_keys()), dev_fast ? 0 : fast_forward_how(i));
+			/* (without its picture where our start menu stands still over it, pet.h; fast forward's own frames
+			 * without one stay as they were on this thread, every one drawn) */
+			emu_frame_as(cinema_keys(frame_keys()), dev_fast ? 0 : (fast_forward_how(i) & ~(unsigned)EMU_FRAME_UNSHOWN) | pet_frame_how());
 			started = true;
 		}
 		if (revealed || director_arrived()) ++revealed;

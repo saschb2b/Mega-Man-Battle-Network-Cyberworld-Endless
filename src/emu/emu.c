@@ -266,12 +266,16 @@ static Thread worker;
 static SDL_Thread *worker;
 #endif
 
+/* (the frame in flight runs without its picture: set before the worker is
+ * woken, read by it and as the frame is taken in, wait_frame) */
+static bool flight_unshown;
+
 static int worker_main(void *arg) {
 	(void)arg;
 	for (;;) {
 		SDL_SemWait(go);
 		if (stopping) return 0;
-		run_frame(false);
+		run_frame(flight_unshown);
 		/* (the picture drawn on a thread of its own: its frame whole) */
 		uint64_t v0 = SDL_GetPerformanceCounter();
 		if (core->videoLogger && core->videoLogger->wait) core->videoLogger->wait(core->videoLogger);
@@ -304,8 +308,11 @@ static void wait_frame(void) {
 	}
 	SDL_SemWait(done);
 	in_flight = false;
-	memcpy(shown, video, sizeof shown);
-	++pictures;
+	/* (a frame run without its picture left the one before it: nothing to take) */
+	if (!flight_unshown) {
+		memcpy(shown, video, sizeof shown);
+		++pictures;
+	}
 	if (after_frame) after_frame();
 }
 
@@ -364,6 +371,10 @@ void emu_frame_as(uint32_t keys, unsigned how) {
 	if (before_frame) before_frame();
 	core->setKeys(core, keys);
 	if (threaded) {
+		/* (a frame asked for without its picture: mGBA's video thread, on
+		 * the 3DS the main core's, draws nothing for it) */
+		flight_unshown = (how & EMU_FRAME_UNSHOWN) && layout_ok;
+		if (flight_unshown) ((struct GBA *)core->board)->video.frameskipCounter = 1;
 		in_flight = true;
 		SDL_SemPost(go);
 		return;
