@@ -118,11 +118,52 @@ void platform_frame_parts(uint64_t update, uint64_t draw) {
 
 void frame_log_drawn(void) { emu_drawing = false; }
 
+/* A line said. On the 3DS a line printed goes to the SD card at once, on
+ * the thread the frames are paced on: 11 to 29 ms a line, measured on a New
+ * 3DS, so every second logged lost a frame and its sound ran dry two or
+ * three times, and the log showed a stutter of its own making (issue #897).
+ * There the lines are kept in memory and written where the loop is held
+ * anyway: after a second with a frame of 100 ms or more in it (a layer
+ * made, a start), as the room fills (two minutes of lines), and as the game
+ * ends (frame_log_flush). A game that stops without ending loses the lines
+ * kept. Elsewhere a line is printed as it is said, for the tools that read
+ * the log as it grows. */
+#ifdef __3DS__
+#define KEPT_BYTES (128 * 1024)
+static char *kept;
+static size_t nkept;
+#endif
+
+void frame_log_flush(void) {
+#ifdef __3DS__
+	if (nkept) fwrite(kept, 1, nkept, stdout);
+	nkept = 0;
+#endif
+	fflush(stdout);
+}
+
+static void say(const char *line, bool held) {
+#ifdef __3DS__
+	size_t n = strlen(line);
+	if (!kept) kept = malloc(KEPT_BYTES);
+	if (kept && n < KEPT_BYTES) {
+		if (nkept + n > KEPT_BYTES) frame_log_flush();
+		memcpy(kept + nkept, line, n);
+		nkept += n;
+		if (held) frame_log_flush();
+		return;
+	}
+#else
+	(void)held;
+#endif
+	fputs(line, stdout);
+	fflush(stdout);
+}
+
 void frame_log_present(uint64_t present) {
 	part_present += present;
 	/* (the longest present of the second, and what the line before took to
-	 * write: on the 3DS a line goes to the SD card as it is printed, on the
-	 * thread the frames are paced on) */
+	 * say (on the 3DS written to the SD card only where say() writes) */
 	static uint64_t present_longest, wrote;
 	if (present > present_longest) present_longest = present;
 	static int log_on = -1;
@@ -172,7 +213,7 @@ void frame_log_present(uint64_t present) {
 		}
 		{
 			size_t k = strlen(bottom);
-			snprintf(bottom + k, sizeof bottom - k, "; the longest present %.1f ms, the line before written in %.1f ms", present_longest * ms, wrote * ms);
+			snprintf(bottom + k, sizeof bottom - k, "; the longest present %.1f ms, the line before said in %.1f ms", present_longest * ms, wrote * ms);
 			present_longest = 0;
 		}
 		/* (and reads of the game that waited, drawing, for the next frame) */
@@ -199,7 +240,8 @@ void frame_log_present(uint64_t present) {
 		}
 #endif
 		uint64_t write0 = SDL_GetPerformanceCounter();
-		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
+		char line[1600];
+		snprintf(line, sizeof line, "frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
 			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms,"
 			" the longest update and drawing %.1f ms%s\n",
 			shown, (unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3], P.blend ? " smooth" : "",
@@ -208,7 +250,7 @@ void frame_log_present(uint64_t present) {
 			part_draw * ms / played, part_present * ms / shown, part_longest * ms, bottom);
 		emu_core_ticks = emu_core_unshown_ticks = 0;
 		emu_core_unshown = 0;
-		fflush(stdout);
+		say(line, part_longest * ms >= 100.0);
 		wrote = SDL_GetPerformanceCounter() - write0;
 		shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
 		part_update = part_draw = part_present = part_longest = 0;

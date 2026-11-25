@@ -18,6 +18,10 @@ void frame_log_heap_from(void (*heap)(char *out, size_t n));
  * `ticks` performance-counter ticks at the picture's `scale` */
 void frame_log_depth(uint64_t ticks, int scale);
 
+/* The lines kept in memory written out (the 3DS's, frame_log.c's say), as
+ * the game ends */
+void frame_log_flush(void);
+
 /* A frame's drawing over, shown or not: what reads the game from here to
  * the next frame's drawing (a quit's save, a test's state in words) is no
  * read while drawing (emu_drawing) */

@@ -45,11 +45,27 @@ times, M samples of silence" where the device asked the ring
 (`src/emu/emu_sound.c`) for more than it held and was given silence for
 the rest, each one a crack heard, or "the sound's buffer N samples at
 least", the least it held as a read began. The ring is kept near 1536
-samples (32 ms) and the 3DS's device reads 1024 at a time, so one frame
-shown late leaves a read short. Then "the longest present" of the second,
-and what "the line before" took to write: on the 3DS a line goes to the
-SD card as it is printed, on the thread the frames are paced on, so the
-log's own line is among what can hold a frame back (issue #897: with
-`frame_log = on` a New 3DS showed 59 frames every second of play, one
-gap of 33 ms in each, and 60 to 61 on the title, where no refresh is
-waited for).
+samples (32 ms) as a frame's sound is written and the 3DS's device reads
+1024 at a time, so a frame late enough for two reads to fall before it
+leaves the second short. Then "the longest present" of the second, and
+what "the line before" took to say.
+
+## The 3DS's lines are kept, not written
+
+On the 3DS a line printed goes to the SD card at once, on the thread the
+frames are paced on. Measured on a New 3DS (issue #897, 25 November
+2026): 11 to 29 ms a line, 19 at the median. So with `frame_log = on`
+every second of play showed 59 frames with one gap of 33 ms, and the sound
+ran dry two or three times in it: the log drew a stutter and cracks of its
+own making, heard by whoever tested with it and by no player. The title,
+which waits for no refresh, showed 60 to 61 with gaps to 22 ms.
+
+So the 3DS keeps its lines in memory (`say`, `src/core/frame_log.c`; 128
+KB, two minutes of lines) and writes them where the loop is held anyway:
+after a second with a frame of 100 ms or more in it (a layer made, a
+start), as the room fills, and as the game ends (`frame_log_flush`, from
+`platform_shutdown`). A game that stops without ending loses the lines
+kept; the other lines of `log.txt` are written as they are printed, as
+before, each one a stall of that size where it falls (a song's start, a
+layer made). Elsewhere a frame line is printed as it is said, for the
+tools that read the log as it grows.
