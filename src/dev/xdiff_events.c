@@ -268,13 +268,13 @@ static void replay(XdLog *log, XdEvent *e, uint32_t own) {
 	 * xd_replay_lag; the engine's per-frame steps have no key) */
 	bool lagged = log->lag != 0;
 	uint32_t at = lagged ? log->t - (uint32_t)log->lag : log->t;
-	/* (a draw of an engine routine BN6 runs outside any family's code, keyed by its site, meets the reference's of that site
-	 * that a family's code led to: BN4's thunder ball, the third kind's 0x2A, is the Thunder chip's unit's moved code in
+	/* (a draw of an engine routine BN6 runs outside any family's code, keyed by its site, meets BN4's of that site that a
+	 * family's code led to: BN4's thunder ball, the third kind's 0x2A, is the Thunder chip's unit's moved code in
 	 * BN4's log and Billy's copy of BN6's own in BN6's, so its hit's spark's place is drawn in one game's family and not the
 	 * other's, bn4_soul_wood_guard) */
 	for (int i = lagged ? log->lag_cursor : log->cursor; i < ref->ndraws && ref->draws[i].t == at; ++i) {
 		const Draw *d = &ref->draws[i];
-		bool same = d->key == key || (!e->family && d->site == key);
+		bool same = d->key == key || (!e->family && ref->game == 4 && d->site == key);
 		if (d->setup || !same || d->which != which || k-- > 0) continue;
 		hook_write32(log->g->rng[own], d->word);
 		e->b = d->word;

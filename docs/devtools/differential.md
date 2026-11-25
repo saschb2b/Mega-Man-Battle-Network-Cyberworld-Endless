@@ -447,8 +447,8 @@ and traces both:
   draw with no twin in the other game's frame is reported, never forced:
   BN5's buster's extra draw is the engine's own (legit.json's rng, only,
   both routines cited); any other is a difference, the family's where its
-  code led to it. A draw BN6 makes outside any family's code meets the
-  reference's of the same site even where the reference's was a family's
+  code led to it. A draw BN6 makes outside any family's code meets
+  BN4's of the same site even where BN4's was a family's
   (BN4's thunder ball, the third kind's 0x2A, is the Thunder chip's moved
   code in BN4's log and Billy's copy of BN6's own ball in BN6's: its
   hit's spark, `bn4_soul_wood_guard`). Without the replay Handi parts at its first draw that
