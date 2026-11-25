@@ -15,8 +15,8 @@
 #include <stdint.h>
 
 #define SOUL_BN4_FIRST 13   /* BN6's Soul number (BN6_SOUL_ID, the element's +BN6_ELEMENT_SOUL, a used bit) of BN4's first moved */
-#define SOULS_BN4      8    /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul (BN4's 4),
-                             * NumSoul (BN4's 8), FireSoul (BN4's 5), MetlSoul (BN4's 9), WoodSoul (BN4's 12) */
+#define SOULS_BN4      9    /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul (BN4's 4),
+                             * NumSoul (BN4's 8), FireSoul (BN4's 5), MetlSoul (BN4's 9), WoodSoul (BN4's 12), WindSoul (BN4's 3) */
 #define SOULS_HELD_BN4 6    /* the bit of the first in the Souls held (soulunite_held), past BN5's six */
 
 /* A BN4 Soul's rows as BN6's engine takes them, read from BN4's ROM */
@@ -53,6 +53,14 @@ void soulbn4_enter(uint32_t obj, int k);
 /* whether no hit's status takes BN4's k-th Soul: BN4's player's frame passes over it for his form (BN4_STATUS_GUARD_FORM:
  * WoodSoul's), read from BN4's code */
 bool soulbn4_guarded(int k);
+/* the collision flags BN4's k-th Soul's taking of the form ORs in where it also spawns his side's wind (BN4_WIND_ENTER,
+ * WindSoul's 0x30), read from BN4's code; 0 for a Soul with no wind */
+uint32_t soulbn4_wind(int k);
+/* ... and the level WindSoul's taking of the form spawns it at (BN4_WIND_LEVEL, its r4), -1 where the code is not that */
+int soulbn4_wind_level(void);
+/* ... and the arguments it sets his collision up again with first (BN4_WIND_COLL); false where the code is not that */
+typedef struct { uint8_t region, region2, arg; } SoulBn4CollSet;
+bool soulbn4_wind_coll(SoulBn4CollSet *out);
 /* (after xchips_bn4_code_install) BN4's k-th Soul's taking of the form moved with his unit (tools/xchiprecipe_bn4.py
  * SOUL_ENTERS: SrchSoul's, which spawns his object), its copy's address with its Thumb bit, 0 where it is not moved */
 uint32_t soulbn4_enter_copy(int k);

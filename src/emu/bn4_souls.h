@@ -93,4 +93,24 @@
                                            * takes, */
 #define BN4_STATUS_GUARD_SKIP 0x0801390Cu /* ... the bl BN4_STATUS_TAKE it passes over */
 
+#define BN4_CHIP_ROUTE    0x0800D406u /* r0 a chip, r7 MegaMan's attack's variables: a power attack's shot that is a chip (WindSoul's
+                                       * AirShot 0x6B and WindRack 0x09, ProtSoul's WideSwrd 0x3E): the variables set from the chip's
+                                       * record (+0x14 the chip, +0xC, +8 its +0xA and damage, +5, +6 0, +3, +2 and +4), its
+                                       * family returned (+0xB); the power attack's stores after it (r1 into +8, +0xA, +3) its own */
+
+#define BN4_WIND_ENTER    0x0800E0F4u /* WindSoul's (form 3's): his collision flags ORed (BN4_WIND_FLAGS), his collision set up as at
+                                       * every form (0x08012ED0: 0x10, 2, 0), a wind of his side (bl BN4_WIND_SPAWN at
+                                       * BN4_WIND_SPAWN_CALL, kept at his AI +0x5C), then his hand's pass (0x0800E208), */
+#define BN4_WIND_FLAGS    0x0800E0F6u /* ... movs r0,#0x30, ORed into his collision data's flags by 0x08012F82 (BN4_COLL_FLAGS, BN6's
+                                       * bits: BN6_OBJ_FLOATS and 0x10), */
+#define BN4_WIND_COLL     0x0800E0FCu /* ... movs r1,#0x10; movs r2,#2; movs r3,#0, bl 0x08012ED0 (BN6_COLL_SET_UP's twin): his collision's
+                                       * regions set again, the masks of region 0x10 where his battle's start set his others, */
+#define BN4_WIND_LEVEL    0x0800E106u /* ... movs r4,#1: the spawn's r4, its level (the wind's +4), */
+#define BN4_WIND_SPAWN_CALL 0x0800E108u /* ... the bl BN4_WIND_SPAWN, */
+#define BN4_WIND_PASS_KIND 0x0800E22Eu /* ... the pass: cmp r1,#0xa, the kind Wind (BN4_CHIP_KIND), its power shown, */
+#define BN4_WIND_PASS_ADD 0x0800E236u /* ... adds r1,#0xa: 10 to its bonus, as GutsSoul's pass */
+#define BN4_FORM_RESET    0x0800D8C2u /* BN4_FORM_STATE's first call, as every form is taken: his collision flags' mask cleared (the
+                                       * word at 0x0800DB14), 1 set where NaviStats +0x28 is 1, his AI +0x5C's wind ended (BN4_WIND_END)
+                                       * and the word cleared (0x0800D8F6-0x0800D902): WindSoul's taken away as he leaves */
+
 #endif

@@ -1,0 +1,134 @@
+{
+ "about": "BN4's WindSoul (Red Sun's Soul 3, form 3: kind Wind; his plain shot power attack 0x6B, AirShot at 5 by BN4's chip route; his charged shot power attack 0x09, WindRack at 50 by the same, 60 frames; his taking the form floats him (his collision flags 0x30), spawns his side's wind and adds 10 to the hand's Wind chips whose power shows, BN4_WIND_ENTER) in BN4 Red Sun's own battle, fought twice, each in a process of its own: the reference holds itself to itself.",
+ "game": "bn4",
+ "foes": "06@42",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 200,
+ "seed": "12345678:9ABCDEF0",
+ "safe": true,
+ "souls4": "4",
+ "folder4": [
+  "3404",
+  "3404",
+  "3404"
+ ],
+ "deck4": [
+  "3404",
+  "3404",
+  "3404"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   100,
+   "B",
+   2
+  ]
+ ],
+ "kind": "control"
+}

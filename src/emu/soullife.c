@@ -13,6 +13,7 @@
 #include "soulbn4.h"
 #include "soulcompanion.h"
 #include "soulmood.h"
+#include "soulwind.h"
 
 #define THUMB_BX_LR 0x4770u   /* a stub's instruction, which its hook stands on */
 #define FREE_HALF   0xFFFFu   /* the free space as emu_init pads it */
@@ -110,6 +111,7 @@ static HookAct entered(HookRegs *r, void *user) {
 		if (soulbn4_k(next) >= 0) {
 			int k = soulbn4_k(next);
 			soulbn4_enter(me, k);   /* (BN4's routine as the form is taken: GutsSoul's and NumSoul's hand pass) */
+			soulwind_enter(me, k);   /* (... WindSoul's shoes and his side's wind) */
 			/* (... his companion spawned, BN4's at the unison: NumSoul's; or the routine's copy where it spawns an object:
 			 * SrchSoul's. FireSoul, who has both, waits on the two together) */
 			uint32_t word, both = soulcompanion_both(k);
@@ -154,7 +156,10 @@ static HookAct left(HookRegs *r, void *user) {
 	}
 	/* (what BN5's Soul takes away as he leaves it, NumberSoul's) */
 	if (soul && routed && soul < SOULS_BN5_FORMS) return go(r, soul_leave[soul]);
-	if (soulbn4_k(soul) >= 0) return go(r, soulcompanion_leave(soulbn4_k(soul)));   /* (his companion taken away, BN4's at the end) */
+	if (soulbn4_k(soul) >= 0) {
+		soulwind_leave(me, soulbn4_k(soul));   /* (WindSoul's shoes and wind taken away, BN4_FORM_RESET's) */
+		return go(r, soulcompanion_leave(soulbn4_k(soul)));   /* (his companion taken away, BN4's at the end) */
+	}
 	return go(r, leave_to);
 }
 
