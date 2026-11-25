@@ -331,7 +331,7 @@ bool emu_drawing;
 int emu_draw_waits;
 unsigned emu_draw_waits_all;
 const char *emu_draw_part, *emu_draw_waited;
-uint64_t emu_core_ticks, emu_core_unshown_ticks;
+uint64_t emu_core_ticks, emu_core_unshown_ticks, emu_core_longest, emu_video_longest;
 
 /* (the run's core's frames timed since the start, for a first NetBattle's window: emu.h) */
 static uint64_t timed_ticks, timed_frames;
@@ -378,6 +378,7 @@ void emu_frame_as(uint32_t keys, unsigned how) {
 	retro_run();
 	uint64_t dt = SDL_GetPerformanceCounter() - t0;
 	emu_core_ticks += dt;
+	if (dt > emu_core_longest) emu_core_longest = dt;
 	timed_ticks += dt;
 	++timed_frames;
 	pull_audio();
