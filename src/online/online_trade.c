@@ -27,7 +27,8 @@ static uint32_t get32(const uint8_t *p) { return (uint32_t)p[0] << 24 | (uint32_
 static void put16(uint8_t *p, unsigned v) { p[0] = (uint8_t)(v >> 8); p[1] = (uint8_t)v; }
 static void put32(uint8_t *p, uint32_t v) { put16(p, v >> 16); put16(p + 2, v); }
 
-void online_trade_reset(void) { memset(&T, 0, sizeof T); }
+static void pending_forget(void);
+void online_trade_reset(void) { memset(&T, 0, sizeof T); pending_forget(); }
 
 void online_trade_lost(void) {
 	if (T.stage == TRADE_NONE || T.stage == TRADE_DONE || T.stage == TRADE_CANCELLED) return;
@@ -163,6 +164,13 @@ int online_trade_spares(TradeChip *out, uint8_t *count, int cap) {
 
 static void pending_path(char *out, size_t n) { snprintf(out, n, "%s/%s", g_data_dir, PENDING); }
 
+/* (the file's answer kept from one asking to the next: the Square asks each
+ * frame, for the week's portal's words, and on a New 3DS a look for the file
+ * on the SD card is milliseconds of the frame, issue #897. Forgotten where
+ * the file is written or removed here, and as a visit begins,
+ * online_trade_reset: a save brought in between two visits is read) */
+static struct { bool read, there; TradeChip give, get; } pending;
+
 bool online_trade_keep(const TradeView *done) {
 	if (!chip_ok(done->mine) || !chip_ok(done->theirs)) return false;
 	char path[1100], tmp[1110];
@@ -177,10 +185,13 @@ bool online_trade_keep(const TradeView *done) {
 	if (ok) ok = cw_rename(tmp, path);
 	if (!ok) remove(tmp);
 	else cw_fsync_dir(g_data_dir);
+	pending_forget();
 	return ok;
 }
 
-bool online_trade_pending(TradeChip *give, TradeChip *get) {
+static void pending_forget(void) { pending.read = false; }
+
+static bool pending_read(TradeChip *give, TradeChip *get) {
 	char path[1100], line[128];
 	pending_path(path, sizeof path);
 	FILE *f = fopen(path, "r");
@@ -194,6 +205,17 @@ bool online_trade_pending(TradeChip *give, TradeChip *get) {
 	*give = (TradeChip){ (uint16_t)gi, (uint8_t)gc };
 	*get = (TradeChip){ (uint16_t)ti, (uint8_t)tc };
 	return gi <= 0xFFFF && ti <= 0xFFFF && chip_ok(*give) && chip_ok(*get);
+}
+
+bool online_trade_pending(TradeChip *give, TradeChip *get) {
+	if (!pending.read) {
+		pending.give = pending.get = (TradeChip){ 0, 0 };
+		pending.there = pending_read(&pending.give, &pending.get);
+		pending.read = true;
+	}
+	*give = pending.give;
+	*get = pending.get;
+	return pending.there;
 }
 
 /* the pack's count of (id, code), -1 where the chip has no such code */
@@ -221,6 +243,7 @@ bool online_trade_here(const TradeView *done) {
 bool online_trade_settle(bool made, const char **words) {
 	TradeChip give, get;
 	*words = NULL;
+	pending_forget();   /* (the file as it is now: a save may have come in since the Square asked) */
 	if (!online_trade_pending(&give, &get)) return false;
 	/* (made in the Square already, where MegaMan said so, and carried home with what its PET changed: square_pet.h) */
 	if (made) {
@@ -253,6 +276,7 @@ void online_trade_settled(void) {
 	char path[1100];
 	pending_path(path, sizeof path);
 	remove(path);
+	pending_forget();
 }
 
 void online_trade_describe(FILE *f, bool visiting) {

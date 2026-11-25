@@ -15,6 +15,9 @@
 
 /* The pass as it stands, opened */
 void netpass_screen_open(void);
+/* What netpass.ini says the Square has seen is kept from its first asking:
+ * forgotten as a visit begins, the file read again at the next asking */
+void netpass_seen_forget(void);
 bool netpass_screen_shown(void);
 /* The frame's course while it is up (the stamping, A or B closing it):
  * true while it holds the game, its keys to the core none */

@@ -35,7 +35,17 @@ static struct {
  * the most stamps stamped (0 none), and how many games the set held then */
 typedef struct { int stamps, games; } Seen;
 
+/* (the file read once a visit, netpass_seen_forget, and kept: the Square
+ * asks each frame whether a stamp is due, and on a New 3DS the file's two
+ * reads from the SD card were 20 ms of every frame there, 25 frames shown a
+ * second, issue #897) */
+static Seen kept;
+static bool kept_read;
+
+void netpass_seen_forget(void) { kept_read = false; }
+
 static Seen seen_read(void) {
+	if (kept_read) return kept;
 	char path[600], line[64];
 	snprintf(path, sizeof path, "%s/netpass.ini", g_data_dir);
 	FILE *f = fopen(path, "r");
@@ -48,6 +58,8 @@ static Seen seen_read(void) {
 	if (f) fclose(f);
 	seen.stamps = seen.stamps < 0 ? 0 : seen.stamps > STAMP_COUNT ? STAMP_COUNT : seen.stamps;
 	seen.games = games >= 0 ? games : seen.stamps ? SET_BEFORE_BN4 : 0;
+	kept = seen;
+	kept_read = true;
 	return seen;
 }
 
@@ -64,6 +76,8 @@ static void seen_write(int seen) {
 	if (fclose(f)) ok = false;
 	if (ok) ok = cw_rename(tmp, path);
 	if (!ok) remove(tmp);
+	/* (read again at the next asking: what the file holds, written or not) */
+	kept_read = false;
 	platform_persist();
 }
 

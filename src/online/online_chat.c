@@ -66,6 +66,7 @@ static struct {
 
 void online_chat_reset(void) {
 	memset(&C, 0, sizeof C);
+	netpass_seen_forget();   /* (the visit's stamps asked of the file anew: netpass_screen.h) */
 	C.on_exit = true;   /* (arrived beside it: it asks once he steps on it) */
 	trade_central_reset();
 	square_life_reset();
