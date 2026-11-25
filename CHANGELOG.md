@@ -3,7 +3,7 @@
 Come and talk: runs, folders, NetBattles, help and ideas on the game's
 Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
 
-## Unreleased
+## 0.24.1 (2026-11-25)
 
 - **Fixed: the New 3DS and the PS Vita ran slower since 0.24.0.** The new
   PET menu's picture asked the game where it stood on every frame drawn,
@@ -12,11 +12,22 @@ Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
   until the game's next frame was done, so a frame took the game's time
   and the drawing's, one after the other, where they ran side by side
   before: dropped frames and broken sound everywhere, slower than before
-  0.22.0. The same held for the layer's map on the bottom screen and under
-  SELECT's map left open, for the team's HP on a dark layer, and for the
-  other divers' names in the week's DeepNet. Nothing drawn asks the game
-  anything now; a test with the game on its own thread holds it there
-  (issue #897). Thanks to Pink5G for the report.
+  0.22.0. On a New 3DS the city showed 54 frames a second at the median
+  and as few as 24; it shows 59 to 60 again. The same held for the layer's
+  map on the bottom screen and under SELECT's map left open, for the
+  team's HP on a dark layer, and for the other divers' names in the week's
+  DeepNet. Nothing drawn asks the game anything now (issue #897). Thanks
+  to Pink5G for the report.
+
+- **Fixed: the Net Square crawled on a New 3DS.** It read two small files
+  from the SD card on every frame, 20 ms of each one, and showed 25 frames
+  a second. They are read once a visit now.
+
+- **Fixed: the start menu lagged on a New 3DS in the net.** With the menu
+  open on a layer the 3DS showed 45 to 53 frames a second, in the town
+  60. Once the menu stands still the game no longer draws BN6's own PET
+  screen under ours each frame; while it waits, the net seen through the
+  menu's top band stands still with the rest of the field.
 
 - **New: a New 3DS reads BN5's and BN4's ROMs together.** Until now it
   read one of them beside BN6's, BN5's where both were there, and said
@@ -27,6 +38,17 @@ Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
   it trades and the week's DeepNet opens; with one game it holds the
   Square's stamp alone, where it held a Trade pass before, so add the
   other ROM to trade again. NetBattles are still not offered on a 3DS.
+
+- **New: all twelve of BN4's Souls.** In a SOUL BN4 run seven more Navis
+  leave their Soul, each as BN4 plays it: FireSoul (a flame for his
+  charged shot, Fire chips charged, grass laid as he unites, lava that
+  heals him), MetlSoul (a punch that knocks back, Break chips charged at
+  double), WoodSoul (a tornado, no status sticks to him), WindSoul
+  (AirShot and WindRack, his wind through the fight), ProtSoul (WideSwrd,
+  Sword chips charged at double, a shield on B and Left), RollSoul (the
+  arrow, a heal after every chip but Recovery) and JunkSoul (Poltrgst,
+  the foes confused as he unites). They join ThunSoul, GutsSoul, AquaSoul, SrchSoul and
+  NumSoul.
 
 ## 0.24.0 (2026-11-25)
 
