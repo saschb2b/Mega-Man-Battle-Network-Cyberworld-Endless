@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-25T21:00:00Z
+* **Update**: engine/emulation/thread.md (The video thread stays on the main core: the second core tried and measured on a New 3DS, the GBA's frame 10.9 to 18.5 ms and 47 frames shown, taken out; the start menu's account, and two other ways tried for it).
