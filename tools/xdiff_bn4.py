@@ -402,6 +402,10 @@ def chip_ids(spec):
     MOVED_FAMILY.update({int(to): int(twin) for to, twin in XREG4_MOVED_TWIN.findall(rows)})
     for e4, e6 in zip(spec.get('folder4', []), spec.get('folder6', [])):
         ids[int(e4, 16) & 0x1FF] = int(e6.split(':')[0], 16) if ':' in e6 else int(e6, 16) & 0x1FF
+    # (... and the chips a Soul shoots by name, no folder's, its "chips": BN4's id and the run's, WindSoul's WindRack)
+    for pair in spec.get('chips', []):
+        e4, e6 = pair.split(':')
+        ids[int(e4, 16)] = int(e6, 16)
     return ids
 
 
@@ -1604,7 +1608,7 @@ def bn4_renderer(fa, fb, fam, last):
     so one drawn in one game alone would move the ranks of the family's drawn after it. The world's natives (is_native: each
     engine's own objects of the third and fourth kinds, the wind's gust) are ranked so among themselves"""
     for f in (fa, fb):
-        for group in ([o for o in f.fr['objs'] if o.role in fam], [o for o in f.fr['objs'] if is_native(o, fam)]):
+        for group in ([o for o in f.fr['objs'] if o.role in fam], [o for o in f.fr['objs'] if is_native(o, fam, f.game)]):
             ranks_into(f, group, last)
 
 
@@ -1615,12 +1619,17 @@ def chip_spec():
     return 'megaman' in SPEC_SUBJECT
 
 
-def is_native(o, fam):
+CHARGE_GLOW = {4: 0x05, 6: 0x08}   # (MegaMan's buster's charge glow, the fourth kind's: BN4's spawned at 0x0800BDA2 into his AI +0x58,
+                                   # BN6's at 0x080173CE)
+
+
+def is_native(o, fam, game=6):
     """an object of the world each engine runs as its own and draws from its own art, ranked among its kind by bn4_renderer:
     the third or fourth kind, not moved (but a chip unit's in a chip's spec: chip_spec), not the family's, not a hit's spark
-    (its life its own art's), not BN6's MegaMan's companion (BN6's alone)"""
+    (its life its own art's), not MegaMan's buster's charge glow (each engine's own, from its own frame of his charge:
+    CHARGE_GLOW, BN6's the fourth kind's 0x08 in both games' traces as before)"""
     return o.role not in fam and o.kind in ('T3', 'T4') and (not o.moved or chip_spec()) and not is_spark(o.role) and \
-        not (o.kind == 'T4' and o.o8(OBJ_TYPE) == 8)
+        not (o.kind == 'T4' and o.o8(OBJ_TYPE) in (CHARGE_GLOW[6], CHARGE_GLOW.get(game, CHARGE_GLOW[6])))
 
 
 def ranks_into(f, own, last):

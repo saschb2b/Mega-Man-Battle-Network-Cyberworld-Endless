@@ -491,6 +491,36 @@ shifts the damage at once and keeps no count (the differential's
 BN6's ball in one game and in Thunder's moved ball in the other (the
 replay's draw by its site, [the differential](../devtools/differential.md)).
 
+## WindSoul in BN6's engine
+
+WindSoul (Red Sun's Soul 3, form 3, kind Wind) is BN6's Soul 21 (k 8,
+held bit 14). His two shots are chips by BN4's chip route
+(`BN4_CHIP_ROUTE`), and his taking of the form floats him and raises a
+wind on his side. What it took:
+
+| Part | WindSoul's |
+| --- | --- |
+| His shots | his plain shot, power attack 0x6B, is AirShot at 5 (the hit word 0x85, subfamily 1), and his charged shot, power attack 0x09, WindRack at 50 (the hit word 0x9E), each a chip set up by BN4's route with the power attack's own stores after. Both chips are BN6's own by name, so, by the rule that a chip both games name plays as BN6's, `soulroute.c` copies each power attack with BN6's id of its chip and its call aimed at BN6's twin of the route (`BN6_CHIP_ROUTE`, `0x080129A6`, through a `bx r3` of the copy's, past a `bl`'s reach), into `SOULS4_ROUTES`. ProtSoul's WideSwrd is the same shape |
+| His pass | 10 more to each Wind chip of his hand whose power shows, GutsSoul's shape (`soulbn4_enter`'s passes, `BN4_WIND_PASS_KIND`, `BN4_WIND_PASS_ADD`) |
+| His shoes and wind | his collision's flags ORed with 0x30 (BN6's bits: floating and 0x10), his collision set up again (regions 0x10 and 2), and a wind of his side (`BN4_WIND_SPAWN`, its level 1) kept at his AI +0x5C; every form's state set clears the flags and ends the wind (`BN4_FORM_RESET`). `soulwind.c` does this at the end of his next frame (`BN6_PLAYER_LAST_CALL`), where BN4's wind starts on the fight's clock: the set-up through `BN6_COLL_SET_UP`, BN6's own wind through `BN6_WIND_SPAWN`, the twin WindMan's move pairs with it, its level as BN4's and its spawner word cleared as BN4's spawn leaves it, so that it holds for nothing (a hook on `BN6_WIND_HOLD` steps on for a wind with no spawner, BN4's state 4 having no hold). The flags are set there too: BN6's form's state set after the proxy form is entered sets his flags anew. BN6 keeps Full Synchro's aura at AI +0x5C, so the wind is found in his side's slot as he leaves |
+
+The proof is three specs, each with its control: `bn4_soul_wind`, his
+wind and its gusts on a MettaurEX from t2 and WindRack charged (B held 62
+frames), held through t94, the frame its variables are set;
+`bn4_soul_wind_pass`, an AirShot used with his pass's 10, held through
+t32; `bn4_soul_wind_plain`, his plain shot, held through t34. After those
+frames each game runs its own AirShot and WindRack (BN4's arm, BN6's
+first-kind object), as `bn4_chip_cannon`'s held verdict records for a
+chip both games name; the plain shot's variables and BN6's AirShot's
+object come in one frame, so its copy is held by WindRack's, made the
+same way. Four mutations: the charge longer, WindRack one stronger, the
+wind and shoes left out, the pass left out. The comparator's part:
+BN6's Wind bit in his attack's +2 (BN6 keeps a chip's second element there,
+BN4 not), WindRack's id by the spec's `chips`, the wind's word at AI
++0x5C, the wind spawn's leftover r3, the unison's sounds counted beside
+BN6's of that frame, and BN4's charge glow kept out of the natives' ranks
+as BN6's was ([the differential](../devtools/differential.md)).
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first

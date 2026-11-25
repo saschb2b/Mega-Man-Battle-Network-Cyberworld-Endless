@@ -1,0 +1,22 @@
+[
+ {
+  "name": "WindSoul's charge 10 frames longer",
+  "spec": "bn4_soul_wind",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 70 frames for his charged shot where BN4_CHARGE_TIMES' row of 0x09 holds 60: B held 62 frames fires his plain shot, not WindRack"
+ },
+ {
+  "name": "WindSoul's WindRack one stronger",
+  "spec": "bn4_soul_wind",
+  "poke": [
+   "08AFAD28:2133"
+  ],
+  "what": "his charged shot's copy (SOULS4_ROUTES' second, src/emu/soulroute.c) with its movs r1,#0x32 (the attack's damage, its +8) made #0x33"
+ },
+ {
+  "name": "WindSoul's wind and shoes left out",
+  "spec": "bn4_soul_wind",
+  "soulbreak": 1024,
+  "what": "the passives' break SOULPASSIVE_BREAK_READY leaves soulwind.c out: no wind blows from his side, his collision's flags without 0x30"
+ }
+]

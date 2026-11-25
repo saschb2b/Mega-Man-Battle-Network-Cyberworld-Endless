@@ -1,12 +1,12 @@
 {
- "about": "BN4's WindSoul (Red Sun's Soul 3, form 3: kind Wind; his plain shot power attack 0x6B, AirShot at 5 by BN4's chip route; his charged shot power attack 0x09, WindRack at 50 by the same, 60 frames; his taking the form floats him (his collision flags 0x30), spawns his side's wind and adds 10 to the hand's Wind chips whose power shows, BN4_WIND_ENTER) in BN4 Red Sun's own battle against BN6's with WindSoul moved (docs/multirom/bn4-souls.md): BN6's Soul 21 over the proxy form, his two shots BN4's power attacks copied onto BN6's AirShot and WindRack through BN6's chip route (soulroute.c), his flags and BN6's own wind as he enters (soulwind.c), his pass soulbn4_enter's. Two AirShot * (BN4's 4, BN6's own 4, kind Wind): the first Custom screen picks both, moves to UNITE and takes one and the Soul. B held from fight frame 30 for 62 frames, two past its charge of 60, its release WindRack on the MettaurEX (250 HP) at (4,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "about": "BN4's WindSoul (Red Sun's Soul 3, form 3: kind Wind; his plain shot power attack 0x6B, AirShot at 5 by BN4's chip route; his charged shot power attack 0x09, WindRack at 50 by the same, 60 frames; his taking the form floats him (his collision flags 0x30), spawns his side's wind and adds 10 to the hand's Wind chips whose power shows, BN4_WIND_ENTER) in BN4 Red Sun's own battle against BN6's with WindSoul moved (docs/multirom/bn4-souls.md): BN6's Soul 21 over the proxy form, his two shots BN4's power attacks copied onto BN6's AirShot and WindRack through BN6's chip route (soulroute.c), his flags and BN6's own wind as he enters (soulwind.c), his pass soulbn4_enter's. Two AirShot * (BN4's 4, BN6's own 4, kind Wind): the first Custom screen picks both, moves to UNITE and takes one and the Soul. B held from fight frame 30 for 62 frames, two past its charge of 60, its release WindRack, BN6's own by name (soulroute.c): held through t94, the frame his power attack sets the attack's variables (WindRack's id by each game's number, the spec's chips), as a chip both games name plays as BN6's own code after (bn4_chip_cannon's held verdict). His wind and its gusts blow on the MettaurEX (250 HP) at (4,2) from t2, MegaMan at (2,2) with 2000 HP, kept from harm.",
  "game": "bn4",
  "against": "bn6",
  "subject": "megaman",
  "foes": "06@42",
  "mm": "22",
  "hp": 2000,
- "frames": 260,
+ "frames": 94,
  "seed": "12345678:9ABCDEF0",
  "rng": "replay",
  "lag": 1,
@@ -215,5 +215,9 @@
    "B",
    62
   ]
+ ],
+ "chips": [
+  "004:004",
+  "035:050"
  ]
 }

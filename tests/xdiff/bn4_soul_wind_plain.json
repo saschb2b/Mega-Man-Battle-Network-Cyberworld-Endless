@@ -1,12 +1,12 @@
 {
- "about": "BN4's WindSoul (Red Sun's Soul 3, form 3: kind Wind; his plain shot power attack 0x6B, AirShot at 5 by BN4's chip route; his charged shot power attack 0x09, WindRack at 50 by the same, 60 frames; his taking the form floats him (his collision flags 0x30), spawns his side's wind and adds 10 to the hand's Wind chips whose power shows, BN4_WIND_ENTER) in BN4 Red Sun's own battle against BN6's with WindSoul moved (docs/multirom/bn4-souls.md): BN6's Soul 21 over the proxy form, his two shots BN4's power attacks copied onto BN6's AirShot and WindRack through BN6's chip route (soulroute.c), his flags and BN6's own wind as he enters (soulwind.c), his pass soulbn4_enter's. Three AirShot *: the first Custom screen picks the three, moves to UNITE and takes the last and the Soul, so the hand is two AirShot with his pass's 10 more each. A at fight frame 30 uses one (30 where it is 20), B pressed at 100 fires his plain shot, AirShot at 5, on the MettaurEX (250 HP) at (4,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "about": "BN4's WindSoul (Red Sun's Soul 3, form 3: kind Wind; his plain shot power attack 0x6B, AirShot at 5 by BN4's chip route; his charged shot power attack 0x09, WindRack at 50 by the same, 60 frames; his taking the form floats him (his collision flags 0x30), spawns his side's wind and adds 10 to the hand's Wind chips whose power shows, BN4_WIND_ENTER) in BN4 Red Sun's own battle against BN6's with WindSoul moved (docs/multirom/bn4-souls.md): BN6's Soul 21 over the proxy form, his two shots BN4's power attacks copied onto BN6's AirShot and WindRack through BN6's chip route (soulroute.c), his flags and BN6's own wind as he enters (soulwind.c), his pass soulbn4_enter's. Two AirShot * (BN4's 4, BN6's own 4, kind Wind): the first Custom screen picks both, moves to UNITE and takes one and the Soul. B pressed at fight frame 30 fires his plain shot, power attack 0x6B, AirShot at 5 (BN6's own by name): held through t34: at t35 his power attack sets the attack's variables (AirShot, 5, the hit word 0x85, subfamily 1, BN6's Wind bit) and BN6's own AirShot spawns its shot in the same frame, so its variables are no frame's to compare alone; the route's copy is held by bn4_soul_wind's WindRack, the same maker (soulroute.c). The MettaurEX (250 HP) at (4,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
  "game": "bn4",
  "against": "bn6",
  "subject": "megaman",
  "foes": "06@42",
  "mm": "22",
  "hp": 2000,
- "frames": 200,
+ "frames": 34,
  "seed": "12345678:9ABCDEF0",
  "rng": "replay",
  "lag": 1,
@@ -15,21 +15,17 @@
  "souls6": "4000",
  "folder4": [
   "3404",
-  "3404",
   "3404"
  ],
  "deck4": [
-  "3404",
   "3404",
   "3404"
  ],
  "folder6": [
   "004:1A",
-  "004:1A",
   "004:1A"
  ],
  "deck6": [
-  "004:1A",
   "004:1A",
   "004:1A"
  ],
@@ -65,14 +61,6 @@
    ],
    [
     "RIGHT",
-    2
-   ],
-   [
-    "",
-    8
-   ],
-   [
-    "A",
     2
    ],
    [
@@ -168,14 +156,6 @@
     8
    ],
    [
-    "A",
-    2
-   ],
-   [
-    "",
-    8
-   ],
-   [
     "RIGHT",
     2
    ],
@@ -232,13 +212,12 @@
  "keys": [
   [
    30,
-   "A",
-   2
-  ],
-  [
-   100,
    "B",
    2
   ]
+ ],
+ "chips": [
+  "004:004",
+  "035:050"
  ]
 }
