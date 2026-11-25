@@ -354,7 +354,7 @@ static void overlays_draw(void) {
 }
 
 static void draw(void) {
-	emu_drawing = true;   /* (until the next update: the second screen's too) */
+	emu_drawing = true;   /* (until the frame is shown, frame_log_drawn: the second screen's too) */
 	fill_rect(0, 0, P.w, P.h, BLACK);
 	if (!emu_ready()) return;
 	if (online_visit_held()) { online_visit_draw(); return; }

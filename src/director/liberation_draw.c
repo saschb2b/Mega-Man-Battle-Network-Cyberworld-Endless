@@ -68,6 +68,8 @@ static struct {
 	bool pop_on[LIB_POPS];
 	Anim effect;           /* the Darkloids' phase's effect (LB.fx), */
 	int effect_n;          /* ... the one begun last, -1 none */
+	int hp[LIB_TEAM];           /* each teammate's HP, and where he stands in the world: MegaMan's are the game's, */
+	int wx[LIB_TEAM], wy[LIB_TEAM];   /* ... read here, not as the team's HP is drawn (a read then waits for the next frame) */
 } S;
 
 /* (the state's words: the pixels the last picture recoloured, all and the
@@ -137,6 +139,10 @@ void lib_see(void) {
 	if (lib_camera_place(&px, &py)) { S.cam_u = px + py; S.cam_v = (py - px) / 2; }
 	S.box = emu_read8(BN6_CHATBOX) != 0;
 	S.look = lib_look_on();
+	for (int k = 0; k < LB.b.team.n && k < LIB_TEAM; ++k) {
+		S.hp[k] = lib_mate_hp(k);
+		lib_mate_world(k, &S.wx[k], &S.wy[k]);
+	}
 	++S.blink;
 	memset(S.sprite, 0, sizeof S.sprite);
 	memset(S.bg, 0, sizeof S.bg);
@@ -322,9 +328,8 @@ static void draw_fx(void) {
 static void draw_harm(void) {
 	if (!LB.harm || !S.look) return;
 	for (int k = 0; k < LB.b.team.n; ++k) {
-		if (!(LB.harm_mates >> k & 1)) continue;
-		int wx, wy, dx, dy;
-		lib_mate_world(k, &wx, &wy);
+		if (k >= LIB_TEAM || !(LB.harm_mates >> k & 1)) continue;
+		int wx = S.wx[k], wy = S.wy[k], dx, dy;
 		cinema_offset(&dx, &dy);
 		lib_piece_harm(LB.harm, wx + wy - S.cam_u + CAM_X + dx, (wy - wx) / 2 - S.cam_v + CAM_Y + dy);
 	}
@@ -351,12 +356,12 @@ static void draw_hp(void) {
  * Darkloids' phase none is in play, so every Navi's is under him */
 static void draw_team_hp(void) {
 	bool theirs = lib_megaman_hp_shown();
-	if (!theirs) lib_piece_hp_box(lib_mate_hp(lib_in_play()));
-	for (int k = 0; k < LB.b.team.n; ++k) {
-		if ((!theirs && k == lib_in_play()) || LB.b.mate[k].out) continue;
-		int wx, wy;
-		lib_mate_world(k, &wx, &wy);
-		lib_piece_hp(lib_mate_hp(k), wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y - BN5_LIB_HP_DOWN);
+	int in_play = lib_in_play();
+	if (!theirs && in_play >= 0 && in_play < LIB_TEAM) lib_piece_hp_box(S.hp[in_play]);
+	for (int k = 0; k < LB.b.team.n && k < LIB_TEAM; ++k) {
+		if ((!theirs && k == in_play) || LB.b.mate[k].out) continue;
+		int wx = S.wx[k], wy = S.wy[k];
+		lib_piece_hp(S.hp[k], wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y - BN5_LIB_HP_DOWN);
 	}
 }
 

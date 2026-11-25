@@ -11,10 +11,12 @@
 #include "blockers.h"
 #include "bn6_fields.h"
 #include "boss.h"
+#include "briefing_words.h"
 #include "director.h"
 #include "director_board.h"
 #include "director_folder.h"
 #include "director_state.h"
+#include "director_way.h"
 #include "feel_game.h"
 #include "liberation.h"
 #include "gfx.h"
@@ -132,6 +134,7 @@ static void see_locks(void) {
 	seen.locks = 0;
 	for (int k = 0; k < layer.nblocks && k < 8; ++k)
 		if (lock_shut(k)) seen.locks |= (uint8_t)(1u << k);
+	seen.flame = D.active && !D.town && flame_here();
 }
 
 /* L heard on the map: a press kept is spent, and the counters show */
@@ -194,6 +197,14 @@ void director_see(void) {
 	seen.battle = emu_read8(BN6_GAMESTATE) == BN6_SUB_BATTLE;
 	seen.timer = emu_read32(BN6_BATTLE_TIMER);
 	seen.custom = seen.battle && emu_read8(BN6_CUSTOM_WINDOW);
+	seen.fade = emu_read8(BN6_FADE_ACTIVE) == 1 || emu_read8(BN6_WARP_PENDING) != 0;
+	seen.chat = emu_read8(BN6_CHATBOX) != 0;
+	/* (the map's way: what is gone from the floor and the heal's call, both read from the game's flags and MegaMan's HP) */
+	seen.heal = false;
+	if (D.active && !D.town) {
+		route_floor();
+		seen.heal = heal_first(&seen.heal_x, &seen.heal_y);
+	}
 	see_tent();
 	see_counts();
 	see_locks();

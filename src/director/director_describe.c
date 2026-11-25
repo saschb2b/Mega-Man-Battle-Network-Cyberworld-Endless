@@ -118,6 +118,10 @@ void director_describe(FILE *f) {
 	/* (GameState's protected zenny, then its BugFrags) */
 	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	save_mask_describe(f);   /* (BN6's own save's mask: issue #734) */
+	/* (reads of the game made while a frame was drawn that waited for the
+	 * core's next frame, since the start: with the core on its own thread
+	 * each one stands a frame's drawing behind the GBA, issue #897) */
+	fprintf(f, "drawwaits %u\n", emu_draw_waits_all);
 	/* (a battle's gauge, its turn and the rules it runs by, a liberation's
 	 * or BN6's own: issue #669 left a liberation's on the next run's
 	 * battles; tests/scenarios reads them) */

@@ -56,6 +56,10 @@ static struct {
 	uint32_t seed;            /* the layer they were made on */
 	uint32_t arrived;         /* ... and when (SDL_GetTicks) */
 	int depth;
+	/* (the game's camera and MegaMan's place as its last frame left them, read with the divers each frame of the link
+	 * and not as the names and rings are drawn: a read then waits, on the core's own thread, for the next frame) */
+	int cam[3], mx, my, mz;
+	bool cam_ok;
 } P;
 
 static int dev_room;   /* diveroom=N: N puppets at most, 0 as the layer leaves */
@@ -141,7 +145,7 @@ static int sign_of(const Who *w) {
 	if (dive_crew_has(w->id)) return SIGN_CREW;
 	/* (about to be a crew only where one can take him: MegaMan's has a place, and his is not full, issue #758) */
 	if (dive_crew_count() >= ONLINE_PARTY_MOST || dive_comings_full_has(w->id)) return SIGN_NONE;
-	long dx = w->x - bn6_player_x(), dy = w->y - bn6_player_y();
+	long dx = w->x - P.mx, dy = w->y - P.my;   /* (MegaMan's place as the link's frame read it: asked as the rings are drawn) */
 	return dive_crew_within(dx, dy, DIVE_CREW_NEAR) ? SIGN_FORMING : SIGN_NONE;
 }
 
@@ -164,10 +168,11 @@ static bool on_plates(const Tag *t) {
 /* The names that show now, as the divers stand: each over his
  * head, and where divers stand on one spot (a layer's arrival) each next
  * name a row over the last, those past the picture's top counted on the
- * topmost. Reads the game's camera; changes nothing. */
+ * topmost. By the camera the link's frame read (P.cam); changes nothing. */
 static int tags_now(Tag tags[DIVE_PEOPLE]) {
-	int n = 0, camera[3];
-	if (!here() || !field_shown() || !map_label_camera(camera)) return 0;
+	int n = 0;
+	const int *camera = P.cam;
+	if (!here() || !field_shown() || !P.cam_ok) return 0;
 	for (int i = 0; i < P.nwho; ++i) {
 		const Who *w = &P.who[i];
 		if (!w->name[0]) continue;
@@ -191,7 +196,8 @@ static int tags_now(Tag tags[DIVE_PEOPLE]) {
 /* the divers whose feet show, each with his sign: their count */
 static int signs_now(int k_of[DIVE_PEOPLE], int sign[DIVE_PEOPLE], int camera[3]) {
 	int n = 0;
-	if (!here() || !field_shown() || !map_label_camera(camera)) return 0;
+	if (!here() || !field_shown() || !P.cam_ok) return 0;
+	memcpy(camera, P.cam, sizeof P.cam);
 	for (int i = 0; i < P.nwho; ++i) {
 		int px, py;
 		map_label_floor(P.who[i].x, P.who[i].y, P.who[i].z, camera, &px, &py);
@@ -227,7 +233,7 @@ static void rings_draw(bool chat) {
 static bool arrival_marked(void) {
 	if (!here() || !P.arrived || !field_shown() || SDL_GetTicks() - P.arrived > ARRIVAL_MS) return false;
 	for (int i = 0; i < P.nwho; ++i) {
-		long dx = P.who[i].x - bn6_player_x(), dy = P.who[i].y - bn6_player_y();
+		long dx = P.who[i].x - P.mx, dy = P.who[i].y - P.my;
 		if (dx * dx + dy * dy <= (long)STACKED * STACKED) return true;
 	}
 	return false;
@@ -235,9 +241,9 @@ static bool arrival_marked(void) {
 
 void dive_people_draw(bool chat) {
 	rings_draw(chat);
-	int camera[3], x, y;
-	if (!chat && arrival_marked() && map_label_camera(camera)) {
-		map_label_at(bn6_player_x(), bn6_player_y(), bn6_player_z(), camera, &x, &y);
+	int x, y;
+	if (!chat && arrival_marked() && P.cam_ok) {
+		map_label_at(P.mx, P.my, P.mz, P.cam, &x, &y);
 		map_label_cursor(x, y);
 	}
 	Tag tags[DIVE_PEOPLE];
@@ -328,7 +334,9 @@ void dive_people_frame(const OnlineSnapshot *s) {
 	SeatDiver d[DIVE_PEOPLE];
 	for (int i = 0; i < n; ++i) d[i] = (SeatDiver){ s->peers[i].id, (int)s->peers[i].x, (int)s->peers[i].y, dive_crew_has(s->peers[i].id) };
 	/* (the crew first, then the nearest: dive_seats.h) */
-	P.undrawn = dive_seats(P.id, P.made, d, n, bn6_player_x(), bn6_player_y());
+	P.cam_ok = map_label_camera(P.cam);
+	P.mx = bn6_player_x(); P.my = bn6_player_y(); P.mz = bn6_player_z();
+	P.undrawn = dive_seats(P.id, P.made, d, n, P.mx, P.my);
 	P.nwho = n;
 	for (int i = 0; i < n; ++i) {
 		const OnlinePeer *p = &s->peers[i];

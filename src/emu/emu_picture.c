@@ -5,6 +5,8 @@
  * the canvas's (x, y). scene_emu.c's draw puts the rest over it. */
 #include "emu.h"
 
+#include <string.h>
+
 #include <SDL.h>
 
 #include "director.h"
@@ -69,7 +71,11 @@ void emu_picture_draw(int x, int y) {
 	const uint32_t *v = emu_video();
 	bool box = false;
 	int hour = online_visit_away() ? 0 : director_town_tint(&box);
-	PART("picture: tint", for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i]);
+	/* (no hour to show, the net's every frame: the frame copied whole, not a pixel at a time asking the hour) */
+	uint64_t tint_t = frame_part_begin();
+	if (!hour) memcpy(px, v, sizeof px);
+	else for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP);
+	frame_part_end("picture: tint", tint_t);
 	/* (a liberation's dark panels, docs/game/liberation/) */
 	PART("picture: board", director_tint_board(px));
 	/* (a Glitch layer's, docs/game/glitch-layer.md) */

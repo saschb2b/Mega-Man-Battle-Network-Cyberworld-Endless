@@ -13,12 +13,16 @@
 typedef struct {
 	int px, py;
 	bool on_map, battle, custom;
+	bool heal;                      /* the way leads to the Recovery Mr. Prog first (heal_first), at (heal_x, heal_y): the map's way, drawn on the second screen */
+	int heal_x, heal_y;
+	bool fade, chat;                /* BN6's fade or a warp under way; its chat box open (director_cover, asked as the divers' names and the dive's band are drawn) */
 	uint32_t timer;
 	int tent_x, tent_y;
 	int md_taken[3], md_known[3];   /* the layer's Mystery Data MegaMan knows of, by colour (green, blue, purple): taken, known */
 	int counts_a;                   /* L's overlay of them: its alpha, 0 hidden */
 	uint16_t md_marked;             /* the ones the map marks, a bit each: untaken, on a panel it shows, or purple with an Unlocker held */
 	uint8_t locks;                  /* the layer's locks still shut (layer.block[k], a bit each): the map marks them */
+	bool flame;                     /* ... and the flame of darkness while it burns (flame_here) */
 	char bug_note[160];             /* the NaviCust's bug as its RUN leaves it, over the PET a few seconds */
 	int bug_note_t;
 	bool gate_strip;                /* the gate in Lan's HP asking: the NetPass's strip over the picture (read in the drawing, on the 3DS each frame waited for the core) */

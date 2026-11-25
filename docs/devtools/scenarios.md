@@ -190,6 +190,7 @@ on every seed ([tools/play.py](play.md) has the steps):
 | The state says | Where | Written by |
 | --- | --- | --- |
 | `savemasks N` (the masks BN6's own save has made since the start: one a save, where nothing wrote into the RAM while it was masked; a write fails the save's sum, and BN6 masks and saves it all again), `savemasked yes` or `no` (the RAM masked now) | a run, at home too | `save_mask_describe`, `src/emu/save_mask.c` |
+| `drawwaits N` (the reads of the game made while a frame was drawn that waited for the core's next frame, since the start: 0 unless the core runs on its own thread, `CYBERWORLD_EMU_THREAD=1`, and then 0 wherever nothing drawn reads the game; `tests/scenarios/draw_waits.py` holds it there, issue #897, [The core on its own thread](../engine/emulation/thread.md), Nothing drawn reads the game) | a run, at home too | `director_describe`, `director_describe.c` |
 | `chips N` (the chips owned, the Folder's and the Pack's: BN6's pack counts both), `programs N`, `unlockers N`, `rushfood N`, `regmemory N` | a run, at home too | `holds_describe`, `director_folder.c` |
 | `map open`, `hidden` (opened by a press, under a chat for now) or `closed`: the layer's map over the picture (issue #840) | a layer | `director_describe`, `director_describe.c` |
 | `choice K/N` (the cursor on option K of the N a chat box asks) | while BN6's box shows a question | `talk_describe`, `talk.c` |

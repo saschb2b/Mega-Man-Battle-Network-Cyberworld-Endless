@@ -74,6 +74,10 @@ void pet_install(void) {
 }
 
 void pet_update(void) {
+	/* (what the menu's picture reads of the game, read here, after the
+	 * game's frame: a read as the frame is drawn waits for the next one,
+	 * issue #897) */
+	pet_menu_see();
 	/* at home, where a layer's refresh (director.c) never runs: the
 	 * profile's key items wherever the game's state lacks them (a NEW
 	 * GAME's, the week's dive's), so KeyItem holds the NetPass before the

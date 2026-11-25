@@ -18,6 +18,11 @@ void frame_log_heap_from(void (*heap)(char *out, size_t n));
  * `ticks` performance-counter ticks at the picture's `scale` */
 void frame_log_depth(uint64_t ticks, int scale);
 
+/* A frame's drawing over, shown or not: what reads the game from here to
+ * the next frame's drawing (a quit's save, a test's state in words) is no
+ * read while drawing (emu_drawing) */
+void frame_log_drawn(void);
+
 /* A frame shown, its present `present` performance-counter ticks long
  * (0 where it was not measured): the line, once a second */
 void frame_log_present(uint64_t present);

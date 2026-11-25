@@ -967,12 +967,14 @@ void platform_end_frame(void) {
 	/* (a frame the loop plays to catch up, or one smooth motion mixes: not
 	 * shown here, so it waits for no refresh of the display) */
 	if (P.skip_present) {
+		frame_log_drawn();
 		++P.frame;
 		audio_log_frame = P.frame;
 		return;
 	}
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	present_canvas();
+	frame_log_drawn();
 	frame_log_present(SDL_GetPerformanceCounter() - t0);
 	++P.frame;
 	audio_log_frame = P.frame;

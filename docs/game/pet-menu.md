@@ -125,9 +125,16 @@ for a liberation's board: the buttons drawn from BN6's label tiles and
 palette 15 in VRAM, the icons from their OBJ tiles at the height BN6 gives
 each (its bob kept), the strip, PLACE's name and EXIT copied from BN6's
 frame of its panel. The field behind is the core's picture kept on the map
-(every other frame there, and the frame START is held, before BN6's PET
-covers it), darkened by BN6's 16 a channel; where none was kept, BN6's
-teal. BN6 loads the Status icon for Forms because the engine grows BN6's
+while START is down there (in the player's hand or among the keys the game
+was given), the last of them the one BN6's PET opens over, darkened by
+BN6's 16 a channel once a menu; where none was kept, BN6's teal. Until
+0.24.1 the map's picture was kept every other frame, 150 KB copied for a
+menu opened once in a while. The picture reads nothing of the game as it is
+drawn: the game's mode, BN6's menu's state and, while the menu is up, its
+label tiles, icon tiles and palettes are read after the game's frame
+(`pet_menu_see`), since a read while drawing waits for the next frame where
+the core runs on its own thread ([The core on its own thread](../engine/emulation/thread.md),
+Nothing drawn reads the game; issue #897). BN6 loads the Status icon for Forms because the engine grows BN6's
 lists of the menu's icons by a ninth, resting under the screen
 (`pet_menu_install`; [The PET and the second screen](../rom/pet-and-second-screen.md),
 the PET menu's icons). It stands while BN6's menu takes input, closes, fades to
