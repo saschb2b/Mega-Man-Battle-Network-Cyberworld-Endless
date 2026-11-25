@@ -18,7 +18,6 @@
 #include "soulpassive.h"
 #include "thumb_reloc.h"
 #include "xchips_code.h"
-#include "xsong.h"
 
 #define BUS 0x08000000u
 #define OP_MOVS_R3_A0 0x23A0u    /* BN6_CHIP_USE_HEAL's movs r3,#0xa0 */
@@ -48,23 +47,18 @@ static HookAct heal(HookRegs *r, void *user) {
 bool soulroll_install(int breaks) {
 	static bool done;
 	if (done) return true;
-	int n = 0, effect = -1, sound = -1, song = 0;
+	int n = 0, effect = -1, sound = -1;
 	for (int k = 0; k < SOULS_BN4; ++k) {
 		heal_of[k] = soulbn4_heal(k, &heals[k]);
 		if (!heal_of[k]) continue;
 		++n;
-		/* (the effect as Repair's unit moved it, the sound in its slot of BN4's sounds: one of each, the Souls' one heal) */
+		/* (the effect as Repair's unit moved it, the sound at the slot its unit copied it into: one of each, the Souls' one heal) */
 		effect = xchips_bn4_effect(heals[k].effect);
-		song = heals[k].sound;
-		sound = xsong_sound_slot(XROM_BN4_RED_SUN_US, song);
+		sound = xchips_bn4_sound(heals[k].sound);
 		if (effect < 0 || sound < 0) return false;
 	}
 	if (!n || (breaks & SOULPASSIVE_BREAK_READY)) return done = true;
-	claims_begin("RollSoul's heal (soulroll.c)");
-	bool copied = xsong_install_at(XROM_BN4_RED_SUN_US, song, sound) == sound;
-	claims_end();
-	if (!copied) return false;
-	if (get16(R.data + (BN6_CHIP_USE_HEAL - BUS)) != OP_MOVS_R3_A0 || get16(R.data + (BN6_CHIP_USE_HEAL + 2 - BUS)) != OP_ADDS_R3_R6)
+	if (get16(R.data + (BN6_CHIP_USE_HEAL - BUS)) != OP_MOVS_R3_A0 || get16(R.data + (BN6_CHIP_USE_HEAL_ADDS - BUS)) != OP_ADDS_R3_R6)
 		return false;
 	/* (r1-r3 his place, as BN4's ldmia from his +0x34; each call through a bx, past a bl's reach) */
 	static const uint16_t code[] = {

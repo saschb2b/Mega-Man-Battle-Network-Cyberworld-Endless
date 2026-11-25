@@ -60,6 +60,7 @@
 /* MegaMan's chip use past its reload's call (0x080F18F4-0x080F191A, BN4's 0x080EECDA-0x080EED00): movs r3,#0xa0; adds r3,r3,r6
  * (his attack's variables), where BN4's RollSoul heals (BN4_ROLL_HEAL_FORM's routine, soulroll.c), r4 the chip's record */
 #define BN6_CHIP_USE_HEAL      0x080F191Eu
+#define BN6_CHIP_USE_HEAL_ADDS 0x080F1920u /* ... the adds */
 #define BN6_CHIP_USE_HEAL_PAST 0x080F1922u /* ... past the two */
 
 #endif
