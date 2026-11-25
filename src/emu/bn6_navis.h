@@ -205,6 +205,7 @@
 #define BN6_WIND_TYPE         0x080E6584u /* the wind's routine (BN6_T4_TYPES[0x41]): init 0x080E65A4 (sound 0xAD), state 4 BN6_WIND_HOLD */
 #define BN6_WIND_HOLD         0x080E65BAu /* its state 4: its step (0x080E65D6, which spawns its gust) skipped while its spawner (+0x4C) has
                                              CurAction 4 or its collision data's +0x3C holds 0x80010000 (0x080E65BC-0x080E65CE) */
+#define BN6_WIND_HOLD_SPAWNER 0x080E65BCu /* ... its ldr r0,[r5,#0x4c] after the push: the spawner it reads */
 #define BN6_WIND_STEP         0x080E65D6u /* ... its step, by its +0xA, which BN4's state 4 runs with no hold (0x080E6858) */
 #define BN6_GUST_SPAWN        0x080CECF8u /* a wind's gust spawned (the third kind's 0x49, its routine 0x080CEB5C) */
 #define BN6_GUST_INIT         0x080CEB80u /* the gust's init: sprite_load of list 0xC's 0x2E with r0 0x80 (0x080CEB90), the sprite state's +3 */
