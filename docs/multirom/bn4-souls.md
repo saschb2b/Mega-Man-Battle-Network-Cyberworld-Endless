@@ -59,10 +59,11 @@ From there BN4's life of a Soul is BN5's in other places:
   MegaMan plain again the turn after.
 - A charged shot is a power attack by the loadout's id (`0x0800CA7C`). It
   sets the attack's variables and returns an attack family, by CurAction
-  itself into `0x080EAEFC`, MegaMan's state table, which the Soul Navis' attacks share ([BN4's Navis in BN6's engine](bn4-navis.md); BN6's table starts at 0x10). Three of them use
+  itself into `0x080EAEFC`, MegaMan's state table, which the Soul Navis' attacks share ([BN4's Navis in BN6's engine](bn4-navis.md); BN6's table starts at 0x10). Four of them use
   one of BN4's chips through `0x0800D406`: WindSoul's AirShot and WindRack,
-  ProtSoul's WideSwrd. JunkSoul uses a chip from the battle. BN6 has
-  AirShot, WindRack and WideSwrd by name.
+  ProtSoul's WideSwrd, and JunkSoul's Poltrgst (BN4's 381, named past 0xFF:
+  `movs r0,#0x7e; adds r0,#0xff`). BN6 has AirShot, WindRack and WideSwrd
+  by name, and the run has Poltrgst (BN5's, moved).
 
 All twelve were seen in romlab. Each Soul was given Wind's kind and flag in
 the ROM's two tables. Each one united after AirShot, played its unison,
@@ -93,7 +94,7 @@ BN6 would need.
 | ProtSoul | Blue Moon | Sword | WideSwrd (60) | chip charge (30); the sword families otherwise | 22, 1,060 B | 11 SAME, 3 LAYOUT, 4 audited, 2 open | 8 |
 | NumSoul | Blue Moon | Plus | family 0x15 (120) | +10 to attack chips of no kind (BN5's NumberSoul's rule); an object beside him | 14, 478 B | 6 SAME, 2 LAYOUT, 1 audited | 0 |
 | MetlSoul | Blue Moon | Break | family 0x14 (80) | a plain shot of its own (family 0x08); chip charge (70) | 43, 1,806 B | 13 SAME, 5 LAYOUT, 4 audited, 1 open | 0 |
-| JunkSoul | Blue Moon | Obstacle | a chip used this battle (80) | an object of its own as he unites | 3, 96 B | 2 SAME | 0 |
+| JunkSoul | Blue Moon | Obstacle | Poltrgst (80) | a collision region at his panel as he unites | 3, 96 B | 2 SAME | 0 |
 | AquaSoul | Blue Moon | Aqua | family 0x1E (30) | element Aqua; chip charge (20) | 14, 452 B | 5 SAME, 2 LAYOUT, 1 audited | 0 |
 | WoodSoul | Blue Moon | Wood | family 0x28 (100) | element Wood; grass, two places | 23, 948 B | 5 SAME, 2 LAYOUT, 1 audited | 2 |
 
@@ -101,9 +102,8 @@ The numbers say less than they seem in two places. The objects a Soul
 spawns (WindSoul's wind, FireSoul's and NumSoul's companions, SrchSoul's
 and JunkSoul's objects) are counted by their spawners only. Their types'
 code is the other BN4 tracks' to move, once, as BN5's objects were. And
-JunkSoul is small only because its shot is any chip the battle used: it
-needs every chip it can name moved first, and a record of the chips used,
-which BN6 does not keep.
+JunkSoul is small because its shot is a chip by name, Poltrgst, which the
+run has as BN5's moved chip.
 
 The two open DIFF pairs are `0x080CD7E2` against BN6's `0x080C6BDA`, where
 an object's element sits at +0x17 in BN4 and +0xE in BN6 (the rewrite
@@ -219,8 +219,8 @@ in the engine, and the mechanisms it needs that the run does not have yet:
 10. **MetlSoul**: 43 routines, the most code, and a plain shot of its own.
 11. **ProtSoul**: eight engine places in the sword families, and two open
     pairs.
-12. **JunkSoul**: any chip of the battle, after the chips' track and a
-    record of chips used.
+12. **JunkSoul**: three routines; his shot Poltrgst by name through the chip
+    route, his taking of the form a collision region.
 
 The recommendation is to move ThunSoul first, as BN5's KnightSoul was: the
 proof of the whole path (the generator's BN4 roots, a BN4 Soul number in
@@ -567,6 +567,28 @@ charge longer, the arrow one stronger, the step left out, the heal left
 out, the heal's effect another. The comparator reads the step's state and
 variables as each engine's own (souls.json's `step`).
 
+## JunkSoul in BN6's engine
+
+JunkSoul (Blue Moon's Soul 10, form 10, kind Obstacle) is BN6's Soul 24
+(k 11, held bit 17), the last of the twelve. What it took:
+
+| Part | JunkSoul's |
+| --- | --- |
+| His charged shot | power attack 0x61, Poltrgst by BN4's chip route (`BN4_JUNK_POWER`: BN4's 381, a secret chip, named in two instructions, `movs r0,#0x7e; adds r0,#0xff`). The run has Poltrgst as BN5's moved chip (292), so `soulroute.c` copies the routine onto it through BN6's chip route, its id named the same way past 0xFF; `xchips_bn4_named` pairs BN4's chip by its name alone, as `xchips_bn4_paid` leaves out a chip no folder holds |
+| His taking of the form | a collision region at his panel (`BN4_JUNK_ENTER`: its spawn word by his side, no damage, the hit's flags 0x2100) that confuses the foes for 720 frames, each confused one's mark over it (the fourth kind's 6, playing its sound every 60 frames). Moved with ProtSoul's unit (`SOUL_ENTERS`, its side table kept by `UNIT_COPIED_DATA`); BN6's own confusion and mark follow. As WindSoul's wind, it runs at the end of his next frame (`soulwind.c`, `soulbn4_late`), so the mark steps on the fight's clock as BN4's |
+
+The proof is one spec with its control: `bn4_soul_junk`, two RockCube,
+the unison and its confusion, B held 82 frames, held at t114: through t113
+the unison, the MettaurEX's confusion, its mark and sound and the charge
+are the same, and at t114 the attack's variables are the run's Poltrgst's
+(BN5's: subfamily 0x5B, 150) where BN4's route takes its own (0x41, 100),
+a chip both games name playing as the run's. Three mutations: the charge
+longer, the taking of the form left out, the region one damage. The
+comparator's souls rules `late` (the mark's first frame, BN6's a frame
+before its first step) and `mark` (the confusion's mark's own layout and
+its host's word of it, each engine's), and the mark's sound by each
+game's number (sounds 131).
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first
@@ -630,6 +652,12 @@ What is left, in order:
    word has 14 and 15 left below BN5's chaos bits (from 16), so the twelve
    need a word of their own; and the run's held mask grows past a byte
    (`RUN_MAGIC`) once a run gives them.
+4. ~~**The other nine**~~ (25 November 2026): all twelve move, each held
+   to BN4's battle by its specs and mutations (each Soul's section,
+   above). Their used bits, 13 to 24, share the used word with BN5's
+   Chaos Unison bits (from 16), which never meet them: a run plays one
+   version of MegaMan's Souls, BN5's or BN4's (#774). What is left is the
+   run's: which Souls a run gives and from whom (#774, issue #499).
 
 ## The look, located
 

@@ -3788,6 +3788,7 @@ static const XcSong woodsoul_songs[] = { { 0x126, 0x303 } };
 /* ---- ProtSoul: BN4's attack 0x25 (080ECCF3) as BN6's 0xdf; its chips  ---- */
 /* MegaMan's state 0x25 (080ECCF2-080ECE14), the family of its chips' records: moved */
 /* ProtSoul's power attack 0x6a (0800D3C0), which returns the family: copied with it */
+/* JunkSoul's taking of the form 10 (0800E146, BN4_FORM_ENTERS), which spawns his object: copied with it */
 /* its sprite 3:0x1b (080D2250): BN6's 3:0x87, copied */
 /* its sound 0x8b (080CFC6E): BN4's song copied into the grown song table's slot 0x305, on BN4's player 9 */
 /* its sound 0xc1 (080D227E): BN4's song copied into the grown song table's slot 0x304, on BN4's player 8 */
@@ -3803,6 +3804,7 @@ static const XvBlock protsoul_blocks[] = {
 	{ 0x080CD2A8, 0x080CD330, XC4_CODE + 0x83E0, 0x7964A393u },
 	{ 0x080CFB8C, 0x080CFBB0, XC4_CODE + 0x8470, 0x2D6E2192u },
 	{ 0x0800D3C0, 0x0800D3E8, XC4_CODE + 0x84A0, 0x2D914F1Fu },
+	{ 0x0800E146, 0x0800E174, XC4_CODE + 0x84D2, 0x8B2BBA46u },
 };
 static const XvData protsoul_data[] = {
 	{ 0x080ECD04, 0x080ECD08, XV_POOL },
@@ -3830,6 +3832,10 @@ static const XvData protsoul_data[] = {
 	{ 0x080CFB8C, 0x080CFBB0, XV_RAW },
 	{ 0x0800D3E2, 0x0800D3E4, XV_ZERO },
 	{ 0x0800D3E4, 0x0800D3E8, XV_POOL },
+	{ 0x0800E162, 0x0800E164, XV_ZERO },
+	{ 0x0800E164, 0x0800E168, XV_POOL },
+	{ 0x0800E168, 0x0800E170, XV_RAW },
+	{ 0x0800E170, 0x0800E174, XV_POOL },
 };
 static const XvPair protsoul_calls[] = {
 	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
@@ -3869,6 +3875,7 @@ static const XvPair protsoul_calls[] = {
 	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
 	{ 0x08013212, 0x0801A258 },   /* project:gutsman, LAYOUT */
 	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x080CD81E, 0x080C6C16 },   /* project:project:chips, SAME */
 };
 static const XvPair protsoul_words[] = {
 	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
@@ -3915,11 +3922,11 @@ static const XcSong protsoul_songs[] = { { 0x8B, 0x305 }, { 0xC1, 0x304 } };
 /* its sound 0x132 (080EC5E2): BN4's song copied into the grown song table's slot 0x208, on BN4's player 27 */
 
 static const XvBlock rollsoul_blocks[] = {
-	{ 0x080EC574, 0x080EC642, XC4_CODE + 0x84D0, 0x9801B3E1u },
-	{ 0x080CE6E0, 0x080CE840, XC4_CODE + 0x85A0, 0x5AA41525u },
-	{ 0x080CE5B0, 0x080CE6E0, XC4_CODE + 0x8700, 0x69329294u },
-	{ 0x0800AD2A, 0x0800B12C, XC4_CODE + 0x8832, 0x793106FEu },
-	{ 0x0800CF20, 0x0800CF42, XC4_CODE + 0x8C40, 0x98F648D7u },
+	{ 0x080EC574, 0x080EC642, XC4_CODE + 0x8500, 0x9801B3E1u },
+	{ 0x080CE6E0, 0x080CE840, XC4_CODE + 0x85D0, 0x5AA41525u },
+	{ 0x080CE5B0, 0x080CE6E0, XC4_CODE + 0x8730, 0x69329294u },
+	{ 0x0800AD2A, 0x0800B12C, XC4_CODE + 0x8862, 0x793106FEu },
+	{ 0x0800CF20, 0x0800CF42, XC4_CODE + 0x8C70, 0x98F648D7u },
 };
 static const XvData rollsoul_data[] = {
 	{ 0x080EC586, 0x080EC588, XV_RAW },

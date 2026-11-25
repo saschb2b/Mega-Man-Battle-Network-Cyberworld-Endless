@@ -122,6 +122,15 @@
 #define BN4_PROT_LEFT     0x0800E12Eu /* ... the movs r1,#0x6a: his shield (0x0800D3C0: family 0x25, BN4's Guard state's subfamily 4,
                                        * power 50, the hit word 0x114) */
 
+/* JunkSoul's taking of the form (form 10's, BN4_FORM_ENTERS): a collision region spawned at his panel (0x080CD81E, BN6's twin
+ * 0x080C6C16), its spawn word by his side from the table at 0x0800E168 (0x1705FF85, 0x1705FF84), no damage (r6 0), the hit's
+ * flags 0x2100 (r7, the word at 0x0800E170); moved with ProtSoul's unit (tools/xchiprecipe_bn4.py SOUL_ENTERS) */
+#define BN4_JUNK_ENTER      0x0800E146u
+#define BN4_JUNK_SPAWN_CALL 0x0800E15Cu /* ... its bl to BN4_REGION_SPAWN_FROZEN */
+/* ... and his charged shot, power attack 0x61 (0x0800CE4C): movs r0,#0x7e; adds r0,#0xff, BN4's Poltrgst (381) through
+ * BN4_CHIP_ROUTE, the run's Poltrgst of its name (BN5's moved, 292) through BN6's (soulroute.c) */
+#define BN4_JUNK_POWER      0x0800CE4Cu
+
 /* RollSoul's heal in MegaMan's chip use (0x080EED04-0x080EED32, after the chip's reload, BN6's at BN6_CHIP_USE_HEAL): in form 1,
  * a chip of another kind than its own, his max HP's tenth (swi 6) healed (0x0800ABBA, BN6_OBJECT_HEAL), the effect spawned at
  * him (BN4_SPAWN_EFFECT) and the sound played */

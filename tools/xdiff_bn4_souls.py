@@ -27,6 +27,10 @@ wrong turns, form, power attack, charge or level still parts:
                 BN6 counts none
   step          his step out of an attack's lag, each engine's own: BN4's state 9 (its 7) by the panel, BN6's 0x10 by the
                 direction, and the variables each sets, while both stand in it
+  mark          the confusion's mark (JunkSoul's unison confuses the foes): its own layout's fields and its host's word of it,
+                each engine's
+  late          a Soul's object that lasts the fight, spawned as he takes the form (JunkSoul's): BN6's at his frame's end a
+                frame before its first step, BN4's spawned and stepped in one frame: at that frame, what it set
   charge        the buster's charge: BN4's counters (+0x30, +0x32), levels (+0x0A, +0x0B: 0, 1, 3), button (+9) and the
                 levels kept at the release (+0x14, +0x15); BN6's counter (+0x1B, held at the charge time), level (+0x1D: 0,
                 1, 2), button (+0x1E) and request bits (+0x44's 0x20000 and 0x40000); each engine's own glow object"""
@@ -79,6 +83,16 @@ REQUESTS, RAPID4, CHARGED6, RAPID_AT = 0x44, 0x20, 0x02, 6   # (... at six asked
 CHAOS6_NONE = 0xFF                        # (BN6's +0x11, its chip's chaos power, 0xFF none: BN6_AI_POWER_CHIP's note)
 GLOW4, GLOW6, GLOW_SLOT = ('T4', 0x05), ('T4', 0x08), 0x58
 SOUL_OBJECTS4 = (('T4', 0x44), ('T4', 0x12))   # (SrchSoul's scan, FireSoul's field of grass)
+LATE_OBJECTS4 = (('T4', 0x06),)            # (a Soul's object spawned at his frame's end, soulwind.c: JunkSoul's, BN4_JUNK_ENTER)
+LATE_COUNT, LATE_FIRST = 0x20, 60          # (... its +0x20 at its spawn, before its first step: BN4's spawn steps it at once)
+# The confusion's mark (the fourth kind's 0x06 of kind 0, BN6_STRUCK_CONFUSE's, BN4's twin at 0x0800AF04): each engine's own object
+# over its host, laid out each its own way: its panel (BN6's its host's, BN4's none), +0x3E, its routine's table and its art's
+# words (+0x60, +0x98-+0xA7, each game's ROM), its host's word (+0x64, +0x8E: BN4's host's collision data +0x6C, BN6's +0x48)
+MARK = ('T4', 0x06)
+MARK_OWN = (0x12, 0x13, 0x3E, *range(0x60, 0x68), 0x8E, 0x8F, *range(0x98, 0xA8))
+COLL_CONFUSE6 = 0x1E                       # (BN6_COLL_CONFUSE, BN4's +0x12 laid there by the trace)
+COLL_MARK_WORD = (0x2C, 0x2D, 0x2E, 0x2F, 0x48, 0x49, 0x4A, 0x4B)   # (... its host's word of it: BN6's +0x48, BN4's +0x6C laid by
+                                           # the trace as leftovers in two halves, at +0x2C and +0x48)
 BLINK_TYPE, BLINK_SIDE, BLINKING = 0x08, 0x09, 0x0D   # (a panel's: BN6_PANEL_BLINK_TYPE, _SIDE, BN6_PANEL_BLINKING)
 SETTER_TYPE = 0x04                        # (FireSoul's object's +4: the type it sets, BN4's 0x080E3436)
 PANEL_TYPE, PANEL_TYPE_COPY, PANEL_FLAGS, PLAIN = 0x02, 0x06, 0x14, 2   # (BN6_PANEL_TYPE, its copy, the flags word; plain)
@@ -247,7 +261,7 @@ class Souls4:
         for key, rule in (('unison', self.unison), ('soul object', self.soul_object), ('companion', self.companion), ('held', self.held), ('unison var', self.unison_var), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
                           ('soul', self.soul), ('lockout', self.lockout), ('pending', self.pending), ('form frames', self.form_frames),
                           ('shots', self.shots), ('presses', self.presses), ('charge', self.charge), ('wind', self.wind),
-                          ('step', self.step)):
+                          ('step', self.step), ('late', self.late), ('mark', self.mark)):
             if key in self.names and rule(d, fa, fb):
                 return self.names[key]
         return None
@@ -492,6 +506,46 @@ class Souls4:
         if oa is None or ob is None or oa.rec[NODE + OBJ_ACTION] != STEP4 or ob.rec[NODE + OBJ_ACTION] != STEP6:
             return False
         return (d.part == 'obj' and d.off == OBJ_ACTION) or (d.part == 'ai' and d.off in STEP_VARS)
+
+    def late(self, d, fa, fb):
+        """a Soul's object that lasts the fight, spawned as he takes the form (JunkSoul's): BN4's spawned in its unison's last frame
+        and stepped in it, BN6's at the end of his frame on the same clock (soulwind.c), stepped the frame after. At BN6's frame
+        of its spawn alone, BN4's none: it in play and in the run order, and what it set in another's collision data as it was
+        spawned, unset in BN4's frame and set in its next (every frame after compared)"""
+        mine = lambda r: isinstance(r, tuple) and tuple(r[:2]) in LATE_OBJECTS4
+        count = lambda o: o.rec[NODE + LATE_COUNT] | o.rec[NODE + LATE_COUNT + 1] << 8
+        if not any(mine(o.role) and count(o) == LATE_FIRST for o in fb.fr['objs']) or any(mine(o.role) for o in fa.fr['objs']):
+            return False
+        nxt = self.a.get(fa.fr['t'] + 1)
+        if nxt is None or not any(mine(o.role) for o in nxt['objs']):
+            return False
+        if d.part == 'in play':
+            return mine(d.role) and d.a is False and d.b is True
+        if d.part == 'run order' and isinstance(d.a, list) and isinstance(d.b, list):
+            named = lambda x: isinstance(x, tuple) and isinstance(x[0], str) and any(x[0].startswith(f'{k}:{t:#x}#') for k, t in LATE_OBJECTS4)
+            return [x for x in d.b if not named(x)] == d.a
+        if d.part != 'coll':
+            return False
+        # (unset in BN4's frame and set in its next, or a word of flags BN4's next frame holds as BN6's: BN6's a frame early, every
+        # frame after compared)
+        oa = next((o for o in nxt['objs'] if o.role == d.role), None)
+        if oa is None or oa.coll is None:
+            return False
+        word = int.from_bytes(oa.coll[d.off:d.off + 4], 'little')
+        if isinstance(d.b, tuple) and len(d.b) == 2 and d.b[0] == 'raw' and word == d.b[1]:
+            return True
+        return d.a in (0, ('raw', 0)) and any(oa.coll[d.off:d.off + (4 if isinstance(d.b, tuple) else 1)])
+
+    def mark(self, d, fa, fb):
+        """the confusion's mark (JunkSoul's unison confuses the foes, BN6's own status code): its own layout's fields, and its host's
+        word of it while the host is confused in both, each engine's; its count, sound, place and the host's timer compared"""
+        if d.part == 'obj' and isinstance(d.role, tuple) and tuple(d.role[:2]) == MARK and d.off in MARK_OWN:
+            return True
+        if d.part != 'coll' or d.off not in COLL_MARK_WORD or not isinstance(d.role, tuple):
+            return False
+        hosts = [next((o for o in f.fr['objs'] if o.role == d.role), None) for f in (fa, fb)]
+        confused = lambda o: o is not None and o.coll is not None and any(o.coll[COLL_CONFUSE6:COLL_CONFUSE6 + 2])
+        return all(confused(o) for o in hosts)
 
     def lockout(self, d, fa, fb):
         # (his lock-out after a chip, BN4's at +0x3A and BN6's at +0x19 (legit.json's bn4 megaman_lockout), where BN4's +0x19 holds

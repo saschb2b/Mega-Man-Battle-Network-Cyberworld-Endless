@@ -28,8 +28,8 @@ enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
 /* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8, FireSoul 5, MetlSoul 9,
- * WoodSoul 12, WindSoul 3, ProtSoul 7, RollSoul 1) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3, 7, 1 };
+ * WoodSoul 12, WindSoul 3, ProtSoul 7, RollSoul 1, JunkSoul 10) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3, 7, 1, 10 };
 #define FORM_GUTS 2
 #define FORM_NUM 8
 #define FORM_AQUA 11
@@ -38,6 +38,7 @@ static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12, 3, 7, 1 };
 #define FORM_WOOD 12
 #define FORM_WIND 3
 #define FORM_PROT 7
+#define FORM_JUNK 10
 #define OP_MOVS_R1 0x2100u   /* movs r1,#imm8 */
 #define OP_MOVS_R0 0x2000u   /* movs r0,#imm8 */
 #define OP_MOVS_R4 0x2400u   /* movs r4,#imm8 */
@@ -374,4 +375,12 @@ bool soulbn4_heal(int k, SoulBn4Heal *out) {
 	out->effect = (uint8_t)effect;
 	out->sound = (uint8_t)sound;
 	return true;
+}
+
+bool soulbn4_late(int k) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	uint32_t to;
+	return b4 && k >= 0 && k < SOULS_BN4 && forms[k] == FORM_JUNK &&
+		get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * (uint32_t)forms[k]) == (BN4_JUNK_ENTER | 1) &&
+		thumb_bl_read(b4 + (BN4_JUNK_SPAWN_CALL - BUS), 0, BN4_JUNK_SPAWN_CALL, &to) && to == BN4_REGION_SPAWN_FROZEN;
 }

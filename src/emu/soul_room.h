@@ -156,6 +156,9 @@
 #define SOULS4_WIND_END    (FREE_BN4_SOUL_LOOK + 0x19E40u)
 #define SOULS4_HEAL        (FREE_BN4_SOUL_LOOK + 0x19E40u)  /* ... RollSoul's heal's look and sound after a chip of his (soulroll.c), to: */
 #define SOULS4_HEAL_END    (FREE_BN4_SOUL_LOOK + 0x19E80u)
-#define SOULS4_END         SOULS4_HEAL_END
+#define SOULS4_LATE        (FREE_BN4_SOUL_LOOK + 0x19E80u)  /* ... a Soul's taking of the form run at his frame's end (JunkSoul's,
+                                                             * soulwind.c), to: */
+#define SOULS4_LATE_END    (FREE_BN4_SOUL_LOOK + 0x19EA0u)
+#define SOULS4_END         SOULS4_LATE_END
 
 #endif

@@ -1,0 +1,7 @@
+{
+ "bn4": "0xAE",
+ "bn6": "0x88",
+ "clock": "state",
+ "what": "JunkSoul's object's sound, each game's own",
+ "why": "Played every 60 frames by the fourth kind's 0x06 of kind 0 (its +0x20 counted down, set again to 0x3C), which JunkSoul's taking of the form spawns (BN4_JUNK_ENTER): BN4's at 0x080E2354 (movs r0,#0xae, its bl to PlaySoundEffect at 0x080E2356), BN6's twin at 0x080E1CC4 (movs r0,#0x88, its bl at 0x080E1CC6), the same steps (0x080E2330-0x080E235A against 0x080E1CA0-0x080E1CCA), a state's: bn4_soul_junk at t2, t62, t122 in BN4 and t3, t63, t123 in BN6. Each game's own song for its own object, paired by the routines that play them"
+}

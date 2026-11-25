@@ -1,4 +1,4 @@
-/* WindSoul's shoes and wind (soulwind.h). */
+/* WindSoul's shoes and wind, and a Soul's taking of the form at his frame's end (soulwind.h). */
 #include "soulwind.h"
 
 #include "bn6.h"
@@ -26,6 +26,7 @@
 #define WIND_STATE 0x08
 
 static bool done;
+static bool late[SOULS_BN4];   /* each BN4 Soul whose taking of the form waits for his frame's end (soulbn4_late) */
 
 static void flags_set(uint32_t obj, uint32_t flags, bool on) {
 	uint32_t coll = hook_read32(obj + BN6_T1_COLLISION);
@@ -35,10 +36,11 @@ static void flags_set(uint32_t obj, uint32_t flags, bool on) {
 }
 
 void soulwind_enter(uint32_t obj, int k) {
-	uint32_t flags = soulbn4_wind(k);
-	if (!done || !flags) return;
+	if (!done || k < 0 || k >= SOULS_BN4 || (!soulbn4_wind(k) && !late[k])) return;
 	hook_write8(soul_field_of(obj, SOUL_WIND), WIND_WAIT);
 }
+
+bool soulwind_late(int k) { return done && k >= 0 && k < SOULS_BN4 && late[k]; }
 
 void soulwind_leave(uint32_t obj, int k) {
 	uint32_t flags = soulbn4_wind(k);
@@ -61,6 +63,11 @@ static HookAct last(HookRegs *r, void *user) {
 	if (!n) return HOOK_CONTINUE;
 	hook_write8(at, (uint8_t)(n - 1));
 	if (n > 1) return HOOK_CONTINUE;
+	int k = soulbn4_k(soul_id_of(r->r[5]));
+	if (k >= 0 && late[k]) {   /* (... or his taking of the form, run then: JunkSoul's) */
+		r->r[12] = SOULS4_LATE | 1;
+		return HOOK_JUMP;
+	}
 	/* (his flags with it: BN6's form's state, set after the proxy form is entered, sets his collision's flags anew) */
 	flags_set(r->r[5], soulbn4_wind(soulbn4_k(soul_id_of(r->r[5]))), true);
 	r->r[12] = (uintptr_t)user | 1;
@@ -76,14 +83,48 @@ static HookAct hold(HookRegs *r, void *user) {
 	return HOOK_JUMP;
 }
 
+/* SOULS4_LATE: the Soul's taking of the form's copy (`enter`, r5 him), then the call the hook stands on, then back past it, each
+ * through a bx r3 (past a bl's reach) */
+static bool late_stage(uint32_t enter) {
+	static const uint16_t code[] = {
+		0x4B04,   /* 00 ldr r3,[pc,#0x10]: the taking of the form's copy */
+		0, 0,     /* 02 bl 0x10 */
+		0x4B04,   /* 06 ldr r3,[pc,#0x10]: BN6_PLAYER_LAST */
+		0, 0,     /* 08 bl 0x10 */
+		0x4B03,   /* 0C ldr r3,[pc,#0xc]: back */
+		0x4718,   /* 0E bx r3 */
+		0x4718,   /* 10 bx r3 */
+		0x46C0,   /* 12 nop */
+		0, 0,     /* 14 the copy */
+		0, 0,     /* 18 BN6_PLAYER_LAST */
+		0, 0,     /* 1C BN6_PLAYER_FRAME_END */
+	};
+	_Static_assert(sizeof code <= SOULS4_LATE_END - SOULS4_LATE, "the late taking's room");
+	uint8_t out[sizeof code];
+	for (size_t i = 0; i < sizeof code / sizeof *code; ++i) put16(out + 2 * i, code[i]);
+	put32(out + 0x14, enter | 1);
+	put32(out + 0x18, BN6_PLAYER_LAST | 1);
+	put32(out + 0x1C, BN6_PLAYER_FRAME_END | 1);
+	if (!thumb_bl_write(out, 0x02, SOULS4_LATE, SOULS4_LATE + 0x10) || !thumb_bl_write(out, 0x08, SOULS4_LATE, SOULS4_LATE + 0x10))
+		return false;
+	claims_begin("a Soul's taking of the form at his frame's end (soulwind.c)");
+	emu_write(SOULS4_LATE, out, sizeof out);
+	claims_end();
+	return true;
+}
+
 bool soulwind_install(int breaks) {
 	if (done) return true;
-	bool any = false;
-	for (int k = 0; k < SOULS_BN4; ++k) any = any || soulbn4_wind(k);
-	if (!any || (breaks & SOULPASSIVE_BREAK_READY)) return true;
-	int level = soulbn4_wind_level();
-	SoulBn4CollSet set;
-	if (level < 0 || !soulbn4_wind_coll(&set)) return false;
+	bool any = false, lates = false;
+	uint32_t enter = 0;
+	for (int k = 0; k < SOULS_BN4; ++k) {
+		any = any || soulbn4_wind(k);
+		if (soulbn4_late(k) && (enter = soulbn4_enter_copy(k)) != 0) lates = late[k] = true;
+	}
+	if ((!any && !lates) || (breaks & SOULPASSIVE_BREAK_READY)) return true;
+	int level = any ? soulbn4_wind_level() : 0;
+	SoulBn4CollSet set = { 0 };
+	if (level < 0 || (any && !soulbn4_wind_coll(&set)) || (lates && !late_stage(enter))) return false;
 	uint32_t to;
 	if (!thumb_bl_read(R.data + (BN6_PLAYER_LAST_CALL - BUS), 0, BN6_PLAYER_LAST_CALL, &to) || to != BN6_PLAYER_LAST ||
 		get16(R.data + (BN6_WIND_HOLD - BUS)) != 0xB500 /* push {lr} */ || get16(R.data + (BN6_WIND_HOLD_SPAWNER - BUS)) != 0x6CE8 /* ldr r0,[r5,#0x4c] */)
