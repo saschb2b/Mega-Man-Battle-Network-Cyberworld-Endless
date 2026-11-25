@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-25T16:30:00Z
-* **Update**: engine/emulation/3ds-memory.md (the 3DS reads both extra ROMs: the limit's reason gone since 14 November, modelled again with both at 71.9 MB under the 86 MB rule, the rule now holding the `all` case, a third ROM stopped at build time until modelled), online/netpass.md (no system of this build is one of one extra ROM; the rule kept for 0.24.0's 3DS games and `--dev xroms=1`), online/weekly-net.md (a 3DS that reads both dives), game/progression/encounter-groups.md, game/battle-lab.md, multirom/how-it-is-built.md, multirom/bn4.md, code/platforms.md, devtools/net-square.md, devtools/dev-menu.md (the same, where each named the limit), GUIDE.md (a New 3DS reads both, its pass everyone's).

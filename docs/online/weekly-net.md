@@ -3,7 +3,7 @@ type: Feature
 title: "The week's net"
 description: "The week's net (issue #127): each server's weekly seed (`week.py`), a dive in a save slot of its own from a standard profile (`src/core/weekly.c`), the portal's offer, WEEK_POST and the Board's reported depths."
 tags: [online]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T23:17:57Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-25T16:30:00Z }
 ---
 
 # The week's net

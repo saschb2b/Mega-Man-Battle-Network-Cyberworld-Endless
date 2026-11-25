@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The 3DS's memory"
 description: "How the New 3DS's 96 MB heap holds BN6's ROM, the core's 16 MB copy and both extra ROMs, BN5's and BN4's (`src/core/start_3ds.c`; one of them until 0.24.0), mGBA's ROM buffer given back, one area's learned maps kept, its maps' mirror images and raised views made in place, measured by `tools/heap3ds.py`: the budget per part and the margin a new feature is checked against."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T13:34:57Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-25T16:30:00Z }
 ---
 
 # The 3DS's memory
