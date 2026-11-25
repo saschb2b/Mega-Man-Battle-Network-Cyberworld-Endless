@@ -98,3 +98,44 @@ changes it.
 
 The frame log names the Square's steps for this (`online`, `second`,
 `square`, and `sq: ...` under them, [Frame log](../../devtools/frame-log.md)).
+
+## The video thread stays on the main core
+
+mGBA's video thread draws the GBA's picture on the New 3DS's main core, at
+a higher priority than the main thread (`docker/mgba.sh`), and takes its
+time from whatever the main thread is doing: the same work reads longer
+in the frame log where the GBA's picture is dear. With our start menu up
+(BN6's PET screen under it, its band and panel blended over the field)
+46 frames are shown a second where the map shows 60 (issue #897).
+
+Putting that thread on the second core, the system's, of whose time an
+application may ask a share, was tried on 25 November 2026
+(`APT_SetAppCpuTimeLimit(80)`, the thread made there once a probe ran) and
+measured on a New 3DS over 105 seconds of play:
+
+| a frame | the video thread on the main core | on the second |
+| --- | ---: | ---: |
+| the main thread's drawing, on the map | 5.1 ms | 3.6 ms |
+| the present's `show`, the menu up | 5.7 ms | 1.3 ms |
+| the GBA's frame, on the map | 10.9 ms | 18.5 ms (26.6 at most) |
+| frames shown a second, on the map | 59 to 60 | 47 |
+| the GBA's frame, in the Net Square | 14.6 ms | 24.7 ms |
+
+The main thread was freed as expected, and the picture came too slowly:
+the share of the second core gives the thread less than it needs, the
+core's frame waits for its picture, and every screen lost frames. It was
+taken out again. What the numbers do say is the menu's account: the main
+thread asks about 8 ms of a frame there once nothing takes from it, so
+BN6's PET screen costs mGBA some 9 ms to draw against 4 for the map, and
+the two are half a millisecond past a frame.
+
+Also tried for the menu and not kept:
+
+- **BN6's field layers switched off in mGBA while the menu covers them**
+  (`enableVideoLayer`): BN6 blends its band over the field, so the band's
+  pixels change with the layer under it (2660 of the band's 7680 on a
+  layer, 4364 in the town).
+- **The game's frames run without their picture between refreshes while
+  the menu takes input**: every frame that does draw still runs past a
+  refresh, so the menu shows N of N + 1 frames (53 a second at one
+  refresh in eight) and the band's field steps at the refresh's rate.
