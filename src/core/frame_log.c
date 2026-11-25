@@ -212,6 +212,15 @@ static void tail_say(char *out, size_t n, double ms) {
 	}
 }
 
+/* a frame shown `us` after the one before: its own work (the update, the
+ * drawing and the present less its wait for the refresh) counted */
+static void own_frame(uint64_t present, int us, uint64_t hz) {
+	uint64_t work = present > last_wait ? present - last_wait : 0, own = last_update + last_draw + work;
+	if ((double)own * 1000.0 / (double)hz >= OWN_LONG_MS) ++own_long;
+	else if (us >= 30000) ++late_short;
+	if (own > worst_own) { worst_own = own; worst_update = last_update; worst_draw = last_draw; worst_present = work; }
+}
+
 void frame_log_present(uint64_t present) {
 	part_present += present;
 	present_longest = present > present_longest ? present : present_longest;
@@ -226,11 +235,7 @@ void frame_log_present(uint64_t present) {
 		if (us < lo) lo = us;
 		if (us > hi) hi = us;
 		++gaps[us < 12500 ? 0 : us < 20000 ? 1 : us < 30000 ? 2 : 3];
-		/* (the frame's own work: its update, its drawing and the present less its wait for the refresh) */
-		uint64_t work = present > last_wait ? present - last_wait : 0, own = last_update + last_draw + work;
-		if ((double)own * 1000.0 / (double)hz >= OWN_LONG_MS) ++own_long;
-		else if (us >= 30000) ++late_short;
-		if (own > worst_own) { worst_own = own; worst_update = last_update; worst_draw = last_draw; worst_present = work; }
+		own_frame(present, us, hz);
 	}
 	last_wait = 0;
 	last = now;
