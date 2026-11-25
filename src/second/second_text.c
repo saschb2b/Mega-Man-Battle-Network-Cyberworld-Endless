@@ -269,14 +269,9 @@ void second_layer_next(int guardian_navi, char *out, size_t n) {
 	else snprintf(out, n, "Find the exit pad");
 }
 
-/* (on the 3DS an extra ROM is read where the heap has room for it beside
- * BN6's, start_3ds.c: left unread, "not found" would send a player to
- * check his ROM, issue #107) */
-void second_xrom_line(const char *found, const char *missing, const char *unread, char *out, size_t n) {
+void second_xrom_line(const char *found, const char *missing, char *out, size_t n) {
 	bool many = strchr(found, '+') != NULL;
-	if (found[0] && unread && unread[0]) snprintf(out, n, "%s found; %s too, but this 3DS has no room for it", found, unread);
-	else if (found[0]) snprintf(out, n, "%s found: the older %s the runs", found, many ? "nets join" : "net joins");
-	else if (unread && unread[0]) snprintf(out, n, "%s found, but this 3DS has no room for it", unread);
+	if (found[0]) snprintf(out, n, "%s found: the older %s the runs", found, many ? "nets join" : "net joins");
 	else snprintf(out, n, "%s not found beside BN6", missing);
 }
 

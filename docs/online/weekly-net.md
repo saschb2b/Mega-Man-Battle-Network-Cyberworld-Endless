@@ -21,9 +21,9 @@ reads on every game. Every diver has every game of the set, BN5's ROM
 and BN4's, so what a seed makes by the ROMs read (the areas `run_dress`
 dresses in BN5's and BN4's, their guardians, the encounter groups'
 families, the chips found) is the same on every dive. That is why a
-system that reads one extra ROM at most, the New 3DS, holds no DeepNet
-stamp though its pass is full and trades
-([A system with room for one game](netpass.md#a-system-with-room-for-one-game)).
+system that reads one extra ROM at most (the New 3DS until 0.24.0) holds
+no DeepNet stamp though its pass is full and trades
+([A system with room for one game](netpass.md#a-system-with-room-for-one-game)); a 3DS that reads both dives as everyone does, a linked fighter in a party's battles ([The shared dive](shared-dive.md)).
 
 A proposal to dive it together, every diver on the seed seen live and the
 guardians fought by parties of up to four, is [The shared dive](shared-dive.md)

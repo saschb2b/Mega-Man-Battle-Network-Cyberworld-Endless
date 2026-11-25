@@ -398,7 +398,8 @@ Checked that day:
   and BN4, 0 allocations refused in 6 runs, the heap's peak 95.8 MB of
   96, no crash; BN6 and BN5 as before (9 refused in 4 runs, the tiles'
   speed cache); all three read at once 50 refused in 5 runs, the maps'
-  mirror images, which is why a 3DS reads one extra ROM, BN5's first
+  mirror images, which is why a 3DS read one extra ROM, BN5's first,
+  until the learned maps shrank and both fit
   ([The 3DS's memory](../engine/emulation/3ds-memory.md), A third ROM).
 
 ## Its viruses' rewards
@@ -481,9 +482,9 @@ battle frame by frame, as BN5's were.
    the ROMs screen (red, Duo's face), the phones' pickers, the browser,
    the desktops' dialogs, the title's and the PET's found lines, and the
    3DS (the mark gone on 5 November 2026: Its viruses as visitors,
-   Turned on, whole), whose heap holds one extra ROM beside BN6's (`tools/heap3ds.py`:
-   BN4's alone fits, BN5's and BN4's together do not), so BN4 is read
-   there where BN5 is not. The guest core runs BN4's battles as the
+   Turned on, whole), whose heap held one extra ROM beside BN6's then (`tools/heap3ds.py`:
+   BN4's alone fit, BN5's and BN4's together did not), so BN4 was read
+   there where BN5 was not; since 25 November 2026 it reads both. The guest core runs BN4's battles as the
    differential's reference.
 1. **Its viruses.** The 17 families by `tools/xrecipe.py`, BN4's engine
    paired first, each proved by `build.py xdiff`; visitors at the seams

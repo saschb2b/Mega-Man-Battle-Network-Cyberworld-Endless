@@ -141,8 +141,8 @@ tool counts whatever the engine holds.
 A family counts for an act where one of its versions the act allows (the
 older nets' by tier, as the visitors take them) hits under the cap and has
 no more HP than the band's top, its stage is reached, and it is not bound
-to special panels. A New 3DS reads one extra ROM, so its pools are the
-second or third row.
+to special panels. (A New 3DS read one extra ROM until 0.24.0, its pools
+the second or third row; it reads both now.)
 
 What the tags are worth:
 

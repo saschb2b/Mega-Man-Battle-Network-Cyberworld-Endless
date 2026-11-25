@@ -99,9 +99,8 @@ statistics, troubleshooting and building the game yourself.
   [NetPass](#the-netpass)'s full set. Once a run has reached the Nest, it
   also brings a tournament to act 3's arena in half the runs: three Navis
   in a row on BN4's own bracket, BN4's among them ([A run](#a-run)). The
-  title's note says "BN4 found" as the game starts. Wherever BN5 can be added, BN4 can, the same ways; the
-  New 3DS reads one of them, BN5's where both are there; with either, its
-  [NetPass](#the-netpass) holds the Square and Trade stamps.
+  title's note says "BN4 found" as the game starts. Wherever BN5 can be added, BN4 can, the same ways, the
+  New 3DS among them: it reads both (until 0.24.0, one of them).
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.
@@ -392,8 +391,8 @@ same game for the Homebrew Launcher (`sdmc:/3ds/`).
 Put your ROM in `sdmc:/3ds/cyberworld-endless/rom/`, or leave it where you
 keep GBA games (`sdmc:/roms/gba/`, `sdmc:/roms/`, `sdmc:/gba/`): any file
 name works. BN5 Team Colonel's goes beside it, or in any of those folders,
-and BN4 Red Sun's the same way: the 3DS has room for one of them, BN5's
-where both are there.
+and BN4 Red Sun's the same way: the 3DS reads both (one of them, BN5's
+first, until 0.24.0).
 The first NEW GAME boots BN6 once, about 15 seconds of black
 screen. The bottom screen is the PET beside the game, framed like BN6's
 own PET screens, with HP, Zenny and BugFrags; on the net it shows the
@@ -1318,7 +1317,7 @@ The NetPass says what your games open online, as four stamps:
 | --- | --- | --- |
 | **Square** | Walking, phrases and emotes, cheering, cards, the referee's calls, the board and its posts, reading the trade offers, the week's ranking | BN6 Cybeast Gregar (USA): everyone has it |
 | **Arena** | NetBattles, and watching them | The full set |
-| **Trade** | Trading at Trade Central, and posting or answering a trade offer | The full set; on a New 3DS, BN5 or BN4 beside BN6 |
+| **Trade** | Trading at Trade Central, and posting or answering a trade offer | The full set |
 | **DeepNet** | The week's DeepNet dive | The full set |
 
 The full set is every game this version supports online: BN6 Cybeast
@@ -1333,15 +1332,14 @@ before shows a new open slot, the greeter tells you once, and the stamps
 land again when you add BN4's ROM. BN4's chips go into NetBattles and
 trades as each is proved; one not yet proved stays out.
 
-A New 3DS reads one ROM beside BN6's, so its pass goes as far as that
-allows: with BN5 Team Colonel's or BN4 Red Sun's it holds the Square and
-Trade stamps, a "Trade pass". It trades with everyone who holds the
-Trade stamp, and a trade with it stays within the chips both games
-hold: the list shows only those, so no BN4 chip goes to or from a game
-without BN4's ROM, and no BN5 chip without BN5's. NetBattles are not
-offered there, and the week's DeepNet dive stays shut: without the
-other game's ROM its dive would not be the same net as the Board's. The
-Board's ranking and the trade offers still read.
+A New 3DS reads both ROMs now, and its pass is everyone's:
+full with BN5 Team Colonel's and BN4 Red Sun's, it trades and the week's
+DeepNet dive is open. With one of the two it holds the Square's stamp
+alone, as on every system, where 0.24.0 and older gave it a "Trade pass"
+on one ROM: add the other and it trades again. NetBattles and watching
+are still not offered there; the 3DS cannot run a battle's two games at
+full speed. A 3DS still on 0.24.0 or older keeps its Trade pass, and a
+trade with it stays within the chips both games hold.
 
 It is a key item: **KeyItem** in the PET, then A on **NetPass**; A or B
 closes it. In the Square **R** on the PET's menu opens it too (the menu

@@ -57,7 +57,7 @@ two: `netpass grew` the greeter's line, in BN6's chat box once no other
 box is open (page it with B where a Navi stands in front: A talks to
 him), and `netpass grown` the pass as it then opens, writing
 `netpass.ini`'s `stamps=1` and `games=`. `--dev xroms=1` makes the build
-act as a system that reads one extra ROM at most, the New 3DS
+act as a system that reads one extra ROM at most, as a New 3DS on 0.24.0 or older is
 ([A system with room for one game](../online/netpass.md#a-system-with-room-for-one-game)):
 with a folder of BN6's ROM and one of BN5's or BN4's, the "Trade pass",
 and in a Square on a local server its trades with a game of all three,

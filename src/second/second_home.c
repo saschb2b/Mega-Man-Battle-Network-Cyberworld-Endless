@@ -10,9 +10,6 @@
 #include <string.h>
 
 #include "rom.h"
-#ifdef __3DS__
-#include "start_3ds.h"
-#endif
 #include "second.h"
 #include "second_frame.h"
 #include "second_state.h"
@@ -96,11 +93,7 @@ bool second_title_draw(int w, int h) {
 		size_t m = strlen(to);
 		snprintf(to + m, sizeof found - m, "%s%s", m ? (XR[i].data ? " + " : " or ") : "", xrom_layout(i)->tag);
 	}
-	const char *unread = NULL;
-#ifdef __3DS__
-	unread = start_3ds_unread();
-#endif
-	second_xrom_line(found, missing, unread, line, sizeof line);
+	second_xrom_line(found, missing, line, sizeof line);
 	second_wrapped(line, x, b.y + b.h - 6 - 2 * SECOND_LINE_H, b.w - 12, 2, found[0] ? PET_CYAN_HI : PET_DIM);
 	return true;
 }
