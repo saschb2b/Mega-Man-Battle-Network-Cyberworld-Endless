@@ -1,5 +1,5 @@
 {
- "about": "BN4's JunkSoul (Blue Moon's Soul 10, form 10: kind Obstacle; his charged shot power attack 0x61, BN4's Poltrgst (381) by its chip route, 80 frames; his taking of the form spawns a collision region at his panel, BN4_JUNK_ENTER) in BN4 Red Sun's own battle against BN6's with JunkSoul moved (docs/multirom/bn4-souls.md): BN6's Soul 24 over the proxy form, his charged shot the run's Poltrgst of its name (BN5's moved, 292) through BN6's chip route (soulroute.c), his taking of the form moved with ProtSoul's unit. Red Sun refuses Blue Moon's Souls: the harness gives him a Red Sun Soul's flag. Two RockCube * (BN4's 99, BN6's 143, kind Obstacle): the first Custom screen picks both, moves to UNITE and takes one and the Soul, the other left. B from fight frame 30 held 82 frames, two past his charge of 80: Poltrgst. The MettaurEX (BN4's 6, 250 HP) at (4,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "about": "BN4's JunkSoul (Blue Moon's Soul 10, form 10: kind Obstacle; his charged shot power attack 0x61, BN4's Poltrgst (381) by its chip route, 80 frames; his taking of the form spawns a collision region at his panel, BN4_JUNK_ENTER) in BN4 Red Sun's own battle against BN6's with JunkSoul moved (docs/multirom/bn4-souls.md): BN6's Soul 24 over the proxy form, his charged shot the run's Poltrgst of its name (BN5's moved, 292) through BN6's chip route (soulroute.c), his taking of the form moved with ProtSoul's unit. Red Sun refuses Blue Moon's Souls: the harness gives him a Red Sun Soul's flag. Two RockCube * (BN4's 99, BN6's 143, kind Obstacle): the first Custom screen picks both, moves to UNITE and takes one and the Soul, the other left. His unison confuses the MettaurEX (BN6's own status and mark, each engine's mark laid out its own way: souls.json's mark), its object spawned on the fight's clock (souls.json's late, its sound each game's own). B from fight frame 30 held 82 frames, two past his charge of 80: Poltrgst, held at t114, the frame its variables are set. The MettaurEX (BN4's 6, 250 HP) at (4,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
  "game": "bn4",
  "against": "bn6",
  "subject": "megaman",
@@ -215,5 +215,10 @@
    "B",
    82
   ]
- ]
+ ],
+ "verdict": {
+  "is": "FAIL",
+  "at": 114,
+  "why": "His charged shot is the run's Poltrgst through BN6's chip route (soulroute.c): BN5's moved chip of its name (292: subfamily 0x5B, power 150) where BN4's route takes its own (381: subfamily 0x41, power 100). Through t113 the unison, the confusion it gives the MettaurEX, its mark and sound, and the charge are the same; at t114, the frame the attack's variables are set, they part as a chip both games name plays as the run's (the held bn4_chip_cannon verdict's rule). A charge longer, or the taking of the form at another frame, parts before t114."
+ }
 }

@@ -126,6 +126,7 @@
  * 0x080C6C16), its spawn word by his side from the table at 0x0800E168 (0x1705FF85, 0x1705FF84), no damage (r6 0), the hit's
  * flags 0x2100 (r7, the word at 0x0800E170); moved with ProtSoul's unit (tools/xchiprecipe_bn4.py SOUL_ENTERS) */
 #define BN4_JUNK_ENTER      0x0800E146u
+#define BN4_JUNK_SPAWN_CALL 0x0800E15Cu /* ... its bl to BN4_REGION_SPAWN_FROZEN */
 /* ... and his charged shot, power attack 0x61 (0x0800CE4C): movs r0,#0x7e; adds r0,#0xff, BN4's Poltrgst (381) through
  * BN4_CHIP_ROUTE, the run's Poltrgst of its name (BN5's moved, 292) through BN6's (soulroute.c) */
 #define BN4_JUNK_POWER      0x0800CE4Cu

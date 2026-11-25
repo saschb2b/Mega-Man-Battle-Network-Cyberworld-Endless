@@ -121,7 +121,7 @@ static HookAct entered(HookRegs *r, void *user) {
 				r->r[2] = 0;
 				return go(r, BN6_FORM_OVERLAY_SPAWN);
 			}
-			return go(r, soulbn4_enter_copy(k));
+			return go(r, soulwind_late(k) ? 0 : soulbn4_enter_copy(k));   /* (JunkSoul's at his frame's end: soulwind.c) */
 		}
 	}
 	/* (a double of his set up in his form while a Soul is his, HolyDrem's or Poltrgst's: BN5 runs the Soul's own entry for

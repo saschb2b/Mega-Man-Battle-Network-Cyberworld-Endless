@@ -567,6 +567,28 @@ charge longer, the arrow one stronger, the step left out, the heal left
 out, the heal's effect another. The comparator reads the step's state and
 variables as each engine's own (souls.json's `step`).
 
+## JunkSoul in BN6's engine
+
+JunkSoul (Blue Moon's Soul 10, form 10, kind Obstacle) is BN6's Soul 24
+(k 11, held bit 17), the last of the twelve. What it took:
+
+| Part | JunkSoul's |
+| --- | --- |
+| His charged shot | power attack 0x61, Poltrgst by BN4's chip route (`BN4_JUNK_POWER`: BN4's 381, a secret chip, named in two instructions, `movs r0,#0x7e; adds r0,#0xff`). The run has Poltrgst as BN5's moved chip (292), so `soulroute.c` copies the routine onto it through BN6's chip route, its id named the same way past 0xFF; `xchips_bn4_named` pairs BN4's chip by its name alone, as `xchips_bn4_paid` leaves out a chip no folder holds |
+| His taking of the form | a collision region at his panel (`BN4_JUNK_ENTER`: its spawn word by his side, no damage, the hit's flags 0x2100) that confuses the foes for 720 frames, each confused one's mark over it (the fourth kind's 6, playing its sound every 60 frames). Moved with ProtSoul's unit (`SOUL_ENTERS`, its side table kept by `UNIT_COPIED_DATA`); BN6's own confusion and mark follow. As WindSoul's wind, it runs at the end of his next frame (`soulwind.c`, `soulbn4_late`), so the mark steps on the fight's clock as BN4's |
+
+The proof is one spec with its control: `bn4_soul_junk`, two RockCube,
+the unison and its confusion, B held 82 frames, held at t114: through t113
+the unison, the MettaurEX's confusion, its mark and sound and the charge
+are the same, and at t114 the attack's variables are the run's Poltrgst's
+(BN5's: subfamily 0x5B, 150) where BN4's route takes its own (0x41, 100),
+a chip both games name playing as the run's. Three mutations: the charge
+longer, the taking of the form left out, the region one damage. The
+comparator's souls rules `late` (the mark's first frame, BN6's a frame
+before its first step) and `mark` (the confusion's mark's own layout and
+its host's word of it, each engine's), and the mark's sound by each
+game's number (sounds 131).
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first
@@ -630,6 +652,12 @@ What is left, in order:
    word has 14 and 15 left below BN5's chaos bits (from 16), so the twelve
    need a word of their own; and the run's held mask grows past a byte
    (`RUN_MAGIC`) once a run gives them.
+4. ~~**The other nine**~~ (25 November 2026): all twelve move, each held
+   to BN4's battle by its specs and mutations (each Soul's section,
+   above). Their used bits, 13 to 24, share the used word with BN5's
+   Chaos Unison bits (from 16), which never meet them: a run plays one
+   version of MegaMan's Souls, BN5's or BN4's (#774). What is left is the
+   run's: which Souls a run gives and from whom (#774, issue #499).
 
 ## The look, located
 

@@ -69,6 +69,9 @@ bool soulbn4_wind_coll(SoulBn4CollSet *out);
 /* (after xchips_bn4_code_install) BN4's k-th Soul's taking of the form moved with his unit (tools/xchiprecipe_bn4.py
  * SOUL_ENTERS: SrchSoul's, which spawns his object), its copy's address with its Thumb bit, 0 where it is not moved */
 uint32_t soulbn4_enter_copy(int k);
+/* ... and whether that routine is run at the end of his next frame rather than as he enters the proxy form: JunkSoul's, whose
+ * object lasts the fight (BN4_JUNK_ENTER), spawned on the fight's clock as BN4's (soulwind.c, as WindSoul's wind) */
+bool soulbn4_late(int k);
 /* (a hook's) whether BN4's k-th Soul charges chip `chip` (BN6's id) with A, by BN4's test (BN4_CHIP_CHARGE_TEST: the chip's
  * kind by BN4's numbering, soulkinds_bn4_of, and its flags): AquaSoul an Aqua chip not left alone; false for a Soul with no
  * chip charge */

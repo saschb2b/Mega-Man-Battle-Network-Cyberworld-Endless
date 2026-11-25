@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-25T14:38:53Z
+* **Update**: multirom/bn4-souls.md (JunkSoul in BN6's engine: Poltrgst through BN6's chip route, his taking of the form's confusion at his frame's end; the twelve moved; his charged shot Poltrgst, not a chip used this battle), rom/souls.md (JunkSoul's row), code/emu.md (soulwind.c's late taking of the form).

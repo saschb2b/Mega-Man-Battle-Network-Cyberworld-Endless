@@ -1,0 +1,22 @@
+[
+ {
+  "name": "JunkSoul's charge 10 frames longer",
+  "spec": "bn4_soul_junk",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 90 frames for his charged shot where BN4_CHARGE_TIMES' row of 0x61 holds 80: his charge's level parts at t110"
+ },
+ {
+  "name": "JunkSoul's taking of the form left out",
+  "spec": "bn4_soul_junk",
+  "soulbreak": 1024,
+  "what": "the passives' break SOULPASSIVE_BREAK_READY leaves soulwind.c out: his taking of the form waits for a frame's end that never runs it, so no region confuses the MettaurEX in BN6"
+ },
+ {
+  "name": "JunkSoul's region one damage",
+  "spec": "bn4_soul_junk",
+  "poke": [
+   "0800E158:2601"
+  ],
+  "what": "his taking of the form's copy (moved with ProtSoul's unit) with its movs r6,#0, the region's damage, made #1: the MettaurEX loses a HP in BN6"
+ }
+]

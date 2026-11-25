@@ -139,5 +139,21 @@
   "evidence": [
    "bn4_soul_roll_step at t102: MegaMan's CurAction 9 in BN4, 0x10 in BN6; his attack's +0xC 0 and 1, +0x18 0xA and 4"
   ]
+ },
+ {
+  "key": "late",
+  "name": "a Soul's lasting object, BN6's in play a frame before its first step",
+  "why": "JunkSoul's taking of the form (BN4_JUNK_ENTER) spawns the fourth kind's 0x06 through BN4_REGION_SPAWN_FROZEN, which lasts the fight and plays its sound every 60 frames. BN4 runs the routine as the form's state is set in the unison, whose last frame is the fight's first, and steps the object in that frame (its +0x20 60, then 59 in the trace); BN6 runs its copy at the end of his frame two frames after he enters the proxy form (soulwind.c, as WindSoul's wind), the object stepped from the frame after, so every step of it falls on the fight's clock as BN4's (the counts and sounds the same frames). At BN6's frame of its spawn alone, BN4 has none yet: the object in play and in the run order, and the fields of another's collision data it set as it was spawned, unset in BN4's frame and set in its next; every frame after compared",
+  "evidence": [
+   "bn4_soul_junk at t1: BN6's object in play (+0x20 60), the MettaurEX's collision data +0x48 naming it, +0x1E and +0x1F 0xCF and 2, +0x3C's 0x8000; BN4's the same at t2"
+  ]
+ },
+ {
+  "key": "mark",
+  "name": "the confusion's mark, each engine's own layout",
+  "why": "JunkSoul's taking of the form confuses the foes (BN4_JUNK_ENTER: a region of no damage, its hit flags 0x2100), and a confused object's mark is each engine's own: the fourth kind's 0x06 of kind 0, spawned by BN6's status step for BN6_STRUCK_CONFUSE (0x0800E8B0-0x0800E8DE, its word at the host's collision data +0x48) and by BN4's twin (0x0800AF04, its word at +0x6C; its countdown BN4_CONFUSE_STEP). The two marks' routines take the same steps (their sound every 60 frames, 0x080E2330 and 0x080E1CA0) and lay their fields out each its own way: the mark's panel (BN6's its host's, BN4's none), +0x3E, its routine's table and art words into each game's ROM (+0x60, +0x98-+0xA7), its host's word (+0x64, +0x8E). The host's word of its mark is BN6's +0x48 and BN4's +0x6C, which the trace lays as leftovers at +0x2C and +0x48. Those are each engine's while the host is confused in both; the mark's presence, count and sound, the host's confusion timer and every other field compared",
+  "evidence": [
+   "bn4_soul_junk at t2: the MettaurEX confused in both (+0x1E 0x2CE), its mark's +0x12 and +0x13 0 in BN4 and its panel (4,2) in BN6, +0x64 BN4's host's collision data +0x6C and BN6's +0x48, the host's +0x48 naming the mark in BN6"
+  ]
  }
 ]
