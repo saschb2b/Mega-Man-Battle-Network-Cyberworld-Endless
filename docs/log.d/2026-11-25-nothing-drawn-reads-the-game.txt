@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-25T10:55:00Z
-* **Update**: engine/emulation/thread.md (Nothing drawn reads the game: the rule, 0.24.0's five reads while drawing that put the 3DS's drawing behind the GBA, how they were measured and ruled out for 0.23.0, the count, the scenario and the whole look; issue #897), game/pet-menu.md (the field kept while START is down, not every other frame; the picture's reads after the game's frame), devtools/scenarios.md (the state's `drawwaits`).
