@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-25
+* **Update**: multirom/bn4-souls.md (FireSoul in BN6's engine: his flame, his chip charge on BN4's own power attacks, his flame for a chip charged, his grass, his companion and his lava), rom/souls.md (FireSoul's flame for a chip charged and his chip charge's row, FireSoul on lava's row), code/emu.md (soulcharged.c, soullava.c), devtools/differential.md (FireSoul's grass in the Soul object's rule, BN4's lava and its count), project/claims/bn4-souls.json (the Souls' Thumb's stubs).
 * **Update**: project/youtube.md (0.24.0's trailer published, its row, and Studio's A/B-Tests waiting on the owner's identity check).
 * **Update**: code/layers.md (0.24.0's row of the numbers), devtools/old-checkpoint.md (0.24.0's candidate continued 0.23.0's and 0.22.2's runs).
 
