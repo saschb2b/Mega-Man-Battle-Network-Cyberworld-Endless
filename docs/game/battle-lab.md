@@ -332,7 +332,7 @@ step:
 - **A family bound to special panels** is set only on a field that has
   them; the builder says so in the information box.
 - **The ROM must be read**: a family of a game whose ROM is absent shows
-  as locked by its game, its data kept. A New 3DS reads one extra ROM.
+  as locked by its game, its data kept.
 - **A Navi fights alone** until the build has measured otherwise.
 
 ### The statistics

@@ -84,7 +84,7 @@ static char rom_3ds[600];   /* the 3DS's own rom folder */
  * loaders (mCorePreloadVF, mCoreLoadFile), which the game never calls:
  * emu.c hands the core its padded copy as a file in memory, which the core
  * maps as it is (GBALoadROM maps a 16 MB ROM, and patches it in place).
- * Given back, the heap holds an extra ROM's file (BN5's) with 8 MB to spare
+ * Given back, the heap holds the extra ROMs' files (BN5's, BN4's) with room to spare
  * (docs/engine/emulation/3ds-memory.md). */
 extern uint32_t *romBuffer;
 extern size_t romBufferSize;
@@ -103,14 +103,6 @@ void start_3ds_heap(char *out, size_t n) {
 	struct mallinfo m = mallinfo();
 	snprintf(out, n, "heap %lu KB in use, %lu KB at most of %lu KB", (unsigned long)(m.uordblks / 1024),
 		(unsigned long)(m.arena / 1024), (unsigned long)(envGetHeapSize() / 1024));
-}
-
-/* (what the heap can still give: its area past what malloc took, and what
- * malloc holds free) */
-static size_t heap_free(void) {
-	struct mallinfo m = mallinfo();
-	size_t heap = envGetHeapSize();
-	return (heap > m.arena ? heap - m.arena : 0) + m.fordblks;
 }
 
 /* (whether ptm:sysm, which sets the clock, answers is asked first for the
@@ -154,17 +146,14 @@ void console_start(bool data_dir_given) {
 	buffer_give_back();
 }
 
-/* The extra ROMs offered (rom.h's xrom_offered: BN5's, then BN4's)
- * read beside BN6's, in their order, where the heap holds one with room
- * left: its 8 MB, the core's 16 MB copy still to come and what a run takes
- * beside them, 50 MB at most where a layer's area is learned
- * (tools/heap3ds.py), and some to spare. A New 3DS holds one extra ROM
- * at most (rom.h's XROMS_MOST, which the NetPass's rule reads too): with BN5's and BN4's both read, a long run's play outgrows
- * the heap (tools/heap3ds.py, docs/engine/emulation/3ds-memory.md). One
- * found past that, or short of room, is left unread, the run going on
- * without it, said in the log and on the PET. */
-#define XROM_ROOM ((size_t)ROM_SIZE + EMU_ROM_SIZE + (56u << 20))
-static char unread[48];   /* (the tags of those found and left unread: "BN4") */
+/* The extra ROMs offered (rom.h's xrom_offered: BN5's, then BN4's) read
+ * beside BN6's, each of them: 8 MB a file in a 96 MB heap. Until 0.24.0 a
+ * New 3DS read one, as with both a long run outgrew the heap; since the
+ * learned maps shrank (14 November 2026) twelve long runs with both peak
+ * at 72 MB, nothing refused (tools/heap3ds.py --cases all --cap 86;
+ * docs/engine/emulation/3ds-memory.md, A third ROM). A third extra ROM is
+ * modelled there before a 3DS reads it. */
+_Static_assert(XROM_COUNT == 2, "a third extra ROM: model the 3DS's heap with it (tools/heap3ds.py --cases all --cap 86) before it is read here");
 
 /* Extra ROM `xrom`'s .gba in `dir`, told by its header's game code before
  * it is read: the first one's path in `first` (where it is still ""),
@@ -196,38 +185,23 @@ static void extras_3ds(const char *const *places, size_t count) {
 	snprintf(beside, sizeof beside, "%s", R.path);
 	char *slash = strrchr(beside, '/');
 	if (slash) *slash = 0;
-	int read = 0;
 	for (int x = 0; x < XROM_COUNT; ++x) {
 		if (!xrom_offered(x)) continue;
 		const char *tag = xrom_layout(x)->tag;
 		char first[700] = "";
 		u64 t0 = osGetTime();
-		size_t room = heap_free();
-		bool fits = read < XROMS_MOST && room >= XROM_ROOM;
 		for (size_t i = 0; i <= count && !XR[x].data; ++i) {
 			const char *dir = i ? places[i - 1] : beside;
 			if (i && !strcmp(dir, beside)) continue;
-			xrom_in(dir, x, fits, first, sizeof first);
+			xrom_in(dir, x, true, first, sizeof first);
 		}
 		char heap[120];
 		start_3ds_heap(heap, sizeof heap);
-		if (XR[x].data) {
-			++read;
-			printf("3ds: %s read and checked in %llu ms (%s); %s\n", tag, (unsigned long long)(osGetTime() - t0), XR[x].path, heap);
-		} else if (first[0] && !fits) {
-			size_t m = strlen(unread);
-			snprintf(unread + m, sizeof unread - m, "%s%s", m ? " + " : "", tag);
-			if (read >= XROMS_MOST)
-				printf("3ds: %s's ROM (%s) left unread: a New 3DS holds %d extra ROM beside BN6's, read already\n", tag, first, XROMS_MOST);
-			else
-				printf("3ds: %s's ROM (%s) left unread: the heap has %lu KB free, %s asks %lu KB (its file, the core's copy and a run's"
-					" play); a run without it\n", tag, first, (unsigned long)(room / 1024), tag, (unsigned long)(XROM_ROOM / 1024));
-		} else if (first[0]) printf("3ds: %s is not %s unchanged, or did not read; a run without it\n", first, xrom_layout(x)->name);
+		if (XR[x].data) printf("3ds: %s read and checked in %llu ms (%s); %s\n", tag, (unsigned long long)(osGetTime() - t0), XR[x].path, heap);
+		else if (first[0]) printf("3ds: %s is not %s unchanged, or did not read; a run without it\n", first, xrom_layout(x)->name);
 		else printf("3ds: no %s ROM beside BN6's or in the 3DS's ROM folders; a run without it\n", tag);
 	}
 }
-
-const char *start_3ds_unread(void) { return unread[0] ? unread : NULL; }
 
 bool console_rom(const char *rom_dir, char *msg, size_t n) {
 	/* (the game's own rom folder, then where 3DS players keep GBA ROMs: a

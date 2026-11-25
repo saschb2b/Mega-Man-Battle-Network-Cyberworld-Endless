@@ -110,7 +110,7 @@ const char *second_trader_name(int kind);
 void second_trader_lines(int kind, int pack_chips, char *out, size_t n);
 /* The other games' ROMs found beside BN6's, in a line: `found` those
  * read ("BN5", "BN5 + BN4"), `missing` those offered and not found ("BN5",
- * "BN5 or BN4"), `unread` (the 3DS's) those found and left for want of room */
-void second_xrom_line(const char *found, const char *missing, const char *unread, char *out, size_t n);
+ * "BN5 or BN4") */
+void second_xrom_line(const char *found, const char *missing, char *out, size_t n);
 
 #endif

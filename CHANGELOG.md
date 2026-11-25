@@ -18,6 +18,16 @@ Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
   anything now; a test with the game on its own thread holds it there
   (issue #897). Thanks to Pink5G for the report.
 
+- **New: a New 3DS reads BN5's and BN4's ROMs together.** Until now it
+  read one of them beside BN6's, BN5's where both were there, and said
+  the other was found with no room for it. The game needs far less
+  memory for a layer than it did when that limit was set, and both fit:
+  BN4's areas, viruses, chips, Navis and Souls join a 3DS's runs beside
+  BN5's. Its NetPass is every other system's now: full with both games,
+  it trades and the week's DeepNet opens; with one game it holds the
+  Square's stamp alone, where it held a Trade pass before, so add the
+  other ROM to trade again. NetBattles are still not offered on a 3DS.
+
 ## 0.24.0 (2026-11-25)
 
 - **New: MegaMan in colours of your own.** Colours, a new entry of the

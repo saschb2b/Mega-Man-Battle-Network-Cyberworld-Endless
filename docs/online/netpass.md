@@ -199,9 +199,9 @@ and its stamps theirs ([In the browser](arena/rollback/browser.md)). The
 New 3DS builds the Arena but offers no NetBattle and no watching
 (`CW_ARENA`, `square_arena_offered`): a frame of the battle's two GBAs
 takes 25.8 ms there against a 60th of a second's 16.7, measured on the
-device ([The New 3DS](arena/rollback/new-3ds.md)). And it reads one extra
-ROM beside BN6's at most (`XROMS_MOST`, `src/core/rom.h`, which
-`start_3ds.c` reads its ROMs by: both together outgrow its heap,
+device ([The New 3DS](arena/rollback/new-3ds.md)). And until 0.24.0 it
+read one extra ROM beside BN6's at most (`XROMS_MOST`, `src/core/rom.h`:
+both together outgrew its heap then,
 [The 3DS's memory](../engine/emulation/3ds-memory.md)), where the full
 set asks two since protocol v17. For a while on `dev` its pass could
 never be full, and it had lost the trades and the dives 0.20.0 gave it
@@ -216,8 +216,18 @@ cannot use.
 **A pass is full when every game of the set that the system can read is
 in** (protocol v18). On every system with room for all of them that is
 the full set as before, BN6's, BN5's and BN4's ROMs. On a system that
-reads one extra ROM at most (`netpass_one_extra`: today the New 3DS
-alone) it is BN6's and one of BN5 Team Colonel's or BN4 Red Sun's. What
+reads one extra ROM at most (`netpass_one_extra`) it is BN6's and one of
+BN5 Team Colonel's or BN4 Red Sun's.
+
+**No system of this build is one any more.** The New 3DS was, until
+0.24.0; since 25 November 2026 it reads both ROMs
+([The 3DS's memory](../engine/emulation/3ds-memory.md), A third ROM) and
+its pass is every other system's: full with both games, the Square's
+stamp alone with one, so a 3DS that traded on BN5's ROM alone trades
+again once BN4's is beside it. The rule below stays in the game and on
+the server for the 3DS games of 0.24.0 and older that meet these in the
+Square (they say `hello_one_extra`), and for `--dev xroms=1`, which acts
+as one; it goes with the wire's next version that no longer serves them. What
 that pass opens goes stamp by stamp, by what the two games of a pair
 must share:
 

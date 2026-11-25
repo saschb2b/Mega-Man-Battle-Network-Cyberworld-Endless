@@ -33,14 +33,11 @@ GBA core alone takes longer than a frame there.
   on every other system (docs/GUIDE.md, What you need): BN5's areas, their
   viruses, Navis, chips, Souls and DarkChips. The start then takes a few
   seconds more, as the game reads and checks BN5's file, and the title
-  says "BN5 found" in its top right corner. A 3DS whose memory had no room
-  for it would leave it unread and play BN6's net alone, and say so (the
-  PET's home and `log.txt`); a New 3DS has room (Memory, below).
+  says "BN5 found" in its top right corner.
 - Mega Man Battle Network 4: Red Sun (USA) goes there the same way, and
   its net joins the runs too: BN4's areas, viruses, chips and Navis,
-  the title saying "BN4 found". A New 3DS reads one extra ROM beside
-  BN6's, BN5's where both are there; the other is left unread, and the
-  PET's home says it was found with no room for it.
+  the title saying "BN4 found". A New 3DS reads both beside BN6's (until
+  0.24.0 it read one, BN5's where both were there: Memory, below).
 - The first NEW GAME boots BN6 from power-on once, about 15 seconds of black
   screen; later starts load what it kept (`boot-3.state`).
 - The picture fills the top screen's height (1.5x, its pixels mixed at their
@@ -124,10 +121,10 @@ What differs from the other builds:
   before `main` (16 MB, `docker/mgba.sh`) for loaders of its own that the
   game never calls: the core maps the game's padded 16 MB copy as it is
   (`src/emu/emu.c`), so the game gives the buffer back at its start. The
-  heap then holds BN6's ROM (8 MB), the core's copy (16 MB) and BN5's ROM
-  where it is read (8 MB): 32 MB, against the 40 MB BN6 alone had taken
-  with the buffer held. BN5's ROM is read where the heap keeps 80 MB free
-  for it, the core's copy still to come and a run's play. The tiles
+  heap then holds BN6's ROM (8 MB), the core's copy (16 MB) and BN5's and
+  BN4's ROMs where they are read (8 MB each): 40 MB, what BN6 alone had
+  taken with the buffer held. Long runs with both peak at 72 MB of the 96
+  (`tools/heap3ds.py`). The tiles
   learned from a layer's area's original maps are kept for that area
   alone (`src/map/netmap.c`): kept for every area a run passed through,
   they filled the heap in long runs. An area a run comes back to is
@@ -174,13 +171,13 @@ What differs from the other builds:
   measure it on the device (docs/online/arena/rollback/new-3ds.md). The
   Net Square, its cards and the referee's calls of the channel's battles
   work as elsewhere.
-- **Trades** work with one of BN5's or BN4's ROMs beside BN6's: a New
-  3DS reads one of the two, and with it its NetPass holds the Square and
-  Trade stamps (docs/GUIDE.md, The NetPass). A trade stays within the
-  chips both games hold. **The week's dive** stays shut: it takes both
-  ROMs, as a dive without one of them is another net than the Board's;
-  the week's ranking can still be read (docs/online/netpass.md, A system
-  with room for one game).
+- **The NetPass** is every other system's: with BN5's and BN4's ROMs it
+  is full, it trades, and the week's dive is open; with one of the two it
+  holds the Square's stamp alone, as everywhere. NetBattles and watching
+  are not offered on a 3DS, whose one core cannot run the battle's two
+  GBAs in a frame. A New 3DS on 0.24.0 or older read one extra ROM and
+  held a "Trade pass" with it (docs/online/netpass.md, A system with room
+  for one game).
 - **Closing** from the HOME Menu: no frame is drawn once the system asks
   the game to close (the GPU is the HOME Menu's then; waiting on it hung
   the console), and the core's threads end before the game does.

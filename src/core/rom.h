@@ -176,18 +176,17 @@ typedef struct {
 	char path[1024];   /* the file it was read from */
 } XRom;
 extern XRom XR[XROM_COUNT];
-/* The extra ROMs a system reads beside BN6's at most: each of them, but
- * on a New 3DS one (its heap: docs/engine/emulation/3ds-memory.md;
- * start_3ds.c reads up to it, BN5's first). What a game can do online
- * goes by it too: a NetPass is full with every game its system can read
- * (docs/online/netpass.md, A system with room for one game). */
-#ifdef __3DS__
-#define XROMS_MOST 1
-#else
+/* The extra ROMs a system reads beside BN6's at most: each of them, on
+ * every system. Until 0.24.0 a New 3DS read one, for its heap's sake;
+ * since the learned maps shrank it holds both with room to spare
+ * (docs/engine/emulation/3ds-memory.md, A third ROM). What a game can do
+ * online goes by it: a NetPass is full with every game its system can
+ * read (docs/online/netpass.md, A system with room for one game), a rule
+ * the wire keeps for those older games. */
 #define XROMS_MOST XROM_COUNT
-#endif
 /* ... as this game goes by it: XROMS_MOST, or what --dev xroms=N and the
- * tests set (a host build acting as a system of one extra ROM) */
+ * tests set (a host build acting as a system of one extra ROM, as a New
+ * 3DS on 0.24.0 or older is) */
 extern int xroms_most;
 /* --dev's options (main.c, beside devtools_parse, as analytics_dev takes
  * its own): xroms=N among them sets it */

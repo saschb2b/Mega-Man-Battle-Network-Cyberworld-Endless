@@ -91,10 +91,10 @@ generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:09:57Z }
    `rom/bn4rs.gba`), where
    `xrom_find_beside` reads it (issue #68); it asks the engine which extra
    ROMs it offers (`cw_rom_offered`) and hides the others' cartridges,
-   refusing their files as another game's. The New 3DS reads one extra
-   ROM offered whole, BN5's before BN4's, beside BN6's or in the 3DS's
-   other ROM folders (`src/core/start_3ds.c`), where its 96 MB heap has
-   room for it: mGBA's 3DS setup had taken a 16 MB ROM buffer it never
+   refusing their files as another game's. The New 3DS reads each extra
+   ROM offered whole (one of them, BN5's first, until 0.24.0), beside
+   BN6's or in the 3DS's other ROM folders (`src/core/start_3ds.c`); its
+   96 MB heap has room for them: mGBA's 3DS setup had taken a 16 MB ROM buffer it never
    used, which the game now gives back, so with BN5's 8 MB read the
    heap's fixed part is 8 MB smaller than the 3DS's with BN6 alone was
    ([The 3DS's memory](../engine/emulation/3ds-memory.md)). Two extra ROMs do not fit: modelled

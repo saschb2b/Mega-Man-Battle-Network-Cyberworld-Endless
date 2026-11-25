@@ -1,7 +1,7 @@
 ---
 type: Engine Mechanism
 title: "The 3DS's memory"
-description: "How the New 3DS's 96 MB heap holds BN6's ROM, the core's 16 MB copy and one extra ROM, BN5's first (`src/core/start_3ds.c`), mGBA's ROM buffer given back, one area's learned maps kept, its maps' mirror images and raised views made in place, measured by `tools/heap3ds.py`: the budget per part and the margin a new feature is checked against."
+description: "How the New 3DS's 96 MB heap holds BN6's ROM, the core's 16 MB copy and both extra ROMs, BN5's and BN4's (`src/core/start_3ds.c`; one of them until 0.24.0), mGBA's ROM buffer given back, one area's learned maps kept, its maps' mirror images and raised views made in place, measured by `tools/heap3ds.py`: the budget per part and the margin a new feature is checked against."
 tags: [engine, emulation]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T13:34:57Z }
 ---
@@ -91,12 +91,32 @@ are the next room to make: some 6 MB.
 ## A third ROM: BN4 Red Sun
 
 BN4 Red Sun's ROM ([Battle Network 4 in a run](../../multirom/bn4.md)) is
-offered since 5 November 2026, its families and areas in runs. The 3DS
-reads one extra ROM at most, BN5's before BN4's (`start_3ds.c`, by
-`rom.h`'s `XROMS_MOST`, which the NetPass's rule reads too:
-[A system with room for one game](../../online/netpass.md#a-system-with-room-for-one-game)), and leaves the second unread, said in `log.txt` ("a New
-3DS holds 1 extra ROM beside BN6's, read already") and on the PET ("BN5
-found; BN4 too, but this 3DS has no room for it"). Modelled on 4
+offered since 5 November 2026, its families and areas in runs. **The 3DS
+reads both extra ROMs since 25 November 2026** (`start_3ds.c`; `rom.h`'s
+`XROMS_MOST` is every system's now). Until 0.24.0 it read one at most,
+BN5's before BN4's, left the second unread and said so in `log.txt` and
+on the PET, because with both a long run outgrew the heap, as the tables
+below show. What changed was the learning made in place and the learned
+maps a byte a pixel (14 November, below), some 20 MB off every peak; the
+limit stood eleven days longer than its reason. Modelled again on 25
+November 2026 with both read against the margin rule (`python3
+tools/heap3ds.py --cases bn5,bn4,all --cap 86`, `all` over seeds 1-12, the
+others 1-6):
+
+| Long runs, the heap capped at 86 MB | BN6 and BN5 | BN6 and BN4 | BN6, BN5 and BN4 |
+| --- | --- | --- | --- |
+| The heap's peak | 63.2 MB | 57.2 MB | 71.9 MB |
+| Allocations refused | 0 | 0 | 0 |
+| Crashes | 0 | 0 | 0 |
+
+So all three leave 14 MB under the rule. A third extra ROM is modelled
+this way before a 3DS reads it (`start_3ds.c`'s `_Static_assert` on
+`XROM_COUNT` stops the build until someone has). Online, a system that
+reads fewer games than there are is still a thing on the wire, for the
+3DS games of 0.24.0 and older
+([A system with room for one game](../../online/netpass.md#a-system-with-room-for-one-game)).
+
+What the limit was measured by, kept as it was written: modelled on 4
 November 2026 (`python3 tools/heap3ds.py --cases bn5,bn4,all --seeds
 1-12`, 120000 frames a run, BN4's read for research, its one family,
 Billy, installed, its areas held):
@@ -118,9 +138,9 @@ and no crash, 12 areas learned again; BN6 and BN5 had 9 refused in 4
 BN4's file costs the heap what BN5's does, 8 MB; with its areas dressed
 its layers learn BN4's 256-colour maps, and the runs above still had
 room. Both together leave a long run's play 8 MB short, and what is
-refused then is not a cache but a layer's own look. A New 3DS with
-BN5's and BN4's ROMs plays with BN5's; BN4's comes in where BN5's is not
-there.
+refused then is not a cache but a layer's own look. So until 0.24.0 a
+New 3DS with BN5's and BN4's ROMs played with BN5's, BN4's coming in
+where BN5's was not there.
 
 ## The learning made in place
 
@@ -242,20 +262,20 @@ budget a new feature is counted against.
 | --- | --- | --- |
 | The core's ROM copy | 16.0 | the whole session |
 | BN6's ROM | 8.0 | the whole session |
-| An extra ROM (BN5's, else BN4's) | 8.0 | the whole session, where read |
+| Each extra ROM (BN5's, BN4's) | 8.0 | the whole session, where read |
 | Home's source (Central Town's map, its mirror image, their entries) | some 5 (13.8 in ARGB) | from the first visit home, the whole run |
 | The layer's area's learned books | 2 to 7 | while its layers last |
 | An area's learning: one of its maps at a time | up to 3.5 (11.8 in ARGB) | while it learns (a layer's first making) |
 | The tiles' learning of that map | up to 9 | the same |
 | The installs' log, SDL, mGBA, the game's tables | about 5 | the whole session |
 
-The margin rule: `python3 tools/heap3ds.py --cases bn6,bn5,bn4 --cap 86`
+The margin rule: `python3 tools/heap3ds.py --cases bn6,bn5,bn4,all --cap 86`
 over seeds 1-12 refuses nothing, and no crash, so a long run's peak stays
 10 MB under the heap: 6 MB for what the 3DS's fragmentation may take (the
 `--cap 90` test above) and 4 MB for what the model does not count (the
 device's `log.txt` "at most" against the model's peak). The `all` case,
-both extra ROMs at once, is measured but not held to it: a 3DS reads one
-(A third ROM, above). A run whose peak at 96 MB stays under 86 with
+both extra ROMs at once, is held to it since a 3DS reads both (A third
+ROM, above). A run whose peak at 96 MB stays under 86 with
 nothing refused makes the same allocations at 86, so the tables above
 answer the rule as well. After the change the cases a 3DS plays peak at
 about 76 to 78 MB: some 8 MB of room under the rule for what is still to
