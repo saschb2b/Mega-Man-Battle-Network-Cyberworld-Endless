@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-25
+* **Update**: devtools/frame-log.md (the sound's dry reads and least fill, the longest present, what the line before took to say; the 3DS's lines kept in memory and written where the loop is held, a line to the SD card measured at 11 to 29 ms on a New 3DS; issue #897).
 * **Update**: multirom/bn4-souls.md (ProtSoul in BN6's engine: WideSwrd through BN6's chip route, his Sword chip charge, his shield and its lock), rom/souls.md (ProtSoul's row), code/emu.md (soullock.c), devtools/differential.md (the B and left's window and lock paired, MegaMan's AI words of counts read as numbers).
 * **Update**: engine/emulation/thread.md (Nothing drawn reads the game: the rule, 0.24.0's five reads while drawing that put the 3DS's drawing behind the GBA, how they were measured and ruled out for 0.23.0, the count, the scenario and the whole look; issue #897), game/pet-menu.md (the field kept while START is down, not every other frame; the picture's reads after the game's frame), devtools/scenarios.md (the state's `drawwaits`).
 * **Update**: multirom/bn4-souls.md (WindSoul in BN6's engine: his shots as BN6's AirShot and WindRack through BN6's chip route, his pass, his shoes and the wind of his side), rom/souls.md (WindSoul's row), code/emu.md (soulroute.c, soulwind.c), devtools/differential.md (a spec's chips, BN6's Wind bit, BN4's charge glow among the natives, a spawn clearing its slot's sprite owner).

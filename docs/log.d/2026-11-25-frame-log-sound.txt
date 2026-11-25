@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-25T15:05:00Z
-* **Update**: devtools/frame-log.md (the sound's dry reads and least fill, the longest present, what the line before took to say; the 3DS's lines kept in memory and written where the loop is held, a line to the SD card measured at 11 to 29 ms on a New 3DS; issue #897).
