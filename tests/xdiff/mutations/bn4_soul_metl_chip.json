@@ -1,0 +1,20 @@
+[
+ {
+  "name": "MetlSoul's charged chip not doubled",
+  "spec": "bn4_soul_metl_chip",
+  "soulbreak": 131072,
+  "what": "the chips' break SOULCHIPS_BREAK_DOUBLE: BN6's charge bonus none where BN4_CHIP_CHARGE_BONUS gives his form 9 0x8000 on a Break chip: the AirHoc1's damage not doubled"
+ },
+ {
+  "name": "MetlSoul charges no chip",
+  "spec": "bn4_soul_metl_chip",
+  "soulbreak": 65536,
+  "what": "the chips' break of the charge's test: no chip of his charged where BN4_CHIP_CHARGE_TEST's form 9 charges a chip of no kind whose power shows"
+ },
+ {
+  "name": "MetlSoul's chip charge 10 frames longer",
+  "spec": "bn4_soul_metl_chip",
+  "soulbreak": 16,
+  "what": "the charge times' copy 10 frames longer for BN4's own power attacks, his chip charge's 70: A held 72 frames uses the AirHoc1 uncharged"
+ }
+]

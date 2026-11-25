@@ -60,6 +60,9 @@
                                        * BN6_SOULS_SIDE, by his +0x16), r0 0, where BN4's code clears fields of his AI data that
                                        * BN6 keeps there (GutsSoul's rapid buster's count, 0x080EBE82: XvCallIn; soulrapid.h) */
 #define XC4_SOULS_BASE BN6_SOULS          /* ... its literal */
+#define XC4_BUSTER_DAMAGE 0x0801265Au   /* r5 MegaMan: his plain buster's damage as BN6's own plain shot makes it (its power attack 0's,
+                                       * 0x08011A44: NaviStats +1 and more), where BN4's adds 1 to its NaviStats +5 (0x0800CC34), a field
+                                       * BN6 keeps otherwise: MetlSoul's plain shot (tools/xchiprecipe_bn4.py UNIT_AIMS) */
 #define XC4_MISC      (FREE_BN4_CHIPS_END - 0x400u)   /* BN6's misc family's routines grown, 256 (BN6's own 23, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
 #define XC4_FIRST_SUPPORT 0x80             /* BN4's subfamily 0 in BN6's grown support routines (BN6's 0-0x29, BN5's from 0x2A) */
 /* An attack family of BN4's (a state of its MegaMan's, BN4_PLAYER_STATES by a chip's record's +0xB: the spread chips' 0x1E)

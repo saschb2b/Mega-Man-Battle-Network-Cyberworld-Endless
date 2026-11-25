@@ -24,12 +24,14 @@
 enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
-/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8, FireSoul 5) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5 };
+/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8, FireSoul 5, MetlSoul 9) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9 };
 #define FORM_GUTS 2
 #define FORM_NUM 8
 #define FORM_AQUA 11
 #define FORM_FIRE 5
+#define FORM_METL 9
+#define OP_CMP_R1_B 0x2900u   /* cmp r1,#imm8 (the bonus's kinds) */
 #define OP_BL_HI 0xF000u      /* a bl's first half */
 #define FORM_THUN 6
 #define OP_CMP_R0 0x2800u    /* cmp r0,#imm8 */
@@ -71,9 +73,29 @@ static bool fire_rule(int *kind) {
 	return true;
 }
 
+/* MetlSoul's rules in BN4's code: the test's two kinds, its flags (not left alone, its power shown), and the bonus's same two;
+ * false where the code is not that */
+static bool metl_rule(int *kind1, int *kind2) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (!b4) return false;
+	uint16_t f = get16(b4 + (BN4_METL_TEST_FORM - BUS)), k1 = get16(b4 + (BN4_METL_TEST_KIND - BUS)), k2 = get16(b4 + (BN4_METL_TEST_KIND2 - BUS));
+	uint16_t bf = get16(b4 + (BN4_METL_BONUS_FORM - BUS)), b1 = get16(b4 + (BN4_METL_BONUS_KIND - BUS)), b2 = get16(b4 + (BN4_METL_BONUS_KIND2 - BUS));
+	if (f != (OP_CMP_R0 | FORM_METL) || (k1 & 0xFF00u) != OP_CMP_R4 || (k2 & 0xFF00u) != OP_CMP_R4 || bf != (OP_CMP_R2 | FORM_METL) ||
+		b1 != (OP_CMP_R1_B | (k1 & 0xFF)) || b2 != (OP_CMP_R1_B | (k2 & 0xFF)))
+		return false;
+	*kind1 = k1 & 0xFF;
+	*kind2 = k2 & 0xFF;
+	return true;
+}
+
 bool soulbn4_charges(int k, int chip) {
-	int kind;
+	int kind, kind2;
 	if (k >= 0 && k < SOULS_BN4 && forms[k] == FORM_FIRE && fire_rule(&kind)) return chip > 0 && soulkinds_bn4_of(chip) == kind;
+	if (k >= 0 && k < SOULS_BN4 && forms[k] == FORM_METL && metl_rule(&kind, &kind2)) {
+		uint8_t flags = chip > 0 ? hook_read8(chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE + BN6_CHIP_EFFECT_FLAGS) : 0;
+		int kd = soulkinds_bn4_of(chip);
+		return chip > 0 && !(flags & BN6_CHIP_LEFT_ALONE) && (flags & BN6_CHIP_SHOWS_POWER) && (kd == kind || kd == kind2);
+	}
 	if (k < 0 || k >= SOULS_BN4 || forms[k] != FORM_AQUA || !aqua_rule(&kind)) return false;
 	uint32_t rec = chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE;
 	return chip > 0 && !(hook_read8(rec + BN6_CHIP_EFFECT_FLAGS) & BN6_CHIP_LEFT_ALONE) && soulkinds_bn4_of(chip) == kind;
@@ -99,8 +121,10 @@ unsigned soulbn4_chip_bonus(int k, int chip) {
 }
 
 unsigned soulbn4_charge_bonus(int k) {
-	int kind;
-	return k >= 0 && k < SOULS_BN4 && forms[k] == FORM_AQUA && aqua_rule(&kind) ? BN4_CHARGED_DOUBLE : 0;
+	int kind, kind2;
+	/* (BN4_CHIP_CHARGE_BONUS by form: AquaSoul's Aqua, MetlSoul's two kinds; the chips he charges are those alone) */
+	return k >= 0 && k < SOULS_BN4 && ((forms[k] == FORM_AQUA && aqua_rule(&kind)) || (forms[k] == FORM_METL && metl_rule(&kind, &kind2))) ?
+		BN4_CHARGED_DOUBLE : 0;
 }
 
 uint32_t soulbn4_charged_copy(int k) {
@@ -136,10 +160,16 @@ bool soulbn4_read(int k, SoulBn4 *out) {
 	/* (a chip charge only where its power attack is one of BN4's empty routines, its charge times serving alone: AquaSoul's,
 	 * FireSoul's) */
 	bool chip = row[ROW4_CHIP] != NONE;
-	if (form < 1 || form >= FORMS || row[ROW4_0] != NONE || row[ROW4_PLAIN] != POWER_PLAIN4 || row[ROW4_CHARGED] >= BN4_POWER_ATTACK_COUNT ||
+	/* (a plain shot of his own where its code is moved with his unit: MetlSoul's) */
+	uint32_t plain = row[ROW4_PLAIN] != POWER_PLAIN4 && row[ROW4_PLAIN] < BN4_POWER_ATTACK_COUNT ?
+		xchips_bn4_moved_at(get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * row[ROW4_PLAIN])) : 0;
+	if (form < 1 || form >= FORMS || row[ROW4_0] != NONE || (row[ROW4_PLAIN] != POWER_PLAIN4 && !plain) || row[ROW4_CHARGED] >= BN4_POWER_ATTACK_COUNT ||
 		(chip && (row[ROW4_CHIP] >= BN4_POWER_ATTACK_COUNT || !empty4(get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * row[ROW4_CHIP])))))
 		return false;
 	out->chip = row[ROW4_CHIP];
+	out->plain = row[ROW4_PLAIN];
+	out->plain_routine = plain;
+	if (plain) memcpy(out->plain_charge, b4 + (BN4_CHARGE_TIMES - BUS) + CHARGE_ROW * (uint32_t)out->plain, CHARGE_ROW);
 	if (chip) memcpy(out->chip_charge, b4 + (BN4_CHARGE_TIMES - BUS) + CHARGE_ROW * (uint32_t)out->chip, CHARGE_ROW);
 	out->form = (uint8_t)form;
 	out->kind = b4[BN4_SOUL_KINDS - BUS + (uint32_t)(form - 1)];

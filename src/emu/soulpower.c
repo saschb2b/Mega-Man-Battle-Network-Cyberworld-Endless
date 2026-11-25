@@ -50,7 +50,7 @@ static const uint8_t team_chaos_powers[] = { 0x06, 0x39, 0x30, 0x37, 0x35, 0x36 
  * B-left of its own (none yet) */
 #define BN4_MORE_AT (SOUL_POWER_BN4_MORE - SOUL_POWER_FIRST)
 #define BN4_MORE_EACH 2
-#define BN4_MORE_END (BN4_MORE_AT + BN4_MORE_EACH * SOULS_HELD_BN4_ALL)
+#define BN4_MORE_END (BN4_MORE_AT + BN4_MORE_EACH * SOULS_HELD_BN4_ALL)   /* (its second: his plain shot, MetlSoul's) */
 enum { MORE_CHIP, MORE_OTHER };
 static bool bn4_chip_own(const SoulBn4 *s);
 /* ... their chaos ones' DarkChips (BN5's 0x0800F660, 0x0800FA86, 0x0800FA2C, 0x0800FA72, 0x0800FA5E, 0x0800FA68: DrkSword, DarkTorn,
@@ -139,9 +139,13 @@ static uint32_t routine_of(int i, int *id5) {
 		return BN6_POWER_EMPTY | 1;
 	}
 	if (i >= BN4_MORE_AT && i < BN4_MORE_END) {
-		/* (BN4's own: an empty one where its Soul's chip charge takes one, its charge times BN4's) */
-		int k = (i - BN4_MORE_AT) / BN4_MORE_EACH;
-		*id5 = (i - BN4_MORE_AT) % BN4_MORE_EACH == MORE_CHIP && k < nbn4 && bn4_chip_own(&bn4s[k]) ? -3 : -2;
+		/* (BN4's own: an empty one where its Soul's chip charge takes one, its charge times BN4's; his plain shot's copy) */
+		int k = (i - BN4_MORE_AT) / BN4_MORE_EACH, role = (i - BN4_MORE_AT) % BN4_MORE_EACH;
+		if (role == MORE_OTHER && k < nbn4 && bn4s[k].plain_routine) {
+			*id5 = -4;
+			return bn4s[k].plain_routine | 1;
+		}
+		*id5 = role == MORE_CHIP && k < nbn4 && bn4_chip_own(&bn4s[k]) ? -3 : -2;
 		return BN6_POWER_EMPTY | 1;
 	}
 	if (i >= TEAM_MOVED_AT + nteam) {
@@ -220,13 +224,13 @@ static void team_chaos(void) {
 	if (team_chaos_on) emu_write(SOULS_TEAM_CHAOS, out, sizeof out);
 }
 
-/* the charge times BN4's Souls give grown entry i: id5 -1 a Soul's charged shot's, -3 his chip charge's on BN4's own power
- * attacks (BN4_MORE_AT on, BN4_MORE_EACH a Soul); NULL where none (a gap's, -2) */
+/* the charge times BN4's Souls give grown entry i: id5 -1 a Soul's charged shot's, -3 his chip charge's and -4 his plain
+ * shot's on BN4's own power attacks (BN4_MORE_AT on, BN4_MORE_EACH a Soul); NULL where none (a gap's, -2) */
 static const uint8_t *bn4_charge_of(int i, int id5) {
-	bool own = id5 == -3;
+	bool own = id5 == -3 || id5 == -4;
 	int k = own ? (i - BN4_MORE_AT) / BN4_MORE_EACH : i - nmoved - (int)sizeof empty_powers - nchaos;
 	if ((id5 != -1 && !own) || (own && i < BN4_MORE_AT) || k < 0 || k >= nbn4) return NULL;
-	return own ? bn4s[k].chip_charge : bn4s[k].charge;
+	return id5 == -1 ? bn4s[k].charge : id5 == -3 ? bn4s[k].chip_charge : bn4s[k].plain_charge;
 }
 
 /* the grown power attacks' and charge times' entries past BN6's own, n in all; false where one has no routine */
@@ -296,7 +300,7 @@ static bool rows_make(uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)])
 	for (int k = 0; k < nbn4; ++k) {
 		uint8_t *r6 = rows + BN6_FORM_LOADOUT_SIZE * (SOULS + k);
 		r6[ROW_A] = (uint8_t)bn4_chip_power(k);
-		r6[ROW_6] = 0;
+		r6[ROW_6] = bn4s[k].plain_routine ? (uint8_t)(SOUL_POWER_FIRST + BN4_MORE_AT + BN4_MORE_EACH * k + MORE_OTHER) : 0;
 		r6[ROW_B] = (uint8_t)(BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos + k);
 	}
 	return true;

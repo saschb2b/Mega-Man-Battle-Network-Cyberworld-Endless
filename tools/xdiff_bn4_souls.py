@@ -162,11 +162,17 @@ def chip_power(rom4, form):
 
 def power_map(rom4):
     """BN4's power attack -> BN6's for the moved Souls: each one's charged shot (BN4_FORM_LOADOUTS' +3 by its form, 0x080184F0)
-    at bn6_power's number, and its chip charge (+2) at chip_power's"""
+    at bn6_power's number, its chip charge (+2) at chip_power's, and a plain shot of its own (+1: MetlSoul's) at its own"""
     if not rom4:
         return {}
     out = {rom4[0x184F0 + 4 * f + 3]: bn6_power(f) for f in bn4_forms().values()}
     out.update({rom4[0x184F0 + 4 * f + 2]: chip_power(rom4, f) for f in bn4_forms().values() if chip_power(rom4, f) is not None})
+    # (and its own plain shot, +1 where not BN4's 0: the second of its own past Team ProtoMan's, soulpower.c's MORE_OTHER)
+    room = open(os.path.join(ROOT, 'src', 'emu', 'soul_room.h')).read()
+    more = int(re.search(r'#define SOUL_POWER_BN4_MORE\s+(0x[0-9A-Fa-f]+)', room).group(1), 16)
+    for k, f in enumerate(bn4_forms().values()):
+        if rom4[0x184F0 + 4 * f + 1]:
+            out[rom4[0x184F0 + 4 * f + 1]] = more + 2 * k + 1
     return out
 
 

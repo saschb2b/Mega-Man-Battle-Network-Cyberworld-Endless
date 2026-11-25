@@ -443,6 +443,28 @@ him at fight frame 30 (BN4's type 8, BN6's 0xD), healed and cooled in both,
 BN4's sound 0x9A and its copy at the same frame; its three mutations another
 effect, no sound, and the Thumb ended at once.
 
+## MetlSoul in BN6's engine
+
+MetlSoul (Blue Moon's Soul 9, form 9, kind Break) is BN6's Soul 19 (k 6,
+held bit 12), the first BN4 Soul with a plain shot of his own. What it took:
+
+| Part | MetlSoul's |
+| --- | --- |
+| His charged shot | power attack 0x13 into family 0x14, an attack unit at BN6's grown 0xDD: a punch of 150 a panel ahead that knocks its foe a panel back. Its hit's bits (the collision region's r7, `0x080EC106`) are BN4's struck-and-pushed 0x23 and BN6's 0x63, as GutsSoul's punch's (`IMMS`); its hit word 0x06050601 a number (`NUMBERS`); its swing's sound BN4's 0xA2, BigHamr's copy at slot 0x243, its punch's 0xB7 the families' at 0x37 |
+| His plain shot | power attack 0x0B, his buster's damage with the hit word 5, into BN4's buster family 8: copied with his unit (`SOUL_PLAINS`), its family BN6's buster's 0x11, on the second of BN4's own power attacks (`MORE_OTHER`, the loadout's +6, `BN6_AI_POWER_A`). BN4 makes the damage its NaviStats +5 plus 1, a field BN6 keeps otherwise, so the copy's call is aimed at BN6's own buster damage (`XC4_BUSTER_DAMAGE`, `0x0801265A`) and its +1 made 0 (`UNIT_AIMS`, `IMMS`) |
+| His chip charge | power 0x0D, BN4's empty routine at 70 frames, BN4's own power attack (FireSoul's way); BN4's test charges a Break or no-kind chip not left alone whose power shows (`BN4_METL_TEST_FORM`) and its bonus doubles it (`BN4_METL_BONUS_FORM`), each read from BN4's code |
+
+The proof is three specs, each with its control, against a MettaurEX
+(250 HP): `bn4_soul_metl`, his punch (B held 82 frames), which knocks the
+MettaurEX back; `bn4_soul_metl_chip`, an AirHoc1 held 72 frames and used
+charged, doubled; `bn4_soul_metl_plain`, a plain shot held to t34, the
+frame its power attack sets the attack's variables, since what each buster
+does after is the differential's gap for every plain shot (BN6's family
+0x11 spawns a first-kind object BN4's state 8 does not, and the buster's
+animation is each art's number). Their seven mutations: the charges longer
+(the punch's, the chip's), the punch not pushing, the chip not doubled, no
+chip charged, the plain shot one stronger, its hit word another.
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first

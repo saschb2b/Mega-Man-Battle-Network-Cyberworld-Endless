@@ -1,0 +1,219 @@
+{
+ "about": "BN4's MetlSoul (Blue Moon's Soul 9, form 9: kind Break; his plain shot power attack 0x0B, his buster's attack + 1 with the hit word 5, into BN4's buster's family 8; his charged shot power attack 0x13 into family 0x14, a punch of 150 a panel ahead, 80 frames; his chip charge a Break or no-kind chip whose power shows held 70 frames, doubled) in BN4 Red Sun's own battle against BN6's with MetlSoul moved (docs/multirom/bn4-souls.md): BN6's Soul 19 over the proxy form, his plain shot's copy BN6's buster's family 0x11 and his charged shot an attack unit at BN6's grown 0xDD (tools/xchiprecipe_bn4.py SOUL_PLAINS, SOUL_POWERS), both on BN4's own power attacks with his chip charge's (soulpower.c). Red Sun refuses Blue Moon's Souls: the harness gives him WindSoul's flag. Two AirHoc1 D (BN4's 63, the run's 0x28A, kind Break): the first Custom screen picks both, moves to UNITE and takes one and the Soul, the other left. B from 30 held 82 frames, two past its charge of 80, the punch, which knocks him a panel back. A MettaurEX (BN4's 6, 250 HP) at (4,2), MegaMan at (3,2); MegaMan with 2000 HP, kept from harm. His plain shot is bn4_soul_metl_plain's and his chip charge bn4_soul_metl_chip's.",
+ "game": "bn4",
+ "against": "bn6",
+ "subject": "megaman",
+ "foes": "06@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "safe": true,
+ "souls4": "100",
+ "souls6": "1000",
+ "folder4": [
+  "063F",
+  "063F"
+ ],
+ "deck4": [
+  "063F",
+  "063F"
+ ],
+ "folder6": [
+  "28A:03",
+  "28A:03"
+ ],
+ "deck6": [
+  "28A:03",
+  "28A:03"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   82
+  ]
+ ]
+}

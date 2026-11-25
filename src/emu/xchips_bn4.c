@@ -3620,6 +3620,71 @@ static const XcSong firesoul_songs[] = { { 0xA8, 0x285 } };
 	.imms = firesoul_imms, .nimms = (int)(sizeof firesoul_imms / sizeof *firesoul_imms), \
 	.types = firesoul_types, .ntypes = (int)(sizeof firesoul_types / sizeof *firesoul_types), \
 	.sound_calls = firesoul_sound_calls, .nsound_calls = (int)(sizeof firesoul_sound_calls / sizeof *firesoul_sound_calls) }
+/* ---- MetlSoul: BN4's attack 0x14 (080EC0A5) as BN6's 0xdd; its chips  ---- */
+/* MegaMan's state 0x14 (080EC0A4-080EC164), the family of its chips' records: moved */
+/* MetlSoul's power attack 0x13 (0800CE28), which returns the family: copied with it */
+/* MetlSoul's plain shot, power attack 0xb (0800CDE2), which returns BN4's buster's family: copied with it */
+/* its effect 0x6: 0xcf, as ShotStar moved it */
+/* its effect 0x6's sprite 5:0xa is listed by ShotStar (5:0xef): installed with it */
+/* its effect 0x6: BN6's 0xcf, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0xa2 (080EC132): BN4's song copied into the grown song table's slot 0x243, on BN4's player 30 */
+/* its sound 0xb7: BN4's song at slot 0x37, the families' slot for it (FAMILY_SLOTS) */
+
+static const XvBlock metlsoul_blocks[] = {
+	{ 0x080EC0A4, 0x080EC164, XC4_CODE + 0x79B0, 0xE51B2D95u },
+	{ 0x0800CDE2, 0x0800CE08, XC4_CODE + 0x7A72, 0x257B857Cu },
+	{ 0x0800CE28, 0x0800CE4C, XC4_CODE + 0x7AA0, 0x6B4BF3F8u },
+};
+static const XvData metlsoul_data[] = {
+	{ 0x080EC0B6, 0x080EC0B8, XV_RAW },
+	{ 0x080EC0B8, 0x080EC0BC, XV_POOL },
+	{ 0x080EC0BC, 0x080EC0C4, XV_TABLE },
+	{ 0x0800CE48, 0x0800CE4C, XV_POOL },
+};
+static const XvPair metlsoul_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08009ED8, 0x0800CCB2 },   /* search, SAME */
+	{ 0x0800AB3E, 0x0800E276 },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800D772, XC4_BUSTER_DAMAGE },   /* his plain shot's damage (power attack 0x0B: r0 his side, r1 5, then +1): BN4's NaviStats +5 its buster's attack less one, as its own plain shot reads it (0x0800CC34); BN6 keeps the buster's attack otherwise (NaviStats +1 and a table, 0x0801265A), so his damage is BN6's own plain shot's, its +1 0 (IMMS) */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x0802608C, 0x080302A8 },   /* project:research, SAME */
+	{ 0x080CD7E2, 0x080C6BDA },   /* project:research, DIFF (audited) */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair metlsoul_words[] = {
+};
+static const XvImm metlsoul_imms[] = {
+	{ 0x0800CDEC, THUMB_ADDS, 0, 0, 0x1, 0x0 },   /* MetlSoul's plain shot: its damage's +1, which BN6's buster damage holds already (UNIT_AIMS' XC4_BUSTER_DAMAGE) */
+	{ 0x0800CE04, THUMB_MOVS, 0, 0, 0x8, 0x11 },   /* MetlSoul's plain shot (power attack 0x0B): the family it returns, BN4's buster's 8, BN6's own 0x11 (BUSTER6) */
+	{ 0x0800CE44, THUMB_MOVS, 0, 0, 0x14, 0xDD },   /* MetlSoul's power attack 0x13: the family it returns, BN4's 0x14, BN6's grown 0xdd */
+	{ 0x080EC0A8, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+	{ 0x080EC0DC, THUMB_MOVS, 0, 0, 0xB7, 0x37 },   /* its sound 0xb7: BN4's copied into BN6's slot 0x37, a BN4 family's too */
+	{ 0x080EC106, THUMB_MOVS, 7, 0, 0x23, 0x63 },   /* his punch's hit's bits (the collision region's r7): struck and pushed is bit 0x01 with a push bit in BN4 (BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED), GutsSoul's punch's */
+	{ 0x080EC122, THUMB_MOVS, 4, 0, 0x6, 0xCF },   /* its effect: 0x6 in BN4, 0xcf in BN6 (moved) */
+};
+static const XvNumber metlsoul_numbers[] = {
+	{ 0x0800CE48, 0x06050601, 0x06050601 },   /* MetlSoul's charged shot's hit word (BN4 0x0800CE48, its power attack 0x13's literal, the attack's +0xC): its bits, its reach and its frames, bytes of a number as PropBom's */
+};
+static const XvType metlsoul_types[] = {
+};
+static const XvSoundCall metlsoul_sound_calls[] = {
+	{ 0x080EC132, 0x243 },   /* its sound 0xa2: BN4's song at the grown table's slot 0x243 */
+};
+static const XcSong metlsoul_songs[] = { { 0xA2, 0x243 }, { 0xB7, 0x37 } };
+
+#define METLSOUL_CODE { .name = "MetlSoul (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0xA000), \
+	.blocks = metlsoul_blocks, .nblocks = (int)(sizeof metlsoul_blocks / sizeof *metlsoul_blocks), \
+	.data = metlsoul_data, .ndata = (int)(sizeof metlsoul_data / sizeof *metlsoul_data), \
+	.calls = metlsoul_calls, .ncalls = (int)(sizeof metlsoul_calls / sizeof *metlsoul_calls), \
+	.words = metlsoul_words, .nwords = (int)(sizeof metlsoul_words / sizeof *metlsoul_words), \
+	.imms = metlsoul_imms, .nimms = (int)(sizeof metlsoul_imms / sizeof *metlsoul_imms), \
+	.numbers = metlsoul_numbers, .nnumbers = (int)(sizeof metlsoul_numbers / sizeof *metlsoul_numbers), \
+	.types = metlsoul_types, .ntypes = (int)(sizeof metlsoul_types / sizeof *metlsoul_types), \
+	.sound_calls = metlsoul_sound_calls, .nsound_calls = (int)(sizeof metlsoul_sound_calls / sizeof *metlsoul_sound_calls) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -3661,6 +3726,7 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_ATTACK, 0x3E, 0xDA, 0x080EDB5D, XC4_HOMES + 0x9400, SRCHSOUL_CODE, srchsoul_songs, (int)(sizeof srchsoul_songs / sizeof *srchsoul_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x15, 0xDB, 0x080EC165, XC4_HOMES + 0x9800, NUMSOUL_CODE, numsoul_songs, (int)(sizeof numsoul_songs / sizeof *numsoul_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x19, 0xDC, 0x080EC44B, XC4_HOMES + 0x9C00, FIRESOUL_CODE, firesoul_songs, (int)(sizeof firesoul_songs / sizeof *firesoul_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x14, 0xDD, 0x080EC0A5, XC4_HOMES + 0xA000, METLSOUL_CODE, metlsoul_songs, (int)(sizeof metlsoul_songs / sizeof *metlsoul_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
 
