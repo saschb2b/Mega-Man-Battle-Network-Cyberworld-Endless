@@ -50,6 +50,16 @@ samples (32 ms) as a frame's sound is written and the 3DS's device reads
 leaves the second short. Then "the longest present" of the second, and
 what "the line before" took to say.
 
+A second's means hide a frame by itself, so each line also counts the
+frames whose own work (the update, the drawing and the present less its
+wait for the refresh) ran past 16 ms, with the longest one's three parts,
+and the frames shown late with less work than that, held up by something
+the main thread waited for; then the GBA's longest frame of the second and
+the longest its core waited for its picture, which mGBA draws on a thread
+of its own. They are there for the New 3DS's start menu (issue #897): it
+shows 43 to 50 frames a second on the net and 58 to 59 in the town with
+the same work a frame on average.
+
 ## The 3DS's lines are kept, not written
 
 On the 3DS a line printed goes to the SD card at once, on the thread the

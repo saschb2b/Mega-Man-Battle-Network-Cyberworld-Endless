@@ -221,6 +221,9 @@ void emu_audio_drop_from(void *other) {
 int emu_audio_out_rate(void) { return out_rate; }
 
 uint64_t emu_core_ticks, emu_core_unshown_ticks;
+/* (the second's longest frame, and the longest the core then waited for its
+ * picture, drawn on a thread of its own: for the frame log) */
+uint64_t emu_core_longest, emu_video_longest;
 int emu_core_unshown;
 
 /* (the run's core's frames timed since the start, for a first NetBattle's window: emu.h) */
@@ -238,6 +241,7 @@ static void run_frame(bool unshown) {
 	if (surveying) ram_survey_frame((uint8_t *)((struct GBA *)core->board)->memory.wram, (uint8_t *)((struct GBA *)core->board)->memory.iwram);
 	uint64_t dt = SDL_GetPerformanceCounter() - t0;
 	emu_core_ticks += dt;
+	if (dt > emu_core_longest) emu_core_longest = dt;
 	timed_ticks += dt;
 	++timed_frames;
 	if (unshown) { emu_core_unshown_ticks += dt; ++emu_core_unshown; }
@@ -269,7 +273,10 @@ static int worker_main(void *arg) {
 		if (stopping) return 0;
 		run_frame(false);
 		/* (the picture drawn on a thread of its own: its frame whole) */
+		uint64_t v0 = SDL_GetPerformanceCounter();
 		if (core->videoLogger && core->videoLogger->wait) core->videoLogger->wait(core->videoLogger);
+		uint64_t waited = SDL_GetPerformanceCounter() - v0;
+		if (waited > emu_video_longest) emu_video_longest = waited;
 		SDL_SemPost(done);
 	}
 }

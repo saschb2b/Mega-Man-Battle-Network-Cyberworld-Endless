@@ -45,7 +45,18 @@ void frame_log_depth(uint64_t ticks, int scale) {
 static struct { const char *name; uint64_t ticks; } parts[PARTS_MOST];
 static int nparts;
 
+/* (a frame by itself, for the seconds whose means hide it: the last
+ * frame's update and drawing, its wait for the screen's refresh inside the
+ * present, and of the second the frames whose own work ran past a refresh
+ * with the longest's parts, and those shown late with less work than that:
+ * held up by something the main thread waited for) */
+#define OWN_LONG_MS 16.0
+static uint64_t last_update, last_draw, last_wait;
+static int own_long, late_short;
+static uint64_t worst_own, worst_update, worst_draw, worst_present;
+
 void frame_log_part(const char *name, uint64_t ticks) {
+	if (!strcmp(name, "frame wait")) last_wait += ticks;
 	for (int i = 0; i < nparts; ++i)
 		if (parts[i].name == name) { parts[i].ticks += ticks; return; }
 	if (nparts == PARTS_MOST) return;
@@ -109,6 +120,8 @@ static void extras_say(char *out, size_t n) {
 }
 
 void platform_frame_parts(uint64_t update, uint64_t draw) {
+	last_update = update;
+	last_draw = draw;
 	part_update += update;
 	part_draw += draw;
 	if (update + draw > part_longest) part_longest = update + draw;
@@ -178,6 +191,17 @@ static void tail_say(char *out, size_t n, double ms) {
 		snprintf(out + k, n - k, "; the longest present %.1f ms, the line before said in %.1f ms", present_longest * ms, wrote * ms);
 		present_longest = 0;
 	}
+	{
+		extern uint64_t emu_core_longest, emu_video_longest;
+		size_t k = strlen(out);
+		snprintf(out + k, n - k, "; %d frames' own work past %.0f ms (the longest: update %.1f, drawing %.1f, the present's work %.1f), %d shown late"
+			" with less; the GBA's longest frame %.1f ms, its picture waited for %.1f ms at most", own_long, OWN_LONG_MS, worst_update * ms,
+			worst_draw * ms, worst_present * ms, late_short, emu_core_longest * ms, emu_video_longest * ms);
+		emu_video_longest = 0;
+		own_long = late_short = 0;
+		worst_own = worst_update = worst_draw = worst_present = 0;
+		emu_core_longest = 0;
+	}
 	/* (and reads of the game that waited, drawing, for the next frame) */
 	if (emu_draw_waits) {
 		size_t k = strlen(out);
@@ -186,6 +210,15 @@ static void tail_say(char *out, size_t n, double ms) {
 		emu_draw_waits = 0;
 		emu_draw_waited = NULL;
 	}
+}
+
+/* a frame shown `us` after the one before: its own work (the update, the
+ * drawing and the present less its wait for the refresh) counted */
+static void own_frame(uint64_t present, int us, uint64_t hz) {
+	uint64_t work = present > last_wait ? present - last_wait : 0, own = last_update + last_draw + work;
+	if ((double)own * 1000.0 / (double)hz >= OWN_LONG_MS) ++own_long;
+	else if (us >= 30000) ++late_short;
+	if (own > worst_own) { worst_own = own; worst_update = last_update; worst_draw = last_draw; worst_present = work; }
 }
 
 void frame_log_present(uint64_t present) {
@@ -202,7 +235,9 @@ void frame_log_present(uint64_t present) {
 		if (us < lo) lo = us;
 		if (us > hi) hi = us;
 		++gaps[us < 12500 ? 0 : us < 20000 ? 1 : us < 30000 ? 2 : 3];
+		own_frame(present, us, hz);
 	}
+	last_wait = 0;
 	last = now;
 	++shown;
 	if (!second) second = now;
