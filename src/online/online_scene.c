@@ -158,6 +158,10 @@ VisitEnd online_scene_wait(void) {
 	return VISIT_END_NONE;
 }
 
+/* (a part of the Square's frame timed for the frame log, where it is on:
+ * what a slow system's second in the Square went to, platform.h) */
+#define PART(name, call) do { uint64_t t0_ = frame_part_begin(); call; frame_part_end(name, t0_); } while (0)
+
 VisitEnd online_scene_update(void) {
 	if (!built) return VISIT_END_BROKEN;
 	online_transport_snapshot(&snapshot);
@@ -168,12 +172,12 @@ VisitEnd online_scene_update(void) {
 		VisitEnd why = resumed();
 		if (why != VISIT_END_NONE) return why;
 	}
-	online_mail_frame();
+	PART("sq: mail", online_mail_frame());
 	/* (the look each player is known by, for the Arena's pairing; MegaMan's
 	 * own sent where the PET's screen changed it: square_looks.h) */
-	square_looks_update(&snapshot, up);
+	PART("sq: looks", square_looks_update(&snapshot, up));
 	/* (BN6's PET: what it changed noted as it closes, square_pet.h) */
-	square_pet_frame();
+	PART("sq: pet", square_pet_frame());
 	/* (the director rests here: the cinema told when a screen of BN6's,
 	 * a shop, takes MegaMan off the map, so its keys reach it) */
 	cinema_on_map(emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME);
@@ -201,15 +205,17 @@ VisitEnd online_scene_update(void) {
 	++frames;
 	local_x = bn6_player_x(); local_y = bn6_player_y(); local_z = bn6_player_z();
 	facing = emu_read8(BN6_PLAYER_FACING) & 7u;
-	online_transport_poll(local_x, local_y, local_z, facing);
+	PART("sq: poll", online_transport_poll(local_x, local_y, local_z, facing));
 	trace_frame();
-	online_motion_update(&snapshot, now, &shown);
+	PART("sq: motion", online_motion_update(&snapshot, now, &shown));
 	unblocked(&shown);
-	online_square_peers(&shown);
-	if (online_chat_update(&shown)) return square_week_leaving() ? VISIT_END_DIVE : VISIT_END_LEFT;
-	square_arena_update(&snapshot);
-	square_watch_update(&snapshot);
-	online_labels_update(&shown, now);
+	PART("sq: peers", online_square_peers(&shown));
+	uint64_t chat_t = frame_part_begin();
+	bool left = online_chat_update(&shown);
+	frame_part_end("sq: chat", chat_t);
+	if (left) return square_week_leaving() ? VISIT_END_DIVE : VISIT_END_LEFT;
+	PART("sq: arena", square_arena_update(&snapshot); square_watch_update(&snapshot));
+	PART("sq: labels", online_labels_update(&shown, now));
 	return VISIT_END_NONE;
 }
 
@@ -228,12 +234,11 @@ void online_scene_draw(void) {
 	/* (BN6's PET up, the engine's own screens over it) */
 	if (!arrived) { square_pet_draw(); return; }
 	/* (the names and marks over heads, an open challenge's strip and the link beside a card: online_labels.h) */
-	online_labels_draw();
+	PART("sq: labels drawn", online_labels_draw());
 	/* (SELECT's emote strip: online_chat.c) */
-	emote_strip_draw();
+	PART("sq: strip drawn", emote_strip_draw());
 	/* (Trade Central's screens, and the NetPass over it all: square_pet.h) */
-	trade_screen_draw();
-	square_pet_draw();
+	PART("sq: screens drawn", trade_screen_draw(); square_pet_draw());
 	if (notice_at && SDL_GetTicks() - notice_at < 4000) {
 		fill_rect(x, y + 112, EMU_W, 28, rgba(9, 24, 42, 240));
 		text_drawf(x + 4, y + 113, WHITE, TEXT_LEFT, "%.32s", snapshot.notice);

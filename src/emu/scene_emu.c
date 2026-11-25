@@ -135,8 +135,8 @@ static uint32_t frame_keys(void) {
  * hooks' events still queued. */
 static void after_frame(void) {
 	if (save_masked()) return;
-	online_visit_update();
-	if (online_visit_away()) { second_update(); emu_debug_frame(); return; }
+	TIMED("online", online_visit_update());
+	if (online_visit_away()) { TIMED("second", second_update()); emu_debug_frame(); return; }
 	director_see();
 	director_update();
 	director_lab_watch();
@@ -363,7 +363,7 @@ static void draw(void) {
 	TIMED("picture", emu_picture_draw(P.core_x + dx, P.core_y + dy));
 	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
-	if (online_visit_away()) { online_visit_draw(); return; }
+	if (online_visit_away()) { TIMED("square", online_visit_draw()); return; }
 	overlays_draw();
 }
 

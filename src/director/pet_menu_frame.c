@@ -28,7 +28,7 @@
 
 #define W 240
 #define H 160
-#define BAND 16                    /* the band's rows, left as BN6 draws them */
+#define BAND PET_MENU_BAND          /* the band's rows, left as BN6 draws them */
 #define ROW_SRC_Y 24               /* BN6's row k from y 24 + 16k (its button at 25 + 16k) */
 #define ROW_PITCH 16
 #define ICON_X 1                   /* a cell's icon, from the cell's left, and its button (BN6's x 15 and 34) */
@@ -87,9 +87,21 @@ static const struct { int label_y, box_y, x, w; } stats[3] = {
 	{ 74, 82, STAT_X1 - FRAGS_W, FRAGS_W },
 };
 
-static uint32_t src[W * H];
+/* What the picture reads of BN6's frame: its panel, PLACE's name and EXIT,
+ * all within columns SRC_X on and rows SRC_Y on. That part alone is kept
+ * (61 KB), where the whole frame was copied (150 KB) each frame the menu
+ * stood: with the frame's first copy and the field's that was three whole
+ * frames moved a frame, 11 ms of drawing on a New 3DS and 45 frames shown
+ * a second (issue #897). */
+#define SRC_X 128
+#define SRC_Y 24
+#define SRC_W (W - SRC_X)
+#define SRC_H (H - SRC_Y)
+static uint32_t src[SRC_W * SRC_H];
+static uint32_t teal_now;          /* BN6's teal in this frame (its pixel at 0, 100) */
+static bool taken;                 /* src and teal_now taken from the core's frame this draw (pet_menu_under) */
 
-static uint32_t get(int x, int y) { return src[y * W + x]; }
+static uint32_t get(int x, int y) { return src[(y - SRC_Y) * SRC_W + (x - SRC_X)]; }
 static void put(uint32_t *px, int x, int y, uint32_t c) {
 	if (x >= 0 && y >= 0 && x < W && y < H) px[y * W + x] = c;
 }
@@ -107,10 +119,12 @@ typedef struct { const uint8_t *pal; int bank; bool flip; int ink; uint16_t ink_
 
 /* a 4bpp tile at (dx, dy), colour 0 clear */
 static void tile(uint32_t *px, const uint8_t *t, const TileLook *l, int dx, int dy) {
+	uint32_t colours[16];   /* (the bank's sixteen once a tile, not a pixel's each time) */
+	for (int k = 1; k < 16; ++k) colours[k] = rgb(k == l->ink ? l->ink_to : pal16(l->pal, l->bank * 16 + k));
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
 			int sx = l->flip ? 7 - x : x, k = t[y * 4 + sx / 2] >> (sx & 1 ? 4 : 0) & 15;
-			if (k) put(px, dx + x, dy + y, rgb(k == l->ink ? l->ink_to : pal16(l->pal, l->bank * 16 + k)));
+			if (k) put(px, dx + x, dy + y, colours[k]);
 		}
 }
 
@@ -333,13 +347,35 @@ void pet_menu_see(void) {
 	if (seen.up && over(seen.state)) read_kit();
 }
 
+/* Whether the menu's picture stands over the frame now: every row under
+ * the band is then the kept field's and the menu's pieces', nothing of the
+ * frame's own. Not on a frame the field may still be kept from. */
+bool pet_menu_covers(void) { return seen.up && over(seen.state) && seen.kit && !map_seen && !map_left; }
+
+void pet_menu_under(const uint32_t *v, uint32_t (*shade)(uint32_t c, int y)) {
+	for (int y = 0; y < SRC_H; ++y) {
+		const uint32_t *from = v + (y + SRC_Y) * W + SRC_X;
+		uint32_t *to = src + y * SRC_W;
+		if (!shade) memcpy(to, from, SRC_W * sizeof *to);
+		else for (int x = 0; x < SRC_W; ++x) to[x] = shade(from[x], y + SRC_Y);
+	}
+	teal_now = shade ? shade(v[100 * W], 100) : v[100 * W];
+	taken = true;
+}
+
 void pet_menu_frame(uint32_t *px) {
+	bool had = taken;
+	taken = false;
 	keep_field(px);
 	if (!seen.up || !over(seen.state) || !seen.kit) return;
-	memcpy(src, px, sizeof src);
+	/* (the frame whole in `px`, where pet_menu_under was not asked: its part read here) */
+	if (!had) {
+		for (int y = 0; y < SRC_H; ++y) memcpy(src + y * SRC_W, px + (y + SRC_Y) * W + SRC_X, SRC_W * sizeof *src);
+		teal_now = px[100 * W];
+	}
 	/* (BN6's teal as it stands taking input, where no field was kept) */
 	static uint32_t teal;
-	if (seen.state == 4 || !teal) teal = get(0, 100);
+	if (seen.state == 4 || !teal) teal = teal_now;
 	/* (the field darkened once a menu, not once a frame) */
 	if (have_field && !field_dark) {
 		for (int i = BAND * W; i < W * H; ++i) field[i] = darker(field[i]);

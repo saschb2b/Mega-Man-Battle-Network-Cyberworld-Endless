@@ -79,3 +79,22 @@ Three things hold it now:
   frame for it, which a computer otherwise never draws. That look, on 25
   November 2026, found the ones above, in three rounds: each round's fixes
   uncovered reads the round before could not reach.
+
+## Nothing asked each frame reads a file
+
+The same New 3DS showed 25 frames a second in the Net Square with 20 ms of
+every frame in the update, in one step: `online_chat_update`
+(`log.txt`'s `sq: chat`, 25 November 2026). It asked each frame whether a
+stamp was due, and both askings (`netpass_stamp_due`, `netpass_grew_due`)
+opened and read `netpass.ini`; with a full pass the week's portal's words
+asked for the pending trade's file as well (`square_week_offer`,
+`online_trade_pending`). On a computer a file read again is the system's
+memory, microseconds; on the 3DS each is a call to the SD card,
+milliseconds on the thread the frames are paced on. Both answers are kept
+in memory now, forgotten where their file is written or removed and as a
+visit begins (`netpass_seen_forget`, `online_trade_reset`). What a frame
+asks every frame comes from memory; a file is read where something
+changes it.
+
+The frame log names the Square's steps for this (`online`, `second`,
+`square`, and `sq: ...` under them, [Frame log](../../devtools/frame-log.md)).

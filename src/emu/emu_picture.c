@@ -39,6 +39,11 @@ void emu_picture_tint_world(uint32_t *px, int n) {
 	for (int i = 0; hour && i < n; ++i) px[i] = tinted(px[i] | 0x18000000u, hour, false) | 0xFF000000u;
 }
 
+/* (a pixel of row `y` at the hour and box of the picture being made) */
+static int shade_hour;
+static bool shade_box;
+static uint32_t shade(uint32_t c, int y) { return tinted(c, shade_hour, shade_box && y >= TINT_BOX_TOP); }
+
 static SDL_Texture *tex;
 
 
@@ -73,8 +78,14 @@ void emu_picture_draw(int x, int y) {
 	int hour = online_visit_away() ? 0 : director_town_tint(&box);
 	/* (no hour to show, the net's every frame: the frame copied whole, not a pixel at a time asking the hour) */
 	uint64_t tint_t = frame_part_begin();
-	if (!hour) memcpy(px, v, sizeof px);
-	else for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP);
+	/* (the PET's menu of ours over the frame: its band's rows alone are the frame's, the rest the menu's to fill,
+	 * pet_menu.h; nothing else edits the picture then, the board's, the way's and a Glitch layer's all on the map alone) */
+	int rows = !online_visit_away() && pet_menu_covers() ? PET_MENU_BAND : EMU_H;
+	shade_hour = hour;
+	shade_box = box;
+	if (!hour) memcpy(px, v, (size_t)rows * EMU_W * sizeof *px);
+	else for (int i = 0; i < EMU_W * rows; ++i) px[i] = shade(v[i], i / EMU_W);
+	if (rows < EMU_H) pet_menu_under(v, hour ? shade : NULL);
 	frame_part_end("picture: tint", tint_t);
 	/* (a liberation's dark panels, docs/game/liberation/) */
 	PART("picture: board", director_tint_board(px));

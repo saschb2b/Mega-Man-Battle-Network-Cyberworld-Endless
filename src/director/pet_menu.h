@@ -42,6 +42,14 @@ bool pet_menu_start(void);
 /* After each frame of the game outside the Net Square, never as one is
  * drawn: what the picture needs of the game read (pet_menu_frame.c) */
 void pet_menu_see(void);
+/* Whether the menu's picture covers the frame now, every row from
+ * PET_MENU_BAND on: the frame need not be copied into the picture whole
+ * then, only its band's rows, and what the menu reads of it given by
+ * pet_menu_under: the core's frame `v` (240 x 160), each pixel through
+ * `shade` with its row (NULL: as it is; the town's hour) */
+#define PET_MENU_BAND 16
+bool pet_menu_covers(void);
+void pet_menu_under(const uint32_t *v, uint32_t (*shade)(uint32_t c, int y));
 /* The picture: BN6's own frame of its menu `px` (240 x 160, the core's
  * pixels) laid out again, while the menu takes input (pet_menu_frame.c);
  * drawn from what pet_menu_see read, it reads nothing of the game */
