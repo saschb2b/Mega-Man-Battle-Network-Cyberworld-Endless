@@ -1,0 +1,119 @@
+{
+ "about": "BN4's MetlSoul (Blue Moon's Soul 9, form 9: kind Break; his plain shot power attack 0x0B, his buster's attack + 1 with the hit word 5, into BN4's buster's family 8; his charged shot power attack 0x13 into family 0x14, a punch of 150 a panel ahead, 80 frames; his chip charge a Break or no-kind chip whose power shows held 70 frames, doubled) in BN4 Red Sun's own battle, fought twice, each in a process of its own: the reference holds itself to itself.",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "06@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 200,
+ "seed": "12345678:9ABCDEF0",
+ "safe": true,
+ "souls4": "100",
+ "folder4": [
+  "063F",
+  "063F"
+ ],
+ "deck4": [
+  "063F",
+  "063F"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   82
+  ]
+ ]
+}

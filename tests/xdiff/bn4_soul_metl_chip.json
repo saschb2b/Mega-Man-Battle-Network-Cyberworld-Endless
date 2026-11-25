@@ -1,0 +1,219 @@
+{
+ "about": "BN4's MetlSoul's chip charge (power 0x0D, BN4's empty routine: 70 frames, BN4's own power attack in BN6, soulpower.c) of an AirHoc1 (kind Break, its power shown: BN4_METL_TEST_FORM's rule), doubled (BN4_METL_BONUS_FORM's), in BN4 Red Sun's own battle against BN6's with MetlSoul moved, united as bn4_soul_metl: A from fight frame 30 held 72 frames, two past its 70, the AirHoc1 used charged. A MettaurEX (BN4's 6, 250 HP) at (4,2), MegaMan at (3,2); MegaMan with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "against": "bn6",
+ "subject": "megaman",
+ "foes": "06@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "safe": true,
+ "souls4": "100",
+ "souls6": "1000",
+ "folder4": [
+  "063F",
+  "063F"
+ ],
+ "deck4": [
+  "063F",
+  "063F"
+ ],
+ "folder6": [
+  "28A:03",
+  "28A:03"
+ ],
+ "deck6": [
+  "28A:03",
+  "28A:03"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   72
+  ]
+ ]
+}

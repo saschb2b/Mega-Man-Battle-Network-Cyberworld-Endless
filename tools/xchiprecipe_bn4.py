@@ -70,6 +70,7 @@ ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x
                   0x3E: 0xDA,   # (SrchSoul's charged shot)
                   0x15: 0xDB,   # (NumSoul's charged shot)
                   0x19: 0xDC,   # (FireSoul's charged shot)
+                  0x14: 0xDD,   # (MetlSoul's charged shot)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -100,6 +101,10 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
 # A call of a unit's code aimed by hand, at a stub of the chips' (XC_STUBS, src/emu/xchips_code.h): BN4's routine has no twin
 # and the unit needs none of what it gives
 UNIT_AIMS = {
+    'MetlSoul': {0x0800D772: ('XC4_BUSTER_DAMAGE', "his plain shot's damage (power attack 0x0B: r0 his side, r1 5, then +1): BN4's "
+                                                    "NaviStats +5 its buster's attack less one, as its own plain shot reads it "
+                                                    "(0x0800CC34); BN6 keeps the buster's attack otherwise (NaviStats +1 and a table, "
+                                                    "0x0801265A), so his damage is BN6's own plain shot's, its +1 0 (IMMS)")},
     'BugCurse': {0x0800C456: ('XC4_FIRST_ACTOR', "the other side's object (r0 the side): BN4's first of the other side's three in its "
                                                   "battle state (+0x48 on), a virus too; BN6's twin, its side's MegaMan alone (0x080103BC), "
                                                   "finds none against viruses, so the curse would not be cast: the project's own routine, "
@@ -128,7 +133,8 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 # attacks (src/emu/soulbn4.c, xchips_bn4_moved_at). By BN4's family: (the power attack's id, its Soul)
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
 SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),), 0x3E: ((0x0A, 'SrchSoul'),),
-               0x15: ((0x11, 'NumSoul'),), 0x19: ((0x0C, 'FireSoul'),)}
+               0x15: ((0x11, 'NumSoul'),), 0x19: ((0x0C, 'FireSoul'),),
+               0x14: ((0x13, 'MetlSoul'),)}
 # ... and a Soul's taking of the form that spawns an object of its own (BN4_FORM_ENTERS by its form), copied with the unit of
 # its charged shot's family, which the Souls' engine runs as he enters the proxy form (src/emu/soullife.c, xchips_bn4_moved_at).
 # By BN4's family: (the form, its Soul)
@@ -139,6 +145,10 @@ SOUL_ENTERS = {0x3E: ((4, 'SrchSoul'),), 0x19: ((5, 'FireSoul'),)}
 # with the unit of that family (its return given the unit's number, its +0x70 BN6's +0xA0: IMMS), which the Souls' engine runs
 # in place of the chip's setup (src/emu/soulchips.c). By BN4's family: (its routine, its Soul)
 SOUL_CHARGED = {0x19: ((0x0800D638, 'FireSoul'),)}
+# ... and a Soul's own plain shot (BN4_FORM_LOADOUTS' +1, a power attack of BN4's buster family 8, BN6's own 0x11), copied with
+# the unit of his charged shot's family, its family BN6's buster's (IMMS). By BN4's family: (its power attack, its Soul)
+SOUL_PLAINS = {0x14: ((0x0B, 'MetlSoul'),)}
+BUSTER4, BUSTER6 = 0x08, 0x11   # (BN4's buster's family, BN6's: the differential's PLAYER_FAMILY)
 # The fourth kind's types a Soul's object is moved as, at fixed dispatch numbers of the Souls' own (docs/project/claims/
 # bn4-souls.json, past bn4-air-units' 0xA0-0xA3), not the units' count: BN4's type -> its number
 TYPES4_SOULS = {0x44: 0xA4,   # (SrchSoul's, spawned as he unites, 0x080E6E4C)
@@ -366,6 +376,7 @@ UNITS = (
     ('attack', 0x3E, 'SrchSoul'),
     ('attack', 0x15, 'NumSoul'),
     ('attack', 0x19, 'FireSoul'),
+    ('attack', 0x14, 'MetlSoul'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -430,7 +441,8 @@ FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
                 0x9A: 0x39,                 # (Repair's: Walla's)
                 0x9F: 0x3D, 0xBC: 0x3F,
                 0x9D: 0x36,                 # (FlmLine's flames: CirKill's)
-                0xA6: 0x38}                 # (TwnFng's fangs: Elmperor's)     # (the spread shot's bubbles' and fire's bursts, by its kinds' rows: Shrimpy's and Spikey's)
+                0xA6: 0x38,                 # (TwnFng's fangs: Elmperor's)
+                0xB7: 0x37}                 # (MetlSoul's punch: the families' copy, src/audio/xsong.c XSOUNDS)     # (the spread shot's bubbles' and fire's bursts, by its kinds' rows: Shrimpy's and Spikey's)
 # The kinds' tables a moved object reads (as tools/bn4_twins.py TABLES: its size, a row's size, the kinds the unit spawns,
 # where a row keeps its sprite's number, the sprite's list and the load that reads it): copied with the unit, each spawned
 # kind's sprite BN6's of the same bytes or copied at a number of the chips' (its byte in the copy set); and, where a row
@@ -549,6 +561,10 @@ ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
 # BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
 IMMS = {
+    0x0800CDEC: dict(form='THUMB_ADDS', rd=0, rn=0, was=1, now=0,
+                     why="MetlSoul's plain shot: its damage's +1, which BN6's buster damage holds already (UNIT_AIMS' XC4_BUSTER_DAMAGE)"),
+    0x0800CE04: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x08, now=0x11,
+                     why="MetlSoul's plain shot (power attack 0x0B): the family it returns, BN4's buster's 8, BN6's own 0x11 (BUSTER6)"),
     # (a shared type's spawner copied alone, SHARED3, is no moved type's code to xrecipe_bn4.palette_imms: its store named here)
     0x080CE4BC: dict(form='THUMB_STRB', rd=7, rn=0, was=0x0E, now=0x0F,
                      why="the flame's spawner (SHARED3's 0x09, FireSoul's copy): the object it spawned: palette: BN4 +0x0E, BN6 "
@@ -658,6 +674,10 @@ IMMS = {
     0x080EBFDE: dict(form='THUMB_MOVS', rd=7, rn=0, was=0x21, now=0x61,
                      why="his punch's hit's bits (the collision region's r7): struck and pushed is bit 0x01 with a push bit in BN4 "
                          "(BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED), GutPnch's row's"),
+    # MetlSoul's charged shot, a punch struck and pushed back a panel (family 0x14's region, r7 of BN4's 0x080CD7E2 at 0x080EC108)
+    0x080EC106: dict(form='THUMB_MOVS', rd=7, rn=0, was=0x23, now=0x63,
+                     why="his punch's hit's bits (the collision region's r7): struck and pushed is bit 0x01 with a push bit in BN4 "
+                         "(BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED), GutsSoul's punch's"),
     # GutsSoul's rapid buster's end: his presses' count and window cleared in his side's Souls block (UNIT_CALLS_IN's r3)
     0x080EBE86: dict(form='THUMB_STRB', rd=0, rn=3, was=0x12, now=0x18,
                      why="his B presses' count, BN4's AI data's +0x12, kept at his side's Souls block's +0x18 (BN6_SOUL_PRESSES)"),
@@ -786,6 +806,8 @@ class Alloc(X4.Alloc):
 
 # A literal of a unit's code that is a number, not an address, kept (as tools/bn4_twins.py NUMBERS, read by hand)
 NUMBERS = {
+    0x06050601: "MetlSoul's charged shot's hit word (BN4 0x0800CE48, its power attack 0x13's literal, the attack's +0xC): its bits, "
+                "its reach and its frames, bytes of a number as PropBom's",
     0x04000000: "a panel's flag, the thunder's search for its target by its side (BN4 0x080D21E8 after its panel's flags, "
                 "0x08009A86; BN6's own thunder tests the same bit, 0x080CAE60)",
     0x08000000: "... the other side's (BN4 0x080D2208; BN6's 0x080CAE66)",
@@ -932,6 +954,11 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             f.roots.append(p)
             f.powers.append((pid, p, soul))
             f.notes.append(f'{soul}\'s power attack {pid:#x} ({p:08X}), which returns the family: copied with it')
+        for pid, soul in SOUL_PLAINS.get(sub, ()):
+            p = b4.u32(POWERS4 + 4 * pid) & ~1
+            bn4_twins.COPIED[p] = f'{soul}\'s plain shot, power attack {pid:#x}, which returns BN4\'s buster\'s family'
+            f.roots.append(p)
+            f.notes.append(f'{soul}\'s plain shot, power attack {pid:#x} ({p:08X}), which returns BN4\'s buster\'s family: copied with it')
         for at, soul in SOUL_CHARGED.get(sub, ()):
             bn4_twins.COPIED[at] = f'{soul}\'s attack for a chip he charged, which returns the family'
             f.roots.append(at)

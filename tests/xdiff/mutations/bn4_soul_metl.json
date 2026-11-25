@@ -1,0 +1,16 @@
+[
+ {
+  "name": "MetlSoul's charges 10 frames longer",
+  "spec": "bn4_soul_metl",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 10 frames longer for his grown power attacks, his punch's 80: B held 82 frames fires the plain buster"
+ },
+ {
+  "name": "MetlSoul's punch not pushing",
+  "spec": "bn4_soul_metl",
+  "poke": [
+   "080EC106:2723"
+  ],
+  "what": "his punch's state's copy (family 0x14's unit) with its movs r7,#0x63 made BN4's own #0x23: BN6 reads no push from bit 0x01, so the MettaurEX is struck and not pushed back"
+ }
+]

@@ -1,0 +1,18 @@
+[
+ {
+  "name": "MetlSoul's plain shot one stronger",
+  "spec": "bn4_soul_metl_plain",
+  "poke": [
+   "0800CDEC:3001"
+  ],
+  "what": "his plain shot's copy (power attack 0x0B, SOUL_PLAINS) with its adds r0,#0 made BN4's #1 after BN6's buster damage (XC4_BUSTER_DAMAGE): 2 where BN4's is 1"
+ },
+ {
+  "name": "MetlSoul's plain shot's hit word another",
+  "spec": "bn4_soul_metl_plain",
+  "poke": [
+   "0800CE00:2004"
+  ],
+  "what": "his plain shot's copy with its movs r0,#5 (the hit word, the attack's +0xC) made #4"
+ }
+]

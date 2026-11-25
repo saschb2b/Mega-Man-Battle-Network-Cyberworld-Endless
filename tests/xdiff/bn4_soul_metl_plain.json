@@ -1,0 +1,219 @@
+{
+ "about": "BN4's MetlSoul's plain shot (power attack 0x0B: his buster's damage, BN6's own buster damage in BN6 (UNIT_AIMS' XC4_BUSTER_DAMAGE), the hit word 5, BN4's buster's family 8, BN6's 0x11) in BN4 Red Sun's own battle against BN6's with MetlSoul moved, united as bn4_soul_metl; B at fight frame 30. Held to t34, the frame its power attack sets the attack's variables: what each buster's state does after is each engine's own (BN6's family 0x11 spawns a first-kind object BN4's state 8 does not, its animation each art's number), the differential's gap for every plain shot (docs/multirom/bn4-souls.md, MetlSoul in BN6's engine).",
+ "game": "bn4",
+ "against": "bn6",
+ "subject": "megaman",
+ "foes": "06@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 34,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "safe": true,
+ "souls4": "100",
+ "souls6": "1000",
+ "folder4": [
+  "063F",
+  "063F"
+ ],
+ "deck4": [
+  "063F",
+  "063F"
+ ],
+ "folder6": [
+  "28A:03",
+  "28A:03"
+ ],
+ "deck6": [
+  "28A:03",
+  "28A:03"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   2
+  ]
+ ]
+}

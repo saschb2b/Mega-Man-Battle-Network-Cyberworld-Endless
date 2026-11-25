@@ -41,6 +41,12 @@
 #define BN4_CHIP_CHARGE_TEST 0x0800BC78u /* r0 the chip: 1 where his form charges it with A (r4 its kind, +7; r7 its flags, +9) */
 #define BN4_AQUA_TEST_FORM 0x0800BCBAu  /* ... cmp r0,#0xb: AquaSoul's form, then not left alone (+9 bit 0), */
 #define BN4_AQUA_TEST_KIND 0x0800BCC4u  /* ... cmp r4,#1: of the kind Aqua */
+#define BN4_METL_TEST_FORM 0x0800BC98u  /* ... cmp r0,#9: MetlSoul's form, not left alone (+9 bit 0) and its power shown (bit 1), */
+#define BN4_METL_TEST_KIND 0x0800BCA8u  /* ... cmp r4,#0xb: of the kind Break, */
+#define BN4_METL_TEST_KIND2 0x0800BCACu /* ... cmp r4,#0xc: or none */
+#define BN4_METL_BONUS_FORM 0x0800C486u /* BN4_CHIP_CHARGE_BONUS's cmp r2,#9: MetlSoul's, */
+#define BN4_METL_BONUS_KIND 0x0800C48Cu /* ... cmp r1,#0xb, */
+#define BN4_METL_BONUS_KIND2 0x0800C490u /* ... cmp r1,#0xc: those two kinds doubled (BN4_CHARGED_DOUBLE) */
 #define BN4_FIRE_TEST_FORM 0x0800BCB0u  /* ... cmp r0,#5: FireSoul's form, no flag tested, */
 #define BN4_FIRE_TEST_KIND 0x0800BCB4u  /* ... cmp r4,#0: of the kind Fire */
 #define BN4_CHARGED_FORM  0x0800B776u   /* the chip use's (0x0800B6F8 on: r4 its flags, 8 a chip charged): cmp r0,#5, FireSoul's form, */

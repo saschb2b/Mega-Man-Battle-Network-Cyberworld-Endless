@@ -50,7 +50,7 @@ static const uint8_t team_chaos_powers[] = { 0x06, 0x39, 0x30, 0x37, 0x35, 0x36 
  * B-left of its own (none yet) */
 #define BN4_MORE_AT (SOUL_POWER_BN4_MORE - SOUL_POWER_FIRST)
 #define BN4_MORE_EACH 2
-#define BN4_MORE_END (BN4_MORE_AT + BN4_MORE_EACH * SOULS_HELD_BN4_ALL)
+#define BN4_MORE_END (BN4_MORE_AT + BN4_MORE_EACH * SOULS_HELD_BN4_ALL)   /* (its second: his plain shot, MetlSoul's) */
 enum { MORE_CHIP, MORE_OTHER };
 static bool bn4_chip_own(const SoulBn4 *s);
 /* ... their chaos ones' DarkChips (BN5's 0x0800F660, 0x0800FA86, 0x0800FA2C, 0x0800FA72, 0x0800FA5E, 0x0800FA68: DrkSword, DarkTorn,
@@ -139,9 +139,13 @@ static uint32_t routine_of(int i, int *id5) {
 		return BN6_POWER_EMPTY | 1;
 	}
 	if (i >= BN4_MORE_AT && i < BN4_MORE_END) {
-		/* (BN4's own: an empty one where its Soul's chip charge takes one, its charge times BN4's) */
-		int k = (i - BN4_MORE_AT) / BN4_MORE_EACH;
-		*id5 = (i - BN4_MORE_AT) % BN4_MORE_EACH == MORE_CHIP && k < nbn4 && bn4_chip_own(&bn4s[k]) ? -3 : -2;
+		/* (BN4's own: an empty one where its Soul's chip charge takes one, its charge times BN4's; his plain shot's copy) */
+		int k = (i - BN4_MORE_AT) / BN4_MORE_EACH, role = (i - BN4_MORE_AT) % BN4_MORE_EACH;
+		if (role == MORE_OTHER && k < nbn4 && bn4s[k].plain_routine) {
+			*id5 = -4;
+			return bn4s[k].plain_routine | 1;
+		}
+		*id5 = role == MORE_CHIP && k < nbn4 && bn4_chip_own(&bn4s[k]) ? -3 : -2;
 		return BN6_POWER_EMPTY | 1;
 	}
 	if (i >= TEAM_MOVED_AT + nteam) {
@@ -233,6 +237,7 @@ static bool grown(int n, uint8_t powers[4 * 0x100], uint8_t charges[BN6_CHARGE_R
 		uint8_t *row = charges + BN6_CHARGE_ROW * (BN6_POWER_ATTACK_COUNT + i);
 		if (id5 == -2) memset(row, 0, BN6_CHARGE_ROW);
 		else if (id5 == -3) memcpy(row, bn4s[(i - BN4_MORE_AT) / BN4_MORE_EACH].chip_charge, BN6_CHARGE_ROW);
+		else if (id5 == -4) memcpy(row, bn4s[(i - BN4_MORE_AT) / BN4_MORE_EACH].plain_charge, BN6_CHARGE_ROW);
 		else if (id5 < 0) memcpy(row, bn4s[i - nmoved - (int)sizeof empty_powers - nchaos].charge, BN6_CHARGE_ROW);
 		else memcpy(row, b5 + (BN5_CHARGE_TIMES - BUS) + BN6_CHARGE_ROW * (uint32_t)id5, BN6_CHARGE_ROW);
 		for (int k = 0; (breaks & SOULPOWER_BREAK_CHARGE) && k < BN6_CHARGE_ROW / 2; ++k) put16(row + 2 * k, get16(row + 2 * k) + 10);
@@ -287,7 +292,7 @@ static bool rows_make(uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)])
 	for (int k = 0; k < nbn4; ++k) {
 		uint8_t *r6 = rows + BN6_FORM_LOADOUT_SIZE * (SOULS + k);
 		r6[ROW_A] = (uint8_t)bn4_chip_power(k);
-		r6[ROW_6] = 0;
+		r6[ROW_6] = bn4s[k].plain_routine ? (uint8_t)(SOUL_POWER_FIRST + BN4_MORE_AT + BN4_MORE_EACH * k + MORE_OTHER) : 0;
 		r6[ROW_B] = (uint8_t)(BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos + k);
 	}
 	return true;
