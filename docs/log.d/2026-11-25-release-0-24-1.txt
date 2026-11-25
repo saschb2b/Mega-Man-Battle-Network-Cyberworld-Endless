@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-25T15:28:00Z
-* **Creation**: releases/v0.24.1.md (the notes: the 3DS's and the Vita's speed, the Net Square and the start menu on a New 3DS, both ROMs read there, BN4's twelve Souls), releases/overview.md and releases/index.md (its line).

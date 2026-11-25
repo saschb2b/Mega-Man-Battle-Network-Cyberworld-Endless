@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-25
+* **Update**: code/layers.md (0.24.1's row of the numbers).
+* **Creation**: releases/v0.24.1.md (the notes: the 3DS's and the Vita's speed, the Net Square and the start menu on a New 3DS, both ROMs read there, BN4's twelve Souls), releases/overview.md and releases/index.md (its line).
 * **Update**: game/pet-menu.md (BN6's own picture of the menu kept once it stands still, the game's frames run without it on the core's own thread; what stands still that moved, and the New 3DS's numbers on the net against the town), engine/emulation/thread.md (the way tried for the menu that was kept in another form).
 * **Update**: devtools/frame-log.md (the frames whose own work ran past 16 ms with the longest's parts, those shown late with less, the GBA's longest frame and its picture's longest wait).
 * **Update**: multirom/bn4-souls.md (JunkSoul in BN6's engine: Poltrgst through BN6's chip route, his taking of the form's confusion at his frame's end; the twelve moved; his charged shot Poltrgst, not a chip used this battle), rom/souls.md (JunkSoul's row), code/emu.md (soulwind.c's late taking of the form).
