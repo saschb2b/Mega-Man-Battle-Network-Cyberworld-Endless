@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-25T02:40:00Z
+* **Update**: multirom/bn4-souls.md (MetlSoul in BN6's engine: his punch, his plain shot of his own and his Break chip charge), rom/souls.md (MetlSoul's chip charge and plain shot's row), code/emu.md (MetlSoul's in soulbn4.c).
