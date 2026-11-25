@@ -79,4 +79,39 @@ void music_carry_held(void);
 void music_carry_resume(void);
 void music_carry_drop(void);
 
+/* Fast forward's music (music_fast.c; docs/engine/emulation/fast-forward.md,
+ * The music): while the game runs fast, its song plays on at the GBA's pace on the
+ * engine's MP2K, from where the game had it, and the game's own music
+ * player runs on unheard (sound_quiet.h's music away), its effects heard
+ * as fast forward hears them. The engine follows what the game's player
+ * does meanwhile (a song begun, a fade, a stop: mp2k_carry_follow), and
+ * gives the song back where it has brought it as the game runs at its
+ * pace again (mp2k_carry.h, the same hand-over as under the engine's
+ * screens). Its sound goes through the core's ring, a frame of the
+ * engine's to each frame of the game's heard (emu_sound_mixer), so the
+ * two hand over on a frame's edge. Nothing of the game's own changes but
+ * its music's place.
+ * Where settings.ini's `fast_music` is off (fast_forward.h), fast
+ * forward's music plays faster, as its grains (emu.h). */
+/* Before an update's frames of the game: whether they run fast (the song
+ * taken, followed) or at the GBA's pace (given back) */
+void music_fast_update(bool fast);
+/* The game held under a screen of the engine's, or left to the title or
+ * a quit: the song given back where the engine has it, its sound beside
+ * the core's again */
+void music_fast_held(void);
+/* The game left (its scene, a soft reset): nothing given back */
+void music_fast_drop(void);
+
+/* The engine's sound heard through the core's ring rather than beside it
+ * (true): audio_engine_add's alone, a frame of the core's at a time, in
+ * step with the game's own sound (fast forward's music, music_fast_update) */
+void audio_engine_in_ring(bool on);
+/* ... its next `frames` added to a frame of the core's `out` (48 kHz
+ * stereo, 1024 at most), as late in the frame as the core's own sound */
+void audio_engine_add(int16_t *out, int frames);
+/* ... its first frame the game's mix of the frame before (`n` samples of
+ * each side, BN6's ring's), but for what the core plays of it itself */
+void audio_engine_prime(const int8_t *right, const int8_t *left, int n);
+
 #endif

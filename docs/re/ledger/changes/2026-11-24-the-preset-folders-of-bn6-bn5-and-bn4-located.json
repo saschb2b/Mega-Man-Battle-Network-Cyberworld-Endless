@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-24",
+  "what": "The preset folders of three games located (src/emu/bn6_chips.h, bn5.h, bn4.h; docs/rom/chips.md, Chip folders and Other games' folders): Gregar's GiveFolder 0x081394F4 and its table 0x08139644, BN5's GiveFolder 0x081348F0 and table 0x08134A20 (six), BN4's giver 0x08043154 over twelve presets from 0x08017CC8; each game's folder 0 its NEW GAME folder, MMKB's list chip for chip; read by tools/folder_hands.py."
+}

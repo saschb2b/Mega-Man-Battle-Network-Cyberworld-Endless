@@ -3,7 +3,7 @@ type: Design
 title: "The meta layer's design"
 description: "The meta layer's design: what you bring against what you find, the loop stack, variety not power, and its pieces: starting folders, Cross starts, the threat staircase, helpers, the Library, gates, routes, run length."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T22:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 ---
 
 # The meta layer's design
@@ -91,13 +91,18 @@ milestone that teaches its style, never by a count to grind.
 | Standard | BN6's own starting folder | None | Always |
 | Blade | Swords, WideSwrd, LongSwrd, StepSwrd | No ranged chips: guardians in the back row need planning | Finish a guardian with a sword |
 | Storm | Elec chips around DolThdr and ElcPuls | One element: only Aqua foes take double | Delete an Aqua guardian with an Elec chip |
-| Z-Canon | Cannons in codes A, B and C: BN6's Program Advance ready to draw | Few answers to viruses behind cover | Use any Program Advance in a run |
+| Z-Canon | BN6's Program Advance folder one tier down: Cannon, FireBrn1 and FireHit1 in codes in a row | Reach and codes: most of it hits close, and nine codes split its hands | Use any Program Advance in a run |
 | Busting | Heavy hitters, no Recovery chips | Every heal comes from the net | Clear an act without a Recovery chip |
 | Lean | Few kinds of chip, codes aligned for big hands | Little coverage | Reach layer 10 |
+| Steady | BN6's ExtraFolder with Recov30 for its Recov50: Standard's shape a step up, heals of its own | Few codes, so thin hands; its heals tied to HiCannon's L | Reach act 3 |
+| Navi | BN6's Navi folder at V1: BlastMan, DiveMan and CircusMan with small chips in their codes and help to hold a foe | Little else hits hard: the Navi chips are its punch | Use a Navi chip |
+| Ember | Grass, then Fire on it: GrasSeed lays it, FireBrn1, FireHit1 and BurnSqr1 burn it for double; HeatCross's partner | A seed spent before the payoff; short reach | Delete a guardian in HeatCross |
+| Tide | Aqua in A and T: TrnArrw1, BblStar1, IceSeed; bubbles and ice hold a foe | One element: only Fire foes take double | Delete a Fire guardian |
 
 Z-Canon, Busting and Lean are built since 26 October 2026 ([Decisions
 and phase one](decisions.md), the designed three), each in codes BN6's
-records give its chips.
+records give its chips; Ember and Tide since 24 November 2026, issue
+#865's first archetypes (the same page, Issue 865's archetypes).
 
 A folder is what the run brings: the pack starts as BN6's would have after
 NEW GAME gave that folder (its chips counted, marked as given), not with
@@ -230,7 +235,9 @@ them a use.
   then the title's marks) and what is closest, a whole sentence in
   KeyItem's information box ("Delete any guardian to open the Blade
   folder"; a playtester read the old "Win a short net: the endless net"
-  as cut off). Its "Viruses deleted" counts every virus deleted, in a
+  as cut off). For a folder, since 24 November 2026, the hint while it is
+  locked and unheard ("The Blade folder opens when something big falls."),
+  the plain sentence once heard ([The shelf of starting folders](shelf.md)). Its "Viruses deleted" counts every virus deleted, in a
   battle lost or run from too. A Cross that won't fit
   beside the run's says, at its first win, that the next dive can start
   with it.

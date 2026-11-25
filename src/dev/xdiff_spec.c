@@ -235,7 +235,8 @@ static int numbers_parse(Spec *s, const char *name, const char *v) {
 		s->seed[1] = b;
 		return 1;
 	}
-	if (a < 1 || a > 3 || b < 1 || b > 3) return 0;
+	/* (columns 1-4: a field where MegaMan's side is four wide or Surrounded, sides=30 or 33) */
+	if (a < 1 || a > 4 || b < 1 || b > 3) return 0;
 	s->mm = (int)(b << 4 | a);
 	return 1;
 }

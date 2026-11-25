@@ -14,6 +14,7 @@
 #include "loot_souls.h"
 #include "soulbn4.h"
 #include "soulpower.h"
+#include "turned_aim.h"
 #include "soulunite.h"
 #include "data.h"
 #include "game.h"
@@ -100,6 +101,7 @@
 #include "xchips_code.h"
 #include "xchips_moved.h"
 #include "xchips_pas.h"
+#include "xchips_folder.h"
 #include "xchips_record.h"
 #include "xchips_registry.h"
 #include "xchips_text.h"
@@ -138,6 +140,7 @@
 #include "xvirus_moved.h"
 #include "xvirus_shim.h"
 #include "soul_room.h"
+#include "looks.h"
 #include "soulcode.h"
 #include "xnavi_sprites.h"
 
@@ -224,6 +227,68 @@ bool town_after_abandon;
 /* (the older net's chips' share, home's requests' rolls; BN6's stages by depth) */
 int loot_older_share, loot_older_net;
 int loot_stage_allowed(int depth) { return depth > 12 ? 2 : depth > 6 ? 1 : 0; }
+
+/* MegaMan's looks in the profile (src/core/looks*.c, docs/game/looks.md):
+ * a fresh profile's, ownership, the slots, the bytes a save keeps read back,
+ * and a profile saved before looks were kept */
+static void test_looks(void) {
+	Profile keep = profile;
+	memset(&profile, 0, sizeof profile);
+	looks_profile_loaded();
+	CHECK(looks_owned(LOOK_CLASSIC) && !looks_owned(LOOK_UNDERNET) && looks_slot() == 0, "a fresh profile owns Classic alone, slot 0");
+	Look w = looks_worn(), plain = look_plain();
+	CHECK(!memcmp(&w, &plain, sizeof w) && look_valid(&w), "a fresh profile wears BN6's own colours");
+	CHECK(looks_grant(LOOK_UNDERNET) && !looks_grant(LOOK_UNDERNET) && looks_owned(LOOK_UNDERNET), "a palette granted once");
+	CHECK(!looks_grant(LOOK_CLASSIC) && !looks_grant(LOOK_PALETTES) && !looks_grant(-1), "Classic and no palette are not granted");
+	Look l = { { LOOK_UNDERNET, LOOK_CLASSIC, LOOK_NONE }, { 3, 15, LOOK_NONE } };
+	CHECK(looks_set(1, &l), "a look set");
+	looks_select(1);
+	w = looks_worn();
+	CHECK(looks_slot() == 1 && !memcmp(&w, &l, sizeof w), "the slot selected is worn");
+	Look bad = l;
+	bad.palette[0] = LOOK_PALETTES;
+	CHECK(!look_valid(&bad) && !looks_set(0, &bad), "a palette past the last refused");
+	bad = l;
+	bad.colour[1] = LOOK_COLOURS;
+	CHECK(!look_valid(&bad), "a colour past the last refused");
+	bad = l;
+	bad.colour[2] = 0;
+	CHECK(!look_valid(&bad) && !looks_set(3, &l), "a channel half LOOK_NONE refused, and a slot past the last");
+	Look parsed;
+	CHECK(looks_parse("11.0,-,5.15", &parsed) && parsed.palette[0] == LOOK_GLITCH && parsed.palette[1] == LOOK_NONE &&
+	      parsed.colour[1] == LOOK_NONE && parsed.colour[2] == 15, "the dev switch's look read");
+	CHECK(looks_parse("3.2", &parsed) && parsed.palette[1] == LOOK_NONE, "a dev look of one channel");
+	CHECK(!looks_parse("12.0", &parsed) && !looks_parse("1.16", &parsed) && !looks_parse("1.2,x", &parsed) && !looks_parse("1.2,3.4,5.6,7.8", &parsed),
+	      "words that are no look refused");
+	/* (the bytes a save writes, read back as profile_load reads them) */
+	static uint8_t bytes[sizeof(Profile)];
+	memcpy(bytes, &profile, sizeof profile);
+	memset(&profile, 0, sizeof profile);
+	memcpy(&profile, bytes, sizeof profile);
+	looks_profile_loaded();
+	w = looks_get(1);
+	CHECK(looks_owned(LOOK_UNDERNET) && looks_slot() == 1 && !memcmp(&w, &l, sizeof w), "the looks read back as saved");
+	/* (a profile saved before looks: its 1124 bytes, the rest zero, its
+	 * last two bytes the struct's padding then, which may hold anything) */
+	memset(bytes + 1124, 0, sizeof bytes - 1124);
+	bytes[1122] = bytes[1123] = 0xFF;
+	memcpy(&profile, bytes, sizeof profile);
+	looks_profile_loaded();
+	w = looks_worn();
+	CHECK(looks_owned(LOOK_CLASSIC) && !looks_owned(LOOK_UNDERNET) && looks_slot() == 0 && !memcmp(&w, &plain, sizeof w),
+	      "an old profile reads as Classic owned and BN6's own colours");
+	for (int p = 0; p < LOOK_PALETTES; ++p) {
+		CHECK(looks_palette_name(p)[0], "palette %d named", p);
+		int distinct = 0;
+		for (int i = 0; i < LOOK_COLOURS; ++i) {
+			int j = 0;
+			while (j < i && looks_colour(p, j) != looks_colour(p, i)) ++j;
+			distinct += j == i;
+		}
+		CHECK(distinct == LOOK_COLOURS, "palette %d's sixteen colours differ (%d)", p, distinct);
+	}
+	profile = keep;
+}
 
 static void test_sha1(void) {
 	char hex[41];
@@ -3631,6 +3696,8 @@ static void test_fast_forward(void) {
 	/* a batch: up to the speed, while the last frame's time still fits */
 	CHECK(fast_batch_more(3, 1, 2, 1, 10) && fast_batch_more(3, 2, 2, 1, 10) && !fast_batch_more(3, 3, 2, 1, 10), "a batch ran past its speed");
 	CHECK(!fast_batch_more(3, 1, 8, 4, 10), "a batch ran past the frame's time");
+	/* the music at its own pace by default (settings.ini's fast_music) */
+	CHECK(fast_music(), "fast forward's music is not at its own pace by default");
 }
 
 static void test_padmap(void) {
@@ -4797,6 +4864,7 @@ static void test_free_space(void) {
 		{ "their loadouts", SOULS_TEAM_LOADOUTS, SOULS_TEAM_LOADOUTS_END },
 		{ "the charge times", SOULS_CHARGES, SOULS_CHARGES_END }, { "their chaos power attacks", SOULS_TEAM_CHAOS, SOULS_TEAM_CHAOS_END },
 		{ "their overlays' masks", SOULS_TEAM_OVERLAYS, SOULS_TEAM_OVERLAYS_END }, { "their hooks' Thumb", SOULS_TEAM_THUMB, SOULS_TEAM_THUMB_END },
+		{ "MeddySoul's capsules", SOULS_CAPSULES, SOULS_CAPSULES_END },
 	};
 	regions_apart("Team ProtoMan's Souls' room", team_souls, (int)(sizeof team_souls / sizeof *team_souls), FREE_TEAM_SOULS, FREE_TEAM_SOULS_END);
 	CHECK(SOULS_ARM_ROWS_END - SOULS_ARM_ROWS >= 0x44u * (3 + 6 + 6), "the Souls' grown arm rows: room for BN6's, Team Colonel's and Team ProtoMan's");
@@ -5362,22 +5430,94 @@ static void test_preset_nine(void) {
  * Recovery chip, Lean's seven kinds in B or *); and the designed three's
  * milestones: a Program Advance used, an act cleared without a Recovery
  * chip, layer 10, each in any run. */
+typedef struct { int id; const char *codes; } FolderCodes;
+static const FolderCodes *soul_codes;
+static size_t soul_ncodes;
+static int soul_run_of(int id) { return id; }
+static void soul_codes_of(int id, uint8_t out[4]) {
+	memset(out, 0xFF, 4);
+	for (size_t q = 0; q < soul_ncodes; ++q)
+		if (soul_codes[q].id == id)
+			for (int k = 0; k < 4 && soul_codes[q].codes[k]; ++k) out[k] = (uint8_t)(soul_codes[q].codes[k] == '*' ? 26 : soul_codes[q].codes[k] - 'A');
+}
+
+/* The Soul forms' starts (docs/game/meta/forms.md, Each game's start):
+ * BN5's and BN4's NEW GAME folders, as numbers (the run's chip ids, each
+ * game's own codes; docs/game/meta/folders-measured.md, 3), as
+ * xfolder_as_run takes them: each a legal BN6 folder after it, 30 chips,
+ * five of a chip at most, every code one BN6's record gives, and only
+ * BN4's AirShot A and Vulcan1 V moved, to * and S (the line names them) */
+static void test_soul_starts(const FolderCodes *codes, size_t ncodes) {
+#define E(id, c, n) { id, c, n }
+	static const struct { int id; char code; int n; } bn5[] = {
+		E(1, 'A', 2), E(1, 'B', 2), E(4, '*', 3), E(5, 'D', 3), E(54, 'B', 2), E(54, 'L', 2), E(71, 'S', 4), E(72, 'S', 2),
+		E(298, '*', 2), E(154, 'A', 2), E(154, 'L', 2), E(163, 'S', 1), E(175, '*', 1), E(192, '*', 2),
+	}, bn4[] = {
+		E(1, 'A', 2), E(1, 'B', 2), E(4, 'A', 3), E(5, 'V', 3), E(54, 'B', 2), E(54, 'L', 2), E(71, 'S', 4), E(72, 'S', 2),
+		E(298, '*', 3), E(154, 'A', 2), E(154, 'L', 2), E(163, 'S', 1), E(192, '*', 2),
+	};
+#undef E
+	soul_codes = codes;
+	soul_ncodes = ncodes;
+	static const uint8_t airshot[4] = { 26, 0xFF, 0xFF, 0xFF }, vulcan[4] = { 1, 3, 18, 26 }, cannon[4] = { 0, 1, 2, 26 }, two[4] = { 1, 3, 0xFF, 0xFF };
+	CHECK(xfolder_code(airshot, 0) == 26 && xfolder_code(vulcan, 21) == 18 && xfolder_code(vulcan, 3) == 3 && xfolder_code(cannon, 26) == 26,
+		"soul starts: AirShot A as *, Vulcan1 V as S, Vulcan1 D and Cannon * kept");
+	CHECK(xfolder_code(two, 2) == 1 && xfolder_code(two, 26) == 3, "soul starts: a tie to the earlier letter, a * the record lacks to its nearest");
+	for (int g = 0; g < 2; ++g) {
+		const char *game = g ? "BN4" : "BN5";
+		uint16_t in[XFOLDER_ENTRIES], out[XFOLDER_ENTRIES];
+		int k = 0, rows = g ? (int)(sizeof bn4 / sizeof *bn4) : (int)(sizeof bn5 / sizeof *bn5);
+		for (int r = 0; r < rows; ++r) {
+			int id = g ? bn4[r].id : bn5[r].id, n = g ? bn4[r].n : bn5[r].n;
+			char c = g ? bn4[r].code : bn5[r].code;
+			for (int i = 0; i < n && k < XFOLDER_ENTRIES; ++i) in[k++] = chip9_entry((unsigned)id, c == '*' ? 26u : (unsigned)(c - 'A'));
+		}
+		CHECK(k == XFOLDER_ENTRIES, "soul starts: %s's has %d chips", game, k);
+		int swapped = -1, count[1024] = { 0 };
+		CHECK(xfolder_as_run(in, soul_run_of, soul_codes_of, out, &swapped), "soul starts: %s's has a chip the run lacks", game);
+		CHECK(swapped == (g ? 6 : 0), "soul starts: %s's moved %d codes", game, swapped);
+		for (int i = 0; i < XFOLDER_ENTRIES; ++i) {
+			int id = (int)chip_entry_id(out[i]), code = (int)chip_entry_code(out[i]);
+			uint8_t rec[4];
+			soul_codes_of(id, rec);
+			CHECK(rec[0] != 0xFF && memchr(rec, code, 4), "soul starts: %s's chip %d in a code BN6 does not give it (%d)", game, id, code);
+			CHECK(++count[id] <= 5, "soul starts: %s's holds more than five of chip %d", game, id);
+		}
+	}
+	CHECK(meta_start_chips(FOLDER_STANDARD, RUN_FORM_CROSS) == NULL && meta_start_chips(FOLDER_BLADE, RUN_FORM_SOUL_BN5) == meta_folder_chips(FOLDER_BLADE),
+		"soul starts: CROSS keeps BN6's Standard, another folder its own in a Soul form");
+	CHECK(strstr(meta_standard_about(RUN_FORM_SOUL_BN4), "AirShot in *") && strstr(meta_standard_about(RUN_FORM_SOUL_BN4), "Vulcan1 in S")
+		&& strstr(meta_standard_about(RUN_FORM_SOUL_BN5), "BN5") && !strcmp(meta_standard_about(RUN_FORM_CROSS), meta_folder(FOLDER_STANDARD)->about),
+		"soul starts: the Standard line names its game and BN4's swaps");
+}
+
 static void test_folders(void) {
 	/* (the folders' chips' codes as BN6's records hold them, at 0x021DA8 + id x
 	 * 0x2C, read from the ROM: docs/rom/chips.md) */
-	static const struct { int id; const char *codes; } bn6_codes[] = {
-		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 12, "AGR" }, { 30, "BRS*" }, { 31, "AEQ" }, { 34, "JLS" },
-		{ 54, "BLR*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 131, "ACP*" },
-		{ 154, "ADL*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 175, "*" }, { 178, "AFR*" }, { 192, "*" },
+	static const FolderCodes bn6_codes[] = {
+		{ 1, "ABC*" }, { 2, "LMN*" }, { 4, "*" }, { 5, "BDS*" }, { 6, "DFL" }, { 12, "AGR" }, { 20, "FGH*" }, { 27, "BET" }, { 30, "BRS*" }, { 31, "AEQ" },
+		{ 34, "JLS" }, { 54, "BLR*" }, { 55, "CKV*" }, { 71, "HLS*" }, { 72, "HLS*" }, { 73, "HLS*" }, { 89, "AGT*" }, { 90, "CRU*" }, { 107, "DEF" },
+		{ 131, "ACP*" }, { 154, "ADL*" }, { 155, "ELQ*" }, { 162, "*" }, { 163, "BFS*" }, { 168, "ABS*" }, { 170, "*" }, { 175, "*" }, { 178, "AFR*" },
+		{ 184, "*" }, { 192, "*" }, { 193, "*" }, { 257, "B*" }, { 260, "D*" }, { 263, "C*" },
+		/* (issue #865's archetypes: Ember's and Tide's) */
+		{ 24, "AFK" }, { 68, "AFS*" }, { 69, "ALR*" }, { 76, "FOZ" }, { 110, "HPV" },
+		{ 298, "*" },   /* (CrakOut, moved: the registry's row's codes, BN5's record's) */
 	};
+	test_soul_starts(bn6_codes, sizeof bn6_codes / sizeof *bn6_codes);
 	Profile profile_was = profile;
 	Run run_was = run;
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f) {
+		if (!meta_folder_exists(f)) {
+			CHECK(!meta_folder_chips(f) && !meta_folder_open(f), "folders: id %d holds no folder but opens or holds chips", f);
+			continue;
+		}
 		const uint16_t *c = meta_folder_chips(f);
 		const char *name = meta_folder(f)->name;
 		CHECK(c && meta_folder(f)->opens, "folders: %s has no chips or no milestone", name);
 		if (!c) continue;
-		int count[512] = { 0 }, kinds = 0, recov = 0, cannons = 0, off_lean = 0;
+		/* (Z-Canon's three recipes of codes in a row, BN6's table at 0x02BA60: GigaCan1 from Cannon A B C, WideBrn1
+		 * from FireBrn1 F G H, FlmHook1 from FireHit1 D E F; a bit per code each) */
+		int count[512] = { 0 }, kinds = 0, recov = 0, cannons = 0, burners = 0, hits = 0, off_lean = 0;
 		for (int k = 0; k < 30; ++k) {
 			int id = (int)chip_entry_id(c[k]), code = (int)chip_entry_code(c[k]);
 			const char *given = NULL;
@@ -5387,10 +5527,21 @@ static void test_folders(void) {
 			kinds += !count[id]++;
 			recov += id >= 154 && id <= 161;
 			cannons |= id == 1 && code <= 2 ? 1 << code : 0;
+			burners |= id == 20 && code >= 5 && code <= 7 ? 1 << (code - 5) : 0;
+			hits |= id == 107 && code >= 3 && code <= 5 ? 1 << (code - 3) : 0;
 			off_lean += code != 1 && code != 26;
 		}
-		for (int id = 0; id < 512; ++id) CHECK(count[id] <= 5, "folders: %s holds %d of chip %d", name, count[id], id);
-		if (f == FOLDER_ZCANON) CHECK(cannons == 7, "folders: Z-Canon lacks a Cannon in A, B or C (%#x)", cannons);
+		/* (BN6's rules: five of a chip at most, a Mega (the Navi chips 221-280) once, five Megas at most) */
+		int megas = 0;
+		for (int id = 0; id < 512; ++id) {
+			CHECK(count[id] <= (id >= 221 && id <= 280 ? 1 : 5), "folders: %s holds %d of chip %d", name, count[id], id);
+			megas += id >= 221 && id <= 280 ? count[id] : 0;
+		}
+		CHECK(megas <= 5, "folders: %s holds %d Megas", name, megas);
+		if (f == FOLDER_NAVI) CHECK(megas == 3, "folders: Navi holds %d Navi chips", megas);
+		if (f == FOLDER_ZCANON)
+			CHECK(cannons == 7 && burners == 7 && hits == 7, "folders: Z-Canon lacks a recipe's code (Cannon %#x, FireBrn1 %#x, FireHit1 %#x)",
+				cannons, burners, hits);
 		if (f == FOLDER_BUSTING) CHECK(recov == 0, "folders: Busting holds %d Recovery chips", recov);
 		if (f == FOLDER_LEAN) CHECK(kinds <= 7 && !off_lean, "folders: Lean has %d kinds, %d chips outside B and *", kinds, off_lean);
 	}
@@ -5429,18 +5580,36 @@ static void test_folders(void) {
 	CHECK(!meta_folder_open(FOLDER_LEAN), "folders: Lean open at layer 9");
 	profile.best_depth = 10;
 	CHECK(meta_folder_open(FOLDER_LEAN), "folders: Lean shut at layer 10");
+	/* Steady at act 3's first layer; Navi once a Navi chip is used (BlastMan; a Cannon is none) */
+	memset(&profile, 0, sizeof profile);
+	profile.best_depth = 6;
+	CHECK(!meta_folder_open(FOLDER_STEADY), "folders: Steady open at layer 6");
+	profile.best_depth = 7;
+	CHECK(meta_folder_open(FOLDER_STEADY), "folders: Steady shut at layer 7");
+	CHECK(meta_chip_watched(257) && meta_chip_watched(221) && meta_chip_watched(280), "folders: the Navi chips watched");
+	meta_chip_used(1);
+	CHECK(!meta_folder_open(FOLDER_NAVI), "folders: Navi open after a Cannon");
+	meta_chip_used(257);
+	CHECK(meta_folder_open(FOLDER_NAVI) && !meta_folder_open(FOLDER_ZCANON), "folders: Navi shut after BlastMan, or Z-Canon opened with it");
 	/* (said on the summary as they open, the closest one named before) */
 	memset(&profile, 0, sizeof profile);
 	profile.short_wins = 1;
 	for (int f = FOLDER_BLADE; f <= FOLDER_STORM; ++f) profile.folders_open |= (uint16_t)(1u << f);
+	/* (the shelf's rule, issue #864: the hint while unheard, the milestone once heard) */
 	const char *goal = meta_next_goal();
-	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder."), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	CHECK(goal && !strcmp(goal, "The Z-Canon folder opens when chips work as one, in order."), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	meta_folder_hear(FOLDER_ZCANON);
+	goal = meta_next_goal();
+	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder."), "folders: the closest goal heard \"%s\"", goal ? goal : "(none)");
 	/* (each a sentence the information box holds in two of its three
 	 * lines) */
 	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {
 		char g[96];
+		if (!meta_folder_exists(f)) continue;
 		meta_goal_words(g, sizeof g, GOAL_FOLDER, f);
 		CHECK(strlen(g) <= 56, "folders: the goal line \"%s\" past 56 letters", g);
+		meta_goal_words(g, sizeof g, GOAL_FOLDER_HINT, f);
+		CHECK(strlen(g) <= 64, "folders: the hint line \"%s\" past 64 letters", g);
 	}
 	profile.folder_feats = FEAT_PA;
 	meta_run_over(false);
@@ -5449,6 +5618,26 @@ static void test_folders(void) {
 	bool told = false;
 	for (int i = 0; i < n; ++i) told |= !strcmp(said[i], "the Z-Canon folder");
 	CHECK(told && (profile.setup_new & SETUP_NEW_FOLDER), "folders: the summary did not say Z-Canon");
+	/* issue #865's archetypes, from blank guardians' records (no saves
+	 * here): Tide opens with a Fire guardian deleted (HeatMan, BlastMan),
+	 * Ember with any guardian deleted in HeatCross, or Beast Out in it; a
+	 * record of before opens it while that battle is the guardian's last,
+	 * and the profile keeps it once a guardian falls */
+	rivals_load();
+	memset(&profile, 0, sizeof profile);
+	CHECK(!meta_folder_open(FOLDER_EMBER) && !meta_folder_open(FOLDER_TIDE), "folders: Ember or Tide open on a new profile");
+	rival_result(6, RIVAL_MEGAMAN_WON, &(RivalEnd){ 0, 100, 400 }, 1);
+	CHECK(!meta_folder_open(FOLDER_TIDE) && meta_folder_open(FOLDER_STORM), "folders: an Aqua guardian opened Tide, or not Storm");
+	rival_result(12, RIVAL_MEGAMAN_WON, &(RivalEnd){ BN6_FORM_CROSS_BEAST + 3, 100, 400 }, 1);
+	CHECK(meta_folder_open(FOLDER_TIDE) && !meta_folder_open(FOLDER_EMBER), "folders: BlastMan deleted, Tide shut or Ember open (SlashCross)");
+	rival_result(13, RIVAL_MEGAMAN_WON, &(RivalEnd){ BN6_FORM_CROSS_BEAST + BN6_FORM_HEAT_CROSS, 100, 400 }, 2);
+	CHECK(meta_folder_open(FOLDER_EMBER), "folders: a guardian deleted in HeatCross's Beast Out left Ember shut");
+	meta_guardian_deleted();
+	rival_result(13, RIVAL_NAVI_WON, NULL, 3);
+	CHECK((profile.folder_feats & FEAT_HEAT_GUARDIAN) && meta_folder_open(FOLDER_EMBER), "folders: Ember not kept past the guardian's next battle");
+	memset(&profile, 0, sizeof profile);
+	CHECK(!meta_folder_open(FOLDER_EMBER), "folders: Ember open with no guardian's last battle won in HeatCross");
+	rivals_load();
 	profile = profile_was;
 	run = run_was;
 }
@@ -5977,10 +6166,19 @@ static void test_chip_registry(void) {
 		plays += xreg_rows[i].how == XREG_RECORD;
 		dark += xreg_rows[i].how == XREG_DARK;
 		pas += xreg_rows[i].how == XREG_PA;
-		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
+		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320 && xreg_rows[i].how != XREG_CAPSULE;
 	}
-	CHECK(xreg_count == 283 && own == 164 && plays >= 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, "
+	CHECK(xreg_count == 285 && own == 166 && plays >= 8 && dark == 7 && pas == 20, "registry: 285 chips, 166 of ids of their own, "
 		"no fewer than 8 playing, 7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
+	/* (MeddySoul's two capsules BN6 has no chip of the name of, past BN4's last id: no pack entry, never a run's find; BN6's
+	 * own three keep their ids, docs/multirom/souls.md, MeddySoul's capsules) */
+	const XChipReg *yel = xreg_of_bn5(380), *blk = xreg_of_bn5(381);
+	CHECK(yel && yel->bn6 == XREG_CAPSULE_FIRST && yel->how == XREG_CAPSULE && blk && blk->bn6 == XREG_CAPSULE_FIRST + 1 &&
+		blk->how == XREG_CAPSULE && xreg_at(734) == yel && !xreg4_at(734) && !xreg4_at(735) && !xreg_of_bn5(382) &&
+		!chip_pool_older(734) && !chip_pool_older(735),
+		"registry: YelCapsl at 734, BlkCapsl at 735, never a find (their pack entries, the cart's save RAM's, never given); WhiCapsl BN6's own");
+	static const XChipReg stray[] = { { 380, 600, XREG_CAPSULE, 0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 3, 5 } };
+	CHECK(xreg_check(stray, 1, why, sizeof why) == 1, "registry: a capsule outside the capsules' ids refused");
 	CHECK(high == 20 + 100 + 15, "registry: the Program Advances and 115 chips past 319, in the pack's extension (%d)", high);
 	/* (BN5's last Program Advances: three in the spare ids below BN6's per-battle bits' end, two past nine bits, whose bit
 	 * is the engine's, xchips_wide.c) */
@@ -5993,7 +6191,7 @@ static void test_chip_registry(void) {
 	const XChipReg *cloud = xreg_of_bn5(266), *django_ds = xreg_of_bn5(280);
 	bool wide_rows = cloud && cloud->bn6 == 512 && cloud->how == XREG_MOVED && django_ds && django_ds->bn6 == 526 && xreg_at(526) == django_ds;
 	for (int i = 0; i < xreg_count; ++i)
-		if (xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 512 && xreg_rows[i].how != XREG_PA) wide_rows = wide_rows && bn6_pack_entry(0x02002230u, xreg_rows[i].bn6) != 0;
+		if (xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 512 && xreg_rows[i].how != XREG_PA && xreg_rows[i].how != XREG_CAPSULE) wide_rows = wide_rows && bn6_pack_entry(0x02002230u, xreg_rows[i].bn6) != 0;
 	CHECK(wide_rows, "registry: CloudMan's V1 at 512, DjangoDS at 526, every chip past 511 a folder can hold with a pack entry");
 	/* (the Darkloids' first batch in the free ids, 511 held for the wide
 	 * rewards: docs/multirom/bn4-chips.md, Past 511) */
@@ -6001,7 +6199,7 @@ static void test_chip_registry(void) {
 	CHECK(shade && shade->bn6 == 505 && shade->how == XREG_MOVED && bliz_ds && bliz_ds->bn6 == 510 && xreg_at(510) == bliz_ds && !xreg_at(XREG_HELD),
 		"registry: ShadeMan's V1 at 505, BlizManDS at 510, nothing at 511");
 	static const XChipReg moved_row[] = { { 91, 298, XREG_MOVED, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
-	static const XChipReg no_way[] = { { 91, 298, XREG_MOVED + 1, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
+	static const XChipReg no_way[] = { { 91, 298, XREG_CAPSULE + 1, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
 	CHECK(!xreg_check(moved_row, 1, why, sizeof why) && xreg_check(no_way, 1, why, sizeof why) == 1, "registry: a moved chip's row taken, a way past it refused");
 	const XChipReg *ws = xreg_of_bn5(9), *cannon = xreg_of_bn5(1), *atk = xreg_of_bn5(149), *z = xreg_of_bn5(218);
 	CHECK(ws && ws->bn6 == 204 && ws->how == XREG_RECORD && ws->twin == 23 && xreg_at(204) == ws, "registry: BN5's WideSht1 is 204, over BN6's WideSht");
@@ -8574,6 +8772,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 	test_sha1();
+	test_looks();
 	test_battle_data();
 	test_lab_text();
 	test_heal_again();
@@ -8689,6 +8888,12 @@ int main(int argc, char **argv) {
 	CHECK(!grab_search_lost(1, 1, 0) && grab_search_lost(-1, 1, 0), "grab: an enemy's search, lost once it has walked its own way off the field");
 	CHECK(!grab_search_lost(1, 0, 1) && grab_search_lost(-1, 0, 1) && !grab_search_lost(-1, 1, 1) && grab_search_lost(1, 1, 1),
 		"grab: a search by one turned round (Surrounded's L or R)");
+	/* MegaMan's side's aim turned round (turned_aim.h, issue #838): a row's search from its own column and the way toward
+	 * the enemy as it faces, where the field is none of BN6's three plain ones; a plain field's, and every foe's, as BN6's */
+	CHECK(turned_aim_mends(BN6_SIDES_SURROUNDED, 0) && turned_aim_mends(0x31, 0), "turned aim: MegaMan's between two enemy sides, from his column");
+	CHECK(!turned_aim_mends(BN6_SIDES_SURROUNDED, 1), "turned aim: a foe's on a Surrounded field, from the edge behind it as BN6's");
+	CHECK(!turned_aim_mends(BN6_SIDES_PLAIN, 0) && !turned_aim_mends(BN6_SIDES_WIDE, 0) && !turned_aim_mends(BN6_SIDES_NARROW, 0),
+		"turned aim: BN6's own fields, as BN6's");
 	/* The player's chips' look-ups (chip_targets.h, issue #523): a moved family read as BN6's first virus, inside every
 	 * viruses' range BN6's chips ask for and no Navis'; a moved Navi, BN5's or BN4's, as its first Navi; BN6's own as they are */
 	CHECK(chip_targets_name(XV_FIRST_ID) == CHIP_TARGETS_VIRUS && chip_targets_name(XV_FIRST_ID + XV_FAMILIES * XV_VERSIONS - 1) == CHIP_TARGETS_VIRUS &&

@@ -3,7 +3,7 @@ type: Process
 title: "YouTube"
 description: "The trailers on YouTube: the channel (@Saschb2b), a video per trailer in one playlist, the 4K masters `tools/trailer_youtube.py` makes, the thumbnails `tools/trailer_thumbnail.py` draws, the narrator, what each video's fields hold, how an upload goes, and each release's step."
 tags: [project, youtube, trailers]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T18:47:34Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T23:58:44Z }
 ---
 
 # YouTube
@@ -159,6 +159,7 @@ published video, and its row below.
 | 0.20.0 | <https://youtu.be/GOWV6RM4j8s> | 2026-11-15 |
 | 0.21.0 | <https://youtu.be/FgRgRRJFtUM> | 2026-11-15 |
 | 0.22.0 | <https://youtu.be/XbueF-wBxt4> | 2026-11-16 |
+| 0.24.0 | <https://youtu.be/dzqTUNPFKKU> | 2026-11-25 |
 
 0.22.0's master, thumbnails and words were made on 15 November 2026,
 ahead of its release (the owner: the video and the release need not go
@@ -167,6 +168,16 @@ after midnight, the day's limit used up by the ten above, and took it on
 the evening of the 16th. It went up with thumbnail A alone: Studio shows
 the channel no test of thumbnails yet (its edit page holds an
 **A/B-Tests** button, hidden), so B and C wait for it.
+
+0.24.0's went up on 25 November 2026, the day after its tag (the owner:
+"doesn't need to go live in sync"), its 4K master in eight pieces joined
+and hash-checked in the page, the details reused from 0.22.0's with its
+own title and description, copyright with no issue. It went up with
+thumbnail A alone: the edit page's thumbnail menu now offers **A/B-Tests**,
+but it asks first for the channel's one-time identity check
+(**Einmalige Überprüfung deiner Identität erforderlich**), the owner's to
+make, so B and C wait for it as 0.22.0's do. The same check makes the
+description's links clickable.
 
 On 16 November 2026 the ten older videos were reworked to 0.22.0's
 standard (the owner): each cut got its `YOUTUBE_HOOK` and one thumbnail in

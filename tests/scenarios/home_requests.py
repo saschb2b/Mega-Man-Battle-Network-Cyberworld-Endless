@@ -2,7 +2,8 @@
 AsterLand's Request BBS and taken there or from the one who asks, one at a
 time; counted in the Net; settled at the next visit by the asker, paid
 once (issue #122: a jack-in and out paid the lab's 1000 zenny again) or
-not at all where it was not done."""
+not at all where it was not done; or settled in Lan's HP by the courier in
+the asker's name, once, either place (issue #841)."""
 
 ROOM = 'room'
 FREE = ('until', 'held=none', 600)
@@ -35,6 +36,8 @@ JACK_OUT = [
     ('do', 'press LEFT; wait 20'),
     ('repeat', 'press A; wait 40', "place=Lan's Room", 20), FREE,
 ]
+# (the courier in Lan's HP, talked to from below him: home_hp.py's courier-heard)
+COURIER = [('do', 'place -84 54 7; wait 10; press A; wait 30'), ('expect', 'chat=open')]
 # (... and back: his front door from the pavement, the stairs up, R at his PC)
 JACK_IN = [
     ('do', 'place -28 216 7; wait 10; hold UP 40'),
@@ -153,5 +156,74 @@ MANY = {
             PAGED, FREE,
             ('expect', 'zenny=0'),
             ('expect', 'request~settled 1'),
+        ]),
+    'courier-pays': dict(
+        GUARDS="Issue #841: a finished request's pay is taken in Lan's HP from the courier, in its asker's name; the board opens again, and the asker in town pays nothing more.",
+        START=home(7, 10, 'job=3,jobstate=2'),
+        STEPS=ARRIVED + [
+            ('expect', 'request~explore done'),
+            ('expect', 'courier=waiting'),
+            ('expect', 'zenny=0'),
+        ] + COURIER + [
+            PAGED, FREE,
+            ('expect', 'zenny=1000'),
+            ('expect', 'request=none held 0 settled 1'),
+        ] + JACK_OUT + OUT + LAB_MAN + [
+            PAGED, FREE,
+            ('expect', 'zenny=1000'),
+            ('expect', 'request=none held 0 settled 1'),
+        ]),
+    'courier-not-done': dict(
+        GUARDS="Issue #841: a request not done is let go in Lan's HP by the courier, with its asker's word and no pay, and the board takes a new one.",
+        START=home(7, 10, 'job=3,jobstate=3'),
+        STEPS=ARRIVED + [
+            ('expect', 'request~explore failed'),
+            ('expect', 'request~held 1 settled 0'),
+            ('expect', 'courier=waiting'),
+        ] + COURIER + [
+            PAGED, FREE,
+            ('expect', 'zenny=0'),
+            ('expect', 'request=none held 0 settled 1'),
+            ('expect', 'courier=waiting'),                          # (his news now: the requests up)
+        ] + JACK_OUT + OUT + LAB_MAN + [
+            PAGED, FREE,                                            # (his word again, nothing asked)
+            ('expect', 'request=none held 0 settled 1'),
+            ('do', 'place -156 -40 7; wait 10; hold UP+LEFT 62'),   # (AsterLand: ASTER's last walk)
+            ('until', 'place=AsterLand', 600), FREE,
+            ('do', 'place -72 -36 7; wait 10'),
+            ('repeat', 'press A; wait 50', 'choice=1/2', 20),       # the board takes a new one
+            ('repeat', 'press A; wait 50', 'request~taken', 6),
+        ]),
+    'courier-bring-kept': dict(
+        GUARDS="Issue #841: the NetBattler's chip asked for in Lan's HP, none of its element in the Pack: the courier keeps the request on No, and lets it go on Yes.",
+        START=home(7, 10, 'job=4'),
+        STEPS=ARRIVED + [
+            ('expect', 'request~bring taken'),
+            ('expect', 'courier=waiting'),
+        ] + COURIER + [
+            ('repeat', 'press A; wait 40', 'choice=1/2|choice=2/2', 30),
+            ('until', 'choice=2/2', 120),                           # (on No: a request given up costs the pay)
+            ('do', 'press A; wait 40'),
+            PAGED, FREE,
+            ('expect', 'request~bring taken'),
+            ('expect', 'request~held 1 settled 0'),
+        ] + COURIER + [
+            ('repeat', 'press A; wait 40', 'choice=1/2|choice=2/2', 30),
+            ('until', 'choice=2/2', 120),
+            ('do', 'press LEFT; wait 20'),
+            ('expect', 'choice=1/2'),
+            ('do', 'press A; wait 40'),
+            PAGED, FREE,
+            ('expect', 'request=none held 0 settled 1'),
+        ]),
+    'courier-bring-handed': dict(
+        GUARDS="Issue #841: a Wood chip in the Pack, the NetBattler's request settled in Lan's HP: the chip goes through the courier, the NetBattler's trade comes back, and the board opens.",
+        START=home(7, 10, 'job=4,pack=37'),                     # (a chip of each of the first 37 in the Pack: one Wood kind, RiskyHoney1 B, 37, handed over with no pick; two or more open the Chip Trader's screen, home_bring_choice.py)
+        STEPS=ARRIVED + [
+            ('expect', 'request~bring taken'),
+        ] + COURIER + [
+            PAGED, FREE,
+            ('expect', 'request=none held 0 settled 1'),
+            ('expect', 'courier=waiting'),                          # (his news now: the requests up)
         ]),
 }

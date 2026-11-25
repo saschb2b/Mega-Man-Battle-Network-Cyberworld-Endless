@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "panels.h"
+#include "tiles_parts.h"   /* tiles_gap */
 
 #define PASSES 3
 
@@ -199,6 +200,45 @@ static void lay_whole(Picked *p) {
 	tiles_stats.whole += whole;
 }
 
+/* (TileGrid.gaps_apart, TILES_GAPS_APART) The gaps one panel wide between two floors whose tiles, as picked,
+ * paint half their background as floor or more (tiles_gap: Mr.
+ * Weather Comp's slots, walled off inside its fields, laid where a gap is
+ * open at both ends; issue 836) are picked again, each tile as its two
+ * floors apart. Asked of the whole panel: a gap's tiles taken one by one
+ * kept the slot's floor at its edges, in steps. */
+#define GAP_PANELS 64
+#define GAP_SKY_LEAST 32
+typedef struct { int A, B, sky, drawn; } GapPanel;
+static void gaps_apart(Picked *p) {
+	const TileGrid *g = p->g;
+	if (!g->gaps_apart) return;
+	GapPanel panel[GAP_PANELS];
+	int n = 0;
+	for (int ty = 0; ty < g->th; ++ty)
+		for (int tx = 0; tx < g->tw; ++tx) {
+			TileGap gap;
+			if (!tiles_gap(g, tx, ty, p->floor, p->ctx, &gap)) continue;
+			int k = 0;
+			while (k < n && (panel[k].A != gap.A || panel[k].B != gap.B)) ++k;
+			if (k == n) {
+				if (n == GAP_PANELS) continue;
+				panel[n++] = (GapPanel){ gap.A, gap.B, 0, 0 };
+			}
+			panel[k].sky += __builtin_popcountll(gap.sky);
+			panel[k].drawn += __builtin_popcountll(gap.sky & p->pick[(size_t)ty * g->tw + tx].mask);
+		}
+	tiles_pick_gaps = true;
+	for (int ty = 0; ty < g->th; ++ty)
+		for (int tx = 0; tx < g->tw; ++tx) {
+			TileGap gap;
+			if (!tiles_gap(g, tx, ty, p->floor, p->ctx, &gap)) continue;
+			int k = 0;
+			while (k < n && (panel[k].A != gap.A || panel[k].B != gap.B)) ++k;
+			if (k < n && panel[k].sky >= GAP_SKY_LEAST && 2 * panel[k].drawn > panel[k].sky) pick_one(p, tx, ty);
+		}
+	tiles_pick_gaps = false;
+}
+
 static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, const TileGrid *g,
 	TileFloor floor, const void *ctx, uint16_t *map, uint8_t *left) {
 	int tw = g->tw, th = g->th;
@@ -237,6 +277,7 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 			}
 		if (!changed) break;
 	}
+	gaps_apart(&p);
 	tiles_stats = first;
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {

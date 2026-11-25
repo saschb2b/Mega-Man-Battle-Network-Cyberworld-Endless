@@ -181,7 +181,9 @@ static void pull_audio(void) {
 		blip_read_samples(blip[0], tmp, got, 1);
 		blip_read_samples(blip[1], tmp + 1, got, 1);
 		/* (a frame fast forward does not sound: its sound dropped) */
-		if (!(frame_how & EMU_FRAME_UNHEARD)) emu_sound_put(tmp, got);
+		if (frame_how & EMU_FRAME_UNHEARD) continue;
+		emu_sound_mix(tmp, got);
+		emu_sound_put(tmp, got);
 	}
 	double adj = emu_sound_settle();
 	blip_set_rates(blip[0], in_rate, out_rate * adj);

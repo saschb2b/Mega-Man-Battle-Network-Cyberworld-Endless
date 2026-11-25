@@ -740,3 +740,54 @@ should have a voice some day.
 Chosen by this cut (the next one's are others): the green accent, the
 climbing packets, the sweep, the tune "Carry on", the Beast Out as the
 cold open.
+
+## 0.24.0: Your MegaMan, your crew (2026-11-24), `tools/trailers/v0_24_0.py`
+
+The owner's direction, before the release: "Maybe lans dad recommends in a
+gamery mmbn way that playing with friends is more exciting. Zooming from
+your own session out to multiple views for more players. Which go into the
+weekly dive, form naturally a cool new crew. Then each quickly custimize
+their megaman ... then they progress together further in an epic way ...
+Boss battle teamsprit", the music opening as 0.22.0's did.
+
+What was made: 68 seconds, 41 bars at 150, the second cut on the
+blueprint. Dad's hello grew to four boxes (six bars, `house_music.form`'s
+`hello`): his third, "And diving's even better with friends!", is where
+the picture pulls back from one player's Net Square to four players'
+games of it (`house.Mosaic`, new with this cut: two or four games of one
+take in the big window, each whole at 2x, `widen` pulling the first back
+into its corner), the band lifting under it (a sweep, the crash, a soft
+backbeat; `v0_24_0_music.py`'s `widen`). Four segments: the crew (the
+Square, the portal, a crew formed by walking together, a battle joined),
+MegaMan's look (the colours screen, its channels, twelve palettes paged,
+his look in battle and chat, the Square in four looks), the forms (the
+PET's Forms, Falzar's Crosses, Team ProtoMan's Souls, Beast Out, big
+hits), the party's guardian (the door, three on one field, each one's own
+screen, a guardian deleted). Its own half: the PET's orange cursor as the
+accent, four rings drifting on the net (a crew's), each shot opening out
+of a ring, the tune "Crew up" (sketch_together_a).
+
+The footage came from two agents at once (one game; four games on a
+local server, each with its own look and name), each in a time box; the
+heavy lock's queue cost the online one most of its two hours. Filming
+found what the build does not do yet: crewmates in different looks part
+before a shared field's first frame (the crew's battle and the party's
+guardian are in BN6's blue), a dive's layer draws every MegaMan in the
+game's own look, and the party's bots never finish a guardian in a take.
+The climax ends on one MegaMan in his look deleting a guardian, its
+caption claiming no party. The release's audit then took out what no
+player reaches in 0.24.0 (the setup's FORM row, shown only with `--dev
+forms`, and BN4's Souls): ask the release's session what ships before
+filming a feature that is merged.
+
+Screens merged on the day were filmed from a detached worktree of `dev`
+in `.build/` with its own host build (and an open PR merged in it,
+locally, for a draft), so the agents' captures kept their binary; the
+scenes are retaken from `dev` once it holds them.
+
+The owner on the draft (24 November 2026): "approved". It became the
+current trailer the same day, before the tag.
+
+Chosen by this cut (the next one's are others): the orange accent, the
+drifting rings, the ring cut, the tune "Crew up", the four forms at once
+as the cold open.

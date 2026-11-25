@@ -199,6 +199,9 @@ void title_summary_describe(FILE *f) {
 		title_new_best ? "yes" : "no");
 	for (int i = 0; i < n; ++i) fprintf(f, "%s %s", i ? "," : "", open[i]);
 	fprintf(f, "%s\n", n ? "" : " nothing");
+	/* (the closest unlock, the shelf's hint or its plain sentence: issue #864) */
+	const char *next = title_dive ? NULL : meta_next_goal();
+	fprintf(f, "nextgoal %s\n", next ? next : "none");
 	/* (a dive's end: its crew's battles and its place, 0 still asked, -1 no answer) */
 	const WeeklyEnd *e = weekly_last_end();
 	if (title_dive) fprintf(f, "diveend crew %d/%d place %d\n", e->crew_won, e->crew_fought, e->place);

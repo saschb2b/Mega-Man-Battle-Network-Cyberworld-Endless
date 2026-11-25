@@ -1,6 +1,79 @@
 # Changelog
 
-## Unreleased
+Come and talk: runs, folders, NetBattles, help and ideas on the game's
+Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
+
+## 0.24.0 (2026-11-25)
+
+- **New: MegaMan in colours of your own.** Colours, a new entry of the
+  PET's menu, opens a screen where his armour, his suit and his gold each
+  take any colour of the palettes you own, previewed on MegaMan as the
+  cursor moves; three looks are kept, A to C. He wears it on the field, in
+  battle, in a chat box and on the Custom screen, BN6's shading kept; a
+  Cross, a Soul or BeastOut keeps its own colours. Classic is yours from
+  the start. Six palettes come with milestones a profile reaches (the
+  Undernet, the Cybeast's fall, Chaud's respect, a Darkloid, the
+  tournament, the top threat rung), three are sold at AsterLand's counter
+  for 6000 zenny each, and two hide in the net: a Mystery Data's ColrData
+  between layers 4 and 7, or a Glitch layer's. A palette you don't own
+  yet shows where it comes from, and a profile gets the milestones it
+  already holds at its next start (issue #854).
+
+- **New: other players see your MegaMan in your colours.** In the Net
+  Square your look travels with your name, and the players around you are
+  drawn in theirs. Where a part of the Square has no room left for one
+  more set of colours (the plaza takes three besides yours), the players
+  farthest from you are drawn in BN6's blue until they come nearer,
+  never in wrong colours. On the week's DeepNet the other divers on
+  your layer wear their looks the same way, your crew first. In a
+  NetBattle you see your MegaMan in your look and the other's in his, on
+  your screen and on his, with your own face in the emotion window. In
+  the week's DeepNet a crew's battle and a party's guardian show each
+  crewmate in his own look on every game. Game and server both need this
+  version (issues #854, #879).
+
+- **New: every starting folder on the setup's shelf.** The FOLDER row
+  turns through all ten and counts the open ones. A locked folder can be
+  looked at, not taken: what it plays like, and a hint at what opens it,
+  never the deed itself. The answer is out there in the Net: a bystander
+  may tell how one opens, and from then on the setup says it plainly. Stuck
+  for three runs, the Endless Net BBS posts one. The summary's closest
+  unlock follows the same rule (issue #864). Thanks to Baron Solomon for
+  the idea.
+
+- **New: four starting folders.** Steady is BN6's own ExtraFolder
+  (HiCannon, Vulcan2, EnergBom, LifeSword's three swords) with four
+  Recov30; it opens once a run reaches act 3. Navi is BN6's Navi folder
+  made a start's: BlastMan, DiveMan and CircusMan with small chips in
+  their codes, BblStar1 and WhiCapsl to hold a foe for them, and three
+  Navi+20; it opens once you use a Navi chip. Ember lays grass with
+  GrasSeed and burns it with Fire chips, which hit a foe on grass for
+  double; it opens once a guardian falls to MegaMan in HeatCross. Tide is
+  Aqua in codes A and T, double on Fire foes, with bubbles and IceSeed's
+  ice to hold a foe still; it opens once a Fire guardian is deleted, so a
+  profile that has beaten HeatMan or BlastMan has it at once
+  (issue #865).
+
+- **New: Z-Canon rebuilt around three Program Advances.** The folder is
+  now BN6's own Program Advance folder one tier down: Cannon A B C for GigaCan1,
+  FireBrn1 F G H for WideBrn1, FireHit1 D E F for FlmHook1, and LifeSrd's
+  three swords in S, with Standard's kind of support in \*. A Program
+  Advance came together in 1 battle in 100 with the old folder; now about
+  1 in 11, at about Standard's damage. It still opens with any Program
+  Advance used (issue #865).
+
+- **New: Team ProtoMan guards the net, and their Souls are MegaMan's.**
+  With BN5 Team Colonel's ROM beside BN6's, from act 2 a coin of the seed
+  puts a BN5 area's guardian's partner in his place: GyroMan for
+  ShadowMan, SearchMan for NumberMan, NapalmMan for TomahawkMan,
+  MagnetMan for KnightMan, Meddy for ToadMan, and DarkProto, BN5's
+  ProtoMan, for Colonel in the Undernet; the deep acts draw from all of
+  them. Each fights as BN5's does and leaves his Soul and a chip of its
+  kind: GyroSoul, SearchSoul with its SHUFFLE, NapalmSoul, MagnetSoul,
+  MeddySoul with her capsules on the Custom screen, ProtoSoul. On a dark
+  layer a held Soul brings its Navi onto the board with his own command,
+  ProtoMan in person. Team Colonel's ROM draws none of the other five on
+  the net, so they stand in a HeelNavi's body (issue #774).
 
 - **New: Falzar's five Crosses.** SpoutMan, TomahawkMan, TenguMan,
   GroundMan and DustMan now give their Crosses when they fall as an
@@ -10,12 +83,144 @@
   beside Gregar's. Once their Navi has fallen, a run can start in one
   (issue #706).
 
+- **New: Forms, the run's Crosses and Souls on one screen.** A run can
+  hold ten Crosses and CROSSSELECT lists five. Forms in the PET's menu
+  shows the five and the spares in the folder editor's two windows: A on
+  one, A on another swaps them, whenever you like and at no cost. Its
+  second page lists the Souls you hold and the chip each takes
+  (issue #774).
+
+- **New: the PET's menu in two columns.** START on the map opens BN6's
+  own menu laid out again from BN6's pieces: ChipFolder, SubChip,
+  Library, MegaMan, Forms and Colours down the left, E-Mail, KeyItem,
+  Options and Save down the right, EXIT under Save, HP, Zenny and
+  BugFrags in one strip, the field darkened behind it. Down from
+  ChipFolder and Up to Save count as in BN6; Left and Right go across.
+  In the Net Square the menu stays BN6's (issue #793).
+
+- **New: in the week's DeepNet, a crew is who walks with you.** Stand near
+  another diver for a second and you are a crew, up to four; walk out of
+  sight and you are not. Nothing to ask or answer. A crewmate's battle
+  starts at once with every free crewmate in it, side by side at the
+  front. Each diver's name stands over his MegaMan, your crew's in green
+  with a ring at their feet; a plate under the HP box gives each
+  crewmate's HP and where he is (his layer, BATTLE, BUSY, HOME), and the
+  map and the second screen show them too. A crewmate deleted in a
+  battle the crew wins is pulled back once a dive, on a quarter of each
+  standing crewmate's HP. A guardian's door waits ten seconds for your
+  crew (hold A to go in early), and a party meets the guardian a diver
+  alone meets, his HP times the party. The portal asks once ("3 NAVIS
+  DIVING! DIVE IN?"), the title's CONTINUE takes an unfinished dive
+  straight back up, a dive's end has a RESULT of its own and reaches the
+  Board as it ends, and a dropped link is said in the band and taken up
+  again however long it was away. Game and server both need this
+  version: an older one is told so at the gate.
+
+- **New: a NetBattle rides out a dropped link.** The server holds the
+  battle and your place; once the link is back the two games catch each
+  other up and fight on, a Team NetBattle's relay and two a side
+  included. Past 20 seconds it stops, and the card that says why stays
+  until B. A lopsided connection gets a few frames less input delay
+  (issue #180).
+
+- **New: a partner's HP in BN6's own digits.** On a party's field and in the
+  Arena's two a side, your ally's HP stands under his name in BN6's
+  battle digits, beside him as BN6 puts an enemy's, never over another
+  MegaMan of the crew: orange while it falls, green while it rises.
+
+- **New: fast forward keeps the music at its own pace.** While the game
+  runs fast, the song plays on as it would at BN6's speed instead of
+  hurrying along with the game, and when fast forward stops the game
+  picks the song up from there. A battle's theme and the win's start as
+  they come; the game's sounds still play fast, with what is on screen.
+  `fast_music = off` in `settings.ini` brings the faster music back
+  (issue #839). Thanks to Agergo100 for the idea.
+
+- **New: the layer's map stays open.** A press of SELECT opens the map
+  and leaves it open while MegaMan walks; the next press closes it, as
+  does a battle, a chat, the PET or a warp. Held, it shows while held,
+  as before. Thanks to Agergo100 for the idea (issue #840).
+
+- **New: a request's reward is taken in Lan's HP.** The Mr.Prog there
+  hands over a finished request's pay in its asker's name, carries a
+  Bring request's chip to the NetBattler and his trade back, and passes
+  on the asker's word where a request was not done, so the board opens
+  for a new one at once. No jack-out and walk to the asker any more; they
+  still settle it in the town for whoever goes to them first, once
+  either place. Thanks to Agergo100 for the idea (issue #841).
+
+- **New: you choose the chip a Bring request takes.** Where more than
+  one kind of chip in your Pack fits the NetBattler's request, he opens
+  BN6's Chip Trader screen over those alone: put in the one you can
+  spare, and he takes that one. B leaves it with nothing taken, the
+  request still yours. One kind alone goes as before (issue #842).
+  Thanks to Agergo100 for the idea.
+
+- **Fixed: chips struck the wrong way when MegaMan turned round (issues
+  #838, #846).** On a liberation's Surrounded field, turned left with L,
+  GolmHit's fist came down behind him, and SandWrm, BurnSqr, TenguMan's
+  chip, AirRaid and Magnum, and BN4's GutsMan, PanlSht, SeekBom, PitRng,
+  RollAro, GutPnch, Meteors, Boomer, DrkVulcn and DarkBomb aimed by his
+  side alone: they struck behind him or nothing at all. They now strike
+  ahead of him whichever way he faces, and BlastMan's flames start where
+  he stands. Thanks to Agergo100 for the report.
+
+- **Fixed: a liberation's battle fought on after its time was up (issue
+  #794).** As the third turn ended, the foes kept moving and attacking
+  under TIME UP! and LIBERATE FAILED!, and a hit there still counted. The
+  battle now stands still from the moment the time is up, as BN5's does.
+  Thanks to Agergo100 for the report.
+
+- **Fixed: CosmoMan SP's card showed a power of 6544.** The Navi chips'
+  SP from Battle Network 5 and 4 (NumberMan's to GridMan's, and GutsMan's)
+  showed a wrong number on their card in Folder Edit and sorted wrongly
+  by Attack. The card now shows the power the chip deals in battle, the
+  one its own game shows for a Navi you never deleted against the clock:
+  80 for CosmoMan SP. Thanks to Agergo100 for the report (issue #835).
+
+- **Fixed: a gap between two floors drawn as a cut walkway (issue
+  #836).** In Mr. Weather Comp, a gap one panel wide between two rooms
+  or pads was drawn in pieces of floor cut straight down, sky through
+  them and a dark square at the edge, like a walkway that was not
+  there. Each floor now ends in its own rim there, the gap open sky.
+  Thanks to Agergo100 for the report.
+
 - **Fixed: a crew's battle could stall on its Custom screen for half a
   minute.** In the week's DeepNet, a crewmate's chips picked on his own
   Custom screen were now and then lost on their way, where his game ran
   a frame ahead of the clock as he pressed OK: the field waited for them
   to the turn's 30-second limit and then gave him no chips. They always
   arrive now.
+
+- **Fixed: ColonelDS pushed the Pack's rows a cell to the right (issue
+  #732).** BN5's DS Navi chips had names of nine letters where BN6's
+  lists hold eight, so every row under one stood a cell late and the
+  Custom screen cut the name short. The twelve are eight now: ColonlDS,
+  NumbMnDS, ShadoMDS, TmhkMnDS and the rest. Thanks to Agergo100 for the
+  report.
+
+- **Fixed: DiveMan's launcher fired on under JudgeMan (issue #733).** In
+  the Glitch copy's fight, a form taken off by the swap left its own
+  objects on the field until the battle ended. They go with the form
+  now; a shot already in flight still lands. Thanks to Agergo100 for the
+  report.
+
+- **Fixed: a layer's Security Cube floated over its panel's edge (issue
+  #735).** It stands on its panel's middle now, sunk as BN6 stands its
+  own in Central Area, and MegaMan stops where the cube begins. Thanks to
+  Agergo100 for the report.
+
+- **Fixed: HubBatc's card showed ColForce's picture (issue #731).**
+  Gregar's ROM gives Falzar's five Gigas the pictures of its own. BigHook,
+  BassAnly and CrossDiv now show BN5's pictures of them where BN5's ROM is
+  there, and all five show BN6's blank card where no ROM holds theirs,
+  never another chip's. Thanks to Agergo100 for the report.
+
+- **Fixed: a Chip Trader's trade could open a reward pick (issue
+  #734).** After a trade, the layer's vault or another pick of three now
+  and then opened over the trader. BN6 saves after every trade, and the
+  run read its flags while the save held them scrambled. It waits the
+  save out now. Thanks to Agergo100 for the report.
 
 ## 0.23.0 (2026-11-19)
 
@@ -37,11 +242,6 @@
   download page's notes are two PET windows now, **Your files** and
   **Stay in touch**.
 
-- **Fixed: a liberation's battle fought on after its time was up (issue
-  #794).** As the third turn ended, the foes kept moving and attacking
-  under TIME UP! and LIBERATE FAILED!, and a hit there still counted. The
-  battle now stands still from the moment the time is up, as BN5's does.
-  Thanks to Agergo100 for the report.
 - **Fixed: MegaMan and Lan kept a liberation teammate's body (issue
   #696).** A dark layer's board left with a teammate in play (Colonel,
   EraseMan, HeatMan) kept his body on the player: the next layer's

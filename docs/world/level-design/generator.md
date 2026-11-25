@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The layer generator's rules, measured from BN6's maps: a cap on the way's one-wide walkways (`net_way.c`), each area's layouts (`net_layouts.c`), the guardian's arena, walkway joins, tile picking and the floor legalizer (`legal.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T11:00:00Z }
 ---
 
 # The generator
@@ -363,6 +363,27 @@ test counts of it is in [the tile test](../../devtools/tile-test.md),
 Breaks. A tile that draws nothing over part of the floor's top, a hole
 where the background shows through, is mended once the map is whole:
 [holes in the floor](floor-holes.md).
+
+In Mr. Weather Comp, a gap one panel wide between two floors, open to
+the void at both its ends, is drawn as the two floors apart, each with
+its own edge, where its tiles as picked painted it as floor
+(`TILES_GAPS_APART`; `tilemap.c`, `gaps_apart`; `tiles_pick.c`,
+`tiles_gap`; issue 836). Its maps hold such a void only inside a field,
+a walled slot drawn as sunken floor. Its pairs, an exact class, drew a
+generated gap between two pads as floor cut straight down on the tiles'
+grid, sky through it and a dark square of the slot at its end, which a
+player took for a walkway. Once the map is picked, a gap's panel whose
+tiles paint half or more of the background past the faces above it is
+picked again, each tile's two sides as if the other were not there (the
+other side of the line through the gap taken for void), the one alone
+where only one draws on a tile, else the floor in front whole; a notch
+(closed by floor at an end) and a pit keep their picks. Over every area
+the same pass counted 19 of the tile test's 298 layers worse (Central's
+comb, the Undernet, Robot Control, the Judge Tree, Sky's homepage, BN5's
+dark areas; breaks 91.4 to 92.3 a hundred panels), so it is Mr. Weather
+Comp's alone. Drawing every gap apart, or a gap tile by tile, left
+steps along a long edge (the pull request of issue 836 holds the
+variants tried).
 
 BN4's ACDC Area leaves out its cyan roads and ringed hubs by their hues
 (`skip_styles`). Any 8 pixels of the roads' hue on a panel's top did it,

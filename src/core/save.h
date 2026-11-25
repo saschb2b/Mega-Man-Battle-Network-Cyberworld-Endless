@@ -6,7 +6,24 @@
 #include <stddef.h>
 
 #include "lab_set.h"
+#include "looks.h"
 #include "run.h"
+
+/* What the profile has heard of the starting folders still locked
+ * (meta_shelf.c): a bit each (1 << FOLDER_*), heard from a bystander or
+ * from the floor's post on the BBS; those the floor told; profile.runs + 1
+ * as the floor's count of finished runs began (the shelf first shown, or
+ * its last post), 0 not yet; SHELF_KEPT once these bytes are the shelf's
+ * (a profile of before held other data in them, cleared once) */
+typedef struct {
+	uint16_t heard, floored;
+	uint16_t floor_at;
+	uint16_t kept;
+} FolderShelf;
+/* "SW": the shelf wide enough for sixteen folders (issue #865). The first
+ * shelf's eight bytes, a byte a bit set and a 32-bit mark, were never
+ * released; a profile that held them starts its shelf afresh. */
+#define SHELF_KEPT 0x5753u
 
 typedef struct {
 	int runs;
@@ -49,10 +66,11 @@ typedef struct {
 	uint32_t library_run;     /* the run library_start was counted for (its seed) */
 	uint8_t setup_new;        /* the setup's rows with an option the last summary announced (SETUP_NEW_*, meta.h) */
 	uint8_t area_before, guardian_before;   /* the run before the last one's first area and guardian (+ 1) */
-	/* (unused: the virus families MegaMan had battled in any run, which his
-	 * warnings read; strategy is the BBS's, and the warnings went in the
-	 * voice sweep of 19 October 2026; kept for the profile's layout) */
-	uint32_t families_fought[2];
+	/* the shelf of starting folders (issue #864, docs/game/meta/shelf.md;
+	 * meta_shelf.c), in the eight bytes that held the virus families
+	 * MegaMan had battled (unread since the voice sweep of 19 October
+	 * 2026): read only once `kept` says they are the shelf's */
+	FolderShelf shelf;
 	uint8_t gem_taught;       /* (unused: the battlefield's Mystery Data is BN6's own, unexplained for its players; kept for the profile's layout) */
 	/* the NaviCust's Spins found in the net, a bit per colour 1-6 (bit
 	 * c - 1: docs/game/meta/), and the run that found one (its seed) with that
@@ -180,12 +198,29 @@ typedef struct {
 	uint8_t last_form, last_soul;
 	uint8_t form_best[4];
 	uint16_t souls_won[2];
+	/* MegaMan's look (issue #854, docs/game/looks.md; looks_profile.c): the
+	 * palettes owned (a bit each; Classic's always), the slot worn, whether
+	 * the looks are kept (0: a profile saved before them, which takes
+	 * Classic and BN6's own colours in every slot), the three looks */
+	uint16_t looks_owned;
+	uint8_t look_slot, looks_kept;
+	Look looks[LOOK_SLOTS];
+	/* the looks' routes (docs/game/looks.md): the run (its seed) whose rare
+	 * find (Mystery or Glitch) was picked up, the palettes MegaMan has
+	 * announced (a bit each), that run's palette and whether Dad's mail on
+	 * the colours was sent; a profile saved before reads them 0 */
+	uint32_t look_find_run;
+	uint16_t looks_told;
+	uint8_t look_find, looks_mailed;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
 enum { BTLR_CARD_HELD = 1 };
 enum { HEARD_CHAUD = 1, HEARD_DEALER = 2, HEARD_FIRST_DIVE = 4, HEARD_KEPT = 0x80 /* the byte is kept: a profile of before is judged once */ };
-enum { FEAT_PA = 1 /* a Program Advance used: Z-Canon */, FEAT_DRY_ACT = 2 /* an act cleared without a Recovery chip: Busting */ };
+enum { FEAT_PA = 1 /* a Program Advance used: Z-Canon */, FEAT_DRY_ACT = 2 /* an act cleared without a Recovery chip: Busting */,
+	FEAT_NAVI = 4 /* a Navi chip used: Navi */ };
+/* (issue #865's archetypes, bits 5-7) */
+enum { FEAT_HEAT_GUARDIAN = 0x20 /* a guardian deleted in HeatCross: Ember */ };
 #define RUN_OPEN 0xA5
 enum { BEAST_OPEN = 1, BEAST_TAUGHT = 2, BEAST_OLD_TOLD = 4 /* (unused since the guest core left runs) */ };
 

@@ -3,7 +3,7 @@ type: Style Guide
 title: "The PET's screens: Battle Network's rules"
 description: "BN6's PET screens' rules measured from Gregar (band, windows, information box, cursor, motion, keys, letters, colours) and what the engine's own screens (the Jukebox, Options and its pages and scene, Trade Central) take from them through `pet_look.c`."
 tags: [engine, ui]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:40:00Z }
 ---
 
 # The PET's screens: Battle Network's rules
@@ -198,6 +198,21 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   rows in FOLDER EDIT's pill; the Souls a page of their own, its tags on
   the band as the Library's entries; KeyItem's INFORMATION box under
   them.
+- The colours screen ([MegaMan's look](../game/looks.md)) puts BN6's own
+  MegaMan in STATUS's slot, his chat face in the NAVIGATOR box's outline
+  over his body, each in its palette as the look makes it, the body on a
+  loop (walking round all eight ways, then his battle stance and
+  attacks); beside it the list in its window (LOOK A on its band, the
+  look worn between Options' pointers, each channel's colour in a swatch
+  framed white) and the palette's window, its short name between the
+  Library's green arrows, its sixteen colours a 4x4 grid with PLAIN under
+  it, EQUIP's orange
+  corners in the cells' gutters the grid's cursor (a grid has no row for
+  the arrow; the list's arrow held still and dim meanwhile) and a white
+  frame the colour worn, as STATUS frames its slot; a locked palette
+  dimmed with LOCKED in PLAIN's place; ChipFolder's SELECT pop-up for a
+  look's copy (SELECT on its band, its rows in capitals), its question in the INFORMATION box with Yes and No behind
+  the green triangle, No chosen; `L/R:PALETTE` on the band.
 - One key's hint on the band where the key does something unguessed:
   the Jukebox's `START:REPEAT` (the mode), Options' `START:DEFAULT` (a
   page's lines back, on pages that have such lines), the reconnect
@@ -252,6 +267,15 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   Board as the server answers it ("Asking..." for up to six seconds,
   then "3rd", or "No link"), MegaMan's word that the portal is open
   again; RECORDS as for any dive.
+- Over a battle's field, a crewmate's name and HP stand beside his
+  MegaMan as BN6 writes an enemy's HP under it, in BN6's own digits; BN6
+  places one label per actor and never stacks actors in a column, so
+  ours takes the first spot (under the feet, in front, behind, over the
+  head) that covers no MegaMan, no other label and none of BN6's own
+  pieces (the HP box, the emotion window under it, the gauge, the chip
+  name at the foot), and stays on the player's half of the picture
+  ([Who is who on a party's field](../online/shared-dive.md), issue
+  #886).
 - A list's line keeps its colour under the cursor (Options).
 - Yes and No as BN6 asks them: the statistics question.
 - The second screen's HP, ZENNY and BUGFRAGS named as the PET menu

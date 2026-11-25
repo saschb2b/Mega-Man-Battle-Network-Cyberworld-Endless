@@ -6,9 +6,9 @@
  * over the field as it stood on the map, darkened as BN6's PET darkens it;
  * the panel cut into one strip the grid's width, PLACE's name onto the
  * band's right stripe. The grid, the strip and the screen's foot stand an
- * equal gap apart. Forms' button is Save's with Forms' label tiles of the
- * labels' copy (pet_options.c) in palette 15, its icon BN6's Status icon
- * (pet_menu_install). What BN6 lights (its cursor's row, EXIT's pulse) and
+ * equal gap apart. Forms' button is Save's with Forms' word's tiles, the
+ * engine's own (pet_options.c), in palette 15, its icon BN6's Status icon
+ * (pet_menu_install); Colours' the same way, its icon MegaMan's. What BN6 lights (its cursor's row, EXIT's pulse) and
  * fades it keeps, BN6's cursor set to ours (pet_menu.c). */
 #include "pet_menu.h"
 
@@ -126,7 +126,8 @@ static void button(uint32_t *px, const uint16_t *map, int ink, uint16_t ink_to, 
 	for (int i = 0; i < 2 * 9; ++i) {
 		uint16_t e = map[i];
 		TileLook l = { pal, e >> 12, (e & 0x400) != 0, ink, ink_to };
-		tile(px, vram + (e & 0x3FF) * 32u, &l, dx + i % 9 * 8, dy + i / 9 * 8);
+		const uint8_t *own = pet_options_forms_tile(e & 0x3FF);   /* (Forms' word's: the engine's, not BN6's) */
+		tile(px, own ? own : vram + (e & 0x3FF) * 32u, &l, dx + i % 9 * 8, dy + i / 9 * 8);
 	}
 }
 
@@ -162,7 +163,7 @@ static void rows(uint32_t *px) {
 	if (!have_maps) read_maps();
 	read_icons();
 	const uint8_t *pal = emu_memory(BG_PALETTES, 0x200u);
-	uint16_t forms[2 * 9];
+	uint16_t own[2 * 9];
 	if (!pal) return;
 	/* (BN6's inks: its lit row's, and an unlit one's) */
 	int cur = pet_menu_cursor(), lit_row = cur == PM_EXIT ? -1 : pet_menu_bn6_row(cur) < 0 ? pet_menu_bn6_row(PM_MEGAMAN) : pet_menu_bn6_row(cur);
@@ -173,9 +174,12 @@ static void rows(uint32_t *px) {
 		bool lit = e == cur;
 		pet_menu_place(e, &col, &row);
 		int dx = COL_X + col * COL_STEP, dy = ROWS_Y + row * ROW_PITCH;
+		bool word = e == PM_LOOKS ? pet_options_looks_map(own) : pet_options_forms_map(own);
 		if (k >= 0) button(px, maps[k], BN6_PET_LABEL_INK + k, lit ? lit_ink : dim_ink, dx + BUTTON_X, dy + 1);
-		else if (pet_options_forms_map(forms)) button(px, forms, BN6_PET_LABEL_INK_NEXT, lit ? lit_ink : dim_ink, dx + BUTTON_X, dy + 1);
-		icon(px, k >= 0 ? k : icons[BN6_PET_ICON_STATUS].found ? BN6_PET_ICON_STATUS : pet_menu_bn6_row(PM_MEGAMAN), lit, dx + ICON_X, dy);
+		else if (word) button(px, own, BN6_PET_LABEL_INK_NEXT, lit ? lit_ink : dim_ink, dx + BUTTON_X, dy + 1);
+		/* (Forms' icon BN6's Status icon; Colours' MegaMan's own, his colours being what it opens) */
+		int ic = k >= 0 ? k : e == PM_FORMS && icons[BN6_PET_ICON_STATUS].found ? BN6_PET_ICON_STATUS : pet_menu_bn6_row(PM_MEGAMAN);
+		icon(px, ic, lit, dx + ICON_X, dy);
 	}
 }
 

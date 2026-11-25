@@ -2,8 +2,8 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-22",
-  "previous": "2026-11-21",
+  "updated": "2026-11-24",
+  "previous": "2026-11-23",
   "features": [
     {
       "name": "Net Square",
@@ -205,17 +205,71 @@
     },
     {
       "name": "Team ProtoMan's Souls in BN6's engine",
-      "state": "building",
-      "now": "BN5's Souls 1-6, which Team Colonel's ROM holds whole but never gives (BN5_SOUL_FLAGS 0xFF), on BN6's proxy form as Team Colonel's six (src/emu/soulteam.h; docs/multirom/souls.md, Team ProtoMan's Souls; docs/rom/souls.md, their row): the differential opens one in BN5's own battle by its flag entry written in the guest's ROM copy (souls5); tools/xsoul.py walks their units after Team Colonel's into a room of their own (FREE_TEAM_SOULS), their power attacks at SOUL_POWER_TEAM (0xB1), past room for BN4's twelve. NapalmSoul and GyroSoul built and proved against BN5's battle: UNITE, look, element, charged shot (0x19, family 0x44 as 0xC8), chip charge doubled as the Napalm Bomb (0x0801043A, family 0x4B as 0xC9), lava step (0x080125FA), +40 to Fire chips (0x0800D0CE), Chaos Unison's power attack: soul_napalm, soul_napalm_shot, soul_napalm_charge, soul_napalm_lava PASS, their mutations FAIL. Every compare of the form with 1-6 in BN5's code is listed (docs/rom/souls.md). GyroSoul: his propeller (the companion overlay of BN5's kind 2 as BN6's 63), Air and Float shoes, tornado (0x09, family 0x3C as 0xCA), the propeller's rule (0x080102CA, 0x08010264) and spin: soul_gyro, soul_gyro_shot, soul_gyro_propeller PASS against BN5, soul_gyro_double held to BN5's course. MagnetSoul (5) moved too: his charged shot and B+Left, BN5's third-kind 0x75 and 0x3F with them (BN6's other bodies), his B+Left's misc family as the Souls' own copy (0xCC), his Elec chip charge doubled and the magnet panel's push spared (soul_magnet, _shot, _left, _charge, _panel PASS; _double held to BN5's course). ProtoSoul (1) too: his WideSword by the Souls' sword family, Reflect by the chips' Guard family, his Sword chip charge doubled and stepped in (soul_proto, _shot, _left, _charge PASS). SearchSoul's battle too (the scope gun, his ready's object): soul_search, _shot PASS. SearchSoul's SHUFFLE: BN6 kept BN5's button (0x0802A5D6, 0x080280E0), his Soul passes its test with three a turn (soulshuffle.c). MeddySoul's battle too (the capsule bomb): soul_meddy, _shot PASS.",
-      "left": "MeddySoul (his capsules: BN5's Custom screen's Soul button, types 6 and 7, 0x08023CF4); NapalmSoul's Chaos Unison's spec; soul_napalm_charge's last frames (CanGard's fourth-kind object let go a frame apart at t321, not traced). Their emotion-window faces: none in Team Colonel's ROM (MegaMan's own shown).",
-      "updated": "2026-11-22",
+      "state": "proven",
+      "now": "BN5's Souls 1-6, which Team Colonel's ROM holds whole but never gives (BN5_SOUL_FLAGS 0xFF), on BN6's proxy form as Team Colonel's six (src/emu/soulteam.h; docs/multirom/souls.md, Team ProtoMan's Souls; docs/rom/souls.md, their row): the differential opens one in BN5's own battle by its flag entry written in the guest's ROM copy (souls5); tools/xsoul.py walks their units after Team Colonel's into a room of their own (FREE_TEAM_SOULS), their power attacks at SOUL_POWER_TEAM (0xB1), past room for BN4's twelve. NapalmSoul and GyroSoul built and proved against BN5's battle: UNITE, look, element, charged shot (0x19, family 0x44 as 0xC8), chip charge doubled as the Napalm Bomb (0x0801043A, family 0x4B as 0xC9), lava step (0x080125FA), +40 to Fire chips (0x0800D0CE), Chaos Unison's power attack: soul_napalm, soul_napalm_shot, soul_napalm_charge, soul_napalm_lava PASS, their mutations FAIL. Every compare of the form with 1-6 in BN5's code is listed (docs/rom/souls.md). GyroSoul: his propeller (the companion overlay of BN5's kind 2 as BN6's 63), Air and Float shoes, tornado (0x09, family 0x3C as 0xCA), the propeller's rule (0x080102CA, 0x08010264) and spin: soul_gyro, soul_gyro_shot, soul_gyro_propeller PASS against BN5, soul_gyro_double held to BN5's course. MagnetSoul (5) moved too: his charged shot and B+Left, BN5's third-kind 0x75 and 0x3F with them (BN6's other bodies), his B+Left's misc family as the Souls' own copy (0xCC), his Elec chip charge doubled and the magnet panel's push spared (soul_magnet, _shot, _left, _charge, _panel PASS; _double held to BN5's course). ProtoSoul (1) too: his WideSword by the Souls' sword family, Reflect by the chips' Guard family, his Sword chip charge doubled and stepped in (soul_proto, _shot, _left, _charge PASS). SearchSoul's battle too (the scope gun, his ready's object): soul_search, _shot PASS. SearchSoul's SHUFFLE: BN6 kept BN5's button (0x0802A5D6, 0x080280E0), his Soul passes its test with three a turn (soulshuffle.c). MeddySoul's battle too (the capsule bomb): soul_meddy, _shot PASS. MeddySoul's capsules on BN6's own elements 6 and 7 (src/emu/soulcapsule.c; the addresses in src/emu/bn5_capsules.h and docs/rom/souls.md, MeddySoul's capsules): BN5's set-up for Soul 6 and lit rule through ColonelSoul's hooks, A and mode 0x3C the project's Thumb in BN6's empty places (BN6's UNITE flight, BN5's last two phases moved), the black and purple bits, the pink heal and BN5's hit decode for a capsule's hit; YelCapsl and BlkCapsl the registry's 734 and 735, WhiCapsl's art BN5's; the differential's trace holds elements 8 and 9 and the capsules (version 9): soul_meddy_capsules, soul_meddy_capsule_used. NapalmSoul's Chaos Unison held by chaos_napalm_75/90 (his row charges 70); soul_napalm_charge to the battle's end, t321 traced to BN6's plain deletion and read by the differential's map deletion_end.",
+      "left": "Their emotion-window faces: none in Team Colonel's ROM (MegaMan's own shown). BN5 draws the hand's two capsule places as plain squares where BN6 shows the capsules' icons (BN5's draw of types 6 and 7, 0x08024118, untraced; the differential compares RAM). The purple capsule's +0x12 0x1118 on the struck, untraced, and no spec takes the purple, white or pink capsule.",
+      "updated": "2026-11-23",
       "link": "../multirom/souls.md",
-      "state_text": "Being built"
+      "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "MegaMan's look",
+      "state": "proven",
+      "now": "Measured (epic #854, step 1): his battle, field, mugshot and emotion-window palettes and their ramps (two blue channels, armour and suit, in battle and on the field; the helmet alone in the mugshot and the face), the code that picks his battle palette by form, and BN6's renderer giving OBJ palette slots by content (12 on the maps, 10 in battle; the Square's plaza 9 of 12 given). A throwaway spike rotated the armour's hue in the ROM copy: field, chat box, battle and emotion face recoloured, HeatCross in its own colours, the look back after it.",
+      "left": "Step 2 onward: the channels and Classic in the profile, the PET screen; the Square's peers each in a sprite of their own; a NetBattle's looks from the Square's wire (its two sides proven under the dev switch), the stands' and two a side's.",
+      "updated": "2026-11-24",
+      "link": "../rom/megaman-colours.md",
+      "state_text": "Proven in research, not built"
     }
   ],
   "decisions": [],
-  "since": [],
+  "since": [
+    {
+      "date": "2026-11-24",
+      "what": "MegaMan's colours mapped (src/emu/bn6_look.h; docs/rom/megaman-colours.md): his battle sprite's 43 palettes (BN6_LOOK_BATTLE_PALS 0x081DE160), the field's (0x08437C34), the mugshot's (0x084EDD1C), the emotion face's through BN6_FACE_PALS_REF, the battle palette's pick by form (0x0801002C), the field's index (0x02000AA5), and the renderer's OBJ palette slots given by content (0x03006108, its limit 0x020098A8 by mode)."
+    },
+    {
+      "date": "2026-11-24",
+      "what": "The preset folders of three games located (src/emu/bn6_chips.h, bn5.h, bn4.h; docs/rom/chips.md, Chip folders and Other games' folders): Gregar's GiveFolder 0x081394F4 and its table 0x08139644, BN5's GiveFolder 0x081348F0 and table 0x08134A20 (six), BN4's giver 0x08043154 over twelve presets from 0x08017CC8; each game's folder 0 its NEW GAME folder, MMKB's list chip for chip; read by tools/folder_hands.py."
+    },
+    {
+      "date": "2026-11-24",
+      "what": "The rest of the chips used turned round on a Surrounded field located and mended (issue #846; docs/rom/chips-code.md, A chip used turned round, the rest): BN4's moved code calls BN6_ENEMY_DIRECTION with objects whose flip it left 0 (answered by MegaMan's facing from XC4_CODE and XN_BN4_CODE); BN6_ROW_PANEL_ACROSS's two searches by the alliance (BN6_ROW_ACROSS_WAY 0x08016178, BN6_ROW_ACROSS_WAY2 0x08016192, Meteors); BN6's side reads in SandWrm (BN6_SANDWORM_FLIP 0x080E0546, BN6_SANDWORM_FLIP2 0x080E088A), BurnSqr (BN6_BURNSQR_START 0x080BC8C2), TenguMan (BN6_TENGU_DASH 0x080BB5FE, BN6_TENGU_DIVE 0x080BB6CA), AirRaid (BN6_AIRRAID_EDGE 0x080D4FF2), Magnum (BN6_MAGNUM_START 0x080BCC16) and BlastMan (BN6_BLASTMAN_START 0x080BA8D0); BN4's in SeekBom (BN4_SEEKBOM_AHEAD 0x080DEF5C), PitRng (BN4_PITRNG_EDGE 0x080E99FE) and GutsMan (BN4_GUTSMAN_EDGE 0x080D07E2), hooked where they were moved (src/emu/turned_aim.c). Left as the originals' own, read in BN6's, BN5's and BN4's code: FlshBom, Magnum's timing, Voltz, Astroid, CloudMan's 50, CosmoMan, MokoRus, BigHamr's random panels, Hole. Scenarios battle-turned/{burnsqr,blastman,panlsht,meteors,seekbom}, seen to fail on the build before."
+    }
+  ],
   "experiments": [
+    {
+      "feature": "MegaMan's look",
+      "date": "2026-11-24",
+      "name": "A NetBattle's two sides, each in his player's look",
+      "result": "All eight spare palettes of his battle block marked in both Arena cores, no hook: never in OBJ palette RAM through a way in and a battle (3,653 frames a core). Two looks written there and BN6's palette pick, its form's second reader and the emotion face's copy answered by the object's alliance: both GBAs drew each MegaMan in his player's look and each its own player's face (0x28 on the first GBA, 0x29 on the second), 489 rollbacks with every one of 54 hashes agreed. The face's owner is alliance 1 on the second GBA: an object's alliance is the cable's side on both, not 0 for each GBA's own player.",
+      "meaning": "A look per side is a write both games make alike into every core's ROM copy plus three stateless hooks; the looks folded into the pair's hash make two games given different looks part before the first frame.",
+      "link": "../online/arena/looks.md"
+    },
+    {
+      "feature": "MegaMan's look",
+      "date": "2026-11-24",
+      "name": "The armour's hue turned in the ROM copy",
+      "result": "Battle palette 0's and 4's indexes 2-5, the field's 2-5, the mugshot's 2-3 and emotion face 0's 11-13 (read through BN6_FACE_PALS_REF, the Souls' copy) turned to hue 350 as the core started: the field, MegaMan's line in a chat box, the Custom screen, a battle and its emotion window drew the armour red in BN6's own shading, the suit, skin and window frame as they were; HeatCross chosen on CROSSSELECT drew its own colours, and the next battle the red armour again. A first try on BN6's own face palettes changed nothing: the engine reads the copy.",
+      "meaning": "A look is a write of the plain palettes in the ROM copy, read by the renderer every frame: no hook for the field, the chat box or the battle, and the forms keep their palettes untouched.",
+      "link": "../rom/megaman-colours.md"
+    },
+    {
+      "feature": "MegaMan's look",
+      "date": "2026-11-24",
+      "name": "The Net Square's OBJ palette slots",
+      "result": "Three games on a local server, the engine's dump in each part: the slot limit 12 everywhere; the welcome plaza gave 9 slots (MegaMan and both peers in slot 0), Trade Central 3, the stage 2. In romlab a byte poked into the OBJ work palette (0x03001550) reached palette RAM that frame and was put back the next.",
+      "meaning": "Peers in one look share a slot; each look of its own costs one. The plaza can show three looks besides the player's own before BN6's renderer marks a sprite and leaves it in a stale slot.",
+      "link": "../rom/megaman-colours.md"
+    },
+    {
+      "feature": "Shared dive",
+      "date": "2026-11-23",
+      "name": "BN6's HP under an enemy: its digits, colours and count",
+      "result": "In a battle against a Mettaur (tools/play.py's dump, tools/romlab/labtrace.py), its \"40\" was one 32x16 OBJ, tile 816, OBJ palette 14, priority 2; the 4's tiles were at 0x086DEB3C and 0x086DEB5C, the 0's at 0x086DEA3C and 0x086DEA5C: ten 8x16 digits 0x40 apart from 0x086DEA3C, whose only pointer is the table at 0x0801D854 (eleven, the last the blank 0x086B5A2C), one of three (white, orange 0x0801D880, green 0x0801D8AC) at 0x0801C34C, read by 0x0801C304 by the plate's +8. Palette 14 is 0x086B5A0C, the battle's copy list's entry at 0x0801ECB4 (to 0x03001710, the OBJ palette buffer's 14th). 0x0801C168 steps each plate's shown HP toward its object's by the gap >> 3 plus 2, orange down, green up and ten frames after, orange while its collision data's poison timer (+8) runs; 0x0801C202 places the OBJ so the number is centred on the object's place on the screen, its top there. Drawn by hp_plate.c beside BN6's own in the Arena's two a side (frame 521, P1's 100 as the enemy on seat 3's picture and as the ally on seat 2's): every lit pixel and colour alike about his panel's middle; the ally's count went 34, 30, 18 in orange, 14 in white over a hit of 20, as an enemy's does.",
+      "meaning": "Online play can write a partner's HP as BN6 writes an enemy's, in its own digits from the player's ROM, where and as BN6 counts it (src/emu/bn6_navis.h BN6_HP_*; docs/rom/graphics.md, The HP under an enemy).",
+      "link": "../rom/graphics.md"
+    },
     {
       "feature": "BN5's Liberation Missions",
       "date": "2026-11-22",

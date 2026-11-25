@@ -446,9 +446,9 @@ TEST_SAN := -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-fra
 TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_detours.c src/net/net_landmarks.c src/net/net_set_pieces.c src/net/net_pieces.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c src/net/net_route.c src/net/net_way.c src/net/net_plan.c src/net/net_signature.c src/net/net_services.c src/net/net_glitch.c src/core/run_glitch.c src/core/run_tourney.c \
 	src/core/xprograms.c src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/npc_sprite.c src/layer/xguardian_bn4.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/director/forms.c src/director/forms_words.c src/layer/text.c src/layer/scripts.c src/layer/service_words.c src/core/touch_layout.c src/core/padmap.c \
 	src/audio/xsong.c src/layer/xnavi.c src/emu/thumb_reloc.c src/emu/battle_rng.c src/emu/xvirus_recipe.c src/emu/xvirus_dispatch.c src/emu/xvirus_moved.c src/emu/xvirus_families.c src/emu/xvirus_bn5.c src/emu/xvirus_bn4.c src/emu/xvirus_shim.c src/emu/xnavi_recipe.c src/emu/xnavi_bn5.c src/emu/xnavi_bn4.c src/emu/xchips_bn5.c src/emu/xchips_bn4.c src/emu/song_table.c src/emu/soulcode_bn5.c \
-	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_registry_bn4.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_pas.c src/core/xchips_pas_bn4.c src/core/xchips_text.c src/core/xchips_cells.c src/emu/claims.c src/emu/free_space_watch.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/director/liberation_board.c src/director/liberation_rules.c src/director/liberation_plan.c src/gfx/qr.c src/director/home_words.c src/layer/fork_words.c src/core/jobs.c \
-	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/core/meta_text.c src/core/battle_data.c src/director/lab_text.c src/world/town_lines.c \
-	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/core/groups.c src/core/group_arc.c src/core/group_tags.c src/core/extras.c src/core/extras_text.c src/map/pad_art.c \
+	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_registry_bn4.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_pas.c src/core/xchips_pas_bn4.c src/core/xchips_text.c src/core/xchips_cells.c src/core/xchips_folder.c src/emu/claims.c src/emu/free_space_watch.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/director/liberation_board.c src/director/liberation_rules.c src/director/liberation_plan.c src/gfx/qr.c src/director/home_words.c src/layer/fork_words.c src/core/jobs.c \
+	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/core/meta_text.c src/core/looks.c src/core/looks_text.c src/core/looks_profile.c src/core/looks_routes.c src/core/battle_data.c src/director/lab_text.c src/world/town_lines.c \
+	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/core/groups.c src/core/group_arc.c src/core/group_tags.c src/core/extras.c src/core/extras_text.c src/map/pad_art.c src/core/meta_shelf.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/audio/crossfeed.c src/audio/sound_heard.c src/core/settings_line.c src/gfx/letters.c src/gfx/lcd_frame.c tests/test_voxel.c src/gfx/gba_layers.c src/gfx/gba_world.c src/gfx/voxel_lift.c src/gfx/voxel_light.c src/gfx/voxel_draw.c tests/test_stereo.c src/gfx/stereo.c \
 	src/jukebox/jukebox_text.c src/core/library_pages.c src/core/library_pages_data.c src/core/fast_forward.c src/core/feel.c src/map/area_src.c src/map/lz.c \
 	tests/test_discord.c src/discord/discord_activity.c src/discord/discord_text.c \
@@ -529,9 +529,9 @@ build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h src/onl
 ONLINE_TEST_SRCS := tests/test_online.c src/online/online_wire.c src/online/online_motion.c src/online/online_people.c src/online/square_plan.c src/core/compat.c \
 	src/online/square_life_words.c src/online/trade_words.c src/online/online_week.c src/online/square_week_words.c \
 	src/online/netpass.c src/online/netpass_text.c src/online/square_words.c src/online/trade_list.c src/online/trade_screen_text.c src/online/pet_carry.c \
-	src/online/dive_wire.c src/director/crew_pull.c src/online/dive_seats.c
+	src/online/dive_wire.c src/director/crew_pull.c src/online/dive_seats.c src/online/square_looks_pick.c
 build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h src/online/square_plan.h src/online/square_life_words.h src/online/netpass.h \
-	src/online/trade_list.h src/online/trade_screen_text.h src/online/pet_carry.h src/online/dive_wire.h src/director/crew_pull.h src/online/dive_seats.h shared/online/protocol.h
+	src/online/trade_list.h src/online/trade_screen_text.h src/online/pet_carry.h src/online/dive_wire.h src/director/crew_pull.h src/online/dive_seats.h src/online/square_looks_pick.h src/core/looks.h shared/online/protocol.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Ishared/online -o $@ $(ONLINE_TEST_SRCS)
@@ -540,7 +540,7 @@ build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h src/online
 # its messages on the wire and the network's link (issue #120)
 ARENA_TEST_SRCS := tests/test_arena.c src/online/team_outbox.c src/online/team_check.c src/online/arena_input.c src/online/arena_link_local.c src/online/arena_loadout.c \
 	src/online/arena_wire.c src/online/arena_link_net.c src/online/arena_format.c src/online/arena_sync.c \
-	src/online/stands_wire.c src/online/stands_report.c src/online/watch_keys.c src/online/arena_text.c
+	src/online/stands_wire.c src/online/stands_report.c src/online/watch_keys.c src/online/arena_text.c src/core/looks.c
 build/host/test_arena: $(ARENA_TEST_SRCS) src/online/arena_input.h src/online/arena_text.h src/online/arena_link.h src/online/arena_loadout.h src/online/online_snapshot.h src/online/online_chips.h \
 	src/online/arena_format.h src/online/arena_sync.h \
 	src/online/arena_wire.h src/online/arena_link_net.h shared/online/protocol.h src/online/stands_wire.h src/online/stands_report.h \

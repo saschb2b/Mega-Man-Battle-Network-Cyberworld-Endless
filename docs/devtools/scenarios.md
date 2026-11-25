@@ -3,7 +3,7 @@ type: Tool
 title: "Scenarios: the game played through a course, its state checked"
 description: "`python3 build.py scenarios` plays each file of `tests/scenarios/` headless (`tools/scenarios.py`, on `tools/cw.py`'s games): a scripted course with the state in words checked on the way, so a bug that only a sequence of play shows stays fixed."
 tags: [devtools, tests]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T21:12:01Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
 ---
 
 # Scenarios: the game played through a course, its state checked
@@ -191,10 +191,11 @@ on every seed ([tools/play.py](play.md) has the steps):
 | --- | --- | --- |
 | `savemasks N` (the masks BN6's own save has made since the start: one a save, where nothing wrote into the RAM while it was masked; a write fails the save's sum, and BN6 masks and saves it all again), `savemasked yes` or `no` (the RAM masked now) | a run, at home too | `save_mask_describe`, `src/emu/save_mask.c` |
 | `chips N` (the chips owned, the Folder's and the Pack's: BN6's pack counts both), `programs N`, `unlockers N`, `rushfood N`, `regmemory N` | a run, at home too | `holds_describe`, `director_folder.c` |
+| `map open`, `hidden` (opened by a press, under a chat for now) or `closed`: the layer's map over the picture (issue #840) | a layer | `director_describe`, `director_describe.c` |
 | `choice K/N` (the cursor on option K of the N a chat box asks) | while BN6's box shows a question | `talk_describe`, `talk.c` |
 | `pickat K/N` the cursor's row as a player counts it, `pickof hp`, `chip`, `program` or `skip` what that row is (with the pick's other lines, `pick`, `offers`, `pickrows`, `pickrow`, `pickready`, below) | a reward pick's screen | `director_pick_describe`, `reward_pick.c` |
 | `shoprows N`, and of the row under the cursor `price N` (as shown, zenny or BugFrags) and `stock N` | BN6's shop screen | `shop_describe`, `shop.c` |
-| `exitpad shut` or `open`, `heard yes` once a Navi has named the act's guardian, `greentaken N`, `bluetaken N`, `purpletaken N`, `locks N` (still standing), `pcode told`, `gate HeatMan sealed` or `earned`, `on floor`, `teleport1`, `teleport2`, `gap`, `lane` or `path` | a layer | `layer_describe`, `layer_describe.c` |
+| `exitpad shut` or `open`, `heard yes` once a Navi has named the act's guardian, `greentaken N`, `bluetaken N`, `purpletaken N`, `locks N` (still standing), `pcode told`, `gate HeatMan sealed` or `earned`, `whisperfolder Blade` or `none` (the starting folder the second bystander's whisper tells how to open), `on floor`, `teleport1`, `teleport2`, `gap`, `lane` or `path` | a layer | `layer_describe`, `layer_describe.c` |
 
 With `CYBERWORLD_STATE_POS=1` first in its START a scenario also reads
 `held`: `held=none` is MegaMan free, so
@@ -292,8 +293,9 @@ none|offered|waiting|answered|accepted|done|cancelled` with `tradewith`,
 `listchip`, `deal ask|wait|swap|swapped`, `dealcursor`
 (`trade_screen_describe`), `tradeboard N` with `tradeoffer NAME has 20F wants W` and
 `myoffer`, `challenge none|to NAME|from NAME`, `arena idle|sent|...|
-battle|over` with `arenacard won|lost|stopped`, `arenahp MINE HIS`, `rematch`
-(`square_arena_describe`), `bouts N`, `bout won against NAME won 1 lost 0`,
+battle|over` with `arenacard won|lost|stopped`, `arenahp MINE HIS`, `rematch`,
+`arenalooks on|none` (the bout's looks, [Looks in a NetBattle](../online/arena/looks.md))
+and `arenastop apart|left|...` (why the last match stopped) (`square_arena_describe`), `bouts N`, `bout won against NAME won 1 lost 0`,
 `weekoffer none|new|again|on|trade|stamp`, `week N`, `weekboard WORDS`; on
 a dive with its link `divers N: NAMES`, `diver NAME at X Y`, `tags N:
 NAMES` (the names shown over the divers' heads, `NAME+K` where K more
@@ -483,12 +485,12 @@ its own part and called from `director_describe` (the summary's from
 | Lines | From | Say |
 | --- | --- | --- |
 | `viruses N`, `navis N`, `battles N`; in a battle `foes N`, `down N` | `tally_describe` (`director_tally.c`) | the run's tally as RESULT will count it, the layer's random battles fought, a battle's enemies and those down |
-| `battle random`, `guardian`, `duel`, `gate`, `copy`, `server` or `floor`; `phase custom`, `fight`, `results` or `other`; `form none`, `HeatCross` ... `BeastOut`; `busterattack N` (the battle's Attack level, a buster shot's damage before a form's bonus: BusterUp's +1); `foestatus none`, `paralysed`, `dragged`, `frozen` or `bubbled`; in a swap's battle (the copy's, the `swap` step's) `swapform N` (the form fighting, 1 first) and `leftovers N` (the objects bound to the last form taken off still at work, 0 where they ended with it: issue #733); at its results `result won`, `lost`, `ran` or `draw` and `reward zenny N`, `chip ID CODE`, `hp N`, `bugfrags N`; on the map after one `lastbattle won` ... | `battle_state_describe` (`battle_state.c`) | a battle: what it is, where it stands, how it ended and what its RESULT paid, MegaMan's form and buster, the statuses its enemies are held in, a swap's form and what the last left behind |
+| `battle random`, `guardian`, `duel`, `gate`, `copy`, `server` or `floor`; `phase custom`, `fight`, `results` or `other`; `form none`, `HeatCross` ... `BeastOut`; `busterattack N` (the battle's Attack level, a buster shot's damage before a form's bonus: BusterUp's +1); `foestatus none`, `paralysed`, `dragged`, `frozen` or `bubbled`; `megamanfaces right` or `left` (turned round on a Surrounded field's L or R) and `foeshurt none` or the columns of the foes that have lost HP, left to right (`foeshurt 2`: where an attack struck, issue #838); in a swap's battle (the copy's, the `swap` step's) `swapform N` (the form fighting, 1 first) and `leftovers N` (the objects bound to the last form taken off still at work, 0 where they ended with it: issue #733); at its results `result won`, `lost`, `ran` or `draw` and `reward zenny N`, `chip ID CODE`, `hp N`, `bugfrags N`; on the map after one `lastbattle won` ... | `battle_state_describe` (`battle_state.c`) | a battle: what it is, where it stands, how it ended and what its RESULT paid, MegaMan's form and buster, the statuses its enemies are held in, the way he faces and where an attack struck, a swap's form and what the last left behind |
 | `version N`, `known yes` or `no`, `data hidden`, `fresh`, `waiting` or `taken` (the exit pad's line is the layer's, above); in his fight `guardianhp N` | `boss_describe` (`boss.c`), beside `guardian NAME waiting` ... | the guardian's course: his version, whether MegaMan has battle data on him, his Guardian Data (`fresh` its first second, when no A takes it) and the exit pad |
 | `duel none`, `waiting`, `on` or `fought`; `rung N`; `duelswon N`, `duelslost N`, `clearance N`; `chaud new` or `known`; `verdict none`, `beat`, `slow`, `hit` or `lost` | `duel_describe` (`director_duel.c`) | the rival: the layer's duel and its rung, the record, what his respect has opened, whether Chaud has called before, the last verdict |
 | `pick gift`, `draft`, `vault`, `order`, `official`, `server` or `copy`; `offers hpmemory:2 chip:137 program:1 [bugfrags]`; `pickrows N`, `pickrow N`, `pickready yes` or `no` | `director_pick_describe` (`reward_pick.c`) | a reward pick while it is up: its rows, the cursor's, whether an A would take one yet |
 | `card title`, `area` or `grand`; `cardsays TOP / NAME / LINE / LINE / LINE` | `cinema_describe` (`cinema.c`) | the card that shows: a guardian's title, the act's ("Guardian: ???") |
-| `page result` or `records`; `ended deleted` or `won`; `cause in RoboDog Comp`; `reached N`, `viruses N`, `navis N`; `learned NAME` or `none`; `newbest yes` or `no`; `opened the endless net, threat 1` or `nothing` | `title_summary_describe` (`title_summary.c`) | the finished run's summary over the title, both its screens' facts while it shows |
+| `page result` or `records`; `ended deleted` or `won`; `cause in RoboDog Comp`; `reached N`, `viruses N`, `navis N`; `learned NAME` or `none`; `newbest yes` or `no`; `opened the endless net, threat 1` or `nothing`; `nextgoal` the closest unlock's sentence, or `none` | `title_summary_describe` (`title_summary.c`) | the finished run's summary over the title, both its screens' facts while it shows |
 
 A drop-in start (`--scene emu`) is no player's arrival: the `battle` and
 `foes` steps given in its first frames begin their battle during the
@@ -632,7 +634,7 @@ change nothing.
 | Where | Lines |
 | --- | --- |
 | The title | `title` its step, `cursor` new, continue or options, `saved` the layer of the run CONTINUE takes (0 none), `asks` typing, no or yes while NEW GAME asks, `runs`, `best` and `marks` (hex) of the profile |
-| The JACK-IN SETUP | `tab` run, help or extras; `row` net, folder, cross, threat, a helper's or an extra's number, or foot; the choice as `net` short or endless, `startfolder`, `startcross`, `threat`, `helpers` and `extrasoff` (bits); what is open as `endless` open or shut, `folders`, `crosses`, `threatmax`, `helpersshown` |
+| The JACK-IN SETUP | `tab` run, help or extras; `row` net, folder, cross, threat, a helper's or an extra's number, or foot; the choice as `net` short or endless, `startfolder`, `startcross`, `threat`, `helpers` and `extrasoff` (bits); what is open as `endless` open or shut, `folders`, `crosses`, `threatmax`, `helpersshown`; the shelf ([The shelf of starting folders](../game/meta/shelf.md)) as `folderlook` (the folder the row shows), `folderstate` locked, heard or open, and `shelf Blade:locked,Storm:heard,...` |
 | A run | the same six lines of the setup it began with (`net` ... `extrasoff`): kept on the setup with `keep`, they are the `same` in the run |
 | A run's summary | the battles' scenarios' lines (`title_summary_describe`): `page` result or records, `ended` won or deleted, `cause`, `reached`, `viruses`, `navis`, `learned`, `newbest`, `opened` (what it opened, apart by commas; nothing) |
 | Options | `line` the line under the cursor (scale, smooth, colour, blend, lcd3x, depth, music, effects, output, sound, vibration, controls, fast, statistics, update, updates) and `value` as the page shows it; `defaults` no or yes while START asks |

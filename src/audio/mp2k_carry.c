@@ -114,6 +114,15 @@ bool mp2k_carry_in(const Mp2kGameMusic *g) {
 	return true;
 }
 
+void mp2k_carry_hush(Mp2kGameMusic *g, const Mp2kRegs *to) {
+	for (int c = MP2K_DS_MAX; c < MP2K_CHANS; ++c) {
+		uint8_t *b = bytes_of(g, c);
+		if (!(b[0] & CHN_ON) || !music_track(mp2k_track_at(get32(b + MP2K_CHAN_TRACK)))) continue;
+		b[0] = 0;
+		mp2k_cgb_off_on(c - MP2K_DS_MAX, to);
+	}
+}
+
 /* ---- the song given back ---- */
 
 /* the game's channel `c` off the list of `owner`, the track holding it
@@ -195,6 +204,55 @@ int mp2k_carry_out(Mp2kGameMusic *g, const Mp2kRegs *to, Mp2kWrite *writes) {
 	mp2k_put_player(g->player, pl);
 	music_stop();
 	return n;
+}
+
+/* ---- the game's music followed ---- */
+
+#define PLAYER_STATUS 0x04
+#define PLAYER_CLOCK  0x0C
+#define PLAYER_TEMPO_U 0x1E
+#define PLAYER_FADE_OI 0x24
+#define PLAYER_FADE_OV 0x28
+#define FADE_START    (64 << 2)   /* m4aMPlayFadeOut's volume, fading out from all of it */
+
+static bool paused(uint32_t status) { return status & (uint32_t)PLAYER_PAUSE; }
+
+/* m4aMPlayStop */
+static void follow_stop(Mp2kPlayer *pl) {
+	pl->status |= (uint32_t)PLAYER_PAUSE;
+	for (int i = 0; i < pl->tracks; ++i) mp2k_track_stop(&M.tracks[pl->first + i]);
+}
+
+void mp2k_carry_follow(const uint8_t *was, const uint8_t *now) {
+	if (!M.ready) return;
+	Mp2kPlayer *pl = music();
+	uint32_t song = get32(now), status = get32(now + PLAYER_STATUS);
+	uint32_t was_status = get32(was + PLAYER_STATUS);
+	uint16_t oi = get16(now + PLAYER_FADE_OI), ov = get16(now + PLAYER_FADE_OV), u = get16(now + PLAYER_TEMPO_U);
+	/* (MPlayStart: another header, or the clock from 0 again; a song begun
+	 * shows no pause, whether it has ticked or not) */
+	bool begun = song && !paused(status) && (song != get32(was) || get32(now + PLAYER_CLOCK) < get32(was + PLAYER_CLOCK));
+	if (begun) {
+		mp2k_read(MP2K_ROM_GAME);
+		mp2k_player_start(pl, MP2K_ROM_GAME, song);
+		mp2k_read(0);
+	}
+	if (pl->rom != MP2K_ROM_GAME || pl->song != song) return;
+	bool fading = pl->fade_oi != 0;
+	/* (m4aMPlayFadeOut, FadeOutTemporarily, FadeIn: begun as the game set it) */
+	if (oi && (!get16(was + PLAYER_FADE_OI) || begun)) {
+		pl->fade_oi = pl->fade_oc = oi;
+		pl->fade_ov = (uint16_t)((ov & 2 ? 0 : FADE_START) | (ov & 3));
+		fading = true;
+	}
+	/* (stopped, its tracks kept: a song's own end leaves none) */
+	if (paused(status) && (status & 0xFFFF) && !paused(was_status) && !fading && !paused(pl->status)) follow_stop(pl);
+	/* (m4aMPlayContinue, the fade in's too) */
+	if (!paused(status) && paused(was_status) && !begun && paused(pl->status)) pl->status &= 0xFFFF;
+	if (u != get16(was + PLAYER_TEMPO_U) || (begun && u != 0x100)) {
+		pl->tempo_u = u;
+		pl->tempo_i = (uint16_t)((pl->tempo_d * (uint32_t)u) >> 8);
+	}
 }
 
 void mp2k_carry_drop(void) {

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "arena_looks.h"
 #include "arena_seats.h"
 #include "arena_team_client.h"
 #include "bn6.h"
@@ -13,6 +14,7 @@
 #include "online_visit.h"
 #include "rom.h"
 #include "square_arena_state.h"
+#include "square_looks.h"
 #include "square_team.h"
 
 void square_bout_seats(const ArenaWireState *w) {
@@ -46,6 +48,17 @@ bool square_bout_build(void) {
 	/* (the bout's seed its match, the same on both games and every
 	 * spectator; arenaseedoff=N moves it on this side alone, a mutation) */
 	uint32_t seed = SA.match + (uint32_t)dev.arena_seed_off;
+	/* (the two MegaMen's looks, the same on both games: mine as I last sent
+	 * it and his as the Square knows him, both the server's word (protocol
+	 * v30, square_looks.h); BN6's on both sides where his is not known, a
+	 * 2v2's always; arenalook=MINE/THEIRS over them, a mutation's) */
+	Look look[2];
+	if (SA.four || dev.arena_look) arena_looks_bout(side, SA.four ? NULL : dev.arena_look);
+	else {
+		square_looks_sent(&look[side & 1u]);
+		if (peer_looks_of(SA.other, &look[~side & 1u])) arena_looks_set(&look[0], &look[1]);
+		else arena_looks_set(NULL, NULL);
+	}
 	SA.arena = arena_new_bout(R.data, ROM_SIZE, loadout, &SA.link.link, seed, SA.kept);
 	SA.kept = NULL;
 	if (!SA.arena) return false;

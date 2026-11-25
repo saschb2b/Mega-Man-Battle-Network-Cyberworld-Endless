@@ -37,6 +37,7 @@ typedef struct {
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
 	bool folders;   /* every starting folder open in the profile (captures: the setup's Folder row, each folder's first hand) */
 	int duels;      /* duels=N: the rival's wins made N, for a capture of a rung or an official gate (docs/game/rival.md); -1 left alone */
+	int looks;      /* looks=MASK: MegaMan's palettes owned and said (a bit each, 1 << LookPalette; docs/game/looks-earning.md), for a route's scenario; 0 left alone */
 	int hp;         /* hp=N: MegaMan's max HP N, his HP with it each time the max moves (a later act's fight swept at a playtester's HP); 0 left alone */
 	int hp_now;     /* hp=N/H: ... and his HP H through the run's first 600 frames (a battle begun hurt); 0 the max */
 	bool worried;   /* MegaMan held worried by BN5's mood in BN6's battles, so its DarkChips come (soulmood.h; a capture of one offered) */
@@ -60,6 +61,8 @@ typedef struct {
 	int side;       /* side=N: the run starts on side layer N at --run-depth, 1 the Undernet (its golden gate), 2 the Secret Area (Bass's once the title's S is held, --marks 08: docs/game/bosses/), 4 the Glitch layer (docs/game/glitch-layer.md) */
 	int bass;       /* bass=N: MegaMan's wins over Bass made N (his form: Bass, SP from 1, BX from 2 with the Cybeast beaten) */
 	int beast;      /* beast=N: ... and over the Cybeast (its rematch's words; Bass BX) */
+	int heard;      /* heard=BITS: the starting folders heard of, 1 << FOLDER_* (the shelf's middle state, issue #864) */
+	bool shelf;     /* shelf: the setup's shelf seen, as after a first setup (a layer's whisper may tell of a folder) */
 	bool xcontrol;  /* the control family installed as the core starts: BN6's own Mettaur moved as AI 32, enemy ids 0x200-0x205
 	                   (xvirus.h; its differential, tools/xcontrol.py) */
 	bool nofamilies; /* no other game's family installed, BN5's ROM read or not (xvirus.h): BN6's battles as its own, to compare */
@@ -90,6 +93,7 @@ typedef struct {
 	int arena_hp;   /* arenahp=N: the carried MegaMan's max HP made N there (the installer seen in the battle; a Net Square battle's too) */
 	int arena_seed; /* arenaseed=N: --dev arena's bout seed (arena_boot_seed: BN6's random words as the bout begins; 0 none, its own) */
 	int arena_again; /* arenaagain=N: --dev arena fights N bouts more after the first, each from the kept pair (arena_keep), its seed one more */
+	const char *arena_look; /* arenalook=MINE[/THEIRS]: a NetBattle's two looks, 12 hex digits each (a Look's six bytes), until the Square carries them (arena_looks.h) */
 	int arena_seed_off; /* arenaseedoff=N: a Net Square bout's seed N more on this side alone (a mutation: the two games' readies apart) */
 	int arena_carry; /* arenacarry=N: --dev arena's carried MegaMan goes in with N HP of his max, as a Team NetBattle's winner does (written on both GBAs at the Custom screen) */
 	int arena_roll; /* arenaroll=N: --dev arena rolls back N frames every N, the game's state checked (arena_roll.h, issue #128); 0 the game's hash said alone; -1 none */
@@ -110,6 +114,7 @@ typedef struct {
 	int party_roll;
 	int party_delay; /* partydelay=N: a party's input delay over the server, N frames (party_play.h) */
 	int party_early; /* partyearly=1: on a party's field over the server, each message of my turn first offered on a frame early on the clock, no word of mine sent on it (party_play.h) */
+	int dive_looks; /* divelooks=N: a dive's layers have room for N looks at most besides MegaMan's own, as a crowded layer does (issue #878, dive_looks.h) */
 	int dive_room;  /* diveroom=N: a dive's layers give the other divers N MegaMen at most, as a layer with little room does (issue #755, dive_people.h) */
 	int party_lead; /* partylead=1: a party's enemies aim at the lead alone, as BN6 has it (party_field.h) */
 	int party_bot;  /* partybot=1: my keys in a party's fight on its core a bot's (party_play.h) */
@@ -171,6 +176,7 @@ extern DevFlags dev;
 void devtools_parse(const char *spec);
 /* With `veteran`, once the profile is loaded: its guardians' records and
  * Spins, where it has none yet; with `duels=N`, the rival's wins; with
+ * `looks=MASK`, MegaMan's palettes owned; with
  * `folders`, every starting folder. */
 void devtools_veteran(void);
 /* The player's GBA keys: the menu takes them while it is open. */
@@ -209,5 +215,11 @@ void reconnect_preview_draw(void);
  * --dev bootplayed (a device's whose kept state held a played game, issue
  * #688's scenario), else NULL, the boot's own. */
 const char *devtools_boot_from(void);
+
+/* "P,P,P,C,C,C" (a palette and a colour a channel, 255 BN6's own) or
+ * "plain": MegaMan's look, into the slot worn (the profile saved), as the
+ * PET's screen would set it (the Square sends it as it changes, square_looks.h); the remote
+ * and scripted step "look SPEC" (look_dev.c) */
+void dev_look_step(const char *spec);
 
 #endif

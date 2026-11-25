@@ -30,6 +30,7 @@ core.base = core/rom.* core/rng.c core/game.h
 # the ROM's tables: chips, programs, foes, the other games' records and registry
 core.data = core/data.* core/chips.* core/chip_pool.* core/foes.h core/library_pages*
 core.data = core/xchips* core/xprograms.* core/xrecords.*
+core.data = core/looks.* core/looks_text.c
 
 # Options and its panels, drawn in the PET's look
 core.options = core/options* core/controls* core/touch_art.* core/pet_panel.h
@@ -64,6 +65,7 @@ world:        formats core.base core.data core emu net map layer
 jukebox:      formats core.base audio gfx
 library:      formats core.base core.data core audio gfx
 forms:        formats core.base core.data core audio gfx
+looks:        formats core.base core.data core emu audio gfx
 core.options: formats core.base emu audio gfx analytics update discord
 director:     *
 online:       formats core.base core.data core emu net audio gfx analytics map layer jukebox library director

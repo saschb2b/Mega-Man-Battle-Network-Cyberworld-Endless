@@ -26,6 +26,7 @@
 #include "save_blob.h"
 #include "souls.h"
 #include "trader.h"
+#include "xchips_shown.h"
 
 /* The run's folder as the game holds it (30 entries, chip | code << 9;
  * zeros where its data is not there) */
@@ -239,10 +240,11 @@ static uint32_t pack_count_at(int entry) {
 }
 
 /* The run's starting folder in the game's first folder (docs/game/meta/): the
- * chosen one's 30 chips over the game's own (Standard keeps those), as
- * BN6's GiveFolder copies a folder in (bn6f sub_8021AB4). */
+ * chosen one's 30 chips over the game's own (BN6's Standard keeps those; a
+ * Soul form's Standard is its game's start, meta_start_chips), as BN6's
+ * GiveFolder copies a folder in (bn6f sub_8021AB4). */
 void set_start_folder(void) {
-	const uint16_t *chips = meta_folder_chips(run.folder);
+	const uint16_t *chips = meta_start_chips(run.folder, run.form);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	if (!chips || data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
 	/* the pack as if this folder had been given at NEW GAME, not the
@@ -476,4 +478,7 @@ void folder_describe(FILE *f) {
 	if (art >= 0 && art != (int)chip_entry_id(folder[0])) chips_name(art, other, sizeof other);
 	if (!*other) snprintf(other, sizeof other, "%d", art);
 	fprintf(f, "foldercard %s\n", art == CHIPS_ART_BLANK ? "blank" : art < 0 ? "none" : other);
+	/* (the power the folder editor's card last drew, as BN6 drew it, and its chip: issue 835, CosmoMn SP's 6544) */
+	int drawn, power;
+	if (xchips_shown_card(&drawn, &power)) fprintf(f, "cardpower %d\ncardchip %d\n", power, drawn);
 }

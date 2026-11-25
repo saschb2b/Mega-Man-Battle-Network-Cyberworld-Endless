@@ -3,7 +3,7 @@ type: Tool
 title: "The Navis' recipe generator"
 description: "`tools/xnavirecipe.py` derives the Navis' recipes as `tools/xrecipe.py` derives a family's, writing the control HeatMan's, the moved objects' and BN5's Navis' into `src/emu/xnavi_bn5.c`, with `--check` and a `--report`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:45:00Z }
 ---
 
 # The Navis' recipe generator
@@ -42,8 +42,18 @@ his own battle sprite given that sprite at its place (`NAVI_SPRITE_PLACES`:
 GridMan's afterimage); an afterimage's spawn's word (the fourth kind's 0x28's
 spawner's r4, loaded into r4 or ORed in from a literal) set to the
 sprite's BN6 place (`afterimage_sprites`: LarkMan's), the afterimage's own
-load the spawner's word; Nebula's two (`NEBULA`) installed after Team
-ProtoMan's, in a room of their own; the image object's kinds it spawns each one
+load the spawner's word, or its two low bytes made by two `movs`
+(`AFTERIMAGE_MOVS`: DarkProto's); the chip its attack writes BN6's of its
+name, by a `movs` or a pool word (DarkProto's AreaGrab); Nebula's two
+(`NEBULA`) installed after Team ProtoMan's, in a room of their own, and
+DarkProto after them and after BN5's chips' code (`AFTER_CHIPS`: the
+types his code spawns whose copy `TYPES` gives the chips, his shield and
+blade, or a Navi before him, LarkMan's afterimage, are that copy's,
+`XV_TYPE_SHARED`, none copied again, so the chips' layout and numbers stay;
+the recipe's `.after_chips`, installed by `xnavi_install_after_chips`;
+every version of his named by his V2's entry, `SHOWN_AS`);
+a sprite past the fourth room's end in the fifth, Team ProtoMan's sprites'
+room's tail (`XN_SHARED_FIVE`); the image object's kinds it spawns each one
 `tools/bn5_objects.py` fixes, and the moved objects' recipe itself
 (`xnavi_objects_bn5`: the image object's module, its kinds' sprites by
 that table, each twin checked by its bytes). A recipe with a decision

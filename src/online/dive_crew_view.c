@@ -155,20 +155,35 @@ static SDL_Color mark_fill(const char *mark) {
 	return mark[1] == 'A' ? LOOK_ORANGE : mark[1] == 'U' ? LOOK_GOLD : LOOK_NAVY;   /* BATTLE, BUSY, HOME */
 }
 
-void dive_crew_view_draw(void) {
-	CrewRow w[ONLINE_PARTY_MOST];
-	int n = dive_crew_view_rows(w);
-	int name_w = 0, layer_w = 0, hp_w = 0;
+/* the rows now and their columns' widths: the rows' count, one width for every plate */
+static int measure(CrewRow w[ONLINE_PARTY_MOST], int *name_w, int *layer_w, int *width) {
+	int n = dive_crew_view_rows(w), hp_w = 0;
+	*name_w = *layer_w = 0;
 	for (int i = 0; i < n; ++i) {
 		/* (a mark in the tag's own small capitals, a margin each side) */
 		int a = pixfont_width(w[i].name, 1), c = pixfont_width(w[i].hp, 1);
 		int b = !w[i].layer[0] ? 0 : (w[i].mark ? look_caps_width(w[i].layer) + 4 : pixfont_width(w[i].layer, 1)) + HP_GAP;
-		if (a > name_w) name_w = a;
-		if (b > layer_w) layer_w = b;
+		if (a > *name_w) *name_w = a;
+		if (b > *layer_w) *layer_w = b;
 		if (c > hp_w) hp_w = c;
 	}
 	/* (one width for every plate: the names, layers and HP in columns) */
-	int width = PAD + name_w + GAP + layer_w + hp_w + PAD + 1;
+	*width = PAD + *name_w + GAP + *layer_w + hp_w + PAD + 1;
+	return n;
+}
+
+bool dive_crew_view_box(int *x, int *y, int *w, int *h) {
+	CrewRow r[ONLINE_PARTY_MOST];
+	int name_w, layer_w, n = measure(r, &name_w, &layer_w, w);
+	*x = LEFT;
+	*y = TOP;
+	*h = n ? (n - 1) * LINE + H : 0;
+	return n > 0;
+}
+
+void dive_crew_view_draw(void) {
+	CrewRow w[ONLINE_PARTY_MOST];
+	int name_w, layer_w, width, n = measure(w, &name_w, &layer_w, &width);
 	for (int i = 0; i < n; ++i) {
 		int x = P.core_x + LEFT, y = P.core_y + TOP + i * LINE;
 		fill_rect(x, y, width, H, rgba(0, 24, 41, 190));

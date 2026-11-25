@@ -14,7 +14,9 @@
 #include "emu.h"
 #include "flags.h"
 #include "job_words.h"
+#include "looks_routes.h"
 #include "npc.h"
+#include "order_looks.h"
 #include "place_lines.h"
 #include "scripts.h"
 #include "shop.h"
@@ -64,10 +66,14 @@ static void debug_triggers(int group, int number) {
 }
 
 /* one's talk: a shop's keeper's greeting and screen (one order a visit at
- * the Order Service), an asker's request, or their words (the game's
+ * the Order Service, MegaMan's colors beside it), an asker's request, or their words (the game's
  * people of list 5 have their sprite's face less 0x20) */
 static int person_script(TextArchive *t, const PlaceFolk *p) {
 	int face = p->folk.sprite - 0x20, shop = p->shop - 1;
+	/* (AsterLand's clerk sells MegaMan's colors beside his orders while
+	 * the profile lacks one: order_looks.h) */
+	int offer[LOOKS_SHOP_COUNT], n = shop == SHOP_ORDER ? looks_shop_offer(offer) : 0;
+	if (n) return order_looks_script(t, shop, face, p->folk.words, place_order_closed, offer, n);
 	if (p->shop) return ta_counter(t, shop, face, p->folk.words, shop == SHOP_ORDER ? HOME_ORDER_FLAG : -1, place_order_closed);
 	return job_script(t, p->asker - 1, face, p->folk.words);
 }

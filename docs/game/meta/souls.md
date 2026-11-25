@@ -3,7 +3,7 @@ type: Feature
 title: "Souls"
 description: "BN5's Souls (issue #69): a beaten BN5 Navi's Soul serves every battle of the run, UNITE on BN6's Custom screen giving up a chip of its kind, Chaos Unison with a DarkChip, kept in `run.souls`."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:35:13Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-24T21:06:00Z }
 ---
 
 # Souls (4 October 2026, issue #69; in every battle since issue #82)
@@ -32,9 +32,13 @@ points first marked as proposals among them.
   meta as variety, not power.
 - **What each needs**, BN5's own rule as its ROM has it ([BN5's battles, records and rewards](../../rom/bn5-battles.md),
   BN5's Souls): the last chip picked on the Custom screen of the Soul's
-  kind, given up for it. Team Colonel's MegaMan unites with the Souls of
-  Colonel's team alone (the other team's six are never offered in this
-  version). BN6's chips light it by BN5's kind of their names (soulkinds.h;
+  kind, given up for it. In BN5, Team Colonel's MegaMan unites with the
+  Souls of Colonel's team alone. A run holds the other team's six too
+  (since 23 November 2026): Team ProtoMan's Navis guard in their
+  partners' places from act 2 and give their Souls as Team Colonel's do,
+  twelve Souls of twelve kinds, so no chip lights two of BN5's
+  ([Team ProtoMan](../team-protoman.md), His Soul, and beside Team
+  Colonel's; the table below is Team Colonel's six). BN6's chips light it by BN5's kind of their names (soulkinds.h;
   [Transplanted Souls](../../multirom/souls.md)), BN5's own of the registry by
   their own:
 

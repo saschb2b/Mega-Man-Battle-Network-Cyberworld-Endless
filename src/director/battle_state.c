@@ -2,7 +2,8 @@
  * tests/scenarios reads (docs/devtools/scenarios.md, Battles and the
  * run's spine in the state): what kind it is, the phase it stands in, how
  * it ended and what its RESULT paid, the form MegaMan fights in, his
- * buster's attack, the statuses its enemies are held in, and a swap's form
+ * buster's attack, the statuses its enemies are held in, the way he faces
+ * and the columns of the foes an attack struck, and a swap's form
  * and what the form taken off left at work (issue #733). On the map
  * after one, how the last ended. Reading changes nothing. */
 #include "director_state.h"
@@ -56,6 +57,26 @@ static void statuses(FILE *f) {
 	fprintf(f, "%s\n", seen ? "" : " none");
 }
 
+/* The way MegaMan faces (BN6_T1_FLIP: turned round on a Surrounded
+ * field's L or R) and the columns of the enemies in play that have lost
+ * HP, left to right: where an attack struck (issue #838) */
+static void aim(FILE *f) {
+	const char *faces = "none";
+	char hurt[32] = "";
+	size_t n = 0;
+	for (int col = 1; col <= 6; ++col)
+		for (uint32_t k = 0; k < BN6_T1_COUNT; ++k) {
+			uint32_t o = BN6_T1_OBJECTS + k * BN6_T1_SIZE;
+			if (!(emu_read8(o + BN6_T1_IN_PLAY) & 1) || emu_read8(o + BN6_T1_PANEL_X) != col) continue;
+			if (!emu_read8(o + BN6_T1_ALLIANCE)) faces = emu_read8(o + BN6_T1_FLIP) ? "left" : "right";
+			else if (emu_read16(o + BN6_T1_HP) < emu_read16(o + BN6_T1_MAX_HP) && n + 3 < sizeof hurt) {
+				n += (size_t)snprintf(hurt + n, sizeof hurt - n, " %d", col);
+				break;
+			}
+		}
+	fprintf(f, "megamanfaces %s\nfoeshurt%s\n", faces, n ? hurt : " none");
+}
+
 /* what the RESULT gives: a chip by its id and code, zenny, HP or BugFrags
  * by their amount (chip_entry.h's reward) */
 static void reward(FILE *f) {
@@ -80,6 +101,7 @@ void battle_state_describe(FILE *f) {
 	 * form's bonus) */
 	fprintf(f, "busterattack %d\n", emu_read8(BN6_BATTLE_NAVI + BN6_NS_ATTACK) + 1);
 	statuses(f);
+	aim(f);
 	SwapState sw = battle_swap_state();
 	if (sw.armed) fprintf(f, "swapform %d\nleftovers %d\n", sw.form + 1, sw.leftovers);
 	if (phase != BN6_PHASE_RESULTS) return;

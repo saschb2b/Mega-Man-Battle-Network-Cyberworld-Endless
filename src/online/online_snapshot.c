@@ -29,7 +29,12 @@ static bool snapshot_flag(const OnlineMemory *m, unsigned flag) {
 
 bool online_snapshot_read(OnlineLoadout *out, unsigned souls) {
 	const OnlineMemory m = { main_read8, NULL };
-	return online_snapshot_read_from(&m, out, souls);
+	if (!online_snapshot_read_from(&m, out, souls)) return false;
+	/* (the profile's worn look: the run's own MegaMan's, not a checkpoint's another core reads) */
+	out->look = looks_worn();
+	Look plain = look_plain();
+	out->looked = look_valid(&out->look) && memcmp(&out->look, &plain, sizeof plain) != 0;
+	return true;
 }
 
 bool online_snapshot_read_from(const OnlineMemory *m, OnlineLoadout *out, unsigned souls) {

@@ -57,15 +57,15 @@ static bool dev_switch(const char *t) {
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "groups", &dev.groups }, { "noarc", &dev.noarc }, { "dark", &dev.dark }, { "bootplayed", &dev.bootplayed }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "glitchhold", &dev.glitch_hold }, { "tourney", &dev.tourney }, { "forms", &dev.forms },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy }, { "nocarry", &dev.no_carry },
 		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end }, { "discord", &dev.discord },
-		{ "feel", &dev.feel }, { "settings", &dev.settings }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 },
+		{ "feel", &dev.feel }, { "settings", &dev.settings }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 }, { "shelf", &dev.shelf },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
-		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "library=", &dev.library }, { "alias=", &dev.alias }, { "reward=", &dev.reward }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },
+		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "looks=", &dev.looks }, { "pack=", &dev.pack }, { "library=", &dev.library }, { "alias=", &dev.alias }, { "reward=", &dev.reward }, { "programs=", &dev.programs }, { "program=", &dev.program }, { "codes=", &dev.codes }, { "clock=", &dev.clock },
 		{ "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny }, { "libpar=", &dev.lib_par }, { "libhp=", &dev.lib_hp },
-		{ "side=", &dev.side }, { "glitchstage=", &dev.glitch_stage }, { "battler=", &layer_battler_forced }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
+		{ "side=", &dev.side }, { "glitchstage=", &dev.glitch_stage }, { "battler=", &layer_battler_forced }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "heard=", &dev.heard }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak }, { "form=", &dev.form },
 		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenacarry=", &dev.arena_carry }, { "arenadesync=", &dev.arena_desync },
-		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "party=", &dev.party }, { "partyhp=", &dev.party_hp }, { "partyend=", &dev.party_end }, { "partydel=", &dev.party_del }, { "partyreward=", &dev.party_reward }, { "partycore=", &dev.party_core }, { "partytwin=", &dev.party_twin }, { "partyroll=", &dev.party_roll }, { "partybot=", &dev.party_bot }, { "partyview=", &dev.party_view }, { "joinwait=", &dev.join_wait }, { "partyscale=", &dev.party_scale }, { "partyaim=", &dev.party_aim }, { "partyhpper=", &dev.party_hp_per }, { "partysteps=", &dev.party_steps }, { "partydelay=", &dev.party_delay }, { "partyearly=", &dev.party_early }, { "partylead=", &dev.party_lead }, { "diveroom=", &dev.dive_room }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
+		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "party=", &dev.party }, { "partyhp=", &dev.party_hp }, { "partyend=", &dev.party_end }, { "partydel=", &dev.party_del }, { "partyreward=", &dev.party_reward }, { "partycore=", &dev.party_core }, { "partytwin=", &dev.party_twin }, { "partyroll=", &dev.party_roll }, { "partybot=", &dev.party_bot }, { "partyview=", &dev.party_view }, { "joinwait=", &dev.join_wait }, { "partyscale=", &dev.party_scale }, { "partyaim=", &dev.party_aim }, { "partyhpper=", &dev.party_hp_per }, { "partysteps=", &dev.party_steps }, { "partydelay=", &dev.party_delay }, { "partyearly=", &dev.party_early }, { "partylead=", &dev.party_lead }, { "diveroom=", &dev.dive_room }, { "divelooks=", &dev.dive_looks }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
 		{ "matehp=", &dev.mate_hp }, { "group=", &dev.group },
 		{ "arenafreeze=", &dev.arena_freeze }, { "arenaseed=", &dev.arena_seed }, { "arenaagain=", &dev.arena_again },
 		{ "arenaseedoff=", &dev.arena_seed_off }, { "teamseat=", &dev.team_seat }, { "teampick=", &dev.team_pick }, { "teambuster=", &dev.team_buster },
@@ -81,10 +81,33 @@ static bool dev_switch(const char *t) {
 	return false;
 }
 
+static Look dev_look_set;
+static bool dev_look_on;
+
+/* `--dev look=`'s words: its first channel `first`, the next two taken
+ * from the tokens after it while they read as channels (the commas split
+ * them), a token that does not left in `*rest` for the switches */
+static void dev_look(const char *first, char **rest) {
+	char words[32];
+	snprintf(words, sizeof words, "%s", first);
+	for (int c = 1; c < LOOK_CHANNELS; ++c) {
+		char *t = strtok(NULL, ",");
+		if (!t) break;
+		size_t a = strspn(t, "0123456789"), b = a && t[a] == '.' ? strspn(t + a + 1, "0123456789") : 0;
+		if (strcmp(t, "-") && !(b && !t[a + 1 + b])) { *rest = t; break; }
+		size_t n = strlen(words);
+		snprintf(words + n, sizeof words - n, ",%s", t);
+	}
+	if (looks_parse(words, &dev_look_set)) dev_look_on = true;
+	else fprintf(stderr, "dev: look=%s is no look (P.C,P.C,P.C, - for BN6's own)\n", words);
+}
+
 void devtools_parse(const char *spec) {
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", spec);
-	for (char *t = strtok(buf, ","); t; t = strtok(NULL, ",")) {
+	char *rest = NULL;
+	for (char *t = strtok(buf, ","); t; t = rest ? rest : strtok(NULL, ",")) {
+		rest = NULL;
 		/* (statistics=ask|on|off, statsurl=URL: analytics.h) */
 		if (dev_switch(t) || analytics_dev(t)) continue;
 		if (!strncmp(t, "hp=", 3)) { dev.hp = atoi(t + 3); dev.hp_now = strchr(t, '/') ? atoi(strchr(t, '/') + 1) : 0; }
@@ -97,6 +120,9 @@ void devtools_parse(const char *spec) {
 			dev.folder_n = *end == '/' ? atoi(end + 1) : 30;
 		}
 		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint16_t)strtoul(t + 6, NULL, 0);
+		/* (look=P.C,P.C,P.C: MegaMan's look for the session, not saved, the
+		 * channels after the first the next tokens; docs/game/looks.md) */
+		else if (!strncmp(t, "look=", 5)) dev_look(t + 5, &rest);
 		/* (glitchlook=3+x0: BN6's Green Area, then BN5's first, as --net-biome
 		 * names them; another game's kept as -1 - N, glitch_look.c) */
 		else if (!strncmp(t, "glitchlook=", 11))
@@ -104,6 +130,7 @@ void devtools_parse(const char *spec) {
 				dev.glitch_look[dev.glitch_looks++] = *a == 'x' ? -1 - atoi(a + 1) : atoi(a);
 		/* (kept past this call: copies of their own) */
 		else if (!strncmp(t, "online=", 7)) { static char url[200]; snprintf(url, sizeof url, "%s", t + 7); dev.online = url; }
+		else if (!strncmp(t, "arenalook=", 10)) { static char look[32]; snprintf(look, sizeof look, "%s", t + 10); dev.arena_look = look; }
 		else if (!strncmp(t, "onlinename=", 11)) { static char name[17]; snprintf(name, sizeof name, "%s", t + 11); dev.online_name = name; }
 	}
 	if (dev.speed < 1) dev.speed = 1;
@@ -114,10 +141,29 @@ void devtools_parse(const char *spec) {
 	run_debug_form = dev.form;
 }
 
+/* (looks=MASK: MegaMan's palettes owned and told, as earned in runs
+ * before: Classic always) */
+static void dev_looks(void) {
+	if (!dev.looks) return;
+	profile.looks_owned = (uint16_t)(dev.looks | 1);
+	profile.looks_told = (uint16_t)dev.looks;
+	profile_save();
+}
+
 void devtools_veteran(void) {
+	/* (the worn slot's look, saved: a CONTINUE without the switch keeps it) */
+	if (dev_look_on) looks_set(looks_slot(), &dev_look_set);
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
-	/* (a bit a folder but the Standard's, every one meta.h has) */
-	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
+	dev_looks();
+	/* (a bit a folder but the Standard's, every one meta.h has; and the
+	 * Soul forms, which the setup offers where their ROMs are read) */
+	if (dev.folders) {
+		profile.folders_open |= 0xFFFEu;
+		profile.forms_open |= (uint8_t)(1u << RUN_FORM_SOUL_BN5 | 1u << RUN_FORM_SOUL_BN4);
+		profile_save();
+	}
+	if (dev.heard) { profile.shelf.heard |= (uint16_t)dev.heard; profile_save(); }
+	if (dev.shelf) meta_shelf_seen();
 	/* (library=N: every Nth chip id held, for the Library's pages' pictures;
 	 * not saved by this, as when the screen filled them as it opened) */
 	for (int id = dev.library; dev.library > 0 && id < META_LIBRARY_IDS; id += dev.library) meta_library_add(id);

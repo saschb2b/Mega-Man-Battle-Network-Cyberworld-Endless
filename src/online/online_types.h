@@ -20,6 +20,9 @@ typedef struct {
 	uint8_t busy;   /* what he is busy with (v13): 0 free, ONLINE_BUSY_BATTLE, ONLINE_BUSY_WATCH, ONLINE_BUSY_TRADE, the server's word */
 	uint8_t link;   /* his link's bars as his PING said his round trip (v13): 0 unknown, 1-3 */
 	bool diving;    /* he dives (v19, ONLINE_PEER_DIVING): a dive room's peer, the server's word */
+	/* his MegaMan's look (v30, issue #854): src/core/looks.h's Look as its bytes, three palettes then three
+	 * colours, ONLINE_LOOK_NONE each where a channel is BN6's own (square_looks.h reads it as a Look) */
+	uint8_t look[2 * ONLINE_LOOK_CHANNELS];
 } OnlinePeer;
 
 typedef struct {

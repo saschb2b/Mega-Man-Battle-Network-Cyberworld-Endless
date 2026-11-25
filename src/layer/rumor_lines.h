@@ -4,7 +4,8 @@
 #define CW_RUMOR_LINES_H
 
 /* The line for a layer's whisperer (from the run's state, the profile and
- * the folder as the layer was made), NULL for none. */
-const char *rumors_line(void);
+ * the folder as the layer was made), NULL for none; into `folder` (NULL:
+ * not asked) the starting folder it tells how to open, 0 none. */
+const char *rumors_line(int *folder);
 
 #endif

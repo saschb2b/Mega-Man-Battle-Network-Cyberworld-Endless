@@ -49,6 +49,7 @@ class Player:
     refused: bool = False     # sent away (a refusal, a moderator, replaced): no place held (holds.py)
     resumed: bool = False     # a place held taken back by this session (holds.py)
     no_arena: bool = False    # its system cannot run the Arena (HELLO's hello_no_arena, v19): a party's linked fighter (party.py)
+    look: bytes = protocol.LOOK_NONE   # MegaMan's look as its LOOK said (v30), in every SNAPSHOT that shows him
 
 
 class Server:
@@ -357,6 +358,10 @@ class Server:
             profile = protocol.read_profile(data)
             if now - player.profile_time >= 1:
                 player.profile, player.profile_time = profile, now
+        elif data and data[0] == protocol.SPEC["look"]:
+            # (v30: the latest kept, under the messages' own bucket; a game
+            # sends it after each WELCOME and as the look worn changes)
+            player.look = protocol.read_look(data)
         elif len(data) == 5 and data[0] == protocol.SPEC["inspect"]:
             await self.inspect(player, struct.unpack("!I", data[1:])[0])
         elif data and data[0] == protocol.SPEC["social"]:

@@ -3,7 +3,7 @@ type: Feature
 title: "The Cross Navis and the team picked, as built"
 description: "BN6's Cross Navis on a dark board with Team ProtoMan's commands traced in BN5's ROM, each fought as MegaMan in that Cross, the team picked on arrival (`liberation_team.c`, `liberation_pick.c`), and the real ProtoMan with his own WideSwrd where ProtoSoul is held; the owner's decisions 9 and 10."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T14:25:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:32:27Z }
 ---
 
 # The Cross Navis and the team picked, as built (25 October 2026)
@@ -160,34 +160,51 @@ battle in HeatCross on his 300 HP.
 unit 10, On a dark board). A held Team ProtoMan Soul brings its own Navi
 by BN5's id, which is his Soul's number (`MATE_PROTOMAN` 1 .. `MATE_MEDDY`
 6, `liberation_board.h`), after Team Colonel's and before the Cross Navis,
-where the Soul stands in BN6's engine (`soulunite_has_bn5`) and he has a
-body. His command is his own, BN5's mask's (ProtoMan WideSwrd, GyroMan
-BombLiberation, SearchMan PanelSearch, NapalmMan Napalm, MagnetMan
-MagnetBarrier; Meddy's TwinLiberation untraced); a Cross Navi of the same
-element keeps the one he was lent, so the command rule's spot serves both
-and the pick chooses between their battles. His board HP is a Cross
-Navi's, the median of BN5's six at the stage, as Team Colonel's ROM's
-table (`BN5_LIB_NAVI_HP`) holds its own six alone; his battle is MegaMan
-in his Soul, committed at the first OK as Team Colonel's are, its
-weakness his Soul's element's (NapalmSoul Aqua, MagnetSoul Wood).
+where the Soul stands in BN6's engine (`soulunite_has_bn5`). His command
+is his own, BN5's mask's (ProtoMan WideSwrd, GyroMan BombLiberation,
+SearchMan PanelSearch, NapalmMan Napalm, MagnetMan MagnetBarrier; Meddy
+none yet, below); a Cross Navi of the same element keeps the one he was
+lent, so the command rule's spot serves both and the pick chooses between
+their battles. His board HP is a Cross Navi's, the median of BN5's six at
+the stage, as Team Colonel's ROM's table (`BN5_LIB_NAVI_HP`) holds its own
+six alone; his battle is MegaMan in his Soul, committed at the first OK as
+Team Colonel's are, its weakness his Soul's element's (NapalmSoul Aqua,
+MagnetSoul Wood).
 
-Of the six only ProtoMan has a body: ProtoSoul is the real ProtoMan's
-([The rival](../../rival.md), The netbattle), and he stands, walks and
-speaks in BN6's own sprite and face (list 6 and mugshot 0x3B, the
-rival's, `lib_navi_bn6`), as the Cross Navis stand in theirs. His lines,
-in `liberation_team_words.c`, are BN6's ProtoMan's habit, a stern
-swordsman of few words ([Voice](../../../voice/rules.md#protoman)): curt with his rival,
-on Chaud's word. Team Colonel's ROM has no overworld sprite or face of the
-other five (its lists 6 and 8 at 0x40-0x44 one placeholder each,
-[BN5's Liberation Missions](../../../rom/liberation.md), Team ProtoMan's bodies), so
-their Souls bring no Navi yet: the owner's question on Team ProtoMan's
-page. `--dev souls=MASK` holds Team ProtoMan's Souls from bit 6 (64
-ProtoSoul). Checked: `liberation-team/command/protoman` (ProtoMan in play
-in BN6's body, his WideSwrd taken and won in ProtoSoul, `soul 1`) and
-`pick/protoman` (ProtoSoul held and SlashCross brought, one place: both
-listed, ProtoMan picked and on the board).
+Each stands and speaks as a guardian of ours (`lib_navi_guardian`).
+ProtoSoul is the real ProtoMan's ([The rival](../../rival.md), The
+netbattle): he stands, walks and speaks in BN6's own sprite and face (list
+6 and mugshot 0x3B, the rival's), as the Cross Navis stand in theirs. His
+lines, in `liberation_team_words.c`, are BN6's ProtoMan's habit, a stern
+swordsman of few words ([Voice](../../../voice/rules.md#protoman)): curt
+with his rival, on Chaud's word. Team Colonel's ROM has no overworld
+sprite or face of the other five (its lists 6 and 8 at 0x40-0x44 one
+placeholder each, [BN5's Liberation Missions](../../../rom/liberation.md),
+Team ProtoMan's bodies), so they take their guardians' (navis 59-64): a
+HeelNavi's body and no face, as Nebula's LarkMan and GridMan stand on
+their arenas. Their lines take a habit from their look, as Team Colonel's
+do: GyroMan a pilot, SearchMan a sniper's few words, NapalmMan a blaster,
+MagnetMan's poles, Meddy a nurse.
 
-**Left for later:** TwinLiberation and Colonel's Save (not traced);
+Meddy joins with Liberation and Pass alone. Her TwinLiberation, traced in
+BN5's ROM ([BN5's Liberation Missions](../../../rom/liberation.md),
+TwinLiberation), takes two Navis: her battle at one end of a line of 2 to
+12 dark panels frees nothing and arms the line; another Navi's
+TwinLiberation, a command in no Navi's mask, fights the second battle
+that frees the whole line. It waits for a line kept on the board across
+turns and a CONTINUE, a second command in the other Navis' windows, its
+spot in the command rule and the planner's play of it.
+
+`--dev souls=MASK` holds Team ProtoMan's Souls from bit 6 (64 ProtoSoul,
+128 GyroSoul, 512 NapalmSoul, 2048 MeddySoul). Checked:
+`liberation-team/command/protoman` (ProtoMan in BN6's body, his WideSwrd
+won in ProtoSoul), `pick/protoman` (ProtoSoul held and SlashCross brought,
+one place: both listed, ProtoMan picked), `command/gyroman` (a HeelNavi's
+body, BombLiberation's panel freed with no battle), `command/napalmman`
+(Napalm won in NapalmSoul) and `command/meddy` (her window Liberation and
+Pass).
+
+**Left for later:** TwinLiberation (traced, above) and Colonel's Save (not traced);
 BombLiberation's flier on BonusPanels; the prototype's earn check in the
 engine; an AreaGrab in a Surrounded liberation battle froze the battle
 under the autopilot (MegaMan's own, with no Cross in it: lib-battle's

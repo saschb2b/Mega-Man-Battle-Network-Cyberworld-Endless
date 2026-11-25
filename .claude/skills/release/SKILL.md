@@ -18,6 +18,10 @@ comes from `.github/workflows/release.yml` and `src/scenes/scene_title.c`).
   player-facing change, in its voice: short, for players who know Battle
   Network, never explaining BN6's own mechanics. Developer-only work
   (the differential, symbols, research) stays out.
+- The CHANGELOG keeps its invitation to the Discord server at the very
+  top, above every version, and each release's notes carry it right under
+  their opening paragraph (the owner, 24 November 2026: "we need adoption
+  and engagement"). The invite is docs/project/discord.md's.
 - Stale pages are a release bug: GUIDE, the site, the README and
   `docs/itch/` say what the build does (a "not in runs yet" left behind
   once a feature shipped is caught here).

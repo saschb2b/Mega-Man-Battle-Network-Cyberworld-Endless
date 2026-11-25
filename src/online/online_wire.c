@@ -37,6 +37,15 @@ static bool identity_valid(const uint8_t *id) {
 	return false;
 }
 
+bool online_wire_look(const uint8_t look[2 * ONLINE_LOOK_CHANNELS]) {
+	for (unsigned c = 0; c < ONLINE_LOOK_CHANNELS; ++c) {
+		uint8_t palette = look[c], colour = look[ONLINE_LOOK_CHANNELS + c];
+		if (palette == ONLINE_LOOK_NONE && colour == ONLINE_LOOK_NONE) continue;
+		if (palette >= ONLINE_LOOK_PALETTES || colour >= ONLINE_LOOK_COLOURS) return false;
+	}
+	return true;
+}
+
 static bool read_peers(const uint8_t *data, size_t size, uint32_t now, OnlineSnapshot *snapshot) {
 	if (size < 2 || data[1] >= ONLINE_MAX_PLAYERS || size != 2 + (size_t)data[1] * ONLINE_PEER_BYTES) return false;
 	snapshot->peer_count = data[1];
@@ -56,8 +65,10 @@ static bool read_peers(const uint8_t *data, size_t size, uint32_t now, OnlineSna
 		peer->busy = (uint8_t)(in[49] >> ONLINE_BUSY_SHIFT & 3u);
 		peer->link = (uint8_t)(in[49] >> ONLINE_LINK_SHIFT & 3u);
 		peer->diving = in[49] & ONLINE_PEER_DIVING;
+		/* (v30: his look's six bytes, bounded as the server bounds them) */
+		memcpy(peer->look, in + 50, sizeof peer->look);
 		if ((in[49] & ~(roms | ONLINE_PEER_DIVING)) >> (ONLINE_LINK_SHIFT + 2) || !peer->id || peer->id == snapshot->player_id || peer->facing > 7 ||
-		    !online_wire_name(peer->name) || !identity_valid(peer->identity)) return false;
+		    !online_wire_name(peer->name) || !identity_valid(peer->identity) || !online_wire_look(peer->look)) return false;
 		if (peer->x < -ONLINE_COORDINATE_LIMIT || peer->x > ONLINE_COORDINATE_LIMIT ||
 		    peer->y < -ONLINE_COORDINATE_LIMIT || peer->y > ONLINE_COORDINATE_LIMIT ||
 		    peer->z < -ONLINE_COORDINATE_LIMIT || peer->z > ONLINE_COORDINATE_LIMIT) return false;

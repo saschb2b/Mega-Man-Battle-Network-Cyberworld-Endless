@@ -610,6 +610,12 @@ bool online_transport_profile(const OnlineProfile *profile) {
 	return online_wire_profile(data, profile) && enqueue(data, sizeof data);
 }
 
+bool online_transport_look(const uint8_t look[2 * ONLINE_LOOK_CHANNELS]) {
+	uint8_t data[ONLINE_LOOK_BYTES] = { ONLINE_LOOK };
+	memcpy(data + 1, look, ONLINE_LOOK_BYTES - 1);
+	return online_wire_look(look) && enqueue(data, sizeof data);
+}
+
 bool online_transport_inspect(uint32_t player_id) {
 	uint8_t data[5] = { ONLINE_INSPECT };
 	online_put32(data + 1, player_id);

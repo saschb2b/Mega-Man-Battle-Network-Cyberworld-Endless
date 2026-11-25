@@ -121,8 +121,7 @@ static const struct { uint8_t navi, partner; } partners[] = {
 	{ BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_NAPALMMAN },   /* SciLab 4 */
 	{ BN5_NAVI_KNIGHTMAN, BN5_NAVI_MAGNETMAN },     /* ACDC Area 1 */
 	{ BN5_NAVI_TOADMAN, BN5_NAVI_MEDDY },           /* End Area 4 */
-	/* (Colonel's in the Undernet 3, BN5's ProtoMan as DarkProto, his row once he is moved: { BN5_NAVI_COLONEL,
-	 * BN5_NAVI_PROTOMAN }) */
+	{ BN5_NAVI_COLONEL, BN5_NAVI_PROTOMAN },        /* Undernet 3: BN5's ProtoMan as DarkProto */
 };
 
 int xguardian_partner(int navi) {

@@ -144,6 +144,19 @@
 #define BN6_MAIL_ID           0x18   /* a mail's entry: its mail, u16 */
 #define BN6_MAIL_MAX          128    /* the mails a list holds: BN6_MAIL_LIST's bytes, BN6_MAIL_ENTRIES' entries */
 
+/* A chip's power in the PET (issue 835): a shown power past 1000 read as a Navi's, never as the battle computes it
+ * (bn6_chips.h's BN6_CHIP_POWER_OF) */
+#define BN6_NAVI_POWER        0x08010C76u /* a Navi chip's power by MegaMan's best time (r0 the chip; bn6_chips.h's
+                                           * BN6_NAVI_TIMES and the rest): what the PET shows of a shown power past 1000, the
+                                           * folder editor's card (Gregar 0x0811A874, bn6f 0x08119542) and the pack's Attack sort
+                                           * (Gregar 0x08121D7E, bn6f sub_811FF80), never the battle (BN6_CHIP_POWER_OF) */
+#define BN6_NAVI_POWER_MID    0x08010CE0u /* ... its twin with no time, the step 5 (bn6f sub_8010CE0): the card's where the
+                                           * submenu's bytes are 0x18 0x1C (Gregar 0x0811A86C, its test at 0x0811A856) */
+#define BN6_CARD_POWER_DRAWN  0x0811A878u /* the folder editor's card: r0 the power its digits draw (bn6f 0x08119548, after
+                                           * BN6_NAVI_POWER or a power of 1000 and under as its record has it), r5 the card's
+                                           * state, its +BN6_CARD_CHIP the chip; reached only by a chip whose power shows */
+#define BN6_CARD_CHIP         0x0E        /* ... u16 */
+
 #include "bn6_navicust.h"   /* the NaviCust programs' tables and the words that name them, for a program of another game */
 
 #endif

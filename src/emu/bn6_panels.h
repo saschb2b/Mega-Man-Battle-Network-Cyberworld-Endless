@@ -249,6 +249,55 @@
 #define BN6_GRAB_TURN         0x0800D5E4u /* ... where the walk left the field (0x0800CC72 said so): ldrb r6,[r5,#0x12], the step made the facing's, and on; */
                                           /* ... no test that it had turned already, so with no such column on the field it never ends (grab_search.h) */
 #define BN6_GRAB_FOUND        0x0800D5E0u /* ... its end: adds r0,r6,#0; pop {r4,r6,r7,pc} */
+/* A panel taken for a while, and handed back: a column's timer runs while it holds a panel of the other side's
+ * (docs/rom/liberation.md, A panel taken and handed back; issue #837). No code of ours uses them yet */
+#define BN6_PANEL_SIDE_SET    0x0800CC14u /* bn6f object_setPanelAlliance (r0 column, r1 row, r2 side): a panel of type 0 refused,
+                                           * its BN6_PANEL_SIDE_TIMER 0; four callers, each followed by BN6_COLUMN_TIMER_SET */
+#define BN6_COLUMN_TIMER_SET  0x0800CC36u /* bn6f object_setPanelAllianceTimerLong (r0 column): its BN6_COLUMN_TIMER 0x708; called at */
+                                          /* ... 0x080C7D76, 0x080CE3EA, 0x080E795A and 0x0810D904 (Catack's) */
+#define BN6_COLUMN_SIDES      0x02034010u /* the columns' record, BN6_COLUMN_SIDES_SIZE a column (1-6 at + column * 8): +1 set as its timer
+                                           * ran out, +2 its panels of the other side's, +3 those of them nothing stands on, +4 and +5 their
+                                           * rows' masks (bn6f sub_800C6F0's four results), */
+#define BN6_COLUMN_TIMER      0x06        /* ... +6 u16 the timer, cleared where the column holds no panel of the other side's */
+#define BN6_COLUMN_SIDES_SIZE 8
+#define BN6_COLUMN_SIDES_RUN  0x0800C746u /* bn6f sub_800C746, each frame but in a pause or time freeze (0x0800BFD4): counts each column's
+                                           * timer down a frame, sets +1 at 0, then hands the taken panels of a run of such columns back
+                                           * where nothing stands on them (bn6f sub_800C81E: the side again, BN6_PANEL_SIDE_TIMER 0x5A) */
+#define BN6_CATACK_TAKE       0x0810D8E2u /* Catack (AI 7, ids 0x25-0x28; its state table 0x0810DA20) drove onto a panel: where it is not
+                                           * its side's (BN6_PANEL_FLAGS 0x20 against its side), BN6_PANEL_SIDE_SET and the timer, */
+#define BN6_CATACK_TAKE_END   0x0810D904u /* ... the last its bl to BN6_COLUMN_TIMER_SET */
+
+/* The first panel of a row that a filter takes, searched from the field's edge behind the object (bn6f
+ * object_getClosestPanelMatchingRowFiltered, from its r0: 1 the search runs right from column 1, 0 left from
+ * column 6; GolmHit's fist, the fourth kind's 0x3F, passes its alliance ^ flip ^ 1, so the edge behind it).
+ * Behind MegaMan between a Surrounded field's two sides lies the enemy's, so it found his back: issue #838 */
+#define BN6_ROW_SEARCH        0x0800D086u /* ... the routine: r0 the way, r1 the row, r2 and r3 the flags wanted set and clear */
+#define BN6_ROW_SEARCH_START  0x0800D09Cu /* ... adds r0,#6: the start column made (6 - 5 x r0), r5 the step, the object at [sp+4] */
+#define BN6_ROW_SEARCH_LOOP   0x0800D09Eu /* ... the loop from r0's column (push {r0-r3}; bl object_checkPanelParameters) */
+#define BN6_GOLMHIT_FIST      0x080E60F0u /* GolmHit's fist (the fourth kind's 0x3F; the misc family 0x1C's 0x15 spawns it, 0x080E630A,
+                                           * at its user's panel with its alliance and flip): its init 0x080E6110, the search 0x080E6144 */
+
+/* The way toward the enemy's side by an object's alliance alone (bn6f object_getEnemyDirection: +1 MegaMan's, -1 the
+ * enemy's), where object_getFrontDirection (0x0800E2CA) takes its flip too; 53 calls in Gregar's code */
+#define BN6_ENEMY_DIRECTION   0x0800E2C0u /* ... ldrb r0,[r5,#0x16], then object_getAllianceDirection's three (0x0800E2C2) and mov pc,lr */
+
+/* BN6_ROW_PANEL_ACROSS's (bn6_chips.h) two searches of the row, each from the edge of its side's across by its alliance alone
+ * (r0 alliance ^ 1 into BN6_ROW_SEARCH's way), which only BN4's moved Meteors calls: issue #846 */
+#define BN6_ROW_ACROSS_WAY    0x08016178u /* ... the first's eors r0,r1 (r0 the alliance, r1 1), the object in r5 */
+#define BN6_ROW_ACROSS_WAY2   0x08016192u /* ... the second's, the same */
+
+/* BN6's chips that take their start, their way or their flip from their side alone, the alliance (or 1) read into a register
+ * the next instruction takes, r5 the object: turned round with MegaMan on a Surrounded field (issue #846) */
+#define BN6_SANDWORM_FLIP     0x080E0546u /* SandWrm's worm (sub_80DECBC): strb r0,[r5,#0x17], r0 1: it faces back at its side */
+#define BN6_SANDWORM_FLIP2    0x080E088Au /* ... its body's segments (sub_80DF016), the same */
+#define BN6_BURNSQR_START     0x080BC8C2u /* BurnSqr's square (sub_80BB048): r0 the alliance, the table at 0x080BC904 its start (+0) and end
+                                           * (+2) columns, {5,2,1,6}, walked back toward its user */
+#define BN6_TENGU_DASH        0x080BB5FEu /* TenguMan's dash (sub_80B9D6E): lsls r0,#1, r0 the alliance, the start at 0x080BB6A4 by it */
+#define BN6_TENGU_DIVE        0x080BB6CAu /* ... his dive (sub_80B9E40): the same, the table at 0x080BB764 */
+#define BN6_AIRRAID_EDGE      0x080D4FF2u /* AirRaid's bomb with no foe ahead (sub_80D3770): r0 the alliance, ^ 1, x 5, + 1: the far edge */
+#define BN6_MAGNUM_START      0x080BCC16u /* Magnum's cursor (sub_80BB398): r0 the alliance, the start column at 0x080BCC64 by it ({6,1}) */
+#define BN6_BLASTMAN_START    0x080BA8D0u /* BlastMan's flames (sub_80B903A): lsls r4,#8, r0 their start column and r4 their way by the
+                                           * alliance alone (side 0: from column 0, right), each stopping at the first foe in its row */
 
 /* A panel flag (bn6.h's BN6_PANEL_FLAGS) */
 #define BN6_PANEL_SIDE_0      0x00010000u /* BN6_PANEL_FLAGS: an object of side 0 stands on it, what side 1's panel scans want: the Gunner's

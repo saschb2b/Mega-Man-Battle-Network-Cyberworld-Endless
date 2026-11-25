@@ -44,7 +44,7 @@ static int tier_of(const uint8_t *c) {
 
 bool chip_pool_older(int id) {
 	const XChipReg *r = xreg_at(id);
-	if (r) return xreg_own(r) && r->how != XREG_DARK && r->how != XREG_PA && r->type <= 2;
+	if (r) return xreg_own(r) && r->how != XREG_DARK && r->how != XREG_PA && r->how != XREG_CAPSULE && r->type <= 2;
 	const XChipReg4 *r4 = xreg4_at(id);
 	return r4 && r4->how != XREG_PA && r4->type <= 2 && r4->mb != XREG4_DARKCHIP_MB;
 }
@@ -111,7 +111,7 @@ static void load(void) {
 	for (int id = 1; id < MAX_CHIPS; ++id) add(CHIP_NET_BN6, id, chips_bn5(id) ? -1 : chip_pool_tier(id));
 	for (int i = 0; loaded_bn5 && i < xreg_count; ++i) {
 		const XChipReg *r = &xreg_rows[i];
-		add(CHIP_NET_BN5, r->bn6, r->how == XREG_DARK || r->how == XREG_PA ? -1 : chip_pool_tier(r->bn6));
+		add(CHIP_NET_BN5, r->bn6, r->how == XREG_DARK || r->how == XREG_PA || r->how == XREG_CAPSULE ? -1 : chip_pool_tier(r->bn6));
 	}
 	for (int x = 1; loaded_bn4 && x < BN4_CHIP_COUNT; ++x) {
 		int id = xchips_bn4_paid(x);

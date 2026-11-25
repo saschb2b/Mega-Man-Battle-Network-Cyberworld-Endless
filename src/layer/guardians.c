@@ -54,7 +54,8 @@ static const Guardian guardians[] = {
 	[32] = { "CloudMan", "Darkloid of the Storm", GUARDIAN_NO_MUGSHOT, -1, 200, 200, 216 },
 	[33] = { "CosmoMan", "Darkloid of the Stars", GUARDIAN_NO_MUGSHOT, -1, 144, 112, 224 },
 	/* BN5's Team ProtoMan (guardians.h GUARDIAN_TEAM_*), their Team Colonel partners' second guardians: Team Colonel's ROM
-	 * keeps no overworld sprite or face of theirs (guardian_older_sprite) (ProtoMan's own, DarkProto, his row once moved) */
+	 * keeps no overworld sprite or face of theirs (guardian_older_sprite); ProtoMan's own as DarkProto, his V2's name */
+	[59] = { "DarkProto", "Blade of the Old Dark", GUARDIAN_NO_MUGSHOT, -1, 152, 48, 96 },
 	[60] = { "GyroMan", "Ace of the Skies", GUARDIAN_NO_MUGSHOT, -1, 232, 200, 72 },
 	[61] = { "SearchMan", "The Silent Scope", GUARDIAN_NO_MUGSHOT, -1, 112, 152, 80 },
 	[62] = { "NapalmMan", "The Walking Arsenal", GUARDIAN_NO_MUGSHOT, -1, 232, 104, 48 },

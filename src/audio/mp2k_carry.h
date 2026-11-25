@@ -46,6 +46,11 @@ bool mp2k_carry_plays(const Mp2kGameMusic *g);
  * sounding on, the PSG's set going on the engine's; false where there is
  * no engine (no BN6 ROM) */
 bool mp2k_carry_in(const Mp2kGameMusic *g);
+/* ... and the game's PSG notes of its music, which the engine now
+ * sounds, silenced in `g` and on `to` (the game's registers) at once,
+ * rather than let BN6's envelope fade them as the music is quieted
+ * (fast forward, music_fast.c) */
+void mp2k_carry_hush(Mp2kGameMusic *g, const Mp2kRegs *to);
 /* ... and gives it back: `g` (as it was taken) made what the engine has
  * played since, the PSG's notes set on `to` (the game's registers), the
  * words of other tracks' lists the game must change too into `writes`
@@ -53,6 +58,16 @@ bool mp2k_carry_in(const Mp2kGameMusic *g);
  * player 31 stopped, its notes cut. -1, `g` untouched, where the engine
  * holds no song taken. */
 int mp2k_carry_out(Mp2kGameMusic *g, const Mp2kRegs *to, Mp2kWrite *writes);
+/* While the game's music player plays on unheard at another pace (fast
+ * forward, audio.h, music_fast_update), the engine's player 31 kept on what the game's
+ * plays, as its MusicPlayerInfo went from `was` to `now`
+ * (MP2K_PLAYER_BYTES each): a song begun there (another header, or its
+ * clock begun again) begun here from its start, on the game's ROM copy
+ * (mp2k_game_rom); a fade begun there begun here; a stop (m4aMPlayStop's
+ * pause, its tracks kept) and a continue the same; the tempo's factor
+ * taken (m4aMPlayTempoControl). A song's own end there, or a fade's, is
+ * left to the engine's own pace. */
+void mp2k_carry_follow(const uint8_t *was, const uint8_t *now);
 /* The engine's player 31 stopped, its notes cut, nothing given back */
 void mp2k_carry_drop(void);
 

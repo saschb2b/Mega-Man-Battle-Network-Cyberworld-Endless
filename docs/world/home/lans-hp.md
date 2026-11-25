@@ -3,7 +3,7 @@ type: Feature
 title: "Lan's HP after an act, the warp zone"
 description: "Lan's HP as the run's warp zone (`lanhp.c`): an act's exit pad leads there, BN6's link squares and pink pad become this run's portals as guardians fall, the courier, ways on and back."
 tags: [world, home]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:00:00Z }
 ---
 
 # Lan's HP after an act, the warp zone
@@ -104,8 +104,10 @@ BN6's "!!" burst over his head (sprite list 5's `0x07`, the burst AsterLand
 paints beside its counter; there it is the map's own tiles, so the HP
 shows BN6's sprite of it). Talked to, he names what waits and where in a
 Mr.Prog's capitals, the most valuable first, a box each (`home_words.c`):
-a finished request's pay with its asker ("REWARD WAITING! THE NETBATTLE
-CLUB,THE ACADEMY!"), else the new requests posted while none is held, by
+the held request, once it is up for settling, he settles himself in its
+asker's name (issue #841, [Jobs](jobs.md), Settled in Lan's HP: the pay
+handed over, "DELIVERY,DELIVERY!", a Bring request's chip taken to
+AsterLand, or the asker's word where it was not done), else the new requests posted while none is held, by
 place ("NEW REQUESTS POSTED! ASTERLAND,THE ACADEMY AND TOWN!"; at the
 run's first visit, before its first layer, when nothing is new yet,
 "REQUESTS ARE UP AT ASTERLAND,THE ACADEMY AND TOWN!", session 74), then the

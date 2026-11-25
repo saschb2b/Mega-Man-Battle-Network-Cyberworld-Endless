@@ -15,6 +15,7 @@
 #include "online_transport.h"
 #include "online_week.h"
 #include "online_wire.h"
+#include "square_looks_pick.h"
 #include "pet_carry.h"
 #include "platform.h"
 #include "rom.h"
@@ -81,6 +82,13 @@ static void positions(void) {
 	/* (v19: bit 7, he dives, the last bit free; a Square's peers never have it, a dive room's all do) */
 	bytes[51] = ONLINE_PEER_DIVING; assert(online_wire_message(bytes, ONE, 100, &out) && out.peers[0].diving && !out.peers[0].roms);
 	bytes[51] = 0; assert(online_wire_message(bytes, ONE, 100, &out) && !out.peers[0].diving);
+	/* (v30: his look's six bytes after them, three palettes then three colours: a channel BN6's own, or in range) */
+	static const uint8_t look[6] = { 3, ONLINE_LOOK_NONE, 11, 15, ONLINE_LOOK_NONE, 0 };
+	memcpy(bytes + 52, look, sizeof look);
+	assert(online_wire_message(bytes, ONE, 100, &out) && !memcmp(out.peers[0].look, look, sizeof look));
+	bytes[52] = ONLINE_LOOK_PALETTES; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[52] = 3;
+	bytes[55] = ONLINE_LOOK_COLOURS; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[55] = 15;
+	bytes[53] = 0; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[53] = ONLINE_LOOK_NONE;
 	for (size_t size = 0; size < ONE; ++size) assert(!online_wire_message(bytes, size, 100, &out));
 	bytes[34] = 8; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[34] = 7;
 	online_put32(bytes + 22, 8193); assert(!online_wire_message(bytes, ONE, 100, &out));
@@ -776,7 +784,49 @@ static void dive_seated(void) {
 	assert(dive_seats(four, 5, d, 0, 0, 0) == 0 && !four[0] && !four[3]);
 }
 
+
+/* the Square's peers' looks (issue #854): as many as the part has room for, the nearest first */
+static Look look_of(int p) {
+	Look l;
+	for (int c = 0; c < LOOK_CHANNELS; ++c) { l.palette[c] = (uint8_t)p; l.colour[c] = (uint8_t)c; }
+	return l;
+}
+
+static void peer_looks(void) {
+	Look plain;
+	for (int c = 0; c < LOOK_CHANNELS; ++c) plain.palette[c] = plain.colour[c] = LOOK_NONE;
+	LookPeer peers[5];
+	for (int i = 0; i < 5; ++i) peers[i] = (LookPeer){ look_of(i + 1), 100 - i * 10, false };
+	bool shown[5];
+	/* (MegaMan in BN6's own colours: three looks, the nearest three; the rest drawn as MegaMan, no palette more) */
+	square_looks_pick(peers, 5, &plain, 3, 0, shown);
+	assert(!shown[0] && !shown[1] && shown[2] && shown[3] && shown[4]);
+	/* (MegaMan in a look of his own: BN6's own colours for those left over take one of the three) */
+	Look own = look_of(9);
+	square_looks_pick(peers, 5, &own, 3, 0, shown);
+	assert(!shown[0] && !shown[1] && !shown[2] && shown[3] && shown[4]);
+	/* (a peer in MegaMan's look, or in one drawn already, costs nothing) */
+	peers[0].look = own; peers[1].look = look_of(5);
+	square_looks_pick(peers, 5, &own, 3, 0, shown);
+	for (int i = 0; i < 5; ++i) assert(shown[i]);
+	/* (one look more than the room: the farthest in BN6's own colours, which take a palette, so two of them) */
+	peers[0].look = look_of(7);
+	square_looks_pick(peers, 5, &own, 3, 0, shown);
+	assert(!shown[0] && shown[1] && !shown[2] && shown[3] && shown[4]);
+	/* (one drawn in his look keeps it against one a step nearer) */
+	for (int i = 0; i < 5; ++i) peers[i] = (LookPeer){ look_of(i + 1), 100 + i, i == 4 };
+	square_looks_pick(peers, 5, &plain, 1, 24, shown);
+	assert(shown[4] && !shown[0]);
+	square_looks_pick(peers, 5, &plain, 1, 0, shown);
+	assert(shown[0] && !shown[4]);
+	/* (a peer in BN6's own colours beside MegaMan in them: free) */
+	peers[1].look = plain;
+	square_looks_pick(peers, 5, &plain, 1, 0, shown);
+	assert(shown[0] && shown[1]);
+}
+
 int main(void) {
+	peer_looks();
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
 	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass(); spares_list(); pet_carried();

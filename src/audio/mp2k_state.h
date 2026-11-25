@@ -133,6 +133,9 @@ uint32_t mp2k_u32(uint32_t addr);
 void mp2k_read(int rom);
 uint8_t mp2k_lib_u8(uint32_t addr);
 uint32_t mp2k_lib_u32(uint32_t addr);
+/* (mp2k.c) the song whose header is at `header` of ROM `rom` (being read:
+ * mp2k_read) begun on `pl` (MPlayStart) */
+void mp2k_player_start(Mp2kPlayer *pl, int rom, uint32_t header);
 /* (mp2k_seq.c) a frame of every player, BN6's order: MPlayMain */
 void mp2k_players_frame(void);
 /* (mp2k_note.c) a note (ply_note), its end (ply_endtie), a track's volume and

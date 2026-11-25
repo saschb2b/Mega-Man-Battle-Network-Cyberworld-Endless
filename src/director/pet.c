@@ -14,9 +14,9 @@
 #include "library.h"
 #include "netpass_screen.h"
 #include "online_visit.h"
-#include "pet_forms.h"
 #include "pet_menu.h"
 #include "pet_options.h"
+#include "pet_screens.h"
 #include "pet_text.h"
 #include "platform.h"
 #include "rom.h"
@@ -81,7 +81,7 @@ void pet_update(void) {
 	if ((director_in_town() || director_in_hp()) && emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME && !pet_text_items_held())
 		pet_text_items();
 	pet_options_update();
-	pet_forms_update();
+	pet_screens_update();
 	/* (A on Library: the Library opens over the PET's menu, the game held under it) */
 	if (emu_read8(BN6_PET_MENU_TAKEN) == BN6_PET_ENTRY_LIBRARY) {
 		emu_write8(BN6_PET_MENU_TAKEN, 0);
@@ -121,7 +121,7 @@ int pet_key_item(void) {
 }
 
 bool pet_holds(void) {
-	bool juke = jukebox_update(), lib = library_update(), forms = pet_forms_holds();
+	bool juke = jukebox_update(), lib = library_update(), forms = pet_screens_holds();
 	return juke || lib || forms;
 }
 
@@ -138,17 +138,18 @@ void pet_describe(FILE *f) {
 	jukebox_describe(f);
 	library_describe(f);
 	pet_menu_describe(f);
-	pet_forms_describe(f);
+	pet_options_describe(f);
+	pet_screens_describe(f);
 }
 
-bool pet_second_follows(void) { return library_shown() || pet_forms_shown(); }
+bool pet_second_follows(void) { return library_shown() || pet_screens_second(); }
 
 bool pet_plays_music(void) { return jukebox_shown(); }
 
 void pet_leave(void) {
 	jukebox_shut();
 	library_shut();
-	pet_forms_leave();
+	pet_screens_leave();
 }
 
 void pet_draw(void) {
@@ -163,7 +164,7 @@ void pet_draw(void) {
 	library_draw();
 	frame_part_end("library", t);
 	t = frame_part_begin();
-	pet_forms_draw();
+	pet_screens_draw();
 	frame_part_end("forms", t);
 }
 

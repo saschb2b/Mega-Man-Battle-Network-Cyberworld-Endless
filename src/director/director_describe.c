@@ -92,6 +92,13 @@ static void describe_body(FILE *f) {
 	else fprintf(f, "body %d\n", player_body_now());
 }
 
+/* Lan's place in the town; on a layer its map over the picture: shown,
+ * or opened and hidden by a chat (issue #840) */
+static void describe_place(FILE *f) {
+	if (D.town) fprintf(f, "place %s\n", director_place_name());
+	else fprintf(f, "map %s\n", director_map_over() ? "open" : D.map_open ? "hidden" : "closed");
+}
+
 void director_describe(FILE *f) {
 	/* (off the run's maps, the Net Square's visit: where MegaMan stands, for a tour's walk) */
 	if (!D.active) { fprintf(f, "where none\npos %d %d %d\n", bn6_player_x(), bn6_player_y(), bn6_player_z()); return; }
@@ -102,11 +109,12 @@ void director_describe(FILE *f) {
 	/* (what of BN6 holds him, issue #23: none where Lan or MegaMan stands free) */
 	fprintf(f, "held %s\n", held_names(bn6_held()));
 	describe_body(f);
+	looks_describe(f);   /* (MegaMan's look and the palettes holding it: docs/game/looks.md) */
 	/* (the game's own count of its main loop's frames: one that stands while
 	 * the engine's frames go on is a game standing still, issue #482;
 	 * tools/old_checkpoint.py watches it) */
 	fprintf(f, "gameframe %u\n", emu_read16(BN6_FRAME_COUNT));
-	if (D.town) fprintf(f, "place %s\n", director_place_name());
+	describe_place(f);
 	/* (GameState's protected zenny, then its BugFrags) */
 	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	save_mask_describe(f);   /* (BN6's own save's mask: issue #734) */
@@ -119,6 +127,7 @@ void director_describe(FILE *f) {
 		fprintf(f, "battlestep %s\n", battle_word());
 	}
 	director_quit_describe(f);
+	looks_routes_describe(f);   /* (the palettes owned and said, the run's rare find: docs/game/looks-earning.md) */
 	describe_turns(f);
 	battle_describe(f);
 	battle_state_describe(f);

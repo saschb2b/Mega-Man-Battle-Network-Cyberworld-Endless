@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "layer_objs.h"
+#include "looks_due.h"   /* (MegaMan's palettes got: each frame on the map, the state's lines) */
 #include "navicust.h"
 #include "rom.h"
 #include "runlog.h"
@@ -97,7 +98,11 @@ typedef struct {
 	int counts_t;                  /* frames L's Mystery Data counters stay once its words are gone */
 	int walk_to, walk_t;           /* the NPC slot MegaMan walks up to after an A short of it, frames left */
 	bool dir_held;         /* a direction is held this frame */
-	bool map_shown;        /* SELECT is held on a layer's map: the map shows */
+	bool map_shown;        /* the layer's map shows this frame (SELECT's, director_keys.c's map_keys) */
+	bool map_open;         /* ... opened by SELECT's press, until the next or until it is held long (issue #840) */
+	bool select_held;      /* SELECT was down last frame */
+	bool select_chord;     /* L or R was pressed while SELECT was down (the dev menu's SELECT+R): a hold */
+	uint64_t select_at;    /* the platform's frame SELECT went down at */
 	uint8_t seen[MAP_H][MAP_W];   /* panels MegaMan has come near on this layer */
 	bool arrow_pending;    /* the way-on arrow lasts until a little after L's words close */
 	int free_x, free_y;    /* MegaMan's last place clear of every NPC */

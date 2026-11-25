@@ -115,6 +115,10 @@ void profile_load(void) {
 		if (profile.runs) profile.heard |= HEARD_DEALER | HEARD_FIRST_DIVE;
 		profile.heard |= HEARD_KEPT;
 	}
+	/* (the shelf's bytes held the virus families battled before: nothing
+	 * heard, the floor's count not begun) */
+	if (profile.shelf.kept != SHELF_KEPT) profile.shelf = (FolderShelf){ .kept = SHELF_KEPT };
+	looks_profile_loaded();
 }
 
 void save_init(void) {

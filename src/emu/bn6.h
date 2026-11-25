@@ -80,6 +80,9 @@
 #define BN6_NPC_X16           0x26        /* X16, Y16, Z16: its position's whole world units (s16) */
 #define BN6_NPC_Y16           0x2A
 #define BN6_NPC_Z16           0x2E
+#define BN6_NPC_PALETTE       0x16        /* PaletteIndex: the palette of its sprite's block it is drawn in, set into its sprite each frame
+                                             (bn6f npc.s, sprite_setPalette after sprite_update; NPC command 0x0F sets it) */
+#define BN6_NPC_SCRIPT_AT     0x4C        /* AnimationScriptPtr: where its NPC script stands (a puppet's within its script, puppet.h) */
 #define BN6_MUSIC_PLAYER      0x02010890u /* MP2K MusicPlayerInfo of the music (player 31) */
 #define BN6_MUSIC_STATUS      (BN6_MUSIC_PLAYER + 4)  /* its status: bit 31 stopped */
 #define BN6_MUSIC_STOPPED     (1u << 31)  /* BN6_MUSIC_STATUS: stopped */
@@ -304,22 +307,12 @@
 #define BN6_VENDOR_FACE       0x087F046Au /* shop 3's keeper text (LZ77 at 0x087F0420): the literal face byte of its first F5 00, which its other six copy (0x42) */
 #define BN6_SHOP_INIT         0x08047D70u /* the shop data a new game copies to ShopDataPtr */
 
-/* Chip Traders (src/layer/trader.c) */
-#define BN6_TRADER_TEXT       0x086C3758u /* TextScriptChipTrader: 0 Chip Trader, 6 Special, 12 BugFrag Trader */
-#define BN6_TRADER_POOLS      0x0804CDE0u /* 5 x (map key, chip list, rarity weights): prizes by the trader's map */
-#define BN6_TRADER_KINDS      0x0809B7E4u /* 6 x (map key, u8 trader script): which lines the trade screen shows */
-#define BN6_TRADER_MODES      0x0804BDCCu /* 2 weights: the prize one the Library has (192) or a new one (64) */
-/* the BugFrag Trader's trade, which BN6's trader machine makes on the
- * Undernet's map (bn6f sub_809A078; director_folder.c bugfrag_trade) */
+/* Chip Traders and their screen: bn6_trader.h; the trade's state (eS200AC80) here */
 #define BN6_TRADER_STATE      0x0200AC80u /* eS200AC80 */
 #define BN6_TRADER_STATE_PRIZE (BN6_TRADER_STATE + 0x04) /* the prize's chip, then its code (u16 each) */
 #define BN6_TRADER_STATE_30   (BN6_TRADER_STATE + 0x30) /* u16 the machine clears with the prize after a trade */
-#define BN6_TRADER_RESET      0x0804B0ADu /* bn6f sub_804A2E8: clears the trade's state and the submenu's */
-#define BN6_TRADER_PRIZE      0x0804CAC5u /* bn6f sub_804BD00: a prize from the map's pool, r0 its chip, r1 its code */
-#define BN6_GIVE_CHIPS        0x08021AEFu /* GiveChips (chip, code, count) */
-#define BN6_TAKE_BUGFRAGS     0x0803D09Du /* TakeBugfrags (count) */
-#define BN6_SAVE_GAME         0x0803F76Du /* bn6f sub_803F798: the game saved to the cartridge, as after every trade */
-#define BN6_FLAG_TRADER_HOWL  0xF6        /* EVENT_F6: the machine's howl, set by the trade's script; the machine clears it */
+#define BN6_TRADER_AMOUNT     BN6_TRADER_STATE_30       /* ... the chips the screen takes, as ts_start_chip_trader gave it (bn6f sub_804A2CC, Gregar 0x0804B09C) */
+#include "bn6_trader.h"
 
 /* ROM code */
 #define BN6_AWAIT_FRAME_LOOP  0x080003A6u /* bn6f main_awaitFrame (0x080003A0): its loop polling DISPSTAT for VBlank, ldrh r1,[r0] */
@@ -390,6 +383,7 @@
 #include "bn6_ai.h"   /* the battle's AI data: its pool of eight (issue #182) */
 #include "bn6_link.h"   /* the link battle's keys into a player, the Practice NetBattle's list (epic #167) */
 #include "bn6_forms.h"   /* MegaMan's forms: the tables by form, the code that reads it, a Cross chosen (issue #82) */
+#include "bn6_look.h"   /* MegaMan's colours: his palettes and their ramps, the OBJ palette slots (issue #854) */
 #include "bn6_navis.h"   /* the battle engine's Navis: their tables by AI index, the routines they name, their arm points (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
 #include "bn6_sound.h"   /* the sound engine (MP2K): its RAM, its tables, its routines */
