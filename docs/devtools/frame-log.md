@@ -39,3 +39,17 @@ and its scale. The 3DS's line also says the GPU's time drawing a frame
 and in 3D a frame's bodies and quads, so a frame held back by the GPU
 tells itself from one held back by the main core; "show" is the canvas
 put into the GPU's texture by SDL, before the present's own parts.
+
+Each line also says how the core's sound fared: "the sound ran dry N
+times, M samples of silence" where the device asked the ring
+(`src/emu/emu_sound.c`) for more than it held and was given silence for
+the rest, each one a crack heard, or "the sound's buffer N samples at
+least", the least it held as a read began. The ring is kept near 1536
+samples (32 ms) and the 3DS's device reads 1024 at a time, so one frame
+shown late leaves a read short. Then "the longest present" of the second,
+and what "the line before" took to write: on the 3DS a line goes to the
+SD card as it is printed, on the thread the frames are paced on, so the
+log's own line is among what can hold a frame back (issue #897: with
+`frame_log = on` a New 3DS showed 59 frames every second of play, one
+gap of 33 ms in each, and 60 to 61 on the title, where no refresh is
+waited for).

@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "emu.h"
+#include "emu_sound.h"
 #include "platform.h"
 #include "platform_second.h"
 #ifdef __3DS__
@@ -119,6 +120,11 @@ void frame_log_drawn(void) { emu_drawing = false; }
 
 void frame_log_present(uint64_t present) {
 	part_present += present;
+	/* (the longest present of the second, and what the line before took to
+	 * write: on the 3DS a line goes to the SD card as it is printed, on the
+	 * thread the frames are paced on) */
+	static uint64_t present_longest, wrote;
+	if (present > present_longest) present_longest = present;
 	static int log_on = -1;
 	if (log_on < 0) log_on = platform_frame_log || getenv("CYBERWORLD_FRAME_LOG") != NULL;
 	if (!log_on) return;
@@ -140,9 +146,9 @@ void frame_log_present(uint64_t present) {
 		extern int emu_core_unshown;
 		int drawn = part_played - emu_core_unshown;
 #ifdef __3DS__
-		char bottom[900] = "";
+		char bottom[1100] = "";
 #else
-		char bottom[480] = "";
+		char bottom[680] = "";
 #endif
 		uint64_t second_ticks;
 		int seconds = platform_second_parts(&second_ticks);
@@ -154,6 +160,20 @@ void frame_log_present(uint64_t present) {
 			snprintf(bottom + k, sizeof bottom - k, "; depth lighting %.1f ms at %dx", depth_ticks * ms / depth_frames, depth_scale);
 			depth_ticks = 0;
 			depth_frames = 0;
+		}
+		/* (the core's sound: the device's reads its ring could not fill, each
+		 * a crack heard, and the least it held as a read began) */
+		int dry, silence, least;
+		emu_sound_dry(&dry, &silence, &least);
+		if (least >= 0) {
+			size_t k = strlen(bottom);
+			if (dry) snprintf(bottom + k, sizeof bottom - k, "; the sound ran dry %d times, %d samples of silence", dry, silence);
+			else snprintf(bottom + k, sizeof bottom - k, "; the sound's buffer %d samples at least", least);
+		}
+		{
+			size_t k = strlen(bottom);
+			snprintf(bottom + k, sizeof bottom - k, "; the longest present %.1f ms, the line before written in %.1f ms", present_longest * ms, wrote * ms);
+			present_longest = 0;
 		}
 		/* (and reads of the game that waited, drawing, for the next frame) */
 		if (emu_draw_waits) {
@@ -178,6 +198,7 @@ void frame_log_present(uint64_t present) {
 			snprintf(bottom + at, sizeof bottom - at, "; %s", heap);
 		}
 #endif
+		uint64_t write0 = SDL_GetPerformanceCounter();
 		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
 			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms,"
 			" the longest update and drawing %.1f ms%s\n",
@@ -188,6 +209,7 @@ void frame_log_present(uint64_t present) {
 		emu_core_ticks = emu_core_unshown_ticks = 0;
 		emu_core_unshown = 0;
 		fflush(stdout);
+		wrote = SDL_GetPerformanceCounter() - write0;
 		shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
 		part_update = part_draw = part_present = part_longest = 0;
 		part_played = 0;

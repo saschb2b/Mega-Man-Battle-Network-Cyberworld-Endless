@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-25T14:20:00Z
+* **Update**: devtools/frame-log.md (the sound's dry reads and least fill, the longest present, what the line before took to write; issue #897).
