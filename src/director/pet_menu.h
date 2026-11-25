@@ -50,14 +50,18 @@ void pet_menu_see(void);
 #define PET_MENU_BAND 16
 bool pet_menu_covers(void);
 void pet_menu_under(const uint32_t *v, uint32_t (*shade)(uint32_t c, int y));
+/* Whether the game's next frame may run without its picture: the menu up
+ * and taking input for a few frames, the cursor off EXIT */
+bool pet_menu_unshown(void);
 /* The picture: BN6's own frame of its menu `px` (240 x 160, the core's
  * pixels) laid out again, while the menu takes input (pet_menu_frame.c);
  * drawn from what pet_menu_see read, it reads nothing of the game */
 void pet_menu_frame(uint32_t *px);
 /* Whether the map's picture was kept for the menu to stand on (BN6's teal where not) */
 bool pet_menu_field_kept(void);
-/* The state in words: `petmenu at ENTRY` while it is up, and `petfield kept`
- * or `none`, the field behind it; reads only */
+/* The state in words: `petmenu at ENTRY` while it is up, `petfield kept`
+ * or `none`, the field behind it, and `petpicture kept` or `live`, BN6's
+ * own picture of the menu (pet_menu_unshown); reads only */
 void pet_menu_describe(FILE *f);
 
 #endif

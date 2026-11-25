@@ -160,6 +160,8 @@ static struct {
 	Icon icons[ICONS];
 	uint8_t icon[ICONS][4][32];
 } seen;
+static unsigned still;               /* the game's frames in a row with the menu taking input, the cursor off EXIT (pet_menu_unshown) */
+static unsigned same;                /* ... and the pictures in a row whose part the menu reads stood the same (pet_menu_under) */
 static bool map_seen, map_left;      /* on the map at a frame since the last picture; or at the frame before one (the frame the PET opens in) */
 
 /* a button from its 9 x 2 map and tiles, its letters (colour `ink`) in `ink_to` */
@@ -345,6 +347,42 @@ void pet_menu_see(void) {
 	if (seen.on_map) map_seen = true;
 	else if (was_map) map_left = true;
 	if (seen.up && over(seen.state)) read_kit();
+	/* (the frames in a row the menu has taken input, the cursor off EXIT: pet_menu_unshown) */
+	bool input = seen.up && seen.state == 4 && seen.kit && !map_seen && !map_left && pet_menu_cursor() != PM_EXIT;
+	still = input ? still + 1 : 0;
+	if (!input) same = 0;
+}
+
+/* BN6's own picture of its menu is not needed again once the menu takes
+ * input: ours is drawn from the game's memory (the buttons, the icons and
+ * their bob, the lit row's ink) and from BN6's band, panel, PLACE and EXIT,
+ * which stand as they stood. So the game's frames run without their
+ * picture there (pet_menu_unshown), the last one drawn kept: once BN6's
+ * panel has stood the same for STILL_SAME pictures in a row and the menu
+ * has taken input for STILL_AFTER frames (PLACE's name typed out), and
+ * not while the cursor is on EXIT, whose capsule BN6 pulses. What stands still that
+ * moved before is the field seen through the band, as the field under the
+ * menu already stood, kept from the map.
+ *
+ * On a New 3DS mGBA draws the GBA's picture on the main processor core.
+ * BN6's PET screen over the net's field, its floors and backdrop under
+ * the blend, is a dearer picture than over the town's: with the menu up
+ * on a layer half the frames' own work ran past a refresh and 45 to 53
+ * were shown a second, where the town showed 60 (log.txt, 25 November
+ * 2026, issue #897; the owner's lead that it was the net's alone). */
+#define STILL_SAME 8
+#define STILL_AFTER 40   /* the frames of input PLACE's name is typed out in, and more */
+
+bool pet_menu_unshown(void) { return still >= STILL_AFTER && same >= STILL_SAME; }
+
+/* BN6's panel as `src` holds it, in a number: the part of its pieces no
+ * field shows through (PLACE's name and EXIT's corners stand over the
+ * field, which moves on under the menu, the net's backdrop for one) */
+static uint32_t pieces_hash(void) {
+	uint32_t h = 2166136261u;
+	for (int y = 26; y < 98; ++y)
+		for (int x = 136; x < 224; ++x) h = (h ^ get(x, y)) * 16777619u;
+	return h;
 }
 
 /* Whether the menu's picture stands over the frame now: every row under
@@ -353,6 +391,13 @@ void pet_menu_see(void) {
 bool pet_menu_covers(void) { return seen.up && over(seen.state) && seen.kit && !map_seen && !map_left; }
 
 void pet_menu_under(const uint32_t *v, uint32_t (*shade)(uint32_t c, int y)) {
+	/* (no new picture of the game's since the last taken: a frame run without one, or the game held) */
+	static uint32_t taken_of;
+	static bool taken_any;
+	taken = true;
+	if (taken_any && taken_of == emu_pictures()) return;
+	taken_of = emu_pictures();
+	taken_any = true;
 	for (int y = 0; y < SRC_H; ++y) {
 		const uint32_t *from = v + (y + SRC_Y) * W + SRC_X;
 		uint32_t *to = src + y * SRC_W;
@@ -360,7 +405,11 @@ void pet_menu_under(const uint32_t *v, uint32_t (*shade)(uint32_t c, int y)) {
 		else for (int x = 0; x < SRC_W; ++x) to[x] = shade(from[x], y + SRC_Y);
 	}
 	teal_now = shade ? shade(v[100 * W], 100) : v[100 * W];
-	taken = true;
+	/* (BN6's panel alone compared: the field beside it moves on) */
+	static uint32_t was;
+	uint32_t now = pieces_hash();
+	same = now == was ? same + 1 : 0;
+	was = now;
 }
 
 void pet_menu_frame(uint32_t *px) {

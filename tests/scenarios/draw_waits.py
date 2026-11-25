@@ -11,7 +11,9 @@ walks a part of the game with what is drawn over it up (SELECT's map left
 open, the PET's menu, a battle, the town) and holds the count at 0
 (docs/engine/emulation/thread.md, Nothing drawn reads the game). The PET's
 menu stands on the map's picture, kept as START goes down now where it was
-copied every other frame: `petfield kept` says it was."""
+copied every other frame: `petfield kept` says it was. And once the menu
+stands still, the game's frames run without BN6's own picture of it
+(`petpicture kept`), drawn again while the cursor is on EXIT."""
 import cw_routes
 
 THREAD = 'CYBERWORLD_EMU_THREAD=1 '
@@ -41,6 +43,13 @@ MANY = {
         ('repeat', 'press START; wait 40', 'screen=pet', 6),
         ('expect', 'petmenu=at ChipFolder'),
         ('expect', 'petfield=kept'),                            # the map's picture behind it, kept as START went down
+        ('do', 'wait 120'),                                     # BN6's panel slid in, PLACE's name typed
+        ('expect', 'petpicture=kept'),                          # ... and its picture kept: the game's frames run without it
+        ('do', 'press RIGHT; wait 10; press RIGHT; wait 30'),
+        ('expect', 'petmenu=at EXIT'),
+        ('expect', 'petpicture=live'),                          # EXIT pulses under the cursor: drawn again
+        ('do', 'press LEFT; wait 30'),
+        ('expect', 'petpicture=kept'),
         ('do', 'press DOWN; wait 30; press RIGHT; wait 30'),
         ('repeat', 'press B; wait 40', 'screen=map', 8),
         ('do', 'wait 30'),

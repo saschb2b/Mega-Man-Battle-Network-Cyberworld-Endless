@@ -147,7 +147,24 @@ takes its pieces' part straight from the core's frame (`pet_menu_under`:
 columns 128 on, rows 24 on), and the field's is the one whole copy left.
 That is exact because nothing else edits the picture then: the board's
 tint, the dark way's mark and a Glitch layer's frame go by the map alone,
-and the town's hour is 0 in the PET. BN6 loads the Status icon for Forms because the engine grows BN6's
+and the town's hour is 0 in the PET.
+
+Once the menu stands still, BN6's own picture of it is not drawn again
+(`pet_menu_unshown`; where the GBA's core has a thread of its own, the New
+3DS and the Vita). Ours is drawn from the game's memory (the buttons, the
+icons and their bob, the lit row's ink) and from BN6's band, panel, PLACE
+and EXIT, which stand as they stood, so the game's frames run without
+their picture and the last one drawn is kept: once the menu has taken
+input for 40 frames (PLACE's name typed out) and BN6's panel has stood the
+same for 8 pictures, and not while the cursor is on EXIT, whose capsule
+BN6 pulses. The state says `petpicture kept` or `live`. What stands still
+that moved before is the field seen through the band, and nine pixels at
+EXIT's corners: the field under the menu stood already, kept from the map.
+The reason is the New 3DS on the net: mGBA draws the GBA's picture on the
+main processor core, BN6's PET screen over a layer's floors and backdrop
+is a dearer picture than over the town, and with the menu up on a layer
+half the frames' own work ran past a refresh, 45 to 53 shown a second
+where the town showed 60 (`log.txt`, 25 November 2026). BN6 loads the Status icon for Forms because the engine grows BN6's
 lists of the menu's icons by a ninth, resting under the screen
 (`pet_menu_install`; [The PET and the second screen](../rom/pet-and-second-screen.md),
 the PET menu's icons). It stands while BN6's menu takes input, closes, fades to

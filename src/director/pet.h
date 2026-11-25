@@ -35,6 +35,10 @@ bool pet_second_follows(void);
 /* ... and whether it plays its own music meanwhile (the Jukebox's songs):
  * the game's then waits for it (audio.h, music_carry_held) */
 bool pet_plays_music(void);
+/* How the game's next frame is to run where its core has a thread of its
+ * own (emu.h's EMU_FRAME_UNSHOWN or 0): without its picture while our
+ * start menu takes input (pet_menu.h) */
+unsigned pet_frame_how(void);
 /* The state in words: the folder MegaMan holds (director_folder.h), the
  * SubChips held (MiniEnrg, FullEnrg, SneakRun, Untrap; the Unlockers are
  * holds_describe's), the mails in the PET and those unread, and the PET's
