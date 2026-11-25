@@ -45,6 +45,14 @@ static const uint8_t team_chaos_powers[] = { 0x06, 0x39, 0x30, 0x37, 0x35, 0x36 
 #define TEAM_AT (SOUL_POWER_TEAM - SOUL_POWER_FIRST)   /* their first entry past BN6's own */
 #define TEAM_CHAOS_AT (TEAM_AT + (int)sizeof team_empty_powers)
 #define TEAM_MOVED_AT (TEAM_CHAOS_AT + (int)sizeof team_chaos_powers)
+/* BN4's Souls' own power attacks past their charged shots, at a fixed place past Team ProtoMan's: two by k, its chip charge where
+ * no empty power of BN5's has its charge times (an empty one, its charge times BN4's: FireSoul's 50), then a plain shot or a
+ * B-left of its own (none yet) */
+#define BN4_MORE_AT (SOUL_POWER_BN4_MORE - SOUL_POWER_FIRST)
+#define BN4_MORE_EACH 2
+#define BN4_MORE_END (BN4_MORE_AT + BN4_MORE_EACH * SOULS_HELD_BN4_ALL)
+enum { MORE_CHIP, MORE_OTHER };
+static bool bn4_chip_own(const SoulBn4 *s);
 /* ... their chaos ones' DarkChips (BN5's 0x0800F660, 0x0800FA86, 0x0800FA2C, 0x0800FA72, 0x0800FA5E, 0x0800FA68: DrkSword, DarkTorn,
  * DarkCirc, DarkMetr, DarkThnd, DrkRecov), each a stub of ours at SOULS_TEAM_CHAOS as Team Colonel's are Chaos Unison's Thumb */
 static const uint16_t team_chaos_chips[] = { 0xBC, 0xC5, 0xBB, 0xC3, 0xC1, 0xC2 };
@@ -128,6 +136,16 @@ static uint32_t routine_of(int i, int *id5) {
 	}
 	if (i < TEAM_CHAOS_AT) {
 		*id5 = team_empty_powers[i - TEAM_AT];
+		return BN6_POWER_EMPTY | 1;
+	}
+	if (i >= BN4_MORE_AT && i < BN4_MORE_END) {
+		/* (BN4's own: an empty one where its Soul's chip charge takes one, its charge times BN4's) */
+		int k = (i - BN4_MORE_AT) / BN4_MORE_EACH;
+		*id5 = (i - BN4_MORE_AT) % BN4_MORE_EACH == MORE_CHIP && k < nbn4 && bn4_chip_own(&bn4s[k]) ? -3 : -2;
+		return BN6_POWER_EMPTY | 1;
+	}
+	if (i >= TEAM_MOVED_AT + nteam) {
+		*id5 = -2;   /* (a gap past Team ProtoMan's) */
 		return BN6_POWER_EMPTY | 1;
 	}
 	*id5 = c->powers[c->npowers_colonel + i - TEAM_MOVED_AT].id;
@@ -214,6 +232,7 @@ static bool grown(int n, uint8_t powers[4 * 0x100], uint8_t charges[BN6_CHARGE_R
 		put32(powers + 4 * (BN6_POWER_ATTACK_COUNT + i), routine);
 		uint8_t *row = charges + BN6_CHARGE_ROW * (BN6_POWER_ATTACK_COUNT + i);
 		if (id5 == -2) memset(row, 0, BN6_CHARGE_ROW);
+		else if (id5 == -3) memcpy(row, bn4s[(i - BN4_MORE_AT) / BN4_MORE_EACH].chip_charge, BN6_CHARGE_ROW);
 		else if (id5 < 0) memcpy(row, bn4s[i - nmoved - (int)sizeof empty_powers - nchaos].charge, BN6_CHARGE_ROW);
 		else memcpy(row, b5 + (BN5_CHARGE_TIMES - BUS) + BN6_CHARGE_ROW * (uint32_t)id5, BN6_CHARGE_ROW);
 		for (int k = 0; (breaks & SOULPOWER_BREAK_CHARGE) && k < BN6_CHARGE_ROW / 2; ++k) put16(row + 2 * k, get16(row + 2 * k) + 10);
@@ -222,16 +241,26 @@ static bool grown(int n, uint8_t powers[4 * 0x100], uint8_t charges[BN6_CHARGE_R
 }
 
 /* Team Colonel's and BN4's Souls' loadouts into rows; false where one of Team Colonel's names a power attack not there */
-/* A BN4 Soul's chip charge (its power attack BN4's empty routine, its charge times alone serving) as BN5's empty power whose
- * charge times are the same, BN6's id of it (AquaSoul's 20 at every Charge: ToadSoul's 0x1B), NONE where it has none or no
- * empty power of BN5's has its times (said) */
-static int bn4_chip_power(const SoulBn4 *s, const uint8_t *b5) {
-	if (s->chip == NONE) return NONE;
-	for (size_t i = 0; i < sizeof empty_powers; ++i)
+/* BN5's empty power whose charge times are a BN4 Soul's chip charge's (BN4's empty routines, their charge times alone serving),
+ * its index in empty_powers, -1 none */
+static int bn5_empty_of(const SoulBn4 *s) {
+	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
+	for (size_t i = 0; s->chip != NONE && i < sizeof empty_powers; ++i)
 		if (!memcmp(b5 + (BN5_CHARGE_TIMES - BUS) + BN6_CHARGE_ROW * (uint32_t)empty_powers[i], s->chip_charge, BN6_CHARGE_ROW))
-			return power6(empty_powers[i]);
-	fprintf(stderr, "soulpower: BN4's form %d's chip charge has no empty power of BN5's of its times: none\n", s->form);
-	return NONE;
+			return (int)i;
+	return -1;
+}
+
+/* whether a BN4 Soul's chip charge takes an empty power of BN4's own (BN4_MORE_AT's), no BN5 one having its times */
+static bool bn4_chip_own(const SoulBn4 *s) { return s->chip != NONE && bn5_empty_of(s) < 0; }
+
+/* A BN4 Soul's chip charge, BN6's id: BN5's empty power of the same charge times (AquaSoul's 20 at every Charge: ToadSoul's
+ * 0x1B), else BN4's own of the k-th (FireSoul's 50); NONE where it has none */
+static int bn4_chip_power(int k) {
+	const SoulBn4 *s = &bn4s[k];
+	int i = bn5_empty_of(s);
+	if (s->chip == NONE) return NONE;
+	return i >= 0 ? power6(empty_powers[i]) : SOUL_POWER_FIRST + BN4_MORE_AT + BN4_MORE_EACH * k + MORE_CHIP;
 }
 
 _Static_assert(SOULS_LOADOUTS + BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_HELD_BN4_ALL) <= SOULS_LOADOUTS_END,
@@ -257,7 +286,7 @@ static bool rows_make(uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)])
 	 * as BN6's six) */
 	for (int k = 0; k < nbn4; ++k) {
 		uint8_t *r6 = rows + BN6_FORM_LOADOUT_SIZE * (SOULS + k);
-		r6[ROW_A] = (uint8_t)bn4_chip_power(&bn4s[k], b5);
+		r6[ROW_A] = (uint8_t)bn4_chip_power(k);
 		r6[ROW_6] = 0;
 		r6[ROW_B] = (uint8_t)(BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos + k);
 	}
@@ -297,6 +326,9 @@ static bool tables(void) {
 	nteam = c->npowers - c->npowers_colonel;
 	if (nteam) team_chaos();
 	int n = BN6_POWER_ATTACK_COUNT + (nteam ? TEAM_MOVED_AT + nteam : team_first());
+	/* (BN4's own past Team ProtoMan's, where a BN4 Soul stands) */
+	if (n > SOUL_POWER_BN4_MORE) return false;
+	if (nbn4) n = SOUL_POWER_FIRST + BN4_MORE_END;
 	if (SOUL_POWER_FIRST != BN6_POWER_ATTACK_COUNT || SOULS_POWERS + 4u * (uint32_t)n > SOULS_POWERS_END ||
 		SOULS_CHARGES + BN6_CHARGE_ROW * (uint32_t)n > SOULS_CHARGES_END || n > NONE ||
 		SOULS_LOADOUTS + BN6_FORM_LOADOUT_SIZE * (uint32_t)(SOULS + SOULS_BN4) > SOULS_LOADOUTS_END)
@@ -342,8 +374,10 @@ static bool expected(void) {
 }
 
 bool soulpower_chip_charge(int id) {
+	int more = id - SOUL_POWER_FIRST - BN4_MORE_AT;
 	return (nmoved && id >= SOUL_POWER_FIRST + nmoved && id < SOUL_POWER_FIRST + nmoved + (int)sizeof empty_powers) ||
-		(team_on && id >= SOUL_POWER_TEAM && id < SOUL_POWER_TEAM + (int)sizeof team_empty_powers);
+		(team_on && id >= SOUL_POWER_TEAM && id < SOUL_POWER_TEAM + (int)sizeof team_empty_powers) ||
+		(more >= 0 && more % BN4_MORE_EACH == MORE_CHIP && more / BN4_MORE_EACH < nbn4 && bn4_chip_own(&bn4s[more / BN4_MORE_EACH]));
 }
 
 bool soulpower_install(int brk) {

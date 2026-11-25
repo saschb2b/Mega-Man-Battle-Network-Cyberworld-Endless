@@ -1,0 +1,124 @@
+{
+ "about": "BN4's FireSoul (Red Sun's Soul 5, form 5: kind Fire, element Fire, his charged shot power attack 0x0C into family 0x19, his flame of 50, 40 frames; his chip charge a Fire chip held 50 frames (power 0x66, BN4's second empty routine), which BN4's chip use turns into his flame of 150 (BN4_FIRE_CHARGED); his companion, list 4's 0) in BN4 Red Sun's own battle fought twice, each in a process of its own: the reference holds itself to itself.",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "06@41",
+ "mm": "21",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "safe": true,
+ "souls4": "10",
+ "folder4": [
+  "0213",
+  "0213"
+ ],
+ "deck4": [
+  "0213",
+  "0213"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   42
+  ],
+  [
+   120,
+   "A",
+   52
+  ]
+ ]
+}

@@ -323,6 +323,8 @@
 #define BN6_COLL_INVULNERABLE 0x28        /* u16 frames left unharmed (0x0800EAFA writes it with BN6_OBJ_INVULNERABLE; BN5's +0x2A, 0x0800CD84) */
 #define BN6_CHARGE_TEST       0x08013236u /* the chip charge's test by the form (r0 the chip, r5 MegaMan; from 0x0801336C): push {r4,r6,r7,lr} */
 #define BN6_CHARGED_RELEASE   0x0800FBA4u /* cmp r1,#0xd in the release of a charged A (0x0800FB74 on): r1 the A power attack (AI data +5), */
+#define BN6_CHARGED_CHIP_SET  0x0800FBF2u /* ... its bl to the family's set (0x08011688, r0 the family 0x080127C0 returned), r7 the attack's variables */
+#define BN6_ATTACK_FAMILY_SET 0x08011688u /* r0 an attack family: MegaMan's attack set to it (his CurAction) */
 #define BN6_CHARGED_CHIP_USE  0x0800FBECu /* ... the ids that use the chip charged (0x0D, 0x1F, 0x20, 0x29, 0x2D, 5) going on here (movs r0,#1, the chip's use); the rest run the power attack */
 #define BN6_CHARGE_BONUS      0x08012C7Cu /* a charged chip's bonus by the form (r0 whether charged): ElecCross's 0x4000, SlashCross's 40, else 0 */
 #define BN6_CHARGED_BONUS_DONE 0x0801284Eu /* ldr r0,[sp,#0xc] past the charged bonus's add and its sound (0x08012834-0x0801284A), r7 the attack's variables */

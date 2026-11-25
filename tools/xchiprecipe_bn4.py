@@ -133,10 +133,16 @@ SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: (
 # its charged shot's family, which the Souls' engine runs as he enters the proxy form (src/emu/soullife.c, xchips_bn4_moved_at).
 # By BN4's family: (the form, its Soul)
 ENTERS4 = 0x0800E0A0   # BN4_FORM_ENTERS
-SOUL_ENTERS = {0x3E: ((4, 'SrchSoul'),)}
+SOUL_ENTERS = {0x3E: ((4, 'SrchSoul'),), 0x19: ((5, 'FireSoul'),)}
+# ... and a Soul's own attack for a chip he charged (BN4's chip use runs it where the chip's charged and his the form:
+# FireSoul's 0x0800D638 at 0x0800B78A), the variables at his AI +0x70 set and its family returned as a power attack's, copied
+# with the unit of that family (its return given the unit's number, its +0x70 BN6's +0xA0: IMMS), which the Souls' engine runs
+# in place of the chip's setup (src/emu/soulchips.c). By BN4's family: (its routine, its Soul)
+SOUL_CHARGED = {0x19: ((0x0800D638, 'FireSoul'),)}
 # The fourth kind's types a Soul's object is moved as, at fixed dispatch numbers of the Souls' own (docs/project/claims/
 # bn4-souls.json, past bn4-air-units' 0xA0-0xA3), not the units' count: BN4's type -> its number
-TYPES4_SOULS = {0x44: 0xA4}   # (SrchSoul's, spawned as he unites, 0x080E6E4C)
+TYPES4_SOULS = {0x44: 0xA4,   # (SrchSoul's, spawned as he unites, 0x080E6E4C)
+                0x12: 0xA5}   # (FireSoul's field of grass, spawned as he unites, 0x080E3604: r4 its type, mode and frames)
 # BN4's computed powers (a chip's power of 1000 and up: the routine by power - 1000 in BN4_CHIP_POWERS, bn4.h) moved into
 # BN6's grown table (XC_POWERS, src/emu/xchips_code.h) at POWER4_FIRST + the entry, past BN5's (0x80-0xCB): a unit of kind
 # 'power' copies the routines, the installer points their entries at the copies (xchips_code.c powers4_stage) and a moved
@@ -543,6 +549,13 @@ ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
 # BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
 IMMS = {
+    # (a shared type's spawner copied alone, SHARED3, is no moved type's code to xrecipe_bn4.palette_imms: its store named here)
+    0x080CE4BC: dict(form='THUMB_STRB', rd=7, rn=0, was=0x0E, now=0x0F,
+                     why="the flame's spawner (SHARED3's 0x09, FireSoul's copy): the object it spawned: palette: BN4 +0x0E, BN6 "
+                         "+0x0F (its +0x0E the element, which BN4's +0x17 store before it set)"),
+    0x0800D63C: dict(form='THUMB_ADDS', rd=7, rn=0, was=0x70, now=0xA0,
+                     why="FireSoul's attack for a chip he charged: his attack's variables, BN4's AI +0x70 (BN4_AI_ATTACK_VARS), "
+                         "BN6's +0xA0 (BN6_AI_ATTACK_VARS)"),
     0x080DD4D4: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
                      why="BugCurse's curse placed by the other side's battle NaviStats' Navi (its offsets by Navi at 0x080DD4FC): "
                          "BN4 +0x23 (BN4_NAVI_NAVI), BN6 +0x29 (BN6_NAVI_SIDE_NAVI), 0 for a virus side in both"),
@@ -919,6 +932,11 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             f.roots.append(p)
             f.powers.append((pid, p, soul))
             f.notes.append(f'{soul}\'s power attack {pid:#x} ({p:08X}), which returns the family: copied with it')
+        for at, soul in SOUL_CHARGED.get(sub, ()):
+            bn4_twins.COPIED[at] = f'{soul}\'s attack for a chip he charged, which returns the family'
+            f.roots.append(at)
+            f.powers.append((None, at, soul))
+            f.notes.append(f'{soul}\'s attack for a chip he charged ({at:08X}), which returns the family: copied with it')
         for form, soul in SOUL_ENTERS.get(sub, ()):
             e = b4.u32(ENTERS4 + 4 * form) & ~1
             bn4_twins.COPIED[e] = f'{soul}\'s taking of the form {form}, which spawns his object'
@@ -1156,15 +1174,16 @@ def power_returns(f):
     """each Soul's power attack copied with the unit (SOUL_POWERS): BN6's power attacks' shape (the variables at r7 set, a
     movs r0 of the family, its return), the family's number given its movs"""
     for pid, p, soul in f.powers:
+        what = f'power attack {pid:#x}' if pid is not None else 'attack for a chip he charged'
         w = f.walks.get(p)
         ins = [w.insns[a] for a in sorted(w.insns)] if w else []
         last = ins[-2:] if len(ins) >= 2 else []
         if len(last) != 2 or last[0].form != 'movs' or last[0].f[:2] != (0, f.sub) or not T.is_return(last[1]) or \
                 any(i.form == 'bl' for i in ins):
-            f.decide('power', f'{soul}\'s power attack {pid:#x} ({p:08X}) is not the shape read: its family\'s movs, then its return')
+            f.decide('power', f'{soul}\'s {what} ({p:08X}) is not the shape read: its family\'s movs, then its return')
             continue
         f.imms.append(dict(at=sorted(w.insns)[-2], form='THUMB_MOVS', rd=0, rn=0, was=f.sub, now=f.number,
-                           why=f'{soul}\'s power attack {pid:#x}: the family it returns, BN4\'s {f.sub:#x}, BN6\'s grown {f.number:#x}'))
+                           why=f'{soul}\'s {what}: the family it returns, BN4\'s {f.sub:#x}, BN6\'s grown {f.number:#x}'))
 
 
 def power_bases(f):

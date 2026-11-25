@@ -2,7 +2,7 @@
   "branch": "bn4-souls",
   "what": "BN4's twelve Souls united in BN6's engine (#499's build list, for #774's SOUL BN4): ThunSoul's look finished, the shared room filled as a Soul unites, the comparator's BN4 Souls, then the other eleven, each held to BN4's battle",
   "takes": {
-    "free_rom": [["0x2EC400", "0x31FFFF"]],
+    "free_rom": [["0x2EC400", "0x31FFFF"], ["0x481BC0", "0x481BFF"]],
     "song_slots": [["0x301", "0x328"], ["0x32A", "0x33F"]],
     "list0": [["0x80", "0x8F"]],
     "attack_families": [["0xD8", "0xDF"]],

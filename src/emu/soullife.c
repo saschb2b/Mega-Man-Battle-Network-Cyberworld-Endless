@@ -112,7 +112,8 @@ static HookAct entered(HookRegs *r, void *user) {
 			soulbn4_enter(me, k);   /* (BN4's routine as the form is taken: GutsSoul's and NumSoul's hand pass) */
 			/* (... his companion spawned, BN4's at the unison: NumSoul's; or the routine's copy where it spawns an object:
 			 * SrchSoul's. FireSoul, who has both, waits on the two together) */
-			uint32_t word;
+			uint32_t word, both = soulcompanion_both(k);
+			if (both) return go(r, both);
 			if (soulcompanion_enter(k, &word)) {
 				r->r[0] = word;
 				r->r[2] = 0;

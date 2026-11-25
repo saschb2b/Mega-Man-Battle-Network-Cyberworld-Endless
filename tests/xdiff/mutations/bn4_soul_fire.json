@@ -1,0 +1,38 @@
+[
+ {
+  "name": "FireSoul's charges 10 frames longer",
+  "spec": "bn4_soul_fire",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 10 frames longer for his grown power attacks, his charged shot's 40 and his chip charge's own 50: B held 42 frames fires the plain buster, A held 52 uses the HeatShot uncharged"
+ },
+ {
+  "name": "FireSoul's element none",
+  "spec": "bn4_soul_fire",
+  "soulbreak": 64,
+  "what": "the element's hook gives his form none where BN4_FORM_ELEMENTS' row of 5 holds Fire: MegaMan's element and collision data's another"
+ },
+ {
+  "name": "FireSoul's flame for a chip charged another power",
+  "spec": "bn4_soul_fire",
+  "poke": [
+   "0800D652:2064"
+  ],
+  "what": "his attack for a chip charged's copy (BN4_FIRE_CHARGED, moved with family 0x19's unit) with its movs r0,#0x96 (150) made #0x64: the MettaurEX keeps 100, not 50"
+ },
+ {
+  "name": "FireSoul's unison lays plain panels",
+  "spec": "bn4_soul_fire",
+  "poke": [
+   "0800E128:00000302"
+  ],
+  "what": "his taking of the form's copy (BN4_FORM_ENTERS' 5, moved with his unit) with its object's word 0x000A0306 made 0x00000302: the setter's type plain, not grass, and its frames none"
+ },
+ {
+  "name": "FireSoul's companion a step behind him",
+  "spec": "bn4_soul_fire",
+  "poke": [
+   "08AFAC00:00000000"
+  ],
+  "what": "the companion overlay's masks of BN4's Souls' kind (SOULS4_COMPANION_MASKS, src/emu/soulcompanion.c) 0 for his first four animations: BN6's overlay drawn a step behind him where BN4's companion keeps his place"
+ }
+]

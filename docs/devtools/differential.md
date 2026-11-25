@@ -117,7 +117,8 @@ trace's spare (its +0x30, at +0xF5), its time and level against BN6's one
 counter, button 1; each engine's sound of a charged chip;
 a Soul's object spawned as he takes the form, BN4's inside its unison and
 BN6's still in play in the fight's first frames, its hit area in MegaMan's
-word of the regions he met (SrchSoul's);
+word of the regions he met (SrchSoul's), the panels it sets still plain in
+BN6's and a panel's blink each game keeps (FireSoul's grass);
 a Soul's companion, BN4's own first-kind 0x57 and BN6's companion overlay of
 BN4's Souls' kind told as one (`t1_moved`), its type, word, flag and mode
 each engine's, its sprite read at the same fight frame while its first
