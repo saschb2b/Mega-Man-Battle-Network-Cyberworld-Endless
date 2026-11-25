@@ -3118,6 +3118,34 @@ N24B = {entry[0]: entry for entry in N24B_SHOTS}   # (tools/before_after.py's 0.
 # (BN5's Navis, Souls, board and chips: the whole ROM folder)
 WHOLE_ROMS_A += ('team-darkproto-card', 'team-meddy-map', 'soul-proto-unite', 'soul-meddy', 'team-board-protoman', 'forms-souls',
                  'liberation-time-up', 'card-cosmoman-sp', 'pack-colonlds')
+# 0.24.1's notes, on a New 3DS's two screens: the PET's menu of ours over a layer's field, the bottom screen under
+# it; the title with BN5's and BN4's ROMs beside BN6's, the bottom screen's line naming both.
+N241_SHOTS = [
+    n24_run(['3ds-start-menu'], N24_SECOND, N24_LAYER + 'press START; wait 150; shot; wait 20') + ('3ds',),
+    n24_run(['3ds-both-roms'], '--scene title', 'wait 100; press START; wait 80; shot; wait 20') + ('3ds',),
+]
+# (BN4's Souls new in 0.24.1, united in a battle: a SOUL BN4 run (form=3) at layer 3's guardian, who pays the Soul of
+# his kind (docs/game/meta/forms.md; tests/scenarios/forms.py's course, walked by hand): `by arena` and a walk in, his
+# card and words paged, OK on the first Custom screen, the buster (onehit), his last word, his Guardian Data and its
+# pick taken; then a folder of the Soul's chip, foe 205 (tests/scenarios/xrom_souls.py's, which keeps its panel) a row off, the chip picked, UNITE under OK, OK.
+# HeatMan pays FireSoul (FireHit1; his flame held 60 frames), TenguMan WindSoul (AirShot; his side's wind, WindRack),
+# Colonel JunkSoul (RockCube; the foe confused as he unites, Poltrgst), who stands a row lower: a step down first)
+N241_SOUL = '--scene emu --seed 3 --run-depth 3 --guardian %d --dev form=3,onehit,quiet,god,hp=2000'
+N241_ARENA = ('wait 150; mash A 300; wait 20; by arena; wait 10; hold AHEAD 60; wait 310; mash A 60; wait 20; hold AHEAD 80; wait 320; '
+              'mash A 200; wait 300; press START; wait 10; press A; wait 260; ')
+N241_UNITED = ('mash B 200; wait 200; mash A 100; wait 300; mash A 200; wait 200; mash A 100; wait 60; chip %s 30; wait 300; press A; wait 120; '
+               'mash A 60; wait 60; foes 205@51; wait 300; press A; wait 10; press START; wait 10; press DOWN; wait 10; press A; wait 60; '
+               'press START; wait 10; press A; wait 260; ')
+N241_SHOTS += [
+    n24_run(['bn4-soul-fire', 'bn4-soul-fire-flame'], N241_SOUL % 1,
+            N241_ARENA + N241_UNITED % '107 D' + 'shot; wait 20; hold B 60; wait 24; shot; wait 20'),
+    n24_run(['bn4-soul-wind', 'bn4-soul-wind-rack'], N241_SOUL % 8,
+            N241_ARENA + N241_UNITED % '4 *' + 'wait 7; shot; wait 13; hold B 70; wait 18; shot; wait 20'),
+    n24_run(['bn4-soul-junk', 'bn4-soul-junk-poltrgst'], N241_SOUL % 18,
+            N241_ARENA + 'press DOWN; ' + N241_UNITED % '143 *' + 'wait 8; shot; wait 12; hold B 90; wait 42; shot; wait 20'),
+]
+SCREENSHOTS += N241_SHOTS
+WHOLE_ROMS_A += ('3ds-both-roms',)
 # (the shared dive's pictures, docs/screenshots/dive-*.png and docs/clips/dive-crew.gif, are no entries here: two or
 # three games on a local server at the clock's pace, tests/scenarios/online_week.py's and online_crew_view.py's
 # courses played by tools/scenarios_online.py's cast (alpha, beta and gamma from Lan's HP, seed 120's Square, the
