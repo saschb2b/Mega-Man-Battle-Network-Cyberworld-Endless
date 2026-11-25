@@ -58,6 +58,9 @@ void emu_sync(void);
  * which the frame log shows). */
 extern bool emu_drawing;
 extern int emu_draw_waits;
+/* ... and since the start, for the state in words (`drawwaits`): a scenario
+ * with the core on its own thread holds it at 0 (issue #897) */
+extern unsigned emu_draw_waits_all;
 /* ... the part of the drawing under way (frame_log_part's name, NULL none),
  * and the last a read waited in */
 extern const char *emu_draw_part, *emu_draw_waited;

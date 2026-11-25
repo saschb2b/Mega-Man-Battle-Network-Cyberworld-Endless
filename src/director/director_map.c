@@ -236,8 +236,11 @@ static void map_way(const MapView *m, int px, int py) {
 	if (D.objs.guardian.navi && !boss_beaten()) { tx = D.objs.guardian.x; ty = D.objs.guardian.y; tc = rgba(255, 110, 90, 200); }
 	double wx, wy;
 	netmap_grid(px, py, &wx, &wy);
-	route_floor();
-	if (heal_first(&ex, &ey)) { tc = map_key[MAP_HEAL].c; tc.a = 200; }
+	/* (what is gone from the floor, route_gone, and the heal's call are
+	 * director_see's, taken after the game's frame: read here, the map on
+	 * the 3DS's bottom screen and SELECT's left open waited for the next
+	 * frame each time they were drawn, issue #897) */
+	if (seen.heal) { ex = seen.heal_x; ey = seen.heal_y; tc = map_key[MAP_HEAL].c; tc.a = 200; }
 	else if (!netmap_panel(tx, ty, &ex, &ey)) return;
 	int nseen = seen_count();
 	if (way.mx != m->mx || way.my != m->my || way.ex != ex || way.ey != ey || way.seen != nseen || way.layer != run.layer_seed || way.gone != route_gone) {
@@ -312,7 +315,7 @@ static void map_locks(const MapView *m) {
 	for (int k = 0; k < layer.nblocks; ++k)
 		if (seen.locks >> k & 1) map_mark(m, -1 /* (no object's type) */, layer.block[k].x, layer.block[k].y, map_key[MAP_EVENT].c);
 	/* (and the flame of darkness while it burns, as L names it) */
-	if (flame_here()) map_mark(m, -1, (int)layer.obj[D.objs.dark_flame_obj].x, (int)layer.obj[D.objs.dark_flame_obj].y, map_key[MAP_EVENT].c);
+	if (seen.flame) map_mark(m, -1, (int)layer.obj[D.objs.dark_flame_obj].x, (int)layer.obj[D.objs.dark_flame_obj].y, map_key[MAP_EVENT].c);
 }
 
 /* the goal while it is unseen: where the ray from MegaMan to it leaves

@@ -37,10 +37,19 @@ int pet_menu_bn6_row(int entry);
 void pet_menu_place(int entry, int *col, int *row);
 /* The player's keys while it takes input: moved on ours, the rest BN6's (pet_keys) */
 uint32_t pet_menu_keys(uint32_t keys);
+/* Whether START was among the keys pet_menu_keys last passed on to the game */
+bool pet_menu_start(void);
+/* After each frame of the game outside the Net Square, never as one is
+ * drawn: what the picture needs of the game read (pet_menu_frame.c) */
+void pet_menu_see(void);
 /* The picture: BN6's own frame of its menu `px` (240 x 160, the core's
- * pixels) laid out again, while the menu takes input (pet_menu_frame.c) */
+ * pixels) laid out again, while the menu takes input (pet_menu_frame.c);
+ * drawn from what pet_menu_see read, it reads nothing of the game */
 void pet_menu_frame(uint32_t *px);
-/* The state in words: `petmenu at ENTRY` while it is up; reads only */
+/* Whether the map's picture was kept for the menu to stand on (BN6's teal where not) */
+bool pet_menu_field_kept(void);
+/* The state in words: `petmenu at ENTRY` while it is up, and `petfield kept`
+ * or `none`, the field behind it; reads only */
 void pet_menu_describe(FILE *f);
 
 #endif

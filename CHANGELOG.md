@@ -3,6 +3,21 @@
 Come and talk: runs, folders, NetBattles, help and ideas on the game's
 Discord, https://discord.gg/mfZyWFvyfG. Bugs still go to GitHub's issues.
 
+## Unreleased
+
+- **Fixed: the New 3DS and the PS Vita ran slower since 0.24.0.** The new
+  PET menu's picture asked the game where it stood on every frame drawn,
+  whether the menu was open or not. On the systems where the GBA runs on a
+  processor core of its own, each of those questions held the drawing back
+  until the game's next frame was done, so a frame took the game's time
+  and the drawing's, one after the other, where they ran side by side
+  before: dropped frames and broken sound everywhere, slower than before
+  0.22.0. The same held for the layer's map on the bottom screen and under
+  SELECT's map left open, for the team's HP on a dark layer, and for the
+  other divers' names in the week's DeepNet. Nothing drawn asks the game
+  anything now; a test with the game on its own thread holds it there
+  (issue #897). Thanks to Pink5G for the report.
+
 ## 0.24.0 (2026-11-25)
 
 - **New: MegaMan in colours of your own.** Colours, a new entry of the

@@ -115,6 +115,8 @@ void platform_frame_parts(uint64_t update, uint64_t draw) {
 	++part_played;
 }
 
+void frame_log_drawn(void) { emu_drawing = false; }
+
 void frame_log_present(uint64_t present) {
 	part_present += present;
 	static int log_on = -1;

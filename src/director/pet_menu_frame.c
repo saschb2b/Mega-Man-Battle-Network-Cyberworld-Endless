@@ -9,7 +9,14 @@
  * equal gap apart. Forms' button is Save's with Forms' word's tiles, the
  * engine's own (pet_options.c), in palette 15, its icon BN6's Status icon
  * (pet_menu_install); Colours' the same way, its icon MegaMan's. What BN6 lights (its cursor's row, EXIT's pulse) and
- * fades it keeps, BN6's cursor set to ours (pet_menu.c). */
+ * fades it keeps, BN6's cursor set to ours (pet_menu.c).
+ *
+ * The picture reads nothing of the game: what it needs (where the game
+ * stands, BN6's menu's state, its tiles, palettes and icons) is read after
+ * each of the game's frames (pet_menu_see), since a read as a frame is drawn
+ * waits, on the core's own thread, for the frame begun after it, and the
+ * drawing then stands behind the GBA where it ran beside it: every frame of
+ * the game, the menu up or not (issue #897). */
 #include "pet_menu.h"
 
 #include <string.h>
@@ -119,52 +126,81 @@ static void read_maps(void) {
 	have_maps = true;
 }
 
-/* a button from its 9 x 2 map, its letters (colour `ink`) in `ink_to` */
-static void button(uint32_t *px, const uint16_t *map, int ink, uint16_t ink_to, int dx, int dy) {
-	const uint8_t *vram = emu_memory(BG_TILES, 0x8000u), *pal = emu_memory(BG_PALETTES, 0x200u);
-	if (!vram || !pal) return;
-	for (int i = 0; i < 2 * 9; ++i) {
-		uint16_t e = map[i];
-		TileLook l = { pal, e >> 12, (e & 0x400) != 0, ink, ink_to };
-		const uint8_t *own = pet_options_forms_tile(e & 0x3FF);   /* (Forms' word's: the engine's, not BN6's) */
-		tile(px, own ? own : vram + (e & 0x3FF) * 32u, &l, dx + i % 9 * 8, dy + i / 9 * 8);
-	}
-}
-
 /* row k's icon as BN6 has it on the screen: its tiles (16 x 16), its height
  * on its row; the ninth, the Status icon, resting under the screen, Forms'
  * (pet_menu_install) */
 typedef struct { int tile, dy; bool found; } Icon;
-static Icon icons[ICONS];
 
-static void read_icons(void) {
-	const uint8_t *oam = emu_memory(OAM, 0x400u);
-	if (!oam) return;
+/* What the picture is drawn from, the game's as its last frame left it
+ * (pet_menu_see): where it stands, and while the menu is up its pieces,
+ * each entry's button (its map, its 18 tiles), the icons' tiles and both
+ * palettes */
+static struct {
+	bool on_map, up;                 /* MegaMan free on the map; BN6's menu open */
+	int state;                       /* BN6's menu's (ePETMenuData +0), while up */
+	bool kit;                        /* the pieces below read */
+	uint8_t pal[0x400];              /* the BG palettes, then the OBJ's */
+	bool has[PM_ENTRIES];
+	uint16_t map[PM_ENTRIES][2 * 9];
+	uint8_t button[PM_ENTRIES][2 * 9][32];
+	Icon icons[ICONS];
+	uint8_t icon[ICONS][4][32];
+} seen;
+static bool map_seen, map_left;      /* on the map at a frame since the last picture; or at the frame before one (the frame the PET opens in) */
+
+/* a button from its 9 x 2 map and tiles, its letters (colour `ink`) in `ink_to` */
+static void button(uint32_t *px, int e, int ink, uint16_t ink_to, int dx, int dy) {
+	for (int i = 0; i < 2 * 9; ++i) {
+		uint16_t m = seen.map[e][i];
+		TileLook l = { seen.pal, m >> 12, (m & 0x400) != 0, ink, ink_to };
+		tile(px, seen.button[e][i], &l, dx + i % 9 * 8, dy + i / 9 * 8);
+	}
+}
+
+static void read_icons(const uint8_t *oam) {
 	for (int i = 0; i < 128; ++i) {
 		const uint8_t *o = oam + 8 * i;
 		int tile_no = (o[4] | o[5] << 8) & 0x3FF, y = o[0];
 		int k = (tile_no - ICON_TILES) / 4;
 		if (tile_no < ICON_TILES || k >= ICONS || (tile_no - ICON_TILES) % 4) continue;
-		icons[k] = (Icon){ tile_no, y - (ROW_SRC_Y + ROW_PITCH * k), true };
+		seen.icons[k] = (Icon){ tile_no, y - (ROW_SRC_Y + ROW_PITCH * k), true };
 	}
 	/* (the Status icon at MegaMan's row's height: the row BN6 lights for Forms) */
-	icons[BN6_PET_ICON_STATUS].dy = icons[pet_menu_bn6_row(PM_MEGAMAN)].dy;
+	seen.icons[BN6_PET_ICON_STATUS].dy = seen.icons[pet_menu_bn6_row(PM_MEGAMAN)].dy;
 }
 
 static void icon(uint32_t *px, int k, bool lit, int dx, int dy) {
-	const uint8_t *vram = emu_memory(OBJ_TILES, 0x8000u), *pal = emu_memory(BG_PALETTES + 0x200u, 0x200u);
-	if (!vram || !pal || !icons[k].found) return;
-	int x = dx + (lit ? ICON_POP : 0), y = dy + icons[k].dy;
-	TileLook l = { pal, lit ? ICON_LIT : ICON_UNLIT, false, -1, 0 };
-	for (int q = 0; q < 4; ++q) tile(px, vram + (uint32_t)(icons[k].tile + q) * 32u, &l, x + q % 2 * 8, y + q / 2 * 8);
+	if (!seen.icons[k].found) return;
+	int x = dx + (lit ? ICON_POP : 0), y = dy + seen.icons[k].dy;
+	TileLook l = { seen.pal + 0x200, lit ? ICON_LIT : ICON_UNLIT, false, -1, 0 };
+	for (int q = 0; q < 4; ++q) tile(px, seen.icon[k][q], &l, x + q % 2 * 8, y + q / 2 * 8);
+}
+
+/* the menu's pieces out of the game's video memory, as its frame left them */
+static void read_kit(void) {
+	const uint8_t *bg = emu_memory(BG_TILES, 0x8000u), *obj = emu_memory(OBJ_TILES, 0x8000u);
+	const uint8_t *pal = emu_memory(BG_PALETTES, 0x400u), *oam = emu_memory(OAM, 0x400u);
+	seen.kit = bg && obj && pal && oam;
+	if (!seen.kit) return;
+	if (!have_maps) read_maps();
+	memcpy(seen.pal, pal, sizeof seen.pal);
+	read_icons(oam);
+	for (int e = 0; e < PM_ENTRIES; ++e) {
+		int k = pet_menu_bn6_row(e);
+		if (k >= 0) memcpy(seen.map[e], maps[k], sizeof seen.map[e]);
+		seen.has[e] = k >= 0 || (e == PM_LOOKS ? pet_options_looks_map(seen.map[e]) : pet_options_forms_map(seen.map[e]));
+		for (int i = 0; seen.has[e] && i < 2 * 9; ++i) {
+			int n = seen.map[e][i] & 0x3FF;
+			const uint8_t *own = pet_options_forms_tile(n);   /* (Forms' word's: the engine's, not BN6's) */
+			memcpy(seen.button[e][i], own ? own : bg + (uint32_t)n * 32u, 32);
+		}
+	}
+	for (int k = 0; k < ICONS; ++k)
+		for (int q = 0; seen.icons[k].found && q < 4; ++q) memcpy(seen.icon[k][q], obj + (uint32_t)(seen.icons[k].tile + q) * 32u, 32);
 }
 
 static void rows(uint32_t *px) {
-	if (!have_maps) read_maps();
-	read_icons();
-	const uint8_t *pal = emu_memory(BG_PALETTES, 0x200u);
-	uint16_t own[2 * 9];
-	if (!pal) return;
+	const uint8_t *pal = seen.pal;
 	/* (BN6's inks: its lit row's, and an unlit one's) */
 	int cur = pet_menu_cursor(), lit_row = cur == PM_EXIT ? -1 : pet_menu_bn6_row(cur) < 0 ? pet_menu_bn6_row(PM_MEGAMAN) : pet_menu_bn6_row(cur);
 	int dim_row = lit_row == 0 ? 1 : 0;
@@ -174,11 +210,9 @@ static void rows(uint32_t *px) {
 		bool lit = e == cur;
 		pet_menu_place(e, &col, &row);
 		int dx = COL_X + col * COL_STEP, dy = ROWS_Y + row * ROW_PITCH;
-		bool word = e == PM_LOOKS ? pet_options_looks_map(own) : pet_options_forms_map(own);
-		if (k >= 0) button(px, maps[k], BN6_PET_LABEL_INK + k, lit ? lit_ink : dim_ink, dx + BUTTON_X, dy + 1);
-		else if (word) button(px, own, BN6_PET_LABEL_INK_NEXT, lit ? lit_ink : dim_ink, dx + BUTTON_X, dy + 1);
+		if (seen.has[e]) button(px, e, k >= 0 ? BN6_PET_LABEL_INK + k : BN6_PET_LABEL_INK_NEXT, lit ? lit_ink : dim_ink, dx + BUTTON_X, dy + 1);
 		/* (Forms' icon BN6's Status icon; Colours' MegaMan's own, his colours being what it opens) */
-		int ic = k >= 0 ? k : e == PM_FORMS && icons[BN6_PET_ICON_STATUS].found ? BN6_PET_ICON_STATUS : pet_menu_bn6_row(PM_MEGAMAN);
+		int ic = k >= 0 ? k : e == PM_FORMS && seen.icons[BN6_PET_ICON_STATUS].found ? BN6_PET_ICON_STATUS : pet_menu_bn6_row(PM_MEGAMAN);
 		icon(px, ic, lit, dx + ICON_X, dy);
 	}
 }
@@ -243,19 +277,32 @@ static void exit_cell(uint32_t *px) {
 	}
 }
 
-/* The field as it stood on the map, kept every other frame there and on the
- * frame START is held (the frame before BN6's PET opens over it), BN6's own
- * picture of it covered by its menu's pieces where ours stand */
+/* The field as it stood on the map, BN6's own picture of it covered by its
+ * menu's pieces where ours stand: kept from the pictures drawn while START
+ * is down on the map (in the player's hand, or among the keys the game was
+ * given), the last of them the one BN6's PET opens over, and good for the
+ * FIELD_FRESH pictures of the map after it (START let go before BN6 has
+ * opened its PET). No other picture of the map is kept: copied every other
+ * frame, as it was, its 150 KB were the map's every frame's on the slow
+ * systems, for a menu opened once in a while. A menu no START of the map
+ * opened stands on BN6's teal. */
+#define FIELD_FRESH 4
 static uint32_t field[W * H];
-static bool have_field;
+static bool have_field, field_dark;
+static int field_age;
 
 static void keep_field(const uint32_t *px) {
-	static unsigned tick;
-	if (emu_read8(emu_read32(BN6_TOOLKIT)) != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_MAP) return;
-	if (!btn_held(BTN_START) && (++tick & 1)) return;
-	memcpy(field, px, sizeof field);
-	have_field = true;
+	bool map = map_seen, left = map_left;
+	map_seen = map_left = false;
+	if ((map || left) && (btn_held(BTN_START) || pet_menu_start())) {
+		memcpy(field, px, sizeof field);
+		have_field = true;
+		field_dark = false;
+		field_age = 0;
+	} else if (map && have_field && ++field_age > FIELD_FRESH) have_field = false;
 }
+
+bool pet_menu_field_kept(void) { return have_field; }
 
 /* a colour darkened as BN6's PET darkens the field: DARKER off each 5-bit channel */
 static uint32_t darker(uint32_t c) {
@@ -273,14 +320,33 @@ static uint32_t darker(uint32_t c) {
  * slides in */
 static bool over(int state) { return state == 4 || state == 8 || state == 0x10 || state == 0x14; }
 
+void pet_menu_see(void) {
+	int mode = emu_read8(emu_read32(BN6_TOOLKIT)), sub = emu_read8(BN6_GAMESTATE);
+	bool was_map = seen.on_map;
+	seen.on_map = mode == BN6_MODE_GAME && sub == BN6_SUB_MAP;
+	seen.up = mode == BN6_MODE_GAME && sub == BN6_SUB_PET && (emu_read8(BN6_PET_MENU_OPEN) & 1);
+	seen.state = seen.up ? emu_read8(BN6_PET_MENU) : 0;
+	/* (the frame START opens BN6's PET in is still the map's picture: the
+	 * game draws a frame from what the one before it left) */
+	if (seen.on_map) map_seen = true;
+	else if (was_map) map_left = true;
+	if (seen.up && over(seen.state)) read_kit();
+}
+
 void pet_menu_frame(uint32_t *px) {
 	keep_field(px);
-	if (!pet_menu_up() || !over(emu_read8(BN6_PET_MENU))) return;
+	if (!seen.up || !over(seen.state) || !seen.kit) return;
 	memcpy(src, px, sizeof src);
 	/* (BN6's teal as it stands taking input, where no field was kept) */
 	static uint32_t teal;
-	if (emu_read8(BN6_PET_MENU) == 4 || !teal) teal = get(0, 100);
-	for (int i = BAND * W; i < W * H; ++i) px[i] = have_field ? darker(field[i]) : teal;
+	if (seen.state == 4 || !teal) teal = get(0, 100);
+	/* (the field darkened once a menu, not once a frame) */
+	if (have_field && !field_dark) {
+		for (int i = BAND * W; i < W * H; ++i) field[i] = darker(field[i]);
+		field_dark = true;
+	}
+	if (have_field) memcpy(px + BAND * W, field + BAND * W, sizeof field - BAND * W * sizeof *field);
+	else for (int i = BAND * W; i < W * H; ++i) px[i] = teal;
 	rows(px);
 	strip(px);
 	place(px);

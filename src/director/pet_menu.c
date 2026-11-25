@@ -129,7 +129,11 @@ static void move(void) {
 	else if (btn_pressed(BTN_LEFT) && col == 1) to(at(0, row));
 }
 
+static bool start_given;
+bool pet_menu_start(void) { return start_given; }
+
 uint32_t pet_menu_keys(uint32_t keys) {
+	start_given = (keys & KEY_START) != 0;
 	if (!pet_menu_up()) {
 		written = -1;
 		return keys;
@@ -155,5 +159,5 @@ uint32_t pet_menu_keys(uint32_t keys) {
 
 void pet_menu_describe(FILE *f) {
 	static const char *const names[PM_ENTRIES + 1] = { "ChipFolder", "SubChip", "Library", "MegaMan", "Forms", "Colours", "E-Mail", "KeyItem", "Options", "Save", "EXIT" };
-	if (pet_menu_up()) fprintf(f, "petmenu at %s\n", names[cur]);
+	if (pet_menu_up()) fprintf(f, "petmenu at %s\npetfield %s\n", names[cur], pet_menu_field_kept() ? "kept" : "none");
 }

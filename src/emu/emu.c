@@ -282,6 +282,7 @@ static void worker_entry(void *arg) { worker_main(arg); }
  * the frame its present; the drawing takes what it reads from the update) */
 bool emu_drawing;
 int emu_draw_waits;
+unsigned emu_draw_waits_all;
 const char *emu_draw_part, *emu_draw_waited;
 
 static void (*after_frame)(void);
@@ -291,6 +292,7 @@ static void wait_frame(void) {
 	if (!in_flight) return;
 	if (emu_drawing) {
 		++emu_draw_waits;
+		++emu_draw_waits_all;
 		if (emu_draw_part) emu_draw_waited = emu_draw_part;
 	}
 	SDL_SemWait(done);
