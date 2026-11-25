@@ -1,0 +1,10 @@
+{
+ "bn4": "0x132",
+ "bn6": "0x208",
+ "clock": "state",
+ "souls": [
+  "1"
+ ],
+ "what": "RollSoul's arrow 0x132, its copy",
+ "why": "Played by his charged shot's state (MegaMan's state 0x1B) as the arrow is loosed (BN4: movs r0,#0x33; adds r0,#0xff at 0x080EC5DE, its bl at 0x080EC5E2; BN6: the copy's bl aimed at a shim of the unit's home that makes r0 0x208, XvSoundCall): the same sound as RollAro's arrow, BN4's song copied into slot 0x208 of BN6's grown song table (src/audio/xsong.c XSOUNDS). bn4_soul_roll at t98"
+}

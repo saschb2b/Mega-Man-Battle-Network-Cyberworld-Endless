@@ -259,4 +259,13 @@
                                        * its frames (ProtSoul's shield 0x28 at 0x0800D3DC), one less a frame; BN6's +0x15 */
 #define BN4_AI_KEPT_LEVEL 0x15        /* u8 his charge's level kept as B is let go (0x0800BE94), which the differential lays at BN6's +0x1A,
                                        * BN6 keeping its B and left's lock at its +0x15 */
+
+/* An attack's lag and MegaMan's step out of it, BN4's (RollSoul's charged shot's state 0x1B, 0x080EC5F6; BN6's in bn6_attacks.h) */
+#define BN4_SHOT_LAG         0x0800B6DCu /* BN6_SHOT_LAG's twin, its table BN4_SHOT_LAGS */
+#define BN4_SHOT_LAGS        0x08018530u
+#define BN4_STEP_ASK_PANEL   0x0800B4B0u /* r5 MegaMan: the panel the step his pad asks goes to (r0, r1), 0 none (BN6_STEP_ASK and
+                                       * BN6_STEP_ASK_PANEL together, BN4's NaviStats +0x26 and +0xD besides) */
+#define BN4_STEP_ASK_STYLE  0x0800C208u /* ... his step's style by his NaviStats +0x23 and +0x25 (0xA his plain step; BN6_STEP_ASK_STYLE) */
+#define BN4_STEP_ASK_START   0x0800C9BAu /* ... the step's state begun, r0, r1 its panel, r2 its style (BN6_STEP_ASK_START by the step) */
+
 #endif

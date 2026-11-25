@@ -1,0 +1,10 @@
+[
+ {
+  "name": "RollSoul's step out of the lag left out",
+  "spec": "bn4_soul_roll_step",
+  "poke": [
+   "080EC620:E00E"
+  ],
+  "what": "the lag's state's copy (MegaMan's state 0x1B's 4) with its beq past the step made a b: UP in the lag steps him out in BN4 at t102, in BN6 never"
+ }
+]

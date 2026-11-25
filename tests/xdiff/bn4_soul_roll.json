@@ -1,0 +1,219 @@
+{
+ "about": "BN4's RollSoul (Red Sun's Soul 1, form 1: kind Recovery; his charged shot power attack 0x22, the arrow (MegaMan's state 0x1B, its object the third kind's 0x0B), 60 frames; after a chip of another kind than Recovery he heals a tenth of his max HP, the heal's effect at him and its sound, BN4_ROLL_HEAL_FORM) in BN4 Red Sun's own battle against BN6's with RollSoul moved (docs/multirom/bn4-souls.md): BN6's Soul 23 over the proxy form, his arrow an attack unit at BN6's grown 0xE0 (tools/xchiprecipe_bn4.py), its lag's step out BN6's (XC4_STEP_OUT), his heal a hook on BN6's chip use (soulroll.c). Two Recov10 A (BN4's 107, BN6's 154, kind Recovery): the first Custom screen picks both, moves to UNITE and takes one and the Soul. B from fight frame 30 held 62 frames, two past his charge of 60: the arrow at the MettaurEX (BN4's 6, 250 HP) at (4,2), then its lag run out (BN6_SHOT_LAG's frames, BN4's by body). MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "against": "bn6",
+ "subject": "megaman",
+ "foes": "06@42",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 180,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "safe": true,
+ "souls4": "1",
+ "souls6": "10000",
+ "folder4": [
+  "006B",
+  "006B"
+ ],
+ "deck4": [
+  "006B",
+  "006B"
+ ],
+ "folder6": [
+  "09A:00",
+  "09A:00"
+ ],
+ "deck6": [
+  "09A:00",
+  "09A:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   62
+  ]
+ ]
+}

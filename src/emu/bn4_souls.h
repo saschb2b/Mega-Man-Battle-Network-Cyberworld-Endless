@@ -122,4 +122,13 @@
 #define BN4_PROT_LEFT     0x0800E12Eu /* ... the movs r1,#0x6a: his shield (0x0800D3C0: family 0x25, BN4's Guard state's subfamily 4,
                                        * power 50, the hit word 0x114) */
 
+/* RollSoul's heal in MegaMan's chip use (0x080EED04-0x080EED32, after the chip's reload, BN6's at BN6_CHIP_USE_HEAL): in form 1,
+ * a chip of another kind than its own, his max HP's tenth (swi 6) healed (0x0800ABBA, BN6_OBJECT_HEAL), the effect spawned at
+ * him (BN4_SPAWN_EFFECT) and the sound played */
+#define BN4_ROLL_HEAL_FORM  0x080EED0Au /* cmp r0,#1: NaviStats +0x24, his form, RollSoul's */
+#define BN4_ROLL_HEAL_KIND  0x080EED10u /* ... cmp r0,#4: the chip's kind (BN4_CHIP_KIND) none of Recovery's */
+#define BN4_ROLL_HEAL_SHARE 0x080EED16u /* ... movs r1,#0xa: his max HP divided by it */
+#define BN4_ROLL_HEAL_EFFECT 0x080EED28u /* ... movs r4,#7: the effect (Repair's, xchips_bn4.c) */
+#define BN4_ROLL_HEAL_SOUND 0x080EED2Eu /* ... movs r0,#0x9a: the sound (Repair's) */
+
 #endif

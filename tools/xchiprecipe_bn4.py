@@ -73,6 +73,7 @@ ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x
                   0x14: 0xDD,   # (MetlSoul's charged shot)
                   0x28: 0xDE,   # (WoodSoul's charged shot)
                   0x25: 0xDF,   # (ProtSoul's shield, his B and left)
+                  0x1B: 0xE0,   # (RollSoul's charged shot)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -103,6 +104,18 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
 # A call of a unit's code aimed by hand, at a stub of the chips' (XC_STUBS, src/emu/xchips_code.h): BN4's routine has no twin
 # and the unit needs none of what it gives
 UNIT_AIMS = {
+    # (RollSoul's charged shot's lag, MegaMan's state 0x1B's 4 (0x080EC5F6): BN6's buster's state 4 the same steps (0x080EEAE2),
+    # its calls BN6's by its work, BN4 laying out a step by its panel and BN6 by its direction; docs/multirom/bn4-souls.md)
+    'RollSoul': {0x0800B6DC: ('BN6_SHOT_LAG', "the lag's frames by the free panels before him (BN4_SHOT_LAG, r2 0): BN6's twin "
+                                             "by body, its table's row 0 BN4's bytes (BN4_SHOT_LAGS, BN6_SHOT_LAGS)"),
+                 0x0800B4B0: ('XC4_STEP_OUT', "the step his pad asks, where he can stand (BN4_STEP_ASK_PANEL, its panel in r0, r1): "
+                                              "BN6's ask and test (BN6_STEP_ASK, BN6_STEP_ASK_PANEL), the step in r0 for "
+                                              "XC4_STEP_START"),
+                 0x0800C208: ('XC_STUBS', "the step's style (BN4_STEP_ASK_STYLE, into r2 for the step's start): BN6 reads its own "
+                                          "after the attack's end as BN4 does, in XC4_STEP_START, so the call is the stub that "
+                                          "returns 0"),
+                 0x0800C9BA: ('XC4_STEP_START', "the step begun (BN4_STEP_ASK_START, r0, r1 its panel, r2 its style): BN6's, by "
+                                                "the step XC4_STEP_OUT left in r0, its style and kind BN6's")},
     'WoodSoul': {0x08043014: ('XC_STUBS', "a count over nine of the NaviStats' fields (by 0x0800D772), each against a list of "
                                           "its own (0x08043070, 0x0804304C), for the tornado's hits: the state's path of "
                                           "subfamily 2 alone (0x080ECFC8), Static's (BN4's chip 27), which no row of the "
@@ -141,7 +154,7 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
 SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),), 0x3E: ((0x0A, 'SrchSoul'),),
                0x15: ((0x11, 'NumSoul'),), 0x19: ((0x0C, 'FireSoul'),),
-               0x14: ((0x13, 'MetlSoul'),), 0x28: ((0x57, 'WoodSoul'),), 0x25: ((0x6A, 'ProtSoul'),)}
+               0x14: ((0x13, 'MetlSoul'),), 0x28: ((0x57, 'WoodSoul'),), 0x25: ((0x6A, 'ProtSoul'),), 0x1B: ((0x22, 'RollSoul'),)}
 # ... and a Soul's taking of the form that spawns an object of its own (BN4_FORM_ENTERS by its form), copied with the unit of
 # its charged shot's family, which the Souls' engine runs as he enters the proxy form (src/emu/soullife.c, xchips_bn4_moved_at).
 # By BN4's family: (the form, its Soul)
@@ -386,6 +399,7 @@ UNITS = (
     ('attack', 0x14, 'MetlSoul'),
     ('attack', 0x28, 'WoodSoul'),
     ('attack', 0x25, 'ProtSoul'),
+    ('attack', 0x1B, 'RollSoul'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -461,6 +475,11 @@ FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
 # holds one of BN4's numbers BN6 numbers otherwise, bytes: a row's offset -> {BN4's value: BN6's}, each set in the copy
 # (table_bytes; bytes_why says what the values are and where each pair was read)
 TABLES = {
+    0x080CE5B0: dict(size=0x130, entry=0x10, kinds=(0,), sprite=(5, 6), list=None, loads={0x080CE718},
+                     why="the arrow's kinds (the third kind's 0x0B: 19 rows of 16 bytes, its collision's three arguments, its "
+                         "sprite's list's offset and number at +5 and +6, read by its init by its +4, 0x080CE70C-0x080CE718); "
+                         "RollSoul's power attack (0x22, 0x0800CF3C) sets the attack's +0xC 0, the kind his state spawns "
+                         "(0x080EC5D6: ldr r4,[r7,#0xc])"),
     0x080CD2A8: dict(size=15 * 9 + 1, entry=9, kinds=(), sprite=(5, 6), list=None, loads={0x080CD36C},
                      why="the third kind's 0x00's kinds (9 bytes each: its collision's three arguments, its +0x17, +0x11, its "
                          "sprite's list's offset and number, 0xFF none), read by its init (0x080CD354, by +4); the Guard state "

@@ -25,6 +25,8 @@ wrong turns, form, power attack, charge or level still parts:
   shots         BN4's count of a form's charged shots, to 5; BN6 none
   presses       BN4's count of B's presses toward GutsSoul's rapid buster (+0x11 its window, +0x12 the presses, under six);
                 BN6 counts none
+  step          his step out of an attack's lag, each engine's own: BN4's state 9 (its 7) by the panel, BN6's 0x10 by the
+                direction, and the variables each sets, while both stand in it
   charge        the buster's charge: BN4's counters (+0x30, +0x32), levels (+0x0A, +0x0B: 0, 1, 3), button (+9) and the
                 levels kept at the release (+0x14, +0x15); BN6's counter (+0x1B, held at the charge time), level (+0x1D: 0,
                 1, 2), button (+0x1E) and request bits (+0x44's 0x20000 and 0x40000); each engine's own glow object"""
@@ -45,6 +47,11 @@ VARS5, UNISON_VAR5 = 0xA5, 2   # (his attack's variables' +5 at BN6's +0xA0 + 5;
 UNISON_SOUNDS = (0x129, 0x157, 0x158)   # (its phase 0's, 0x080EBABE; the picture's, 0x080E369A; its phase 1's, 0x080EBB32)
 UNISON_DECO_SOUNDS = (0xAD,)   # (... and the picture's decoration's: WindSoul's swirl, the third kind's 0x5A, 0x080D8C11's 0x121, BN6's
                                # number of it the wind's start's, sounds 045)
+STEP4, STEP6 = 0x07, 0x10       # (his step's state, each engine's: BN4's 7 by BN4_STEP_ASK_START's movs r0,#7, the trace's 9 as it
+                                 # reads BN4's own from 6 as BN6's from 8; BN6's 0x10 by BN6_STEP_ASK_START's movs r0,#0x10)
+STEP_VARS = (0xA3, 0xAC, 0xB6, 0xB7, 0xB8, 0xB9, 0xCC, 0xCD, 0xCE, 0xCF)   # (... and his attack's variables it sets, at BN6's +0xA0:
+                                 # BN4's +0x16 and +0x17 the panel, +0x18 its kind; BN6's +3 and +0x18 its kinds, +0xC the
+                                 # step, +0x2C cleared)
 WIND_WORD, WIND_ROLE = 0x5C, 'T4:0x41#'   # (WindSoul's wind at his AI data's +0x5C, BN4_WIND_ENTER)
 BN6_FORM_PROXY, BN6_FORM_NAME_BASE = 8, 0x1AB
 MEGAMAN = ('T1', 0x1A0)
@@ -239,7 +246,8 @@ class Souls4:
         """the rule's name that reads d as the same state, None where none"""
         for key, rule in (('unison', self.unison), ('soul object', self.soul_object), ('companion', self.companion), ('held', self.held), ('unison var', self.unison_var), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
                           ('soul', self.soul), ('lockout', self.lockout), ('pending', self.pending), ('form frames', self.form_frames),
-                          ('shots', self.shots), ('presses', self.presses), ('charge', self.charge), ('wind', self.wind)):
+                          ('shots', self.shots), ('presses', self.presses), ('charge', self.charge), ('wind', self.wind),
+                          ('step', self.step)):
             if key in self.names and rule(d, fa, fb):
                 return self.names[key]
         return None
@@ -474,6 +482,16 @@ class Souls4:
         a = d.a if isinstance(d.a, tuple) else ()
         return isinstance(d.role, tuple) and d.role[:2] == MEGAMAN and d.part == 'ai' and d.off == WIND_WORD and \
             len(a) == 3 and isinstance(a[0], str) and a[0].startswith(WIND_ROLE) and d.b in (('raw', 0), 0)
+
+    def step(self, d, fa, fb):
+        """his step out of his charged shot's lag (RollSoul's arrow, xchips_bn4.h XC4_STEP_OUT): each engine's own step state
+        and the variables it sets, BN4's by its panel and BN6's by its direction, while both stand in it"""
+        if not (isinstance(d.role, tuple) and d.role[:2] == MEGAMAN) or not self.united(fa, fb):
+            return False
+        oa, ob = self.mm(fa.fr), self.mm(fb.fr)
+        if oa is None or ob is None or oa.rec[NODE + OBJ_ACTION] != STEP4 or ob.rec[NODE + OBJ_ACTION] != STEP6:
+            return False
+        return (d.part == 'obj' and d.off == OBJ_ACTION) or (d.part == 'ai' and d.off in STEP_VARS)
 
     def lockout(self, d, fa, fb):
         # (his lock-out after a chip, BN4's at +0x3A and BN6's at +0x19 (legit.json's bn4 megaman_lockout), where BN4's +0x19 holds

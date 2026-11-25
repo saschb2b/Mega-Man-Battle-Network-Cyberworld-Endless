@@ -553,11 +553,68 @@ static void souls_side_stage(void) {
 	if (p) put32(p + sizeof code, XC4_SOULS_BASE);
 }
 
+/* A stub's code (FREE_BN4_CHIP_STUBS) put, then its words: its calls go through its own bx r3, a bl within the stub each (BN6's
+ * code lies past a bl's reach), so their halves are numbers of the code */
+static void stub_put(uint32_t at, const uint16_t *code, size_t n, const uint32_t *words, size_t nwords) {
+	uint8_t *p = xv_put(at, 2 * n + 4 * nwords, true);
+	for (size_t i = 0; p && i < n; ++i) put16(p + 2 * i, code[i]);
+	for (size_t i = 0; p && i < nwords; ++i) put32(p + 2 * n + 4 * i, words[i]);
+}
+
+/* XC4_STEP_OUT (the project's own Thumb, xchips_bn4.h): BN6's step asked, then its panel tested, the step in r0 or 0 */
+static void step_out_stage(void) {
+	static const uint16_t code[] = {
+		0xB510,   /* 00 push {r4, lr} */
+		0x4B07,   /* 02 ldr r3, [pc, #0x1c]: BN6_STEP_ASK */
+		0xF000, 0xF80A,   /* 04 bl 0x1c */
+		0x2800,   /* 08 cmp r0, #0 */
+		0xD006,   /* 0A beq 0x1a */
+		0x1C04,   /* 0C adds r4, r0, #0: the step */
+		0x4B05,   /* 0E ldr r3, [pc, #0x14]: BN6_STEP_ASK_PANEL */
+		0xF000, 0xF804,   /* 10 bl 0x1c */
+		0x2800,   /* 14 cmp r0, #0 */
+		0xD000,   /* 16 beq 0x1a */
+		0x1C20,   /* 18 adds r0, r4, #0 */
+		0xBD10,   /* 1A pop {r4, pc} */
+		0x4718,   /* 1C bx r3 */
+		0x46C0,   /* 1E nop */
+	};
+	static const uint32_t words[] = { BN6_STEP_ASK | 1, BN6_STEP_ASK_PANEL | 1 };
+	_Static_assert(XC4_STEP_OUT + sizeof code + sizeof words <= XC4_STEP_START, "the step out's room");
+	stub_put(XC4_STEP_OUT, code, sizeof code / sizeof *code, words, sizeof words / sizeof *words);
+}
+
+/* XC4_STEP_START (the project's own Thumb, xchips_bn4.h): r0 the step; BN6's style and kind of it, then BN6's step begun */
+static void step_start_stage(void) {
+	static const uint16_t code[] = {
+		0xB550,   /* 00 push {r4, r6, lr} */
+		0x1C06,   /* 02 adds r6, r0, #0: the step */
+		0x4B07,   /* 04 ldr r3, [pc, #0x1c]: BN6_STEP_ASK_STYLE */
+		0xF000, 0xF80B,   /* 06 bl 0x20 */
+		0x1C04,   /* 0A adds r4, r0, #0 */
+		0x4B06,   /* 0C ldr r3, [pc, #0x18]: BN6_STEP_ASK_KIND */
+		0xF000, 0xF807,   /* 0E bl 0x20 */
+		0x1C02,   /* 12 adds r2, r0, #0 */
+		0x1C30,   /* 14 adds r0, r6, #0 */
+		0x1C21,   /* 16 adds r1, r4, #0 */
+		0x4B04,   /* 18 ldr r3, [pc, #0x10]: BN6_STEP_ASK_START */
+		0xF000, 0xF801,   /* 1A bl 0x20 */
+		0xBD50,   /* 1E pop {r4, r6, pc} */
+		0x4718,   /* 20 bx r3 */
+		0x46C0,   /* 22 nop */
+	};
+	static const uint32_t words[] = { BN6_STEP_ASK_STYLE | 1, BN6_STEP_ASK_KIND | 1, BN6_STEP_ASK_START | 1 };
+	_Static_assert(XC4_STEP_START + sizeof code + sizeof words <= FREE_BN4_CHIP_STUBS_END, "the step start's room");
+	stub_put(XC4_STEP_START, code, sizeof code / sizeof *code, words, sizeof words / sizeof *words);
+}
+
 /* the chips' own routines (FREE_BN4_CHIP_STUBS) staged */
 static void stubs4_stage(void) {
 	first_actor_stage();
 	if (!xv_failed()) coll_panel_word_stage();
 	if (!xv_failed()) souls_side_stage();
+	if (!xv_failed()) step_out_stage();
+	if (!xv_failed()) step_start_stage();
 }
 
 /* BN4's units of one pass staged and committed: its Navi chips' (`navis`: after BN4's Navis), or the rest */
@@ -569,6 +626,22 @@ uint32_t xchips_bn4_moved_at(uint32_t bn4) {
 		if (at) return at;
 	}
 	return 0;
+}
+
+int xchips_bn4_effect(int from) {
+	for (int i = 0; installed4 && i < xchips_bn4_count; ++i) {
+		const XVirusFamily *f = &xchips_bn4[i].code;
+		for (int e = 0; e < f->neffects; ++e)
+			if (f->effects[e].from == from) return f->effects[e].to;
+	}
+	return -1;
+}
+
+int xchips_bn4_sound(int song) {
+	for (int i = 0; installed4 && i < xchips_bn4_count; ++i)
+		for (int s = 0; s < xchips_bn4[i].nsongs; ++s)
+			if (xchips_bn4[i].songs[s].song == song) return xchips_bn4[i].songs[s].slot;
+	return -1;
 }
 
 bool xchips_bn4_code_install(void) {

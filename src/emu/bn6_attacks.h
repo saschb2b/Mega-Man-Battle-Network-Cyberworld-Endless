@@ -47,4 +47,20 @@
 #define BN6_ATTACK_END_LEFT   0x0801173Cu /* ... its strb r0,[r1,#0x15]: BN4's end sets no lock, its power attack having set it as it began */
 #define BN6_ATTACK_END_LEFT_PAST 0x0801173Eu /* ... and past it */
 
+/* An attack's lag and MegaMan's step out of it (his buster's state 4, 0x080EEAE2-0x080EEB4E, the lag ended early by a step
+ * the pad asks: RollSoul's charged shot's, BN4's 0x080EC5F6, steps out through these, xchips_bn4.h XC4_STEP_OUT) */
+#define BN6_SHOT_LAG           0x0800FAF6u /* r0, r1 a panel, r2 a row: the frames, BN6_SHOT_LAGS' row by the free panels before it (to 5) */
+#define BN6_SHOT_LAGS          0x080209CCu /* ... six bytes a row (row 0 BN4_SHOT_LAGS' row 0) */
+#define BN6_STEP_ASK           0x0800FA54u /* r5 MegaMan: the step his pad asks (his AI +0x22): 1 up, 2 down, 3 left, 4 right, turned by a table under his status 0x8000, 0 none */
+#define BN6_STEP_ASK_PANEL     0x0800F964u /* ... r0 that step: the panel it goes to in r0, r1, 0 where he cannot stand there */
+#define BN6_STEP_ASK_STYLE    0x08010332u /* ... his step's style by his NaviStats +0x29 and +0x2B (4 his plain step) */
+#define BN6_STEP_ASK_KIND      0x080103A8u /* ... 3 where his NaviStats +0x31 is set, else 0 */
+#define BN6_STEP_ASK_START     0x080116AEu /* ... the step's state begun (r0 the step, r1 its style, r2 its kind) */
+
+/* MegaMan's chip use past its reload's call (0x080F18F4-0x080F191A, BN4's 0x080EECDA-0x080EED00): movs r3,#0xa0; adds r3,r3,r6
+ * (his attack's variables), where BN4's RollSoul heals (BN4_ROLL_HEAL_FORM's routine, soulroll.c), r4 the chip's record */
+#define BN6_CHIP_USE_HEAL      0x080F191Eu
+#define BN6_CHIP_USE_HEAL_ADDS 0x080F1920u /* ... the adds */
+#define BN6_CHIP_USE_HEAL_PAST 0x080F1922u /* ... past the two */
+
 #endif

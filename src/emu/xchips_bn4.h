@@ -49,7 +49,7 @@
                                        * 0x0800C456 for the other side's three, which BN6's twin (0x080103BC) answers with its
                                        * MegaMan alone: the project's own Thumb (xchips_code.c), BugCurse's target */
 /* Where a unit's code and art may go and its calls go besides BN6's routines (xvirus_recipe.h XvRegion): the code and the art's
- * rows, the chips' stubs (xchips_code.h XC_STUBS) and BN4's own (XC4_FIRST_ACTOR) */
+ * rows, the chips' stubs (xchips_code.h XC_STUBS) and BN4's own (XC4_FIRST_ACTOR on) */
 #define XC4_REGION { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS), \
 	.stubs2 = FREE_BN4_CHIP_STUBS, .stubs2_end = FREE_BN4_CHIP_STUBS_END }
 #define XC4_COLL_PANEL_WORD (FREE_BN4_CHIP_STUBS + 0x20u) /* r5 an object: the word of its collision data that BN4 keeps at
@@ -60,6 +60,11 @@
                                        * BN6_SOULS_SIDE, by his +0x16), r0 0, where BN4's code clears fields of his AI data that
                                        * BN6 keeps there (GutsSoul's rapid buster's count, 0x080EBE82: XvCallIn; soulrapid.h) */
 #define XC4_SOULS_BASE BN6_SOULS          /* ... its literal */
+#define XC4_STEP_OUT (FREE_BN4_CHIP_STUBS + 0x40u) /* r5 MegaMan: the step his pad asks (BN6_STEP_ASK) where its panel
+                                       * takes him (BN6_STEP_ASK_PANEL), in r0, else 0: for BN4_STEP_ASK_PANEL in RollSoul's charged shot's
+                                       * lag (0x080EC622), whose step BN4 lays out by its panel and BN6 by its direction */
+#define XC4_STEP_START (FREE_BN4_CHIP_STUBS + 0x68u) /* ... r0 that step: BN6's begun, its style and kind BN6's (BN6_STEP_ASK_STYLE,
+                                       * BN6_STEP_ASK_KIND, BN6_STEP_ASK_START), for BN4_STEP_ASK_START (0x080EC63C) after the attack's end */
 #define XC4_BUSTER_DAMAGE 0x0801265Au   /* r5 MegaMan: his plain buster's damage as BN6's own plain shot makes it (its power attack 0's,
                                        * 0x08011A44: NaviStats +1 and more), where BN4's adds 1 to its NaviStats +5 (0x0800CC34), a field
                                        * BN6 keeps otherwise: MetlSoul's plain shot (tools/xchiprecipe_bn4.py UNIT_AIMS) */

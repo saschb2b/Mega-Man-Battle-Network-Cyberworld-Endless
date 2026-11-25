@@ -1,0 +1,16 @@
+[
+ {
+  "name": "RollSoul's heal left out",
+  "spec": "bn4_soul_roll_heal",
+  "soulbreak": 1024,
+  "what": "the passives' break SOULPASSIVE_BREAK_READY leaves the heal's hook out (src/emu/soulroll.c): the AirHoc1 used, BN4 spawns the heal's effect and plays its sound at t43, BN6 neither"
+ },
+ {
+  "name": "RollSoul's heal's effect another",
+  "spec": "bn4_soul_roll_heal",
+  "poke": [
+   "08AFAE48:24CD"
+  ],
+  "what": "the heal's stub (SOULS4_HEAL, src/emu/soulroll.c) with its movs r4,#0xce (BN4's effect 7 as Repair's unit moved it) made #0xcd, WhitWeb's: another effect at him"
+ }
+]
