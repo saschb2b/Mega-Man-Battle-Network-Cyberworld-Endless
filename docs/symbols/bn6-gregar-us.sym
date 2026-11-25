@@ -692,6 +692,7 @@
 080117D4 BN6_POWER_ATTACKS
 08011A24 BN6_POWER_EMPTY
 08011A26 as_byte_alone
+08011A44 bn6_own_plain_shot_damage_power
 08011A74 team_protoman_souls
 08011B8A after_his_loadout
 08011BA4 soul_passives_2
@@ -702,6 +703,7 @@
 08011CCC soul_passives.from
 08011D2A soul_passives_3
 08012530 swords_reach
+0801265A bn6_own_plain_shot_damage
 0801268C BN6_FORM_BONUS_READ
 0801268E BN6_FORM_BONUS_NEXT
 080126B0 BN6_FORM_BUSTER_BONUS
