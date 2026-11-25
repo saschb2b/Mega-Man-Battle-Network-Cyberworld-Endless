@@ -86,7 +86,7 @@ bool soulwind_install(int breaks) {
 	if (level < 0 || !soulbn4_wind_coll(&set)) return false;
 	uint32_t to;
 	if (!thumb_bl_read(R.data + (BN6_PLAYER_LAST_CALL - BUS), 0, BN6_PLAYER_LAST_CALL, &to) || to != BN6_PLAYER_LAST ||
-		get16(R.data + (BN6_WIND_HOLD - BUS)) != 0xB500 /* push {lr} */ || get16(R.data + (BN6_WIND_HOLD + 2 - BUS)) != 0x6CE8 /* ldr r0,[r5,#0x4c] */)
+		get16(R.data + (BN6_WIND_HOLD - BUS)) != 0xB500 /* push {lr} */ || get16(R.data + (BN6_WIND_HOLD_SPAWNER - BUS)) != 0x6CE8 /* ldr r0,[r5,#0x4c] */)
 		return false;
 	/* (the wind's spawn, then the call the hook stands on, then back past it: each through a bx r3, past a bl's reach) */
 	/* (BN4's spawn keeps no spawner at the wind's +0x4C, so BN4's wind never holds for his state (BN6_WIND_HOLD) and gusts as it
@@ -126,7 +126,7 @@ bool soulwind_install(int breaks) {
 	put16(out + 0x04, (uint16_t)(0x2200 | set.region2));
 	put16(out + 0x06, (uint16_t)(0x2300 | set.arg));
 	put16(out + 0x0C, (uint16_t)(0x2400 | level));
-	put32(out + 0x24, (BN6_PLAYER_LAST_CALL + 4) | 1);
+	put32(out + 0x24, BN6_PLAYER_FRAME_END | 1);   /* (past the call the hook stands on: the frame's pop) */
 	put32(out + 0x2C, BN6_COLL_SET_UP | 1);
 	put32(out + 0x34, BN6_WIND_SPAWN | 1);
 	put32(out + 0x3C, BN6_PLAYER_LAST | 1);
