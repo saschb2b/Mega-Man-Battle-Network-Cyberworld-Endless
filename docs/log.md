@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-25
+* **Update**: multirom/bn4-souls.md (WindSoul in BN6's engine: his shots as BN6's AirShot and WindRack through BN6's chip route, his pass, his shoes and the wind of his side), rom/souls.md (WindSoul's row), code/emu.md (soulroute.c, soulwind.c), devtools/differential.md (a spec's chips, BN6's Wind bit, BN4's charge glow among the natives, a spawn clearing its slot's sprite owner).
 * **Update**: multirom/bn4-souls.md (WoodSoul in BN6's engine: his tornado, his hand's merge, his guard against a hit's status, his grass), rom/souls.md (WoodSoul's merge and guard's row), code/emu.md (soulguard.c), devtools/differential.md (a draw outside any family's code met by its site; BN6's doubling counts among BN4_LACKS).
 * **Update**: multirom/bn4-souls.md (MetlSoul in BN6's engine: his punch, his plain shot of his own and his Break chip charge), rom/souls.md (MetlSoul's chip charge and plain shot's row), code/emu.md (MetlSoul's in soulbn4.c).
 * **Update**: multirom/bn4-souls.md (FireSoul in BN6's engine: his flame, his chip charge on BN4's own power attacks, his flame for a chip charged, his grass, his companion and his lava), rom/souls.md (FireSoul's flame for a chip charged and his chip charge's row, FireSoul on lava's row), code/emu.md (soulcharged.c, soullava.c), devtools/differential.md (FireSoul's grass in the Soul object's rule, BN4's lava and its count), project/claims/bn4-souls.json (the Souls' Thumb's stubs).

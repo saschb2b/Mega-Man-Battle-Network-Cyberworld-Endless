@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-25T14:30:00Z
-* **Update**: multirom/bn4-souls.md (WindSoul in BN6's engine: his shots as BN6's AirShot and WindRack through BN6's chip route, his pass, his shoes and the wind of his side), rom/souls.md (WindSoul's row), code/emu.md (soulroute.c, soulwind.c), devtools/differential.md (a spec's chips, BN6's Wind bit, BN4's charge glow among the natives, a spawn clearing its slot's sprite owner).
