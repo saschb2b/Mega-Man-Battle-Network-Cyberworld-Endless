@@ -43,6 +43,9 @@ HELD_FLAG, HELD = 0x18, 4      # (an actor's held routine, BN4 0x080104DC, BN6's
 HELD_COPY, HELD_FROM = range(0x30, 0x34), 6   # ... +0x36 and +0x3E copied to +0x30 and +0x32)
 VARS5, UNISON_VAR5 = 0xA5, 2   # (his attack's variables' +5 at BN6's +0xA0 + 5; BN4's 2 as the unison begins, 0x08013B1C)
 UNISON_SOUNDS = (0x129, 0x157, 0x158)   # (its phase 0's, 0x080EBABE; the picture's, 0x080E369A; its phase 1's, 0x080EBB32)
+UNISON_DECO_SOUNDS = (0xAD,)   # (... and the picture's decoration's: WindSoul's swirl, the third kind's 0x5A, 0x080D8C11's 0x121, BN6's
+                               # number of it the wind's start's, sounds 045)
+WIND_WORD, WIND_ROLE = 0x5C, 'T4:0x41#'   # (WindSoul's wind at his AI data's +0x5C, BN4_WIND_ENTER)
 BN6_FORM_PROXY, BN6_FORM_NAME_BASE = 8, 0x1AB
 MEGAMAN = ('T1', 0x1A0)
 READY = (0x0A, 0x0B, 0x20)     # (an object's phase, its set-up byte, its phase's count)
@@ -227,7 +230,7 @@ class Souls4:
         """the rule's name that reads d as the same state, None where none"""
         for key, rule in (('unison', self.unison), ('soul object', self.soul_object), ('companion', self.companion), ('held', self.held), ('unison var', self.unison_var), ('ready clock', self.ready), ('power', self.power), ('name', self.name),
                           ('soul', self.soul), ('lockout', self.lockout), ('pending', self.pending), ('form frames', self.form_frames),
-                          ('shots', self.shots), ('presses', self.presses), ('charge', self.charge)):
+                          ('shots', self.shots), ('presses', self.presses), ('charge', self.charge), ('wind', self.wind)):
             if key in self.names and rule(d, fa, fb):
                 return self.names[key]
         return None
@@ -263,9 +266,20 @@ class Souls4:
             ob = next((x for x in before['objs'] if x.role == d.role), None) if before and isinstance(d.role, tuple) else None
             return ob is not None and d.part == 'obj' and isinstance(d.a, int) and not isinstance(d.a, bool) and \
                 ob.rec[NODE + d.off] == d.a
-        # (its sounds, begun before the fight, said at the frame after its last)
-        return d.part == 'sounds' and self.unison_last is not None and fa.fr['t'] == self.unison_last + 1 and \
-            isinstance(d.a, list) and set(d.a) <= set(UNISON_SOUNDS) and not d.b
+        # (its sounds, begun before the fight, said at the frame after its last, beside BN6's of that frame)
+        if d.part != 'sounds' or self.unison_last is None or fa.fr['t'] != self.unison_last + 1 or not isinstance(d.a, list):
+            return False
+        rest = list(d.a)
+        for x in d.b or []:
+            if x not in rest:
+                return False
+            rest.remove(x)
+        deco = list(UNISON_DECO_SOUNDS)
+        for x in list(rest):
+            if x in deco:
+                deco.remove(x)
+                rest.remove(x)
+        return set(rest) <= set(UNISON_SOUNDS)
 
     def soul_object(self, d, fa, fb):
         """a Soul's object spawned as he takes the form, BN4's inside its unison (BN4_FORM_STATE runs the form's routine as the form is
@@ -445,6 +459,12 @@ class Souls4:
         # (BN4's turns and their count at its own places, BN6's 0 there: its Souls block holds them, checks())
         return self.united(fa, fb) and self.word_bytes(d, fa, fb, lambda k, a, b: k in (TURNS_USED4, TURNS4) and b[k] == 0 or
                                                        self.charge_byte(k, a, b))
+
+    def wind(self, d, fa, fb):
+        """WindSoul's wind's word: BN4's AI data's +0x5C naming the wind, BN6's 0 (it keeps the wind in the side's slot alone)"""
+        a = d.a if isinstance(d.a, tuple) else ()
+        return isinstance(d.role, tuple) and d.role[:2] == MEGAMAN and d.part == 'ai' and d.off == WIND_WORD and \
+            len(a) == 3 and isinstance(a[0], str) and a[0].startswith(WIND_ROLE) and d.b in (('raw', 0), 0)
 
     def lockout(self, d, fa, fb):
         # (his lock-out after a chip, BN4's at +0x3A and BN6's at +0x19 (legit.json's bn4 megaman_lockout), where BN4's +0x19 holds

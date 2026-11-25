@@ -1878,6 +1878,10 @@ def leftovers(trace):
             role = next((o.role for o in fr['objs'] if o.addr == e.object), None)
             if role is not None and e.kind in (SPAWN, SPRITE_SET):
                 (spawned if e.kind == SPAWN else drawn).add(role)
+                # (a spawn clears its slot's sprite state's owner: a record of many frames, a unison's, holds an earlier
+                # occupant's set-up at the same address, which is not this object's)
+                if e.kind == SPAWN:
+                    drawn.discard(role)
         out[fr['t']] = {o.role for o in fr['objs'] if o.role in spawned and o.role not in drawn}
     return out
 
