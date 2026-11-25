@@ -41,6 +41,10 @@
 void xpanels_install(int xrom);
 /* Whether BN6's engine has lava and sea now */
 bool xpanels_ready(void);
+/* An object that takes BN5's lava its own way (own(obj) true: FireSoul, soullava.c): at the lava's sites, in place of its damage
+ * and cooling, the Thumb at `at` runs, entered as the cooling's stub is (r5 the object, r3 the hooked instruction with its
+ * Thumb bit, lr as the code had it) and back there with r3-r11, sp and lr as they were */
+void xpanels_lava_own(bool (*own)(uint32_t obj), uint32_t at);
 /* ... and panel type `type` of the four (XPANEL_LAVA to XPANEL_HOLE): its game's ROM read and its install whole */
 bool xpanels_has(int type);
 /* An object coming onto a magnet panel (BN5_MAGNET_ARRIVED), from BN6's arrival test (BN6_ARRIVED_TYPE, xsea.c's hook): `obj`

@@ -32,6 +32,11 @@
 /* A Soul's chip charge (AquaSoul's, form 11; ProtSoul's, MetlSoul's and FireSoul's by the same code): */
 #define BN4_POWER_EMPTY   0x0800CC2Cu /* mov pc,lr: the chip charge's power attack of forms 7, 9 and 11 (BN4_FORM_LOADOUTS +2), its charge
                                        * times (BN4_CHARGE_TIMES' row) the chip charge's alone */
+#define BN4_LAVA_STEP     0x08013128u /* an actor on a panel of type 8 (lava; BN6's engine's XPANEL_LAVA, BN5's): */
+#define BN4_LAVA_FIRE_FORM 0x08013142u /* ... cmp r0,#5: FireSoul's form (NaviStats +0x24), on to 0x080131B8, */
+#define BN4_LAVA_FIRE_HEAL 0x080131B8u /* ... movs r0,#0x32: 50 healed (0x0800ABBA, BN6's 0x0800E2EC), the same added to his collision data's
+                                        * Fire tally (+0x3E, BN6's BN6_COLL_FIRE_DAMAGE), the panel set plain (BN4_SET_PANEL_TYPE),
+                                        * effect 7 at his place (movs r4,#7 at 0x080131D6) and sound 0x9A (0x080131DC) */
 #define BN4_POWER_EMPTY2  0x0800CCD0u /* mov pc,lr: another, FireSoul's chip charge's (form 5's +2, power 0x66: 50 frames) */
 #define BN4_CHIP_CHARGE_TEST 0x0800BC78u /* r0 the chip: 1 where his form charges it with A (r4 its kind, +7; r7 its flags, +9) */
 #define BN4_AQUA_TEST_FORM 0x0800BCBAu  /* ... cmp r0,#0xb: AquaSoul's form, then not left alone (+9 bit 0), */

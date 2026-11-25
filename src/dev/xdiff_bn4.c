@@ -188,7 +188,7 @@ void xd4_panels_put(const Spec *s, int game) {
 	for (int i = 0; i < s->npanels; ++i) {
 		uint32_t p = (uint32_t)(s->panels[i].row * 8 + s->panels[i].col);
 		if (game == 6) {
-			emu_write8(BN6_FIELD_PANELS + p * BN6_PANEL_SIZE + BN6_PANEL_TYPE, s->panels[i].type);
+			emu_write8(BN6_FIELD_PANELS + p * BN6_PANEL_SIZE + BN6_PANEL_TYPE, s->panels[i].type6);
 			continue;
 		}
 		/* (BN4's: the type's byte and its side's beside it, +1, a u16 kept but for the type) */

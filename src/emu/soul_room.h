@@ -40,6 +40,8 @@
 #define SOULS_BN4_CHARGED_END (SOULS_THUMB + 0x1E0u)
 #define SOULS_BN4_BOTH     (SOULS_THUMB + 0x1E0u)    /* ... a BN4 Soul's companion spawned, then his taking of the form's copy (soulcompanion.c), */
 #define SOULS_BN4_BOTH_END (SOULS_THUMB + 0x200u)
+#define SOULS_BN4_LAVA     (SOULS_THUMB + 0x200u)    /* ... FireSoul on lava, healed and the panel cooled (soullava.c), */
+#define SOULS_BN4_LAVA_END (SOULS_THUMB + 0x260u)
 #define SOULS_THUMB_END    (FREE_SOULS + 0x001C80u)   /* ... to */
 #define SOULS_ARM_OF       (FREE_SOULS + 0x001C80u)   /* list 0's arm row by sprite number grown: BN6's bytes, then the Souls', to: */
 #define SOULS_ARM_OF_END   (FREE_SOULS + 0x001D80u)

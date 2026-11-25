@@ -72,6 +72,25 @@ static void or8(uint32_t a, uint8_t v) { hook_write8(a, (uint8_t)(hook_read8(a) 
  * (stub_make), which comes back to the hooked instruction: that time it
  * runs. */
 
+/* An object that takes lava its own way, and the Thumb it runs there in place of the lava's cooling (xpanels_lava_own: FireSoul's
+ * heal, soullava.c), none where none is registered */
+static bool (*lava_own)(uint32_t obj);
+static uint32_t lava_own_at;
+
+void xpanels_lava_own(bool (*own)(uint32_t obj), uint32_t at) {
+	lava_own = own;
+	lava_own_at = at;
+}
+
+/* the object r5 names on lava, the battle's time running (BN5_LAVA_STEP's tests before the object's own) */
+static bool on_lava(const HookRegs *r) {
+	if (hook_read16(BN6_BATTLE_FLAGS) & BN6_TIME_STOP) return false;
+	uint32_t coll = hook_read32(r->r[5] + BN6_T1_COLLISION);
+	if (coll < BN6_EWRAM || coll >= BN6_EWRAM_END || !hook_read8(coll + BN6_COLL_REGION)) return false;
+	uint32_t p = panel_at(hook_read8(coll + BN6_COLL_PANEL_X), hook_read8(coll + BN6_COLL_PANEL_Y));
+	return p && hook_read8(p + BN6_PANEL_TYPE) == XPANEL_LAVA;
+}
+
 /* the lava acting on the object r5 names: its damage dealt; false where it does not act */
 static bool lava_acts(const HookRegs *r) {
 	if (hook_read16(BN6_BATTLE_FLAGS) & BN6_TIME_STOP) return false;
@@ -106,11 +125,13 @@ static HookAct lava_site(HookRegs *r, void *user) {
 		back->at = 0;
 		return HOOK_CONTINUE;
 	}
-	if (!lava_acts(r)) return HOOK_CONTINUE;
+	/* (one that takes it its own way: its Thumb, which comes back here as the stub does) */
+	bool own = lava_own && on_lava(r) && lava_own(r->r[5]);
+	if (!own && !lava_acts(r)) return HOOK_CONTINUE;
 	back->at = r->pc;
 	back->sp = r->sp;
 	r->r[3] = r->pc | 1;
-	r->r[12] = XP_STUB | 1;
+	r->r[12] = (own ? lava_own_at : XP_STUB) | 1;
 	return HOOK_JUMP;
 }
 
