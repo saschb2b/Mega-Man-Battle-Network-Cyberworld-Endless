@@ -117,8 +117,80 @@ void platform_frame_parts(uint64_t update, uint64_t draw) {
 
 void frame_log_drawn(void) { emu_drawing = false; }
 
+/* A line said. On the 3DS a line printed goes to the SD card at once, on
+ * the thread the frames are paced on: 11 to 29 ms a line, measured on a New
+ * 3DS, so every second logged lost a frame and its sound ran dry two or
+ * three times, and the log showed a stutter of its own making (issue #897).
+ * There the lines are kept in memory and written where the loop is held
+ * anyway: after a second with a frame of 100 ms or more in it (a layer
+ * made, a start), as the room fills (two minutes of lines), and as the game
+ * ends (flush, at exit). A game that stops without ending loses the lines
+ * kept. Elsewhere a line is printed as it is said, for the tools that read
+ * the log as it grows. */
+#ifdef __3DS__
+#define KEPT_BYTES (128 * 1024)
+static char *kept;
+static size_t nkept;
+
+static void flush(void) {
+	if (nkept) fwrite(kept, 1, nkept, stdout);
+	nkept = 0;
+	fflush(stdout);
+}
+#endif
+
+static void say(const char *line, bool held) {
+#ifdef __3DS__
+	size_t n = strlen(line);
+	if (!kept && (kept = malloc(KEPT_BYTES)) != NULL) atexit(flush);
+	if (kept && n < KEPT_BYTES) {
+		if (nkept + n > KEPT_BYTES) flush();
+		memcpy(kept + nkept, line, n);
+		nkept += n;
+		if (held) flush();
+		return;
+	}
+#else
+	(void)held;
+#endif
+	fputs(line, stdout);
+	fflush(stdout);
+}
+
+/* (the longest present of the second, and what the line before took to
+ * say: on the 3DS written to the SD card only where say() writes) */
+static uint64_t present_longest, wrote;
+
+/* The line's end: the core's sound, the longest present, what the line
+ * before took, and the reads of the game that waited while drawing */
+static void tail_say(char *out, size_t n, double ms) {
+	/* (the core's sound: the device's reads its ring could not fill, each
+	 * a crack heard, and the least it held as a read began) */
+	int dry, silence, least;
+	emu_sound_dry(&dry, &silence, &least);
+	if (least >= 0) {
+		size_t k = strlen(out);
+		if (dry) snprintf(out + k, n - k, "; the sound ran dry %d times, %d samples of silence", dry, silence);
+		else snprintf(out + k, n - k, "; the sound's buffer %d samples at least", least);
+	}
+	{
+		size_t k = strlen(out);
+		snprintf(out + k, n - k, "; the longest present %.1f ms, the line before said in %.1f ms", present_longest * ms, wrote * ms);
+		present_longest = 0;
+	}
+	/* (and reads of the game that waited, drawing, for the next frame) */
+	if (emu_draw_waits) {
+		size_t k = strlen(out);
+		snprintf(out + k, n - k, "; %d reads of the game waited while drawing%s%s", emu_draw_waits, emu_draw_waited ? ", the last in " : "",
+			emu_draw_waited ? emu_draw_waited : "");
+		emu_draw_waits = 0;
+		emu_draw_waited = NULL;
+	}
+}
+
 void frame_log_present(uint64_t present) {
 	part_present += present;
+	present_longest = present > present_longest ? present : present_longest;
 	static int log_on = -1;
 	if (log_on < 0) log_on = platform_frame_log || getenv("CYBERWORLD_FRAME_LOG") != NULL;
 	if (!log_on) return;
@@ -140,9 +212,9 @@ void frame_log_present(uint64_t present) {
 		extern int emu_core_unshown;
 		int drawn = part_played - emu_core_unshown;
 #ifdef __3DS__
-		char bottom[900] = "";
+		char bottom[1100] = "";
 #else
-		char bottom[480] = "";
+		char bottom[680] = "";
 #endif
 		uint64_t second_ticks;
 		int seconds = platform_second_parts(&second_ticks);
@@ -155,14 +227,7 @@ void frame_log_present(uint64_t present) {
 			depth_ticks = 0;
 			depth_frames = 0;
 		}
-		/* (and reads of the game that waited, drawing, for the next frame) */
-		if (emu_draw_waits) {
-			size_t k = strlen(bottom);
-			snprintf(bottom + k, sizeof bottom - k, "; %d reads of the game waited while drawing%s%s", emu_draw_waits, emu_draw_waited ? ", the last in " : "",
-				emu_draw_waited ? emu_draw_waited : "");
-			emu_draw_waits = 0;
-			emu_draw_waited = NULL;
-		}
+		tail_say(bottom, sizeof bottom, ms);
 #ifdef __3DS__
 		/* (and the heap, whose high-water mark a layer's learning raises:
 		 * docs/engine/emulation/3ds-memory.md) */
@@ -178,7 +243,9 @@ void frame_log_present(uint64_t present) {
 			snprintf(bottom + at, sizeof bottom - at, "; %s", heap);
 		}
 #endif
-		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
+		uint64_t write0 = SDL_GetPerformanceCounter();
+		char line[1600];
+		snprintf(line, sizeof line, "frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
 			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms,"
 			" the longest update and drawing %.1f ms%s\n",
 			shown, (unsigned long long)P.frame, lo / 1000.0, hi / 1000.0, gaps[0], gaps[1], gaps[2], gaps[3], P.blend ? " smooth" : "",
@@ -187,7 +254,8 @@ void frame_log_present(uint64_t present) {
 			part_draw * ms / played, part_present * ms / shown, part_longest * ms, bottom);
 		emu_core_ticks = emu_core_unshown_ticks = 0;
 		emu_core_unshown = 0;
-		fflush(stdout);
+		say(line, part_longest * ms >= 100.0);
+		wrote = SDL_GetPerformanceCounter() - write0;
 		shown = 0; hi = 0; lo = 1 << 30; gaps[0] = gaps[1] = gaps[2] = gaps[3] = 0;
 		part_update = part_draw = part_present = part_longest = 0;
 		part_played = 0;

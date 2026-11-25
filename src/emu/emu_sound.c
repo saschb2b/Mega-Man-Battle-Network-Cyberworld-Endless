@@ -32,6 +32,10 @@ static SDL_mutex *ring_lock;
  * skipped, as they were played already (issue #167) */
 static uint64_t ring_written, ring_played, ring_debt;
 static AudioPace pace;   /* (the ring's averaged fill: the output rate's nudge) */
+/* (for the frame log, emu_sound_dry: the device's reads the ring could not
+ * fill, the silence they were padded with, and the least it held as a read
+ * began; a read padded is a crack heard) */
+static int dry_reads, dry_frames, least_fill = RING;
 
 bool emu_sound_ready(void) { return ring_lock != NULL; }
 
@@ -99,9 +103,23 @@ void emu_audio_open(void) {
 	if (!ring_lock) ring_lock = SDL_CreateMutex();
 }
 
+void emu_sound_dry(int *reads, int *silence, int *least) {
+	if (ring_lock) SDL_LockMutex(ring_lock);
+	*reads = dry_reads;
+	*silence = dry_frames;
+	*least = least_fill == RING ? -1 : least_fill;
+	dry_reads = dry_frames = 0;
+	least_fill = RING;
+	if (ring_lock) SDL_UnlockMutex(ring_lock);
+}
+
 int emu_audio_read(int16_t *out, int frames) {
 	int n = 0;
 	if (ring_lock) SDL_LockMutex(ring_lock);
+	int fill = (ring_w - ring_r + RING) % RING;
+	if (fill < least_fill) least_fill = fill;
+	/* (dry once it has played: not the silence before the game's first sound) */
+	if (fill < frames && ring_played) { ++dry_reads; dry_frames += frames - fill; }
 	while (n < frames && ring_r != ring_w) {
 		out[n * 2] = ring[ring_r * 2];
 		out[n * 2 + 1] = ring[ring_r * 2 + 1];

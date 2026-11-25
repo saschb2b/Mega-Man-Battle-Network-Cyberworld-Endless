@@ -168,6 +168,10 @@ bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len);
 /* Stereo 16-bit samples at the given rate, pulled by the audio device.
  * Returns the frames written; silence fills the rest. */
 int emu_audio_read(int16_t *out, int frames);
+/* (emu_sound.c) For the frame log, since the last call: the device's reads the ring could
+ * not fill (each padded with silence, a crack heard), the frames of silence,
+ * and the least the ring held as a read began (-1: none read) */
+void emu_sound_dry(int *reads, int *silence, int *least);
 void emu_audio_rate(int rate);
 
 #endif
