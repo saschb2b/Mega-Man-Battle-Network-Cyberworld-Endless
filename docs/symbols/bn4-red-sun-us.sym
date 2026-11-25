@@ -174,13 +174,17 @@
 0800BA20 BN4_TURN_COUNT
 0800BA66 BN4_COUNTER_WINDOW
 0800BC78 form_5
+0800BC88 protsoul_chip_charge.7
+0800BC8C protsoul_chip_charge.6
+0800BC90 flags_bit_0
 0800BC98 metlsoul_chip_charge.9
 0800BCA8 metlsoul_chip_charge.0xb
 0800BCAC metlsoul_chip_charge.0xc
 0800BCB0 firesoul_flame_for.5
 0800BCB4 firesoul_flame_for.0
 0800BDAA BN4_ATTACK_END_CLEAR
-0800BE96 gutssoul_rapid_buster
+0800BE96 protsoul_chip_charge.window
+0800BEA2 ai_0x16
 0800BFC0 BN4_AI_REQUESTS_CLEAR
 0800BFC4 written_by
 0800BFF4 BN4_AI_OF_SIDE
@@ -196,6 +200,8 @@
 0800C486 metlsoul_chip_charge.9_2
 0800C48C metlsoul_chip_charge.0xb_0xc
 0800C490 metlsoul_chip_charge.0xb_0xc_2
+0800C4A8 protsoul_chip_charge.7_2
+0800C4AE protsoul_chip_charge.6_2
 0800C720 BN4_REPAIR
 0800C964 BN4_FORM_ELEMENTS
 0800C9AC BN4_SET_ACTION
@@ -209,6 +215,8 @@
 0800CDE2 navistats_5_by
 0800D204 chip_0x35
 0800D298 BN4_POWER_THUN
+0800D3C0 power_0x6a
+0800D3DC ai_0x1a_0x28
 0800D3E8 windsoul_shots_pass.movs_r0
 0800D406 BN4_CHIP_ATTACK
 0800D4B4 bn6_charged_chip_use
@@ -229,6 +237,8 @@
 0800E0F6 windsoul_shots_pass.0x30_0x08012f82
 0800E0FC windsoul_shots_pass.0_0x08012ed0
 0800E106 windsoul_shots_pass.1_bl_0x080e68f8
+0800E12C bn4_form_enters_7
+0800E12E protsoul_chip_charge.0x6a
 0800E174 bn4_bn4_form_enters_12
 0800E208 windsoul_shots_pass.pass
 0800E22E windsoul_shots_pass.0xa
@@ -263,6 +273,7 @@
 080105BC BN4_STATE_GENERIC_5
 08010610 BN4_STRUCK_STEP
 08010736 BN4_VIRUS_PRESENT
+080107E8 lock_count
 08010960 BN4_PLAYER_STRUCK
 08010D30 BN4_NAVI_GENERIC_0
 08010D4C BN4_NAVI_GENERIC_2
@@ -273,6 +284,8 @@
 08010FAE BN4_NAVI_GENERIC_5
 080112C4 BN4_OBSTACLE_PUSHED
 080113FC bn4_souls_companions
+08011714 attack_end
+0801173C protsoul_chip_charge
 08011878 BN4_ENEMY_RECORD
 08011888 BN4_ENEMY_STATS
 080125B0 BN4_EFFECT_PATTERNS

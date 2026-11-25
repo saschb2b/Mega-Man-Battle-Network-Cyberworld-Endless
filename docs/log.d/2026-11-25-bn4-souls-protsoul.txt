@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-25T17:30:00Z
-* **Update**: multirom/bn4-souls.md (ProtSoul in BN6's engine: WideSwrd through BN6's chip route, his Sword chip charge, his shield and its lock), rom/souls.md (ProtSoul's row), code/emu.md (soullock.c), devtools/differential.md (the B and left's window and lock paired, MegaMan's AI words of counts read as numbers).

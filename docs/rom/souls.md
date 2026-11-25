@@ -3,7 +3,7 @@ type: ROM Map
 title: "MegaMan's forms and BN5's Souls in BN6's engine"
 description: "Addresses for MegaMan's forms and BN5's Souls in BN6's engine: the proxy form, UNITE on the Custom screen, a Soul's look, abilities, passives and chips, ColonelSoul, BN5's mood and DarkChip after-effects, Chaos Unison."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T14:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T17:30:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
