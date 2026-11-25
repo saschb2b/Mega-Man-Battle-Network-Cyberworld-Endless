@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-25T04:30:00Z
-* **Update**: multirom/bn4-souls.md (WoodSoul in BN6's engine: his tornado, his hand's merge, his guard against a hit's status, his grass), rom/souls.md (WoodSoul's merge and guard's row), code/emu.md (soulguard.c), devtools/differential.md (a draw outside any family's code met by its site; BN6's doubling counts among BN4_LACKS).
