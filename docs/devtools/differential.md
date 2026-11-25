@@ -83,9 +83,11 @@ and its pseudo-chip's byte written past the chip gate as the game writes
 it giving the Soul (`xd4_souls_put`), and his form is said as it changes
 (`xd4_form_watch`, the battle NaviStats' `BN4_NAVI_FORM`). BN4's UNITE
 is keyed as BN5's: the chip picked, five right and down to UNITE, A,
-then up and A on the Soul (four other paths tried, none united). `panels=` (a spec's `panels`, `CR:T` each: column, row, type)
+then up and A on the Soul (four other paths tried, none united). `panels=` (a spec's `panels`, `CR:T` each: column, row, type; `CR:T/T6`
+where BN6's type is another, BN4's lava 8 and the engine's 0xD; `@N` at
+fight frame N by the fight's timer, as the keys are)
 gives panels a type in both games as the fight begins, before its first
-fight frame, each game's type byte at its own place (BN4's panel +0,
+fight frame (or at N), each game's type byte at its own place (BN4's panel +0,
 BN5's and BN6's +2; `src/dev/xdiff.c` `panels_step`, `xd4_panels_put`):
 each game makes a panel's flags from its type every frame, so the panel
 is a cracked one or grass from then on in both. BN4's cracked (3) and
@@ -119,6 +121,9 @@ a Soul's object spawned as he takes the form, BN4's inside its unison and
 BN6's still in play in the fight's first frames, its hit area in MegaMan's
 word of the regions he met (SrchSoul's), the panels it sets still plain in
 BN6's and a panel's blink each game keeps (FireSoul's grass);
+BN4's lava (type 8) as the engine's (0xD), its count compared at the same
+fight frame (BN4's at its +0xE, BN6's at +0x12), the frame a spec gives it
+BN4's not yet counted;
 a Soul's companion, BN4's own first-kind 0x57 and BN6's companion overlay of
 BN4's Souls' kind told as one (`t1_moved`), its type, word, flag and mode
 each engine's, its sprite read at the same fight frame while its first

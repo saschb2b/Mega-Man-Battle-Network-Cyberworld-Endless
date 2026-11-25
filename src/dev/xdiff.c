@@ -119,7 +119,8 @@ typedef struct Side_ {
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
 	uint32_t still;                 /* the core's frames run since its timer last read otherwise (a hold's: a Navi chip's, a turn's change) */
 	uint32_t filmed;                /* (film=) the timer of its last picture, + 1; 0 none */
-	bool seeded, fought, done, decked, held, paneled, hidden;
+	bool seeded, fought, done, decked, held, hidden;
+	unsigned paneled;   /* (panels=) bit i: the spec's panel i given its type */
 	const struct Side_ *ref;        /* (BN6's) the reference's side, BN5's, its fight begun first */
 } Side;
 
@@ -421,9 +422,14 @@ static void hold_step(Side *g, const Spec *s) {
 	if (s->hide && g->seeded && !g->hidden && v->coll_flash) foes_mark(v, v->coll_flash, s->hide, v->coll_flags, BN5_OBJ_FLASHING), g->hidden = true;
 }
 
-/* (panels=) a BN4 spec's panels' types written in each game before its first fight frame (xdiff_bn4.c's xd4_panels_put) */
-static void panels_step(Side *g, const Spec *s) {
-	if (!g->paneled) { xd4_panels_put(s, g->v.game); g->paneled = true; }
+/* (panels=) a BN4 spec's panels' types written in each game before its first fight frame, or at the fight frame each names by
+ * the fight's timer as the keys are (xdiff_bn4.c's xd4_panels_put, which puts those due) */
+static void panels_step(Side *g, const Spec *s, uint32_t t) {
+	for (int i = 0; i < s->npanels; ++i)
+		if (!(g->paneled >> i & 1) && (!s->panels[i].at || t >= (uint32_t)g->behind + s->panels[i].at)) {
+			xd4_panels_put(s, g->v.game, i);
+			g->paneled |= 1u << i;
+		}
 }
 
 /* (safe=1) MegaMan's collision data invulnerable, before each frame of the battle */
@@ -529,7 +535,7 @@ static bool step(Side *g, const Spec *s) {
 	if (battle && phase == BN6_PHASE_FIGHT) {
 		keys |= t >= (uint32_t)g->behind ? keys_at(s, t - (uint32_t)g->behind) : 0;
 		hold_step(g, s);
-		panels_step(g, s);
+		panels_step(g, s, t);
 	}
 	if (battle && s->safe) keep_safe(v);
 	xd4_dark_rules(s, v->game, battle);   /* (calm4, confuse6, mood4: xdiff_bn4.h) */

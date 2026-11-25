@@ -1,0 +1,26 @@
+[
+ {
+  "name": "FireSoul on lava: another effect",
+  "spec": "bn4_soul_fire_lava",
+  "poke": [
+   "08C81C26:2407"
+  ],
+  "what": "his lava's Thumb (SOULS_BN4_LAVA, src/emu/soullava.c) with its movs r4,#0xCE (BN4's effect 7, Repair's copy) made #7, BN6's own effect 7: another effect at his place"
+ },
+ {
+  "name": "FireSoul on lava: no sound",
+  "spec": "bn4_soul_fire_lava",
+  "poke": [
+   "08C81C2E:2000"
+  ],
+  "what": "his lava's Thumb with its movs r0,#0x39 (BN4's sound 0x9A, Walla's copy) made #0: no sound where BN4 plays 0x9A"
+ },
+ {
+  "name": "FireSoul burnt by lava",
+  "spec": "bn4_soul_fire_lava",
+  "poke": [
+   "08C81C00:4770"
+  ],
+  "what": "his lava's Thumb ended at its first instruction (bx lr): BN6's lava neither heals nor cools under him, the lava standing where BN4's turned plain"
+ }
+]
