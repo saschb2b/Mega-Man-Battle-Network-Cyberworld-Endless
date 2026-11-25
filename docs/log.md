@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-25
+* **Update**: project/youtube.md (0.24.0's trailer published, its row, and Studio's A/B-Tests waiting on the owner's identity check).
 * **Update**: code/layers.md (0.24.0's row of the numbers), devtools/old-checkpoint.md (0.24.0's candidate continued 0.23.0's and 0.22.2's runs).
 
 ## 2026-11-24
