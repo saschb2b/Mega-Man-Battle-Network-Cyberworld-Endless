@@ -465,6 +465,32 @@ animation is each art's number). Their seven mutations: the charges longer
 (the punch's, the chip's), the punch not pushing, the chip not doubled, no
 chip charged, the plain shot one stronger, its hit word another.
 
+## WoodSoul in BN6's engine
+
+WoodSoul (Blue Moon's Soul 12, form 12, kind and element Wood) is BN6's
+Soul 20 (k 7, held bit 13). BN4's code names him in two places of the
+player's frame and in his taking of the form. What it took:
+
+| Part | WoodSoul's |
+| --- | --- |
+| His charged shot | power attack 0x57 into family 0x28, an attack unit at BN6's grown 0xDE: a tornado two panels ahead, the third kind's 0x31, copied with it; its sound 0x126 copied at slot 0x303, and the arm's kind 0x0F of the arm's table copied with the others. The state's path for its subfamily 2 (Static's, BN4's chip 27, no row of the registry) asks a count no BN6 routine keeps (`0x08043014`): the stub that returns 0, as WoodSoul never takes that path (`UNIT_AIMS`) |
+| His merge | his taking of the form (`BN4_WOOD_ENTER`, `BN4_WOOD_MERGE`) joins each Wood chip of his hand and the chip of no kind after it whose power shows: its power, bonus and extra are added to the Wood chip's and it leaves the hand. `soulbn4_enter` does the same on BN6's hand, whose layout is BN4's; BN4 moves its two byte arrays by two bytes a place, BN6's code by one, as BN6 keeps them |
+| His guard | BN4's player's frame passes over the status a hit gave him where his form is 12 (`BN4_STATUS_GUARD_FORM`): no paralysis, confusion, blindness or hold takes him. BN6's player's frame has the same gate for its own forms (`BN6_PLAYER_STATUS_CALL`, forms 7 and 0x13); a hook there (`soulguard.c`) passes over the call for a BN4 Soul so guarded, the form read from BN4's code |
+| His grass | on grass BN4 heals him 1 a frame (`0x08012FB6`, form 12). BN6 heals any Wood object on grass 1 a frame already (`0x0801A1D2`), so his element gives it |
+
+The proof is three specs, each with its control: `bn4_soul_wood`, his
+tornado on a MettaurEX (B held 102 frames); `bn4_soul_wood_merge`,
+ElemLeaf and MokoRus1 joined and used as one; `bn4_soul_wood_guard`, Billy
+V1's ball striking him, unparalysed in both games. Their four mutations: his
+charge 10 frames longer, the tornado one stronger, the merge left out, the
+guard left out. The guard's spec is the first where a foe's object meets a
+BN4 Soul: BN6's hit pass then counts the doubling of his Wood body against
+the Elec ball in the ball's collision data (+0x74, +0x75), where BN4's
+shifts the damage at once and keeps no count (the differential's
+`BN4_LACKS`), and the ball's spark's place is drawn in Billy's copy of
+BN6's ball in one game and in Thunder's moved ball in the other (the
+replay's draw by its site, [the differential](../devtools/differential.md)).
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first

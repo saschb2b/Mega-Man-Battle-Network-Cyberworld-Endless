@@ -832,6 +832,11 @@ BN4_LACKS = [
              "0x081D7832-0x081D7838, ldr r3,[r7,#0x44]; ldr r2,[r6,#0x7c]; orrs; str): BN4's hit pass, its twin, ORs the "
              "striker's alliance word alone there (0x08012BDC-0x08012BE8: bn4.h BN4_COLL_HITS_WORD), and keeps the pairs met "
              "apart as BN6 does (BN4_COLL_MET, BN6's +0x68)"),
+    dict(name='bn4 no doubling counts', part='coll', offset=0x74, size=2,
+         why="BN6's collision data +0x74 and +0x75, the doublings its hit pass counts for the struck (0x081D78C8-0x081D78F4: "
+             "the two elements' by 0x081D792E and the rest, for its frame's step to shift the damage by): BN4's hit pass shifts "
+             "the damage by its doubling at once (0x08012C56-0x08012C82, r4 by 0x08012C94) and keeps no count. A Wood "
+             "MegaMan's body meeting an Elec object counts one there in BN6 (bn4_soul_wood_guard: Billy's ball)"),
     dict(name='bn4 no bubble', part='coll', offset=0x2C, size=2,
          why="BN6's collision data +0x2C, the frames left in a bubble (bn6.h, BN6_COLL_BUBBLE): BN4 has no bubble (bn4.h, as the "
              "freeze)"),

@@ -1,0 +1,16 @@
+[
+ {
+  "name": "WoodSoul's charge 10 frames longer",
+  "spec": "bn4_soul_wood",
+  "soulbreak": 16,
+  "what": "the charge times' copy (src/emu/soulpower.c) 110 frames for his charged shot where BN4_CHARGE_TIMES' row of 0x57 holds 100: B held 102 frames fires the plain buster, not his tornado"
+ },
+ {
+  "name": "WoodSoul's tornado one stronger",
+  "spec": "bn4_soul_wood",
+  "poke": [
+   "0800D286:2015"
+  ],
+  "what": "his power attack 0x57's copy (SOUL_POWERS) with its movs r0,#0x14 (the attack's damage, its +8) made #0x15: each of the tornado's hits 21 where BN4's are 20"
+ }
+]

@@ -1,0 +1,8 @@
+[
+ {
+  "name": "WoodSoul's guard left out",
+  "spec": "bn4_soul_wood_guard",
+  "soulbreak": 1024,
+  "what": "the passives' break SOULPASSIVE_BREAK_READY leaves the guard's hook out (src/emu/soulguard.c): Billy's ball paralyses him in BN6 where BN4's WoodSoul takes no status"
+ }
+]

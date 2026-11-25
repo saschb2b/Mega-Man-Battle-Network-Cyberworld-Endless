@@ -68,9 +68,10 @@ void xd_log_bn4(const XdGame *g) { game4 = g; }
 /* a game's routines: 5's, 6's or 4's (NULL where BN4's were not given) */
 static const Game *game_of(int game) { return game == 4 ? game4 : &games[game == 6]; }
 
-/* A draw kept: the battle's timer, its key (a BN5 address), the word it was drawn from, which word; and whether it was a
- * draw of the family's made before the fight was seeded (xd_replay_setup: kept first, all before the fight's) */
-typedef struct { uint32_t t, key, word, which; bool setup; } Draw;
+/* A draw kept: the battle's timer, its key (a BN5 address), the word it was drawn from, which word; whether it was a
+ * draw of the family's made before the fight was seeded (xd_replay_setup: kept first, all before the fight's); and its site,
+ * the reference's caller, where its key is a family's code */
+typedef struct { uint32_t t, key, word, which; bool setup; uint32_t site; } Draw;
 /* a key's draws in the frame replayed so far */
 typedef struct { uint32_t key, which; int n; } Keyed;
 
@@ -222,7 +223,7 @@ static uint32_t key_of(const XdLog *log, const XdEvent *e, uint32_t *which) {
 
 static void keep(XdLog *log, XdEvent *e, uint32_t which) {
 	if (log->ndraws >= DRAWS_MAX) return;
-	log->draws[log->ndraws++] = (Draw){ log->seeded ? log->t : 0, key_of(log, e, &which), e->a, which, !log->seeded };
+	log->draws[log->ndraws++] = (Draw){ log->seeded ? log->t : 0, key_of(log, e, &which), e->a, which, !log->seeded, e->caller & ~1u };
 	e->flags |= XD_KEPT;
 	e->ref = (uint32_t)log->ndraws;
 }
@@ -267,9 +268,14 @@ static void replay(XdLog *log, XdEvent *e, uint32_t own) {
 	 * xd_replay_lag; the engine's per-frame steps have no key) */
 	bool lagged = log->lag != 0;
 	uint32_t at = lagged ? log->t - (uint32_t)log->lag : log->t;
+	/* (a draw of an engine routine BN6 runs outside any family's code, keyed by its site, meets BN4's of that site that a
+	 * family's code led to: BN4's thunder ball, the third kind's 0x2A, is the Thunder chip's unit's moved code in
+	 * BN4's log and Billy's copy of BN6's own in BN6's, so its hit's spark's place is drawn in one game's family and not the
+	 * other's, bn4_soul_wood_guard) */
 	for (int i = lagged ? log->lag_cursor : log->cursor; i < ref->ndraws && ref->draws[i].t == at; ++i) {
 		const Draw *d = &ref->draws[i];
-		if (d->setup || d->key != key || d->which != which || k-- > 0) continue;
+		bool same = d->key == key || (!e->family && ref->game == 4 && d->site == key);
+		if (d->setup || !same || d->which != which || k-- > 0) continue;
 		hook_write32(log->g->rng[own], d->word);
 		e->b = d->word;
 		e->flags |= XD_REPLAYED;
