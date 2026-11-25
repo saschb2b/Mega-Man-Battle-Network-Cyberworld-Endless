@@ -172,6 +172,8 @@ void pet_draw(void) {
 	frame_part_end("forms", t);
 }
 
+unsigned pet_frame_how(void) { return !online_visit_away() && pet_menu_unshown() ? EMU_FRAME_UNSHOWN : 0; }
+
 uint32_t pet_keys(uint32_t keys) {
 	keys = pet_options_keys(keys);
 	/* (the PET's menu: ours over BN6's, but in the Net Square, where the menu is BN6's own) */
