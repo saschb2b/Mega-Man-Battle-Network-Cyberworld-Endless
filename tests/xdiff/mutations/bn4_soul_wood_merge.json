@@ -1,0 +1,8 @@
+[
+ {
+  "name": "WoodSoul's merge left out",
+  "spec": "bn4_soul_wood_merge",
+  "soulbreak": 512,
+  "what": "the passives' break SOULPASSIVE_BREAK_PLUS leaves his entering's merge out (src/emu/soulbn4.c soulbn4_enter): the hand keeps ElemLeaf and MokoRus1 apart, ElemLeaf strikes without MokoRus1's power"
+ }
+]

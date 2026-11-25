@@ -1,0 +1,10 @@
+{
+ "bn4": "0x126",
+ "bn6": "0x303",
+ "clock": "state",
+ "souls": [
+  "12"
+ ],
+ "what": "WoodSoul's tornado 0x126, its copy",
+ "why": "Played by WoodSoul's charged shot's tornado (the third kind's 0x31, MegaMan's state 0x28's) as it rises (BN4: movs r0,#0x27; adds r0,#0xff at 0x080D3092, its bl at 0x080D3096; BN6: the copy's bl aimed at a shim of the unit's home that makes r0 0x303, XvSoundCall): the same sound, BN4's song copied into slot 0x303 by WoodSoul's unit (src/audio/xsong.c XSOUNDS), the Souls' line's. bn4_soul_wood at t146"
+}

@@ -145,6 +145,10 @@
 #define BN6_COLL_STATUS_GIVEN 0x10        /* u8 the status a hit gives, from its object's +6 (0x0801A258), passed by the hit pass at
                                            * 0x081D784E to the struck's BN6_COLL_STATUS_TAKEN (BN4's +0xE) */
 #define BN6_COLL_STATUS_TAKEN 0x11        /* u8 (0x081D7854; BN4's +0xF) */
+#define BN6_PLAYER_STATUS_CALL 0x0801ACE8u /* the player's frame's (0x0801AC6C, r5 him) bl BN6_STATUS_TAKEN, which puts the status a
+                                            * hit gave him on him: passed over where NaviStats +0x29 or his form (+0x2C) is 7, his
+                                            * form 0x13, or NaviStats +0x52 set (0x0801ACC6-0x0801ACE6), */
+#define BN6_PLAYER_STATUS_PAST 0x0801ACECu /* ... and where those go, past it */
 #define BN6_COLL_PUSH         0x12        /* u16 a hit's, given the struck's +0xA4 where its low byte is not 0 (0x081D78BA; BN4's +0x74) */
 #define BN6_COLL_PUSH_TAKEN   0xA4        /* u16 the struck's (0x081D78C6; BN4's +0x48) */
 #define BN6_COLL_MET          0x68        /* u32 the index bits of those it met (0x081D7B1E-0x081D7B30; BN4's +0x4C) */

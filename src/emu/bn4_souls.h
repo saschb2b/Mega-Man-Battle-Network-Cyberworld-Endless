@@ -75,4 +75,22 @@
 #define BN4_GUTS_RAPID 0x080EBDC0u     /* ... its routine (BN4_PLAYER_STATES' 0x10): eight buster shots (0x0800B590) with sound
                                         * 0xA7, the count and window cleared at its end (0x080EBE84-0x080EBE88) */
 
+#define BN4_WOOD_ENTER    0x0800E174u /* WoodSoul's (form 12's): r0 his side, on to his hand's merge (its bl at +4), */
+#define BN4_WOOD_MERGE    0x0800E294u /* ... which, from the chip up next, joins each chip of the kind Wood (BN4_WOOD_MERGE_KIND) and
+                                       * the chip after it (0x0800E2C4-0x0800E2D6: of the kind none, BN4_WOOD_MERGE_KIND2, its power
+                                       * shown, +9's 0x02): that chip's power, bonus and extra (the hand's +0xE, +0x1A and +0x26 by
+                                       * index, its layout BN6's) added to the Wood chip's, and
+                                       * it taken out of the hand, the chips after it moved up a place (0x0800E2F0-0x0800E31C; its
+                                       * two bytes' arrays, +0x3E and +0x44, moved by two bytes a place as the u16s are) */
+#define BN4_WOOD_MERGE_KIND 0x0800E2B0u /* ... cmp r1,#3: the first chip's kind (BN4_CHIP_KIND), Wood, */
+#define BN4_WOOD_MERGE_KIND2 0x0800E2CCu /* ... cmp r1,#0xc: the next's, none */
+#define BN4_STATUS_TAKE   0x08013470u /* the status a hit gave the struck put on him (the player's frame's, 0x0801363C, 0x08013728,
+                                       * 0x08013836, 0x0801390C): his collision data's +0xF (BN4_COLL_STATUS_TAKEN), its class the
+                                       * high nibble (1-4) and its level the low, the flag set and its frames stored by the table
+                                       * 0x08018550 (paralysis's 0x08 for 90, 120, 150 frames), BN6_STATUS_TAKEN's twin */
+#define BN4_STATUS_GUARD_FORM 0x08013908u /* the player's frame's (0x08013860's) cmp r0,#0xc on his form (movs r1,#0x24; bl 0x0800D7CA:
+                                           * NaviStats +0x24) and its beq past the next bl: WoodSoul's form, whom no hit's status
+                                           * takes, */
+#define BN4_STATUS_GUARD_SKIP 0x0801390Cu /* ... the bl BN4_STATUS_TAKE it passes over */
+
 #endif

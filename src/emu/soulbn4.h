@@ -15,8 +15,8 @@
 #include <stdint.h>
 
 #define SOUL_BN4_FIRST 13   /* BN6's Soul number (BN6_SOUL_ID, the element's +BN6_ELEMENT_SOUL, a used bit) of BN4's first moved */
-#define SOULS_BN4      7    /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul (BN4's 4),
-                             * NumSoul (BN4's 8), FireSoul (BN4's 5), MetlSoul (BN4's 9) */
+#define SOULS_BN4      8    /* BN4's Souls moved: ThunSoul (BN4's 6), GutsSoul (BN4's 2), AquaSoul (BN4's 11), SrchSoul (BN4's 4),
+                             * NumSoul (BN4's 8), FireSoul (BN4's 5), MetlSoul (BN4's 9), WoodSoul (BN4's 12) */
 #define SOULS_HELD_BN4 6    /* the bit of the first in the Souls held (soulunite_held), past BN5's six */
 
 /* A BN4 Soul's rows as BN6's engine takes them, read from BN4's ROM */
@@ -50,6 +50,9 @@ int soulbn4_form(int k);
  * its numbers read from BN4's code; BN4's hand's +0x26 on, BN6's
  * BN6_HAND_BONUS: the attack's +6 beside its power at +8 in both) */
 void soulbn4_enter(uint32_t obj, int k);
+/* whether no hit's status takes BN4's k-th Soul: BN4's player's frame passes over it for his form (BN4_STATUS_GUARD_FORM:
+ * WoodSoul's), read from BN4's code */
+bool soulbn4_guarded(int k);
 /* (after xchips_bn4_code_install) BN4's k-th Soul's taking of the form moved with his unit (tools/xchiprecipe_bn4.py
  * SOUL_ENTERS: SrchSoul's, which spawns his object), its copy's address with its Thumb bit, 0 where it is not moved */
 uint32_t soulbn4_enter_copy(int k);

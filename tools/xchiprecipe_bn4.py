@@ -491,15 +491,16 @@ TABLES = {
                          "copied with the unit, three rows"),
     # (the arm, BN4_T3_02_KINDS: tools/bn4_twins.py TABLES has it with Roll's kind; here the kinds the chips' states spawn,
     # each state's own bytes of them by subfamily read by hand, a row's sprite its list's offset and its number)
-    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C, 0x31, 0x11, 0x1D, 0x05), sprite=(0, 1), list=None, loads={0x080CD628},
+    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C, 0x31, 0x11, 0x1D, 0x05, 0x0F), sprite=(0, 1), list=None, loads={0x080CD628},
                      why="the arm's kinds (the third kind's 0x02: 53 of 4 bytes, its sprite's list offset and number, its "
                          "palette, its +0xC), read by its init (0x080CD61E, by +4); the spread state spawns 0x0A, 0x06, 0x0E "
                          "and 0x32 by subfamily (its bytes at 0x080EC814), FlmLine's 0x0C (0x080ECAF6), MagBolt's 0x23 + its "
                          "subfamily, 0x23 again for MagShok's 3 (0x080EE05E-0x080EE068), the Elem chips' 0x2C (0x080EE35A: movs r4,#0x2c, "
                          "its high byte from NaviStats +0x23), DrkVulcn's 0x31 (0x080EC88E: movs r1,#0x31 for its subfamily 4), DarkBomb's 0x11 (the bombs' state's table "
                          "by subfamily, 0x080EB4EC, its subfamily 2's), SandRing's state's 0x1D (0x080EDCAC: movs r4,#0x1d, its high "
-                         "byte from NaviStats +0x23; ThunSoul's charged shot, his buster's flash where the attack's +0xC is not 3), and GutsSoul's punch's 0x05 (0x080EBF9A: "
-                         "movs r4,#5, family 0x12's first frame)"),
+                         "byte from NaviStats +0x23; ThunSoul's charged shot, his buster's flash where the attack's +0xC is not 3), GutsSoul's punch's 0x05 (0x080EBF9A: "
+                         "movs r4,#5, family 0x12's first frame), and WoodSoul's tornado's 0x0F (0x080ECF86: movs r2,#0xf, its high "
+                         "byte twice NaviStats +0x23; 0x26 for the state's subfamily 2, Static's, which no row plays)"),
     0x080DF674: dict(size=0x18, entry=12, kinds=(0, 1), sprite=(0, 1), list=3, loads={0x080DF6C4}, sound=(0x0A, {0x080DF762}),
                      why="the geyser's and the tower's rows (the third kind's 0x92, AquaUp's and GreenWd's strike: 12 bytes each, its "
                          "sprite's list's offset and number, three animations with their frames, its collision's argument, and at "

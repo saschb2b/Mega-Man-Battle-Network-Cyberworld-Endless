@@ -7,6 +7,7 @@
 #include "bn4_souls.h"
 #include "bn6.h"
 #include "bn6_chips.h"
+#include "bn6_link.h"
 #include "bytes.h"
 #include "chips.h"
 #include "hook.h"
@@ -24,13 +25,17 @@
 enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
-/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8, FireSoul 5, MetlSoul 9) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9 };
+/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, SrchSoul 4, NumSoul 8, FireSoul 5, MetlSoul 9,
+ * WoodSoul 12) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 4, 8, 5, 9, 12 };
 #define FORM_GUTS 2
 #define FORM_NUM 8
 #define FORM_AQUA 11
 #define FORM_FIRE 5
 #define FORM_METL 9
+#define FORM_WOOD 12
+#define OP_MOVS_R1 0x2100u   /* movs r1,#imm8 */
+#define OP_BEQ_NEXT 0xD001u  /* beq past the next bl */
 #define OP_CMP_R1_B 0x2900u   /* cmp r1,#imm8 (the bonus's kinds) */
 #define OP_BL_HI 0xF000u      /* a bl's first half */
 #define FORM_THUN 6
@@ -205,17 +210,81 @@ static bool pass_of(int form, int *kind1, int *kind2, int *add) {
 	return false;
 }
 
+/* whether chip (BN6's id) shows its power (BN4's +9 0x02, BN6's BN6_CHIP_SHOWS_POWER) */
+static bool shows_power(uint16_t chip) {
+	return hook_read8(chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE + BN6_CHIP_EFFECT_FLAGS) & BN6_CHIP_SHOWS_POWER;
+}
+
+/* WoodSoul's merge in BN4's code (BN4_WOOD_MERGE), its two kinds read there: false where form has none, or the code is not that */
+static bool merge_rule(int form, int *kind1, int *kind2) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	uint32_t to;
+	if (!b4 || form != FORM_WOOD || get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * (uint32_t)form) != (BN4_WOOD_ENTER | 1) ||
+		!thumb_bl_read(b4 + (BN4_WOOD_ENTER + 4 - BUS), 0, BN4_WOOD_ENTER + 4, &to) || to != BN4_WOOD_MERGE)
+		return false;
+	uint16_t k1 = get16(b4 + (BN4_WOOD_MERGE_KIND - BUS)), k2 = get16(b4 + (BN4_WOOD_MERGE_KIND2 - BUS));
+	if ((k1 & 0xFF00u) != OP_CMP_R1 || (k2 & 0xFF00u) != OP_CMP_R1) return false;
+	*kind1 = k1 & 0xFF;
+	*kind2 = k2 & 0xFF;
+	return true;
+}
+
+/* a hand's u16 arrays by place: those the merge adds, and those a place's move takes (its id first); its u8 arrays */
+static const uint8_t sums[] = { BN6_HAND_POWERS, BN6_HAND_BONUS, BN6_HAND_EXTRA };
+static const uint8_t moves16[] = { BN6_HAND_CHIPS, BN6_HAND_POWERS, BN6_HAND_BONUS, BN6_HAND_EXTRA, BN6_HAND_ENTRIES };
+static const uint8_t moves8[] = { BN6_HAND_SCREEN, BN6_HAND_MARKS };
+
+/* the hand's chips from place j on moved up a place, its last emptied */
+static void hand_up(uint32_t hand, uint32_t j) {
+	for (; j + 1 < BN6_HAND_MAX; ++j) {
+		for (size_t a = 0; a < sizeof moves16; ++a) hook_write16(hand + moves16[a] + 2 * j, hook_read16(hand + moves16[a] + 2 * (j + 1)));
+		for (size_t a = 0; a < sizeof moves8; ++a) hook_write8(hand + moves8[a] + j, hook_read8(hand + moves8[a] + j + 1));
+		if (hook_read16(hand + BN6_HAND_CHIPS + 2 * j) == HAND_END) return;
+	}
+	hook_write16(hand + BN6_HAND_CHIPS + 2 * j, HAND_END);
+}
+
+/* WoodSoul's merge of a hand (BN4_WOOD_MERGE): from the chip up next, each of kind1 whose next is of kind2 and shows its power
+ * takes that chip's power, bonus and extra, and the chips after it move up over it. Its two u8 arrays move a place each,
+ * as BN6 keeps them, where BN4 moves its by two bytes */
+static void hand_merge(uint32_t hand, int kind1, int kind2) {
+	for (uint32_t i = hook_read8(hand + BN6_HAND_AT); i + 1 < BN6_HAND_MAX; ++i) {
+		uint16_t chip = hook_read16(hand + BN6_HAND_CHIPS + 2 * i), next = hook_read16(hand + BN6_HAND_CHIPS + 2 * (i + 1));
+		if (chip == HAND_END || next == HAND_END) return;
+		if (soulkinds_bn4_of(chip) != kind1 || soulkinds_bn4_of(next) != kind2 || !shows_power(next)) continue;
+		for (size_t a = 0; a < sizeof sums; ++a) {
+			uint32_t at = hand + sums[a] + 2 * i;
+			hook_write16(at, (uint16_t)(hook_read16(at) + hook_read16(at + 2)));
+		}
+		hand_up(hand, i + 1);
+	}
+}
+
 void soulbn4_enter(uint32_t obj, int k) {
 	int kind1, kind2, add;
-	if (k < 0 || k >= SOULS_BN4 || (soulpassive_breaks() & SOULPASSIVE_BREAK_PLUS) || !pass_of(forms[k], &kind1, &kind2, &add))
-		return;
+	if (k < 0 || k >= SOULS_BN4 || (soulpassive_breaks() & SOULPASSIVE_BREAK_PLUS)) return;
 	uint32_t hand = BN6_BATTLE_HAND + (uint32_t)(hook_read8(obj + BN6_T1_ALLIANCE) & 1) * BN6_HAND_SIZE;
+	if (merge_rule(forms[k], &kind1, &kind2)) {
+		hand_merge(hand, kind1, kind2);
+		return;
+	}
+	if (!pass_of(forms[k], &kind1, &kind2, &add)) return;
 	for (uint32_t i = hook_read8(hand + BN6_HAND_AT); i < BN6_HAND_MAX; ++i) {
 		uint16_t chip = hook_read16(hand + BN6_HAND_CHIPS + 2 * i);
 		if (chip == HAND_END) break;
 		int kind = soulkinds_bn4_of(chip);
-		uint32_t rec = chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE;
-		if ((kind == kind1 || kind == kind2) && (hook_read8(rec + BN6_CHIP_EFFECT_FLAGS) & BN6_CHIP_SHOWS_POWER))
+		if ((kind == kind1 || kind == kind2) && shows_power(chip))
 			hook_write16(hand + BN6_HAND_BONUS + 2 * i, (uint16_t)(hook_read16(hand + BN6_HAND_BONUS + 2 * i) + add));
 	}
+}
+
+bool soulbn4_guarded(int k) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	uint32_t to;
+	if (!b4 || k < 0 || k >= SOULS_BN4 || get16(b4 + (BN4_STATUS_GUARD_FORM - 6 - BUS)) != (OP_MOVS_R1 | BN4_NAVI_FORM) ||
+		get16(b4 + (BN4_STATUS_GUARD_FORM + 2 - BUS)) != OP_BEQ_NEXT ||
+		!thumb_bl_read(b4 + (BN4_STATUS_GUARD_SKIP - BUS), 0, BN4_STATUS_GUARD_SKIP, &to) || to != BN4_STATUS_TAKE)
+		return false;
+	uint16_t f = get16(b4 + (BN4_STATUS_GUARD_FORM - BUS));
+	return (f & 0xFF00u) == OP_CMP_R0 && (f & 0xFF) == forms[k];
 }

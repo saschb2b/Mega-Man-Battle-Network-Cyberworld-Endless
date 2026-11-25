@@ -447,7 +447,11 @@ and traces both:
   draw with no twin in the other game's frame is reported, never forced:
   BN5's buster's extra draw is the engine's own (legit.json's rng, only,
   both routines cited); any other is a difference, the family's where its
-  code led to it. Without the replay Handi parts at its first draw that
+  code led to it. A draw BN6 makes outside any family's code meets the
+  reference's of the same site even where the reference's was a family's
+  (BN4's thunder ball, the third kind's 0x2A, is the Thunder chip's moved
+  code in BN4's log and Billy's copy of BN6's own ball in BN6's: its
+  hit's spark, `bn4_soul_wood_guard`). Without the replay Handi parts at its first draw that
   BN5's buster or shake moved (`rng=follow`: t305, none: t35). A Soul
   united as the fight starts holds the clock for BN5's own crossing,
   longer than BN6's, so BN5's per-frame draws of those frames reach the
@@ -1433,7 +1437,8 @@ format, its game 4: the trace's header names it):
   spec. The masks are the fields BN4 has none of (`BN4_LACKS`, each with
   why), applied only where BN4's trace holds nothing there and the other
   is BN6's: a virus's AI data and its pointer, the AI index, the freeze's
-  and the bubble's timers.
+  and the bubble's timers, and the doublings BN6's hit pass counts for the
+  struck (+0x74, +0x75), which BN4's applies to the damage at once.
 - **The control** (`"kind": "control"`): `bn4_mettaur_control` fights
   BN4's Mettaur at (5,2) against MegaMan at (2,2) with 200 HP, 35 buster
   shots and five steps by the timer, twice, each run in a process of its
