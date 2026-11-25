@@ -134,7 +134,20 @@ drawn: the game's mode, BN6's menu's state and, while the menu is up, its
 label tiles, icon tiles and palettes are read after the game's frame
 (`pet_menu_see`), since a read while drawing waits for the next frame where
 the core runs on its own thread ([The core on its own thread](../engine/emulation/thread.md),
-Nothing drawn reads the game; issue #897). BN6 loads the Status icon for Forms because the engine grows BN6's
+Nothing drawn reads the game; issue #897).
+
+What the picture costs matters where the GBA's own picture is drawn on the
+same processor core, the New 3DS's: with the menu up a frame drew for 11
+ms there against 5 on the map, and 43 to 48 were shown a second
+(`log.txt`, 25 November 2026). Three whole frames were moved a frame: the
+core's into the picture, the picture again for the menu to read BN6's
+pieces from, the kept field over it. While the menu covers the frame
+(`pet_menu_covers`) the picture takes the band's rows alone, the menu
+takes its pieces' part straight from the core's frame (`pet_menu_under`:
+columns 128 on, rows 24 on), and the field's is the one whole copy left.
+That is exact because nothing else edits the picture then: the board's
+tint, the dark way's mark and a Glitch layer's frame go by the map alone,
+and the town's hour is 0 in the PET. BN6 loads the Status icon for Forms because the engine grows BN6's
 lists of the menu's icons by a ninth, resting under the screen
 (`pet_menu_install`; [The PET and the second screen](../rom/pet-and-second-screen.md),
 the PET menu's icons). It stands while BN6's menu takes input, closes, fades to
