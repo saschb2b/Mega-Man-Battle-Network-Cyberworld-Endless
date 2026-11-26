@@ -70,6 +70,7 @@ commits, issues and old notes) are mapped section by section in
 | The numbers each branch in flight may take (ids, slots, free-space spans, units, `Run`): a claim a branch, held apart by lint | [docs/project/claims.md](docs/project/claims.md) |
 | The itch.io page: its texts, settings, pictures and files, each release's devlog post, and the record (`docs/itch/state.json`) that `build.py lint` holds it to | [docs/project/itch.md](docs/project/itch.md) |
 | The trailers on YouTube: the channel, each video's fields, the 4K masters, the upload through the owner's Chrome, the videos | [docs/project/youtube.md](docs/project/youtube.md); the [youtube-publish skill](.claude/skills/youtube-publish/SKILL.md) |
+| Players' reports and ideas on Discord made GitHub issues: the channels read through the owner's Chrome, pictures to `pr-media`, a ticket a fault and an idea, its link in the idea's thread | [docs/project/discord.md](docs/project/discord.md), From Discord to GitHub; the [discord-sweep skill](.claude/skills/discord-sweep/SKILL.md) |
 
 Keeping it (the okf skill's implicit mode, whenever `docs/` changes):
 
