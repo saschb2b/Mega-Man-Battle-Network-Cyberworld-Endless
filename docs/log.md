@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-26
+* **Update**: code/site-and-media.md (the downloads' thank-you on phones and tablets: the file in a tab of its own, the thanks shown again on the way back).
 * **Update**: project/discord.md (From Discord to GitHub: the sweep that makes players' reports and ideas issues, what it posts back and what stays the owner's), code/tools.md (the discord-sweep skill's row and its two scripts).
 
 ## 2026-11-25
