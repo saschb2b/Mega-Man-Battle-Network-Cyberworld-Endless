@@ -1,7 +1,8 @@
 // The discord-sweep skill's helpers for a Discord tab
 // (.claude/skills/discord-sweep/SKILL.md). Paste this file whole into one
-// javascript_tool call after each page load that lost it (a navigation
-// inside Discord keeps it), then call window.cw's functions.
+// javascript_tool call after each page load that lost it (a click on a
+// channel in Discord's sidebar keeps it, the tool's navigate does not),
+// then call window.cw's functions.
 //
 // Two things shaped it. The tool cuts a long answer short, so cw.show
 // hands a value back a piece at a time. And it blocks an answer that
@@ -24,8 +25,9 @@ window.cw = (() => {
     }
   };
 
-  // A piece of a value, as text: cw.show(x), then cw.show(x, 1200), ...
-  function show(value, from = 0, size = 1200) {
+  // A piece of a value, as text: cw.show(x), then cw.show(x, 900), ...
+  // (the tool cut an answer off near 1000 characters).
+  function show(value, from = 0, size = 900) {
     const s = typeof value === 'string' ? value : JSON.stringify(value, null, 1);
     return `${from}-${Math.min(from + size, s.length)} of ${s.length}\n` + s.slice(from, from + size);
   }

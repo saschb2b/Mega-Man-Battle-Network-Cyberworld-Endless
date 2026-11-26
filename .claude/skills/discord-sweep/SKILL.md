@@ -58,9 +58,11 @@ lists what the sidebar shows.
 Paste [scripts/discord_page.js](scripts/discord_page.js) whole into one
 `javascript_tool` call. It leaves `window.cw` on the page:
 `cw.messages()`, `cw.threads()`, `cw.savePictures()`, `cw.post()`,
-`cw.tag()` and `cw.show(value, from)`, which returns a long answer 1200
-characters at a time (the tool cuts longer ones off). A full page load
-loses it; paste it again.
+`cw.tag()` and `cw.show(value, from)`, which returns a long answer 900
+characters at a time (the tool cuts longer ones off). The tool's
+`navigate` loads the page afresh and loses it; a click on a channel in
+Discord's sidebar keeps it
+(`document.querySelector('a[href="/channels/GUILD/CHANNEL"]').click()`).
 
 ## 2. Find what is new
 
