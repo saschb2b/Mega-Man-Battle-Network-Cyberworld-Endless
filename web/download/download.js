@@ -85,6 +85,9 @@ document.addEventListener('click', async (e) => {
 
 // ---- the files: the newest GitHub release, an alpha's pre-release too ----
 
+// a phone or tablet, whatever system the page was asked for
+const OWN_TAB = ['android', 'ios'].includes(detectPlatform());
+
 (async () => {
 	const repo = 'saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless';
 	const hint = document.getElementById('release-hint');
@@ -122,6 +125,11 @@ document.addEventListener('click', async (e) => {
 			if (main && entry) entry.dataset.missing = '1';
 		} else {
 			a.href = asset.browser_download_url;
+			// (a phone's or tablet's browser may show the file's address as an
+			// empty page in place of this one: there the file opens in a tab
+			// of its own, which the browser closes or the visitor does, and
+			// this page stays behind it with its steps and its thanks)
+			if (OWN_TAB) { a.target = '_blank'; a.rel = 'noopener'; }
 			a.dataset.umamiEventFile = asset.name;
 			a.dataset.umamiEventVersion = release.tag_name;
 			// (the SHA-256 GitHub keeps of each file, for whoever checks)
@@ -168,21 +176,55 @@ document.addEventListener('click', async (e) => {
 // opens after the click has done its work, and its own links open a new
 // tab, never over the download's navigation. The 3DS's QR code is scanned
 // by FBI, not clicked here: it has no thanks. Shown after every download.
+//
+// Where the browser shows the file's address in place of this page (an
+// app's own browser, some phones'), the mail went with the page. So a
+// download is remembered for this tab until its mail is closed or one of
+// its links taken, and the page shown again within ten minutes (Back from
+// the empty page) opens the mail it owes.
 (() => {
 	const dialog = document.getElementById('thanks');
 	if (!dialog || typeof dialog.showModal !== 'function') return;
 	const DOWNLOAD = 'a[href*="/releases/download/"], a[href*="/releases/latest/download/"], a[data-needs]:not([aria-disabled="true"])';
+	const KEY = 'cw-thanks', OWED_FOR = 10 * 60 * 1000;
 	let from = null;
 	let pressedOutside = false;
+
+	// (the download whose mail is still owed: its system and when)
+	const owe = (platform) => {
+		try { sessionStorage.setItem(KEY, JSON.stringify({ platform, at: Date.now() })); } catch (e) { /* no storage: the mail once, as before */ }
+	};
+	const settle = () => {
+		try { sessionStorage.removeItem(KEY); } catch (e) { /* nothing kept */ }
+	};
+	const owed = () => {
+		try {
+			const kept = JSON.parse(sessionStorage.getItem(KEY));
+			if (kept && Date.now() - kept.at < OWED_FOR) return kept;
+		} catch (e) { /* none */ }
+		settle();
+		return null;
+	};
 
 	document.addEventListener('click', (e) => {
 		const link = e.target.closest(DOWNLOAD);
 		if (!link || dialog.open) return;
+		const platform = link.dataset.umamiEventPlatform || 'website';
 		from = link;
+		owe(platform);
 		setTimeout(() => {
+			if (dialog.open) return;
 			dialog.showModal();
-			track('thanks-open', { platform: link.dataset.umamiEventPlatform || 'website' });
+			track('thanks-open', { platform, on: 'download' });
 		});
+	});
+	// (the page shown again, loaded anew or kept as it was left: the mail
+	// still open there is the one owed)
+	window.addEventListener('pageshow', () => {
+		const kept = owed();
+		if (!kept || dialog.open) return;
+		dialog.showModal();
+		track('thanks-open', { platform: kept.platform, on: 'return' });
 	});
 	dialog.querySelector('.close').addEventListener('click', () => dialog.close());
 	// (Tab goes round the window, from its last link to Close and back)
@@ -195,14 +237,17 @@ document.addEventListener('click', async (e) => {
 		(e.shiftKey ? last : first).focus();
 	});
 	// (a click on the dialog itself is outside its window; a press that began
-	// in the window, text selected and let go outside, is not one)
+	// in the window, text selected and let go outside, is not one; a link of
+	// the mail taken is the mail read)
 	dialog.addEventListener('pointerdown', (e) => { pressedOutside = e.target === dialog; });
 	dialog.addEventListener('click', (e) => {
+		if (e.target.closest('a[href]')) settle();
 		if (e.target === dialog && pressedOutside) dialog.close();
 		pressedOutside = false;
 	});
 	// (back to the link the download came from, as the keyboard left it)
 	dialog.addEventListener('close', () => {
+		settle();
 		if (from && from.isConnected) from.focus({ preventScroll: true });
 		from = null;
 	});
