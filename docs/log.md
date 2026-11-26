@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-26
+* **Update**: project/discord.md (From Discord to GitHub: the sweep that makes players' reports and ideas issues, what it posts back and what stays the owner's), code/tools.md (the discord-sweep skill's row and its two scripts).
+
 ## 2026-11-25
 * **Update**: code/layers.md (0.24.1's row of the numbers).
 * **Creation**: releases/v0.24.1.md (the notes: the 3DS's and the Vita's speed, the Net Square and the start menu on a New 3DS, both ROMs read there, BN4's twelve Souls), releases/overview.md and releases/index.md (its line).

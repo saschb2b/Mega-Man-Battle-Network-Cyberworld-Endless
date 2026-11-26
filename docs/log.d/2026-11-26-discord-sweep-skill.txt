@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-26T11:30:00Z
-* **Update**: project/discord.md (From Discord to GitHub: the sweep that makes players' reports and ideas issues, what it posts back and what stays the owner's), code/tools.md (the discord-sweep skill's row and its two scripts).
