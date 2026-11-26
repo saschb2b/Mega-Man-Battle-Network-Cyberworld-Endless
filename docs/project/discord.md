@@ -71,6 +71,28 @@ news for `#announcements`, beside its devlog post on [itch.io](itch.md)
 and its trailer on [YouTube](youtube.md); a post there is still the
 owner's to approve.
 
+## From Discord to GitHub
+
+What players report and propose on the server becomes issues by a sweep,
+run on request through the owner's signed-in Chrome (his choice of 21
+November 2026 over a bot): the discord-sweep skill
+(`.claude/skills/discord-sweep/`, [Tools and skills](../code/tools.md)
+has its files) is how it goes. It reads `#runs-and-folders`, `#general`
+and the two forums, saves the reports' pictures to `pr-media` under
+`issues/discord-DATE/` (Discord's own links expire), and files one issue
+a fault and one an idea, each with the player's words, their handle, the
+message's link, leads into the code and the docs, and its labels. An
+issue's link to the message is also the sweep's memory: a message an
+issue links is done.
+
+Back on the server, an idea's thread gets its ticket's link as a comment
+from the owner's account and the forum's On GitHub tag (the owner, 26
+November 2026); Not planned stays his to set. A bug report gets no reply
+from an agent: one is drafted in his voice, and he posts it. A sweep
+files and reports; it starts no fix unless asked. The first sweeps:
+issues 731 to 734 (21 November), 835 to 842 and 846, 912 to 914 (25
+November) and the ideas forum's first eight, 915 to 922 (26 November).
+
 ## Releases there
 
 Each release posts itself in `#announcements`: `release.yml` calls
